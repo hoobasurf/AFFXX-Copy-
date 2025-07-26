@@ -1,118 +1,82 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Affinix Intro</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
-
-<style>
-  html, body {
-    margin: 0; padding: 0;
-    height: 100vh; width: 100vw;
-    background: url('/fond-galactique.jpg') no-repeat center center/cover;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    font-family: 'Orbitron', sans-serif;
-    background-color: black;
-    overflow: hidden;
-  }
-
-  #container {
-    margin-top: 12vh;
-    text-align: center;
-    user-select: none;
-  }
-
-  #logo {
-    width: 320px;
-    max-width: 90vw;
-    filter:
-      drop-shadow(0 0 5px #8a2be2)
-      drop-shadow(0 0 15px #d354f7);
-    animation: zoomFade 2s ease-out forwards;
-    opacity: 0;
-    transform: scale(2);
-  }
-
-  @keyframes zoomFade {
-    to {
-      opacity: 1;
-      transform: scale(1);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Accueil AFFINIX</title>
+  <style>
+    body {
+      margin: 0; padding: 0;
+      background: url('fond-galactique.jpg') no-repeat center center / cover;
+      height: 100vh;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-family: 'Arial', sans-serif;
+      color: white;
     }
-  }
 
-  #phrase {
-    margin-top: 40px;
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    user-select: none;
-    background: linear-gradient(90deg, #ff00ff, #ff66cc, #cc33ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow:
-      -1px -1px 0 #000,
-      1px -1px 0 #000,
-      -1px 1px 0 #000,
-      1px 1px 0 #000,
-      0 0 10px #ff66cc,
-      0 0 20px #d600d6;
-    opacity: 0;
-    transform-origin: center center;
-  }
+    #titre {
+      width: 60%;
+      max-width: 600px;
+      animation: zoomOut 3s ease forwards;
+    }
 
-  @keyframes fadeZoomIn {
-    from {
+    @keyframes zoomOut {
+      0% {
+        transform: scale(3);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    #texte {
+      font-size: 2rem;
+      margin-top: 30px;
       opacity: 0;
-      transform: scale(0.3);
+      animation: fadeIn 2s ease forwards;
+      animation-delay: 3.5s;
+      background: linear-gradient(90deg, #ff00f0, #7f00ff, #ff00f0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 10px #ff00f0;
     }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
 
-  @keyframes zoomBig {
-    from {
-      transform: scale(1);
-      opacity: 1;
+    @keyframes fadeIn {
+      to { opacity: 1; }
     }
-    to {
-      transform: scale(25);
-      opacity: 0;
+
+    @keyframes zoomToScreen {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(25);
+        opacity: 0;
+      }
     }
-  }
-</style>
+  </style>
 </head>
 <body>
 
-<div id="container">
-  <img id="logo" src="/AAFFXX.png" alt="Logo Néon AFFINIX" />
-  <div id="phrase">Prépare-toi au voyage</div>
-</div>
+  <img id="titre" src="AAFFXX.png" alt="AFFINIX" />
 
-<script>
-  const logo = document.getElementById('logo');
-  const phrase = document.getElementById('phrase');
+  <div id="texte">Prépare-toi au voyage</div>
 
-  logo.style.animation = 'zoomFade 2s ease-out forwards';
+  <script>
+    setTimeout(() => {
+      const texte = document.getElementById('texte');
+      texte.style.animation = "zoomToScreen 2s forwards";
 
-  setTimeout(() => {
-    phrase.style.animation = 'fadeZoomIn 1s forwards ease-out';
-  }, 2000);
-
-  setTimeout(() => {
-    phrase.style.animation = 'zoomBig 2.5s forwards ease-in';
-  }, 3000);
-
-  setTimeout(() => {
-    window.location.href = 'nouvelle-page.html'; 
-  }, 5500); // redirection quasi immédiate après zoom
-</script>
+      setTimeout(() => {
+        window.location.href = "vortex.html";
+      }, 2000);
+    }, 6500);
+  </script>
 
 </body>
 </html>
