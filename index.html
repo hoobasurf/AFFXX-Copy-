@@ -1,65 +1,70 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Accueil AFFINIX</title>
-  <style>
-    body {
-      margin: 0; padding: 0;
-      background: url('fond-galactique.jpg') no-repeat center center / cover;
-      height: 100vh;
-      overflow: hidden;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      font-family: 'Arial', sans-serif;
-      color: white;
-    }
-
-    #titre {
-      width: 60%;
-      max-width: 600px;
-      animation: zoomOut 3s ease forwards;
-    }
-
-    @keyframes zoomOut {
-      0% {
-        transform: scale(3);
-        opacity: 0;
-      }
-      100% {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
-    #texte {
-      font-size: 2rem;
-      margin-top: 30px;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Accueil AFFINIX</title>
+<style>
+  body {
+    margin: 0; padding: 0;
+    background: url('fond-galactique.jpg') no-repeat center center / cover;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Pour pouvoir contrôler position */
+    font-family: 'Arial', sans-serif;
+    color: white;
+    position: relative;
+  }
+  #titre {
+    width: 60%;
+    max-width: 600px;
+    margin-top: 10vh; /* un peu au-dessus du centre */
+    animation: zoomOut 3s ease forwards;
+  }
+  @keyframes zoomOut {
+    0% {
+      transform: scale(3);
       opacity: 0;
-      animation: fadeIn 2s ease forwards;
-      animation-delay: 3.5s;
-      background: linear-gradient(90deg, #ff00f0, #7f00ff, #ff00f0);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 10px #ff00f0;
     }
-
-    @keyframes fadeIn {
-      to { opacity: 1; }
+    100% {
+      transform: scale(1);
+      opacity: 1;
     }
-
-    @keyframes zoomToScreen {
-      0% {
-        transform: scale(1);
-        opacity: 1;
-      }
-      100% {
-        transform: scale(25);
-        opacity: 0;
-      }
+  }
+  #texte {
+    font-size: 2rem;
+    margin-top: 30px;
+    opacity: 0;
+    animation: fadeIn 2s ease forwards;
+    animation-delay: 3.5s;
+    background: linear-gradient(90deg, #ff00f0, #7f00ff, #ff00f0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 10px #ff00f0;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: black;
+  }
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+  @keyframes zoomToScreen {
+    0% {
+      transform: scale(1);
+      opacity: 1;
     }
-  </style>
+    100% {
+      transform: scale(25);
+      opacity: 0;
+    }
+  }
+</style>
 </head>
 <body>
 
@@ -67,16 +72,28 @@
 
   <div id="texte">Prépare-toi au voyage</div>
 
-  <script>
+<script>
+  // On cache le texte au départ
+  const texte = document.getElementById('texte');
+  texte.style.opacity = 0;
+
+  // Le texte apparaît après 3.5s (fin de zoom du titre)
+  setTimeout(() => {
+    texte.style.opacity = 1;
+
+    // Après 2s, on lance le zoom avant
     setTimeout(() => {
-      const texte = document.getElementById('texte');
       texte.style.animation = "zoomToScreen 2s forwards";
 
+      // Après 2s, on attend 0.5s puis on change de page
       setTimeout(() => {
         window.location.href = "vortex.html";
-      }, 2000);
-    }, 6500);
-  </script>
+      }, 500);
+
+    }, 2000);
+
+  }, 3500);
+</script>
 
 </body>
 </html>
