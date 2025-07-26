@@ -6,55 +6,52 @@
 <title>AFFINIX animation fidèle</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet" />
 <style>
-  /* Reset */
-  * {
-    margin: 0; padding: 0; box-sizing: border-box;
-  }
   html, body {
-    height: 100%;
-    overflow: hidden;
-    background: black;
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
     font-family: 'Orbitron', sans-serif;
+    background: black;
+    position: relative;
   }
+
+  /* Fond galaxie rose/violet identique */
   body::before {
     content: "";
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: url('https://i.imgur.com/TB4V2BI.jpeg') center/cover no-repeat;
+    inset: 0;
+    background: url('https://i.imgur.com/TB4V2BI.jpeg') no-repeat center center;
+    background-size: cover;
     filter: brightness(1.1) saturate(1.2);
-    animation: slowPan 60s linear infinite;
     z-index: -1;
+    animation: slowPan 60s linear infinite;
   }
   @keyframes slowPan {
     0% { background-position: center center; }
     100% { background-position: center top; }
   }
 
-  /* Coeur "❤ AF" */
+  /* Cœur AF - position & taille EXACTES */
   #heart {
     position: fixed;
-    top: 12vh;
+    top: 11vh;          /* 11% viewport height */
     left: 50%;
     transform: translateX(-50%);
-    font-size: 2.5rem;
     font-weight: 700;
-    letter-spacing: 0.25em;
+    font-size: 1.7rem;  /* Plus petit */
+    letter-spacing: 0.5em; /* espacement important */
     opacity: 0;
-    background: linear-gradient(90deg, #b200ff, #ff00cc);
+    background: linear-gradient(90deg, #c000ff, #ff33cc);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow:
-      0 0 5px #ff00cc,
-      0 0 10px #b200ff,
-      0 0 20px #ff00cc,
-      0 0 30px #b200ff;
+      0 0 8px #ff33cc,
+      0 0 15px #c000ff;
     animation: fadeInHeart 2s ease forwards;
     animation-delay: 1.8s;
   }
   @keyframes fadeInHeart {
     0% {
       opacity: 0;
-      transform: translateX(-50%) scale(1.3);
+      transform: translateX(-50%) scale(1.15);
     }
     100% {
       opacity: 1;
@@ -62,36 +59,36 @@
     }
   }
 
-  /* Texte AFFINIX */
+  /* Titre AFFINIX */
   #title {
     position: fixed;
     top: 50%;
     left: 50%;
-    font-size: 8vw;
+    font-size: 6.8vw;      /* taille similaire à l’image */
     font-weight: 700;
-    letter-spacing: 0.4em;
-    transform: translate(-50%, -50%) scale(4);
+    letter-spacing: 0.25em; /* lettre un peu plus serrée */
     opacity: 0;
-    background: linear-gradient(90deg, #b200ff, #ff00cc);
+    transform: translate(-50%, -50%) scale(2.3);  /* départ zoom moins extrême */
+    background: linear-gradient(90deg, #c000ff, #ff33cc);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow:
-      0 0 10px #ff00cc,
-      0 0 20px #b200ff,
-      0 0 40px #ff00cc;
+      0 0 15px #ff33cc,
+      0 0 25px #c000ff;
     animation: zoomOut 2.5s ease forwards;
   }
+
   @keyframes zoomOut {
     0% {
-      transform: translate(-50%, -50%) scale(4);
       opacity: 0;
+      transform: translate(-50%, -50%) scale(2.3);
     }
     30% {
       opacity: 1;
     }
     100% {
-      transform: translate(-50%, -50%) scale(1);
       opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
     }
   }
 </style>
