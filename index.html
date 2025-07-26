@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bienvenue sur Affinix</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Raleway:wght@500&display=swap" rel="stylesheet">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    body {
+      background: url('img/fond-accueil-final.jpg') no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      position: relative;
+      color: white;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 42%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      max-width: 90%;
+    }
+
+    .overlay p {
+      font-family: 'Raleway', sans-serif;
+      font-size: 1.2rem;
+      background: linear-gradient(45deg, #ff94f8, #c38aff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 8px #ffb6ff66;
+      font-weight: bold;
+    }
+
+    .buttons {
+      position: absolute;
+      bottom: 120px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 40px; /* ✅ augmenté ici (de 30px à 40px) */
+      box-sizing: border-box;
+    }
+
+    .neon-btn {
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: 2px solid #ff70e6;
+      border-radius: 25px;
+      background: rgba(0, 0, 0, 0.4);
+      color: white;
+      cursor: pointer;
+      text-shadow: 0 0 4px #ff99ff;
+      box-shadow: 0 0 8px #ff70e6;
+      transition: all 0.3s ease;
+    }
+
+    .neon-btn:hover {
+      background-color: #ff70e6;
+      color: #000;
+      box-shadow: 0 0 15px #ff70e6;
+    }
+
+    @media (max-width: 600px) {
+      .overlay p {
+        font-size: 1rem;
+      }
+
+      .neon-btn {
+        font-size: 0.9rem;
+        padding: 10px 18px;
+      }
+
+      .buttons {
+        bottom: 140px;
+        padding: 0 28px; /* ✅ aussi élargi ici pour mobile */
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <p>Connecte-toi et prépare-toi à une rencontre magique dans l’univers Affinix…</p>
+  </div>
+
+  <div class="buttons">
+    <a href="connexion.html" class="neon-btn">Connexion</a>
+    <a href="inscription.html" class="neon-btn">Inscription</a>
+  </div>
+</body>
+</html>
