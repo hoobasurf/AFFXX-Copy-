@@ -3,18 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AFFINIX Animation</title>
+  <title>AFFINIX Néon</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100vh;
-      overflow: hidden;
+      width: 100vw;
       background: url('/fond-galactique.jpg') no-repeat center center/cover;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       background-color: black;
+      overflow: hidden;
+    }
+
+    .container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
 
     #logo {
@@ -26,9 +31,7 @@
       filter:
         drop-shadow(0 0 5px #ff00cc)
         drop-shadow(0 0 10px #cc00ff)
-        drop-shadow(0 0 20px #9900ff)
-        drop-shadow(0 0 30px #ff00cc)
-        drop-shadow(0 0 40px #ff66ff);
+        drop-shadow(0 0 14px #9900ff);
     }
 
     @keyframes zoomFade {
@@ -44,6 +47,8 @@
   </style>
 </head>
 <body>
-  <img id="logo" src="/AAFFXX.png" alt="Logo AFFINIX néon dégradé">
+  <div class="container">
+    <img id="logo" src="/AAFFXX.png" alt="Logo Néon AFFINIX" />
+  </div>
 </body>
 </html>
