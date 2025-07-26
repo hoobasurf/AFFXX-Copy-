@@ -1,95 +1,100 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>AFFINIX</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-      font-family: 'Orbitron', sans-serif;
-      background: black;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AFFINIX animation fidèle</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet" />
+<style>
+  /* Reset */
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+  }
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: black;
+    font-family: 'Orbitron', sans-serif;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('https://i.imgur.com/TB4V2BI.jpeg') center/cover no-repeat;
+    filter: brightness(1.1) saturate(1.2);
+    animation: slowPan 60s linear infinite;
+    z-index: -1;
+  }
+  @keyframes slowPan {
+    0% { background-position: center center; }
+    100% { background-position: center top; }
+  }
 
-    /* FOND galaxie rose/violet */
-    body::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: url('https://i.imgur.com/TB4V2BI.jpeg') no-repeat center center;
-      background-size: cover;
-      filter: brightness(1.2) saturate(1.2);
-      z-index: -1;
-      animation: slowPan 60s linear infinite;
-    }
-
-    @keyframes slowPan {
-      0% { background-position: center center; }
-      100% { background-position: center top; }
-    }
-
-    /* COEUR "AF" en haut */
-    #heart {
-      position: absolute;
-      top: 12%;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 2.5vw;
-      font-weight: 700;
-      letter-spacing: 0.2em;
+  /* Coeur "❤ AF" */
+  #heart {
+    position: fixed;
+    top: 12vh;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    opacity: 0;
+    background: linear-gradient(90deg, #b200ff, #ff00cc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow:
+      0 0 5px #ff00cc,
+      0 0 10px #b200ff,
+      0 0 20px #ff00cc,
+      0 0 30px #b200ff;
+    animation: fadeInHeart 2s ease forwards;
+    animation-delay: 1.8s;
+  }
+  @keyframes fadeInHeart {
+    0% {
       opacity: 0;
-      animation: fadeInHeart 2s ease-out 1.8s forwards;
-      background: linear-gradient(90deg, #ff00cc, #a100ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 10px #ff00cc, 0 0 20px #a100ff;
+      transform: translateX(-50%) scale(1.3);
     }
-
-    @keyframes fadeInHeart {
-      0% {
-        opacity: 0;
-        transform: translateX(-50%) scale(1.2);
-      }
-      100% {
-        opacity: 1;
-        transform: translateX(-50%) scale(1);
-      }
+    100% {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
     }
+  }
 
-    /* TITRE "AFFINIX" */
-    #title {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(5);
-      font-size: 7vw;
-      font-weight: 700;
-      letter-spacing: 0.4em;
+  /* Texte AFFINIX */
+  #title {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    font-size: 8vw;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+    background: linear-gradient(90deg, #b200ff, #ff00cc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow:
+      0 0 10px #ff00cc,
+      0 0 20px #b200ff,
+      0 0 40px #ff00cc;
+    animation: zoomOut 2.5s ease forwards;
+  }
+  @keyframes zoomOut {
+    0% {
+      transform: translate(-50%, -50%) scale(4);
       opacity: 0;
-      animation: zoomOut 2.5s ease-out forwards;
-      background: linear-gradient(90deg, #ff00cc, #a100ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 20px #ff00cc, 0 0 40px #a100ff;
     }
-
-    @keyframes zoomOut {
-      0% {
-        transform: translate(-50%, -50%) scale(5);
-        opacity: 0;
-      }
-      30% {
-        opacity: 1;
-      }
-      100% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
-      }
+    30% {
+      opacity: 1;
     }
-  </style>
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+  }
+</style>
 </head>
 <body>
   <div id="heart">❤ AF</div>
