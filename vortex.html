@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>Vortex AFFINIX</title>
 <style>
   html, body {
@@ -15,18 +15,44 @@
     align-items: center;
   }
   video {
-    max-width: 100vw;
-    max-height: 100vh;
-    object-fit: contain;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    display: block;
+  }
+  #whiteFlash {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 10;
   }
 </style>
 </head>
 <body>
 
-<video autoplay loop muted playsinline>
+<video autoplay muted playsinline id="vortexVideo">
   <source src="vortex.mov" type="video/quicktime" />
   Votre navigateur ne supporte pas la lecture de cette vidéo.
 </video>
+
+<div id="whiteFlash"></div>
+
+<script>
+  const whiteFlash = document.getElementById('whiteFlash');
+  const redirectUrl = 'nouvelle-page.html'; // change ici ta page cible
+
+  setTimeout(() => {
+    whiteFlash.style.opacity = '1';  // explosion blanche en fondu
+    setTimeout(() => {
+      window.location.href = redirectUrl;
+    }, 600); // délai pour que l'explosion soit visible avant redirection
+  }, 4000); // explosion après 4 secondes
+</script>
 
 </body>
 </html>
