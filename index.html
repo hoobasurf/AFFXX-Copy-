@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Affinix Bouton Néon</title>
+<title>Affinix Intro</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
 
@@ -13,23 +13,30 @@
     height: 100vh; width: 100vw;
     background: url('/fond-galactique.jpg') no-repeat center center/cover;
     display: flex;
-    justify-content: center;
-    align-items: center;
     flex-direction: column;
+    justify-content: flex-start; /* titre plus haut */
+    align-items: center;
     font-family: 'Pacifico', cursive;
     background-color: black;
+    overflow: hidden;
+  }
+
+  #container {
+    margin-top: 12vh; /* remonte titre+coeur au dessus centre */
+    text-align: center;
+    color: white;
+    user-select: none;
   }
 
   #logo {
-    width: 360px;
+    width: 320px;
     max-width: 90vw;
-    margin-bottom: 30px;
-    animation: zoomFade 2.5s ease-out forwards;
-    opacity: 0;
-    transform: scale(2.3);
     filter:
       drop-shadow(0 0 5px #a53fff)
       drop-shadow(0 0 10px #d354f7);
+    animation: zoomFade 2s ease-out forwards;
+    opacity: 0;
+    transform: scale(2);
   }
 
   @keyframes zoomFade {
@@ -39,45 +46,19 @@
     }
   }
 
-  #btnPrepare {
-    padding: 10px 40px;
-    font-size: 1.4rem;
-    border-radius: 30px;
-    border: 3px solid;
-    border-image-slice: 1;
-    border-image-source: linear-gradient(90deg, #ff00cc, #8a2be2, #ff69b4);
-    background: transparent;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    color: transparent; /* text caché pour dégradé */
+  #phrase {
+    margin-top: 40px;
+    font-size: 2.6rem;
+    color: #ff69b4;
+    opacity: 0;
     font-weight: bold;
-    user-select: none;
-    animation: fadeIn 1.5s ease forwards;
-    animation-delay: 2.7s;
+    animation: fadeIn 2s forwards 2.2s;
+    cursor: pointer;
   }
 
-  /* Texte avec dégradé animé style chargement */
-  #btnPrepare::before {
-    content: "Prépare-toi à rentrer dans l’univers de AFFINIX";
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: linear-gradient(270deg, #000000, #8a2be2, #ff00cc, #ff69b4, #000000);
-    background-size: 200% 100%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: gradientShift 3.5s linear infinite;
-    white-space: nowrap;
-  }
-
-  @keyframes gradientShift {
-    0% {
-      background-position: 0% 50%;
-    }
-    100% {
-      background-position: 200% 50%;
-    }
+  /* Zoom vers l'avant */
+  .zoomInFull {
+    animation: zoomInFull 2.5s forwards;
   }
 
   @keyframes fadeIn {
@@ -86,16 +67,32 @@
     }
   }
 
-  #btnPrepare:hover {
-    border-image-source: linear-gradient(90deg, #ff69b4, #8a2be2, #ff00cc);
+  @keyframes zoomInFull {
+    to {
+      transform: scale(25);
+      opacity: 0;
+    }
   }
 </style>
 </head>
 <body>
 
-<img id="logo" src="/AAFFXX.png" alt="Logo Néon AFFINIX" />
+<div id="container">
+  <img id="logo" src="/AAFFXX.png" alt="Logo Néon AFFINIX" />
+  <div id="phrase">Prépare-toi au voyage</div>
+</div>
 
-<button id="btnPrepare"></button>
+<script>
+  const phrase = document.getElementById('phrase');
+
+  phrase.addEventListener('click', () => {
+    phrase.style.animation = 'zoomInFull 2.5s forwards';
+    // Après l'animation, redirige vers nouvelle page (ajuste URL)
+    setTimeout(() => {
+      window.location.href = 'nouvelle-page.html'; 
+    }, 2500);
+  });
+</script>
 
 </body>
 </html>
