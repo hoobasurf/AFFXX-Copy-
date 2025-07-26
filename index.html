@@ -3,90 +3,41 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AFFINIX animation fidèle</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet" />
+<title>AFFINIX animation PNG fidèle</title>
 <style>
   html, body {
     margin: 0; padding: 0; height: 100%; overflow: hidden;
-    font-family: 'Orbitron', sans-serif;
-    background: black;
+    background: url('https://i.imgur.com/TB4V2BI.jpeg') no-repeat center center/cover;
+    font-family: Arial, sans-serif;
     position: relative;
+    background-color: black;
   }
-
-  /* Fond galaxie rose/violet identique */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: url('https://i.imgur.com/TB4V2BI.jpeg') no-repeat center center;
-    background-size: cover;
-    filter: brightness(1.1) saturate(1.2);
-    z-index: -1;
-    animation: slowPan 60s linear infinite;
-  }
-  @keyframes slowPan {
-    0% { background-position: center center; }
-    100% { background-position: center top; }
-  }
-
-  /* Cœur AF - position & taille EXACTES */
   #heart {
     position: fixed;
-    top: 11vh;          /* 11% viewport height */
+    top: 11vh;
     left: 50%;
     transform: translateX(-50%);
-    font-weight: 700;
-    font-size: 1.7rem;  /* Plus petit */
-    letter-spacing: 0.5em; /* espacement important */
+    width: 120px; /* Ajuste la taille comme sur ton image */
     opacity: 0;
-    background: linear-gradient(90deg, #c000ff, #ff33cc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow:
-      0 0 8px #ff33cc,
-      0 0 15px #c000ff;
-    animation: fadeInHeart 2s ease forwards;
+    animation: fadeIn 2s ease forwards;
     animation-delay: 1.8s;
   }
-  @keyframes fadeInHeart {
-    0% {
-      opacity: 0;
-      transform: translateX(-50%) scale(1.15);
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(-50%) scale(1);
-    }
-  }
-
-  /* Titre AFFINIX */
   #title {
     position: fixed;
     top: 50%;
     left: 50%;
-    font-size: 6.8vw;      /* taille similaire à l’image */
-    font-weight: 700;
-    letter-spacing: 0.25em; /* lettre un peu plus serrée */
+    width: 420px; /* Ajuste la taille comme sur ton image */
+    transform: translate(-50%, -50%) scale(2.3);
     opacity: 0;
-    transform: translate(-50%, -50%) scale(2.3);  /* départ zoom moins extrême */
-    background: linear-gradient(90deg, #c000ff, #ff33cc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow:
-      0 0 15px #ff33cc,
-      0 0 25px #c000ff;
     animation: zoomOut 2.5s ease forwards;
   }
-
-  @keyframes zoomOut {
-    0% {
-      opacity: 0;
-      transform: translate(-50%, -50%) scale(2.3);
-    }
-    30% {
+  @keyframes fadeIn {
+    to {
       opacity: 1;
     }
-    100% {
+  }
+  @keyframes zoomOut {
+    to {
       opacity: 1;
       transform: translate(-50%, -50%) scale(1);
     }
@@ -94,7 +45,7 @@
 </style>
 </head>
 <body>
-  <div id="heart">❤ AF</div>
-  <div id="title">AFFINIX</div>
+  <img id="heart" src="https://i.imgur.com/0L9kl0C.png" alt="Cœur AF" />
+  <img id="title" src="https://i.imgur.com/4oEXx1O.png" alt="Titre AFFINIX" />
 </body>
 </html>
