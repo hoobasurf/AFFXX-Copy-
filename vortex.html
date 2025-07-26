@@ -44,14 +44,14 @@
 
 <script>
   const whiteFlash = document.getElementById('whiteFlash');
-  const redirectUrl = 'nouvelle-page.html'; // change ici ta page cible
+  const redirectUrl = 'nouvelle-page.html'; // change la cible ici
 
   setTimeout(() => {
-    whiteFlash.style.opacity = '1';  // explosion blanche en fondu
+    whiteFlash.style.opacity = '1';  // explosion blanche
     setTimeout(() => {
       window.location.href = redirectUrl;
-    }, 600); // délai pour que l'explosion soit visible avant redirection
-  }, 4000); // explosion après 4 secondes
+    }, 600);
+  }, 4000);
 </script>
 
 </body>
