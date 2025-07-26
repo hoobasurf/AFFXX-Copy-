@@ -48,22 +48,27 @@
   #phrase {
     margin-top: 40px;
     font-size: 2rem;
-    font-weight: 500;
+    font-weight: 700;
     letter-spacing: 0.1em;
-    color: #ff66cc;
     user-select: none;
+    /* Gradient rose/violet flashy */
+    background: linear-gradient(90deg, #ff00ff, #ff66cc, #cc33ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    /* Contour noir subtil */
     text-shadow:
-      0 0 5px #ff66cc,
+      -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000,
+      1px 1px 0 #000,
       0 0 10px #ff66cc,
-      0 0 20px #ff00ff,
-      0 0 30px #ff00ff,
-      0 0 40px #d600d6,
-      0 0 70px #d600d6;
+      0 0 20px #d600d6;
+
     opacity: 0;
     transform-origin: center center;
   }
 
-  /* Anim apparition fondu + ouverture (zoom arrière) */
   @keyframes fadeZoomIn {
     from {
       opacity: 0;
@@ -75,7 +80,6 @@
     }
   }
 
-  /* Zoom avant énorme pour recouvrir l’écran */
   @keyframes zoomBig {
     from {
       transform: scale(1);
@@ -99,23 +103,23 @@
   const logo = document.getElementById('logo');
   const phrase = document.getElementById('phrase');
 
-  // 1. Affiche et anime logo zoom + fade
+  // Affiche et anime logo zoom + fade
   logo.style.animation = 'zoomFade 2s ease-out forwards';
 
-  // 2. Après logo fini (2.1s), affiche phrase en fondu+zoom arrière
+  // Après logo fini (2.1s), affiche phrase en fondu+zoom arrière
   setTimeout(() => {
     phrase.style.animation = 'fadeZoomIn 1.5s forwards ease-out';
   }, 2100);
 
-  // 3. Après phrase visible (2.1 + 1.5 = 3.6s), lance zoom avant énorme + fondu (4s)
+  // Après phrase visible (2.1 + 1.5 = 3.6s), lance zoom avant énorme + fondu (4s)
   setTimeout(() => {
     phrase.style.animation = 'zoomBig 4s forwards ease-in';
   }, 3600);
 
-  // 4. Après zoom gros terminé, redirection (3.6 + 4 = 7.6s)
+  // Après zoom gros terminé, redirection (3.6 + 4 + 0.3 = 7.9s)
   setTimeout(() => {
     window.location.href = 'nouvelle-page.html'; // adapte l'URL
-  }, 7600);
+  }, 3900 + 4000 - 700); // 3600 + 4000 - 700 = 6900ms (2.9s après début zoomBig)
 </script>
 
 </body>
