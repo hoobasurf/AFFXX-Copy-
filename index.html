@@ -13,7 +13,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* Pour pouvoir contrôler position */
+    justify-content: flex-start;
     font-family: 'Arial', sans-serif;
     color: white;
     position: relative;
@@ -21,7 +21,7 @@
   #titre {
     width: 60%;
     max-width: 600px;
-    margin-top: 10vh; /* un peu au-dessus du centre */
+    margin-top: 10vh;
     animation: zoomOut 3s ease forwards;
   }
   @keyframes zoomOut {
@@ -35,7 +35,7 @@
     }
   }
   #texte {
-    font-size: 2rem;
+    font-size: 2.5rem;
     margin-top: 30px;
     opacity: 0;
     animation: fadeIn 2s ease forwards;
@@ -44,12 +44,9 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 0 10px #ff00f0;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: black;
   }
   @keyframes fadeIn {
     to { opacity: 1; }
@@ -73,24 +70,21 @@
   <div id="texte">Prépare-toi au voyage</div>
 
 <script>
-  // On cache le texte au départ
   const texte = document.getElementById('texte');
   texte.style.opacity = 0;
 
-  // Le texte apparaît après 3.5s (fin de zoom du titre)
   setTimeout(() => {
     texte.style.opacity = 1;
 
-    // Après 2s, on lance le zoom avant
+    // Après affichage, zoom
     setTimeout(() => {
       texte.style.animation = "zoomToScreen 2s forwards";
-
-      // Après 2s, on attend 0.5s puis on change de page
-      setTimeout(() => {
-        window.location.href = "vortex.html";
-      }, 500);
-
     }, 2000);
+
+    // Après zoom, redirection
+    setTimeout(() => {
+      window.location.href = "vortex.html";
+    }, 4500);
 
   }, 3500);
 </script>
