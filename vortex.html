@@ -1,16 +1,14 @@
-<!-- vortex.html -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vortex AFFINIX</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      height: 100%;
       background: black;
     }
     canvas {
@@ -19,50 +17,85 @@
   </style>
 </head>
 <body>
-<canvas id="vortexCanvas"></canvas>
+<canvas id="vortex"></canvas>
 
 <script>
-  const canvas = document.getElementById('vortexCanvas');
-  const ctx = canvas.getContext('2d');
-  let stars = [];
+  const canvas = document.getElementById("vortex");
+  const ctx = canvas.getContext("2d");
+  let w, h;
 
-  const w = canvas.width = window.innerWidth;
-  const h = canvas.height = window.innerHeight;
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resize);
+  resize();
 
-  const starCount = 1000;
-  for (let i = 0; i < starCount; i++) {
-    stars.push({
-      x: Math.random() * w - w / 2,
-      y: Math.random() * h - h / 2,
-      z: Math.random() * w
-    });
+  let particles = [];
+  const maxParticles = 600;
+  const centerX = w / 2;
+  const centerY = h / 2;
+  let angle = 0;
+  let zoom = 1;
+  let whiteOut = false;
+  let whiteOpacity = 0;
+
+  function createParticle() {
+    const radius = Math.random() * 400;
+    const theta = Math.random() * 2 * Math.PI;
+    return {
+      radius,
+      theta,
+      size: Math.random() * 2 + 1,
+      speed: 0.002 + Math.random() * 0.002,
+      color: `hsl(${280 + Math.random() * 60}, 100%, 70%)`
+    };
+  }
+
+  for (let i = 0; i < maxParticles; i++) {
+    particles.push(createParticle());
   }
 
   function draw() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillStyle = `rgba(0, 0, 0, 0.1)`;
     ctx.fillRect(0, 0, w, h);
 
-    const cx = w / 2;
-    const cy = h / 2;
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.scale(zoom, zoom);
 
-    for (let i = 0; i < starCount; i++) {
-      const star = stars[i];
-      star.z -= 5;
-      if (star.z <= 0) {
-        star.z = w;
-      }
-
-      const k = 128.0 / star.z;
-      const x = star.x * k + cx;
-      const y = star.y * k + cy;
-
-      const size = (1 - star.z / w) * 3;
-      const color = `rgba(${255 - star.z/5}, ${star.z/10}, 255, 0.8)`;
+    for (let p of particles) {
+      p.theta += p.speed;
+      let x = Math.cos(p.theta) * p.radius;
+      let y = Math.sin(p.theta) * p.radius;
 
       ctx.beginPath();
-      ctx.fillStyle = color;
-      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.arc(x, y, p.size, 0, Math.PI * 2);
       ctx.fill();
+    }
+
+    ctx.restore();
+
+    angle += 0.002;
+    zoom += 0.0008;
+
+    // Transition to white flash
+    if (zoom > 3 && !whiteOut) {
+      whiteOut = true;
+    }
+
+    if (whiteOut) {
+      whiteOpacity += 0.02;
+      ctx.fillStyle = `rgba(255,255,255,${whiteOpacity})`;
+      ctx.fillRect(0, 0, w, h);
+
+      if (whiteOpacity >= 1) {
+        // Redirection (optionnel) après 0.5 sec
+        setTimeout(() => {
+          window.location.href = "page-suivante.html"; // à remplacer
+        }, 500);
+      }
     }
 
     requestAnimationFrame(draw);
