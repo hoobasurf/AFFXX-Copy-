@@ -51,12 +51,9 @@
     font-weight: 700;
     letter-spacing: 0.1em;
     user-select: none;
-    /* Gradient rose/violet flashy */
     background: linear-gradient(90deg, #ff00ff, #ff66cc, #cc33ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-
-    /* Contour noir subtil */
     text-shadow:
       -1px -1px 0 #000,
       1px -1px 0 #000,
@@ -64,7 +61,6 @@
       1px 1px 0 #000,
       0 0 10px #ff66cc,
       0 0 20px #d600d6;
-
     opacity: 0;
     transform-origin: center center;
   }
@@ -103,23 +99,19 @@
   const logo = document.getElementById('logo');
   const phrase = document.getElementById('phrase');
 
-  // Affiche et anime logo zoom + fade
   logo.style.animation = 'zoomFade 2s ease-out forwards';
 
-  // Après logo fini (2.1s), affiche phrase en fondu+zoom arrière
   setTimeout(() => {
-    phrase.style.animation = 'fadeZoomIn 1.5s forwards ease-out';
-  }, 2100);
+    phrase.style.animation = 'fadeZoomIn 1s forwards ease-out';
+  }, 2000);
 
-  // Après phrase visible (2.1 + 1.5 = 3.6s), lance zoom avant énorme + fondu (4s)
   setTimeout(() => {
-    phrase.style.animation = 'zoomBig 4s forwards ease-in';
-  }, 3600);
+    phrase.style.animation = 'zoomBig 2.5s forwards ease-in';
+  }, 3000);
 
-  // Après zoom gros terminé, redirection (3.6 + 4 + 0.3 = 7.9s)
   setTimeout(() => {
-    window.location.href = 'nouvelle-page.html'; // adapte l'URL
-  }, 3900 + 4000 - 700); // 3600 + 4000 - 700 = 6900ms (2.9s après début zoomBig)
+    window.location.href = 'nouvelle-page.html'; 
+  }, 5500); // redirection quasi immédiate après zoom
 </script>
 
 </body>
