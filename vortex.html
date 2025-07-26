@@ -3,103 +3,105 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Vortex AFFINIX WebGL</title>
+<title>Vortex AFFINIX Avance</title>
 <style>
-  body, html {
+  html, body {
     margin: 0; padding: 0; overflow: hidden; height: 100vh; background: black;
   }
   canvas {
     display: block;
+    position: fixed;
+    top: 0; left: 0;
   }
 </style>
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 <script>
-  // Setup scène, caméra et rendu
+  // Initialisation scène, caméra, rendu
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
   camera.position.z = 5;
 
-  const renderer = new THREE.WebGLRenderer({antialias: true});
+  const renderer = new THREE.WebGLRenderer({antialias: true, alpha: false});
+  renderer.setClearColor(0x000000, 1); // fond noir opaque
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  // Particules vortex
-  const particleCount = 1500;
+  // Création des particules
+  const particleCount = 2000;
   const geometry = new THREE.BufferGeometry();
   const positions = new Float32Array(particleCount * 3);
   const colors = new Float32Array(particleCount * 3);
 
-  // Couleurs violet / rose (dégradé)
-  const colorStart = new THREE.Color(0xff33cc); // rose vif
-  const colorEnd = new THREE.Color(0x8a2be2);   // violet électrique
+  const colorStart = new THREE.Color(0xff33cc);
+  const colorEnd = new THREE.Color(0x8a2be2);
 
   for (let i = 0; i < particleCount; i++) {
-    // angle sur 2PI
+    // angle aléatoire autour du centre
     const angle = Math.random() * Math.PI * 2;
-    // rayon spiralé sur 0.1 à 4
-    const radius = 0.1 + Math.random() * 3.9;
-    // hauteur Z entre -10 et 20
-    const z = Math.random() * 30 - 10;
+    // rayon variable (0.1 à 5)
+    const radius = 0.1 + Math.random() * 4.9;
+    // position z entre -15 (loin) et 20 (près)
+    const z = Math.random() * 35 - 15;
 
-    // coordonnées x,y en spiral (autour origine)
     positions[i*3] = Math.cos(angle + z * 5) * radius;
-    positions[i*3+1] = Math.sin(angle + z * 5) * radius;
-    positions[i*3+2] = z;
+    positions[i*3 + 1] = Math.sin(angle + z * 5) * radius;
+    positions[i*3 + 2] = z;
 
-    // couleur interpolée du centre vers extérieur (z+10 normalisé 0-1)
-    const t = (z + 10) / 30;
+    // couleur dégradée selon position z (profondeur)
+    const t = (z + 15) / 35;
     const col = colorStart.clone().lerp(colorEnd, t);
     colors[i*3] = col.r;
-    colors[i*3+1] = col.g;
-    colors[i*3+2] = col.b;
+    colors[i*3 + 1] = col.g;
+    colors[i*3 + 2] = col.b;
   }
 
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
+  // Matériau points lisses, neon, taille variable
   const material = new THREE.PointsMaterial({
-    size: 0.05,
+    size: 0.07,
     vertexColors: true,
     transparent: true,
-    opacity: 0.9,
+    opacity: 0.85,
     depthWrite: false,
-    blending: THREE.AdditiveBlending
+    blending: THREE.AdditiveBlending,
+    sizeAttenuation: true,
   });
 
   const particles = new THREE.Points(geometry, material);
   scene.add(particles);
 
-  // Animation : on déplace les particules vers l'avant (z diminue)
+  // Animation - particules avancent vers caméra (z diminue)
   function animate() {
     requestAnimationFrame(animate);
 
     const pos = geometry.attributes.position.array;
     for (let i = 0; i < particleCount; i++) {
-      pos[i*3+2] -= 0.1; // vitesse d'avancement vers caméra (z diminue)
+      pos[i*3 + 2] -= 0.12; // vitesse d'avance
 
-      // si particule trop proche (z < -10), reset à fond (z=20)
-      if (pos[i*3+2] < -10) {
-        pos[i*3+2] = 20;
-        // récalcule angle et rayon aléatoire
+      if (pos[i*3 + 2] < -15) {
+        pos[i*3 + 2] = 20;
+        // nouvelle position x,y recalculée pour garder spirale
         const angle = Math.random() * Math.PI * 2;
-        const radius = 0.1 + Math.random() * 3.9;
-        pos[i*3] = Math.cos(angle + pos[i*3+2] * 5) * radius;
-        pos[i*3+1] = Math.sin(angle + pos[i*3+2] * 5) * radius;
+        const radius = 0.1 + Math.random() * 4.9;
+        pos[i*3] = Math.cos(angle + pos[i*3 + 2] * 5) * radius;
+        pos[i*3 + 1] = Math.sin(angle + pos[i*3 + 2] * 5) * radius;
       }
     }
     geometry.attributes.position.needsUpdate = true;
 
-    // Rotation douce de la scène pour dynamisme
-    scene.rotation.z += 0.002;
+    // Rotation lente (dans sens horaire) pour fluidité et dynamique sans dénaturer
+    scene.rotation.z += 0.0015;
 
     renderer.render(scene, camera);
   }
 
   animate();
 
-  // Ajuste la taille du canvas si fenêtre change
+  // Ajuste canvas à la taille de la fenêtre
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
