@@ -3,33 +3,33 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AFFINIX animation PNG fidèle</title>
+<title>Animation AFFINIX violet néon</title>
 <style>
   html, body {
-    margin: 0; padding: 0; height: 100%; overflow: hidden;
-    background: url('https://i.imgur.com/TB4V2BI.jpeg') no-repeat center center/cover;
-    font-family: Arial, sans-serif;
-    position: relative;
+    margin: 0; padding: 0; height: 100vh; overflow: hidden;
+    background: url('https://i.imgur.com/40qAeIr.jpeg') no-repeat center center/cover;
     background-color: black;
   }
   #heart {
     position: fixed;
-    top: 11vh;
+    top: 10vh; /* un peu plus haut */
     left: 50%;
+    width: 100px; /* un peu plus petit */
     transform: translateX(-50%);
-    width: 120px; /* Ajuste la taille comme sur ton image */
     opacity: 0;
     animation: fadeIn 2s ease forwards;
     animation-delay: 1.8s;
+    z-index: 10;
   }
   #title {
     position: fixed;
-    top: 50%;
+    top: 55%; /* légèrement décalé verticalement */
     left: 50%;
-    width: 420px; /* Ajuste la taille comme sur ton image */
+    width: 380px; /* ajusté */
     transform: translate(-50%, -50%) scale(2.3);
     opacity: 0;
     animation: zoomOut 2.5s ease forwards;
+    z-index: 9;
   }
   @keyframes fadeIn {
     to {
@@ -45,7 +45,7 @@
 </style>
 </head>
 <body>
-  <img id="heart" src="https://i.imgur.com/0L9kl0C.png" alt="Cœur AF" />
-  <img id="title" src="https://i.imgur.com/4oEXx1O.png" alt="Titre AFFINIX" />
+  <img id="heart" src="https://i.imgur.com/3FCQXYW.png" alt="Cœur AF néon violet" />
+  <img id="title" src="https://i.imgur.com/NBdRuLY.png" alt="Titre AFFINIX néon violet" />
 </body>
 </html>
