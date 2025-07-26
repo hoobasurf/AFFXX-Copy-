@@ -2,18 +2,73 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Vortex AFFINIX</title>
-<style>
-  body {
-    margin: 0; padding: 0;
-    background: url('fond-galactique.jpg') no-repeat center center / cover;
-    height: 100vh;
-    overflow: hidden;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vortex AFFINIX</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      background: black;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
 </head>
 <body>
+<canvas id="vortexCanvas"></canvas>
+
+<script>
+  const canvas = document.getElementById('vortexCanvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  const w = canvas.width = window.innerWidth;
+  const h = canvas.height = window.innerHeight;
+
+  const starCount = 1000;
+  for (let i = 0; i < starCount; i++) {
+    stars.push({
+      x: Math.random() * w - w / 2,
+      y: Math.random() * h - h / 2,
+      z: Math.random() * w
+    });
+  }
+
+  function draw() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillRect(0, 0, w, h);
+
+    const cx = w / 2;
+    const cy = h / 2;
+
+    for (let i = 0; i < starCount; i++) {
+      const star = stars[i];
+      star.z -= 5;
+      if (star.z <= 0) {
+        star.z = w;
+      }
+
+      const k = 128.0 / star.z;
+      const x = star.x * k + cx;
+      const y = star.y * k + cy;
+
+      const size = (1 - star.z / w) * 3;
+      const color = `rgba(${255 - star.z/5}, ${star.z/10}, 255, 0.8)`;
+
+      ctx.beginPath();
+      ctx.fillStyle = color;
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+</script>
 </body>
 </html>
