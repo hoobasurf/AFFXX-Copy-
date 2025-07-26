@@ -30,17 +30,20 @@
       100% { background-position: center top; }
     }
 
+    /* Titre AFFINIX */
     #title {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) scale(5);
-      color: #ff66cc;
       font-size: 6vw;
       letter-spacing: 0.4em;
       opacity: 0;
       animation: zoomOut 2.5s ease-out forwards;
-      text-shadow: 0 0 20px #ff66cc, 0 0 40px #ff66cc;
+      background: linear-gradient(90deg, #d700ff, #ff00cc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 20px #ff00cc, 0 0 40px #ff00cc;
     }
 
     @keyframes zoomOut {
@@ -56,9 +59,41 @@
         opacity: 1;
       }
     }
+
+    /* Coeur AF */
+    #heart {
+      position: absolute;
+      top: 25%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 4vw;
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 0.2em;
+      opacity: 0;
+      animation: fadeInHeart 2.5s ease-out 2s forwards;
+      background: linear-gradient(90deg, #a100ff, #ff00e0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 20px #ff00e0, 0 0 35px #a100ff;
+    }
+
+    @keyframes fadeInHeart {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.2);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- Cœur violet-rose néon -->
+  <div id="heart">❤ AF</div>
+
+  <!-- Titre zoom arrière -->
   <div id="title">AFFINIX</div>
 </body>
 </html>
