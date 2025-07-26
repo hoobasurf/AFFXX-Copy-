@@ -47,31 +47,54 @@
 
     #btnPrepare {
       opacity: 0;
-      padding: 15px 30px;
-      font-size: 1.2rem;
-      background: linear-gradient(90deg, #cc00ff, #ff33cc);
-      border: none;
+      padding: 8px 20px;
+      font-size: 1rem;
+      background: transparent;
+      border: 2px solid;
+      border-image-slice: 1;
+      border-width: 2px;
+      border-image-source: linear-gradient(270deg, #cc00ff, #ff33cc, #cc00ff);
       border-radius: 30px;
-      color: white;
+      color: #ff33cc;
       cursor: pointer;
       box-shadow:
-        0 0 8px #cc00ff,
-        0 0 20px #ff33cc;
-      animation: fadeIn 1.5s ease forwards;
-      animation-delay: 2.7s; /* juste après le logo */
-      transition: background 0.3s ease;
+        0 0 6px #cc00ff,
+        0 0 12px #ff33cc,
+        0 0 18px #cc00ff;
+      animation: fadeIn 1.5s ease forwards, neonBorder 3s ease-in-out infinite;
+      animation-delay: 2.7s;
+      transition: color 0.3s ease, box-shadow 0.3s ease;
     }
 
     #btnPrepare:hover {
-      background: linear-gradient(90deg, #ff33cc, #cc00ff);
+      color: #fff;
       box-shadow:
-        0 0 15px #ff33cc,
-        0 0 35px #cc00ff;
+        0 0 12px #ff33cc,
+        0 0 24px #cc00ff,
+        0 0 36px #ff33cc;
+      border-image-source: linear-gradient(270deg, #ff33cc, #cc00ff, #ff33cc);
     }
 
     @keyframes fadeIn {
       to {
         opacity: 1;
+      }
+    }
+
+    @keyframes neonBorder {
+      0%, 100% {
+        border-image-source: linear-gradient(270deg, #cc00ff, #ff33cc, #cc00ff);
+        box-shadow:
+          0 0 6px #cc00ff,
+          0 0 12px #ff33cc,
+          0 0 18px #cc00ff;
+      }
+      50% {
+        border-image-source: linear-gradient(270deg, #ff33cc, #cc00ff, #ff33cc);
+        box-shadow:
+          0 0 12px #ff33cc,
+          0 0 24px #cc00ff,
+          0 0 36px #ff33cc;
       }
     }
   </style>
