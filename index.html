@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AFFINIX Néon</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Monoton&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
 
   <style>
     html, body {
@@ -50,32 +50,59 @@
 
     #btnPrepare {
       opacity: 0;
-      padding: 8px 24px;
-      font-size: 1.3rem;
+      padding: 10px 28px;
+      font-size: 1.4rem;
       background: transparent;
-      border: none;
-      color: #ee82ee; /* violet-rose néon */
+      border-radius: 24px;
+      border: 2.5px solid;
+      border-image-slice: 1;
+      border-width: 2.5px;
+      border-image-source: linear-gradient(270deg, #ff00cc, #cc33ff, #ff66ee, #cc00ff, #ff00cc);
+      color: white;
+      font-family: 'Pacifico', cursive;
       cursor: pointer;
-      font-family: 'Monoton', cursive;
-      text-shadow:
-        0 0 5px #ff33cc,
-        0 0 10px #cc00ff,
-        0 0 20px #ff33cc,
-        0 0 30px #cc00ff,
-        0 0 40px #ff33cc;
       animation: fadeIn 1.5s ease forwards;
       animation-delay: 2.7s;
-      transition: color 0.3s ease, text-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.3s ease;
+      text-shadow: 0 0 5px #ff66ee;
+      user-select: none;
+    }
+
+    /* Lueur animée "flamme" néon sur contour */
+    #btnPrepare::before {
+      content: '';
+      position: absolute;
+      top: -6px; left: -6px; right: -6px; bottom: -6px;
+      border-radius: 30px;
+      background: linear-gradient(270deg, #ff00cc, #cc33ff, #ff66ee, #cc00ff, #ff00cc);
+      filter: blur(12px);
+      opacity: 0.6;
+      animation: pulseGlow 3s infinite ease-in-out;
+      z-index: -1;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        opacity: 0.6;
+        filter: blur(12px) brightness(1);
+      }
+      50% {
+        opacity: 1;
+        filter: blur(18px) brightness(1.3);
+      }
     }
 
     #btnPrepare:hover {
-      color: #fff;
+      color: #ff99ff;
       text-shadow:
         0 0 10px #ff66ee,
         0 0 20px #cc33ff,
-        0 0 30px #ff66ee,
+        0 0 30px #ff99ff,
         0 0 40px #cc33ff,
-        0 0 50px #ff66ee;
+        0 0 50px #ff99ff;
+      border-image-source: linear-gradient(270deg, #ff66ff, #cc66ff, #ff99ff, #cc33ff, #ff66ff);
     }
 
     @keyframes fadeIn {
