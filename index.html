@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Affinix Intro</title>
 
-<!-- Police galactique/spatial : Orbitron -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
 
 <style>
@@ -15,7 +14,7 @@
     background: url('/fond-galactique.jpg') no-repeat center center/cover;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* titre plus haut */
+    justify-content: flex-start;
     align-items: center;
     font-family: 'Orbitron', sans-serif;
     background-color: black;
@@ -25,7 +24,6 @@
   #container {
     margin-top: 12vh;
     text-align: center;
-    color: white;
     user-select: none;
   }
 
@@ -49,12 +47,11 @@
 
   #phrase {
     margin-top: 40px;
-    font-size: 1.6rem;
+    font-size: 2rem;
     font-weight: 500;
     letter-spacing: 0.1em;
     color: #ff66cc;
     user-select: none;
-    /* effet flamme rose néon animé */
     text-shadow:
       0 0 5px #ff66cc,
       0 0 10px #ff66cc,
@@ -62,45 +59,29 @@
       0 0 30px #ff00ff,
       0 0 40px #d600d6,
       0 0 70px #d600d6;
-    animation: flameGlow 2s ease-in-out infinite alternate,
-               zoomInFull 4s forwards 3s;
-    transform-origin: center center;
     opacity: 0;
+    transform-origin: center center;
   }
 
-  @keyframes flameGlow {
-    0% {
-      text-shadow:
-        0 0 5px #ff66cc,
-        0 0 10px #ff66cc,
-        0 0 20px #ff00ff,
-        0 0 30px #ff00ff,
-        0 0 40px #d600d6,
-        0 0 70px #d600d6;
-      opacity: 1;
-    }
-    100% {
-      text-shadow:
-        0 0 10px #ff99dd,
-        0 0 20px #ff99dd,
-        0 0 30px #ff33ff,
-        0 0 40px #ff33ff,
-        0 0 50px #e600e6,
-        0 0 100px #e600e6;
-      opacity: 1;
-    }
-  }
-
-  /* Zoom jusqu'à remplir l'écran (avec disparition progressive) */
-  @keyframes zoomInFull {
-    0% {
+  /* Anim apparition fondu + ouverture (zoom arrière) */
+  @keyframes fadeZoomIn {
+    from {
       opacity: 0;
+      transform: scale(0.3);
+    }
+    to {
+      opacity: 1;
       transform: scale(1);
     }
-    20% {
+  }
+
+  /* Zoom avant énorme pour recouvrir l’écran */
+  @keyframes zoomBig {
+    from {
+      transform: scale(1);
       opacity: 1;
     }
-    100% {
+    to {
       transform: scale(25);
       opacity: 0;
     }
@@ -115,23 +96,26 @@
 </div>
 
 <script>
-  // Animation logo
   const logo = document.getElementById('logo');
-  logo.style.animation = 'zoomFade 2s ease-out forwards';
-
-  // Phrase animée, zoom automatique puis redirection
   const phrase = document.getElementById('phrase');
 
-  // Faire apparaître phrase après logo (2.5s)
-  setTimeout(() => {
-    phrase.style.opacity = '1';
-    // Lancement du zoom (animation css déjà incluse)
-  }, 2500);
+  // 1. Affiche et anime logo zoom + fade
+  logo.style.animation = 'zoomFade 2s ease-out forwards';
 
-  // Redirection après animation complète (2.5 + 4s)
+  // 2. Après logo fini (2.1s), affiche phrase en fondu+zoom arrière
   setTimeout(() => {
-    window.location.href = 'nouvelle-page.html'; // Modifie URL cible ici
-  }, 6500);
+    phrase.style.animation = 'fadeZoomIn 1.5s forwards ease-out';
+  }, 2100);
+
+  // 3. Après phrase visible (2.1 + 1.5 = 3.6s), lance zoom avant énorme + fondu (4s)
+  setTimeout(() => {
+    phrase.style.animation = 'zoomBig 4s forwards ease-in';
+  }, 3600);
+
+  // 4. Après zoom gros terminé, redirection (3.6 + 4 = 7.6s)
+  setTimeout(() => {
+    window.location.href = 'nouvelle-page.html'; // adapte l'URL
+  }, 7600);
 </script>
 
 </body>
