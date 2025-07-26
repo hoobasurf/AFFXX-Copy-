@@ -3,110 +3,30 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Vortex AFFINIX Avance</title>
+<title>Vortex AFFINIX</title>
 <style>
   html, body {
-    margin: 0; padding: 0; overflow: hidden; height: 100vh; background: black;
+    margin: 0; padding: 0;
+    height: 100vh; width: 100vw;
+    overflow: hidden;
+    background: url('fond-galactique.jpg') no-repeat center center / cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
-  canvas {
-    display: block;
-    position: fixed;
-    top: 0; left: 0;
+  video {
+    max-width: 100vw;
+    max-height: 100vh;
+    object-fit: contain;
   }
 </style>
 </head>
 <body>
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-<script>
-  // Initialisation scène, caméra, rendu
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-  camera.position.z = 5;
 
-  const renderer = new THREE.WebGLRenderer({antialias: true, alpha: false});
-  renderer.setClearColor(0x000000, 1); // fond noir opaque
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
+<video autoplay loop muted playsinline>
+  <source src="vortex.mov" type="video/quicktime" />
+  Votre navigateur ne supporte pas la lecture de cette vidéo.
+</video>
 
-  // Création des particules
-  const particleCount = 2000;
-  const geometry = new THREE.BufferGeometry();
-  const positions = new Float32Array(particleCount * 3);
-  const colors = new Float32Array(particleCount * 3);
-
-  const colorStart = new THREE.Color(0xff33cc);
-  const colorEnd = new THREE.Color(0x8a2be2);
-
-  for (let i = 0; i < particleCount; i++) {
-    // angle aléatoire autour du centre
-    const angle = Math.random() * Math.PI * 2;
-    // rayon variable (0.1 à 5)
-    const radius = 0.1 + Math.random() * 4.9;
-    // position z entre -15 (loin) et 20 (près)
-    const z = Math.random() * 35 - 15;
-
-    positions[i*3] = Math.cos(angle + z * 5) * radius;
-    positions[i*3 + 1] = Math.sin(angle + z * 5) * radius;
-    positions[i*3 + 2] = z;
-
-    // couleur dégradée selon position z (profondeur)
-    const t = (z + 15) / 35;
-    const col = colorStart.clone().lerp(colorEnd, t);
-    colors[i*3] = col.r;
-    colors[i*3 + 1] = col.g;
-    colors[i*3 + 2] = col.b;
-  }
-
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-  // Matériau points lisses, neon, taille variable
-  const material = new THREE.PointsMaterial({
-    size: 0.07,
-    vertexColors: true,
-    transparent: true,
-    opacity: 0.85,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    sizeAttenuation: true,
-  });
-
-  const particles = new THREE.Points(geometry, material);
-  scene.add(particles);
-
-  // Animation - particules avancent vers caméra (z diminue)
-  function animate() {
-    requestAnimationFrame(animate);
-
-    const pos = geometry.attributes.position.array;
-    for (let i = 0; i < particleCount; i++) {
-      pos[i*3 + 2] -= 0.12; // vitesse d'avance
-
-      if (pos[i*3 + 2] < -15) {
-        pos[i*3 + 2] = 20;
-        // nouvelle position x,y recalculée pour garder spirale
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 0.1 + Math.random() * 4.9;
-        pos[i*3] = Math.cos(angle + pos[i*3 + 2] * 5) * radius;
-        pos[i*3 + 1] = Math.sin(angle + pos[i*3 + 2] * 5) * radius;
-      }
-    }
-    geometry.attributes.position.needsUpdate = true;
-
-    // Rotation lente (dans sens horaire) pour fluidité et dynamique sans dénaturer
-    scene.rotation.z += 0.0015;
-
-    renderer.render(scene, camera);
-  }
-
-  animate();
-
-  // Ajuste canvas à la taille de la fenêtre
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth/window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-</script>
 </body>
 </html>
