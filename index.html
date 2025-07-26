@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AFFINIX Néon</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Monoton&display=swap" rel="stylesheet" />
+
   <style>
     html, body {
       margin: 0;
@@ -47,54 +50,37 @@
 
     #btnPrepare {
       opacity: 0;
-      padding: 8px 20px;
-      font-size: 1rem;
+      padding: 8px 24px;
+      font-size: 1.3rem;
       background: transparent;
-      border: 2px solid;
-      border-image-slice: 1;
-      border-width: 2px;
-      border-image-source: linear-gradient(270deg, #cc00ff, #ff33cc, #cc00ff);
-      border-radius: 30px;
-      color: #ff33cc;
+      border: none;
+      color: #ee82ee; /* violet-rose néon */
       cursor: pointer;
-      box-shadow:
-        0 0 6px #cc00ff,
-        0 0 12px #ff33cc,
-        0 0 18px #cc00ff;
-      animation: fadeIn 1.5s ease forwards, neonBorder 3s ease-in-out infinite;
+      font-family: 'Monoton', cursive;
+      text-shadow:
+        0 0 5px #ff33cc,
+        0 0 10px #cc00ff,
+        0 0 20px #ff33cc,
+        0 0 30px #cc00ff,
+        0 0 40px #ff33cc;
+      animation: fadeIn 1.5s ease forwards;
       animation-delay: 2.7s;
-      transition: color 0.3s ease, box-shadow 0.3s ease;
+      transition: color 0.3s ease, text-shadow 0.3s ease;
     }
 
     #btnPrepare:hover {
       color: #fff;
-      box-shadow:
-        0 0 12px #ff33cc,
-        0 0 24px #cc00ff,
-        0 0 36px #ff33cc;
-      border-image-source: linear-gradient(270deg, #ff33cc, #cc00ff, #ff33cc);
+      text-shadow:
+        0 0 10px #ff66ee,
+        0 0 20px #cc33ff,
+        0 0 30px #ff66ee,
+        0 0 40px #cc33ff,
+        0 0 50px #ff66ee;
     }
 
     @keyframes fadeIn {
       to {
         opacity: 1;
-      }
-    }
-
-    @keyframes neonBorder {
-      0%, 100% {
-        border-image-source: linear-gradient(270deg, #cc00ff, #ff33cc, #cc00ff);
-        box-shadow:
-          0 0 6px #cc00ff,
-          0 0 12px #ff33cc,
-          0 0 18px #cc00ff;
-      }
-      50% {
-        border-image-source: linear-gradient(270deg, #ff33cc, #cc00ff, #ff33cc);
-        box-shadow:
-          0 0 12px #ff33cc,
-          0 0 24px #cc00ff,
-          0 0 36px #ff33cc;
       }
     }
   </style>
