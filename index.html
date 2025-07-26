@@ -99,23 +99,19 @@
   const logo = document.getElementById('logo');
   const phrase = document.getElementById('phrase');
 
-  // Logo animation
   logo.style.animation = 'zoomFade 2s ease-out forwards';
 
-  // Phrase apparition après logo
   setTimeout(() => {
     phrase.style.animation = 'fadeZoomIn 1s forwards ease-out';
   }, 2000);
 
-  // Délai avant zoom grand
   setTimeout(() => {
     phrase.style.animation = 'zoomBig 2.5s forwards ease-in';
-  }, 3500); // 1,5s après apparition
+  }, 3500);
 
-  // Redirection après zoom
   setTimeout(() => {
-    window.location.href = 'vortex.html';  // <-- Changement ici
-  }, 6000); // un peu après zoom
+    window.location.href = 'vortex.html';
+  }, 6000);
 </script>
 
 </body>
