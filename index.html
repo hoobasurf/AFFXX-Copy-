@@ -7,46 +7,69 @@
 <style>
   html, body {
     margin: 0; padding: 0; height: 100vh; overflow: hidden;
-    background: url('fond-galactique.jpg') no-repeat center center/cover;
+    background: url('/fond-galactique.jpg') no-repeat center center/cover;
     background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
   }
   #heart {
-    position: fixed;
-    top: 10vh;
-    left: 50%;
-    width: 100px;
-    transform: translateX(-50%);
+    width: 120px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 8px #c56dfb)
+            drop-shadow(0 0 15px #e04fff)
+            drop-shadow(0 0 20px #b041c6);
     opacity: 0;
     animation: fadeIn 2s ease forwards;
     animation-delay: 1.8s;
-    z-index: 10;
   }
-  #title {
-    position: fixed;
-    top: 55%;
-    left: 50%;
-    width: 380px;
-    transform: translate(-50%, -50%) scale(2.3);
+  svg text {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 4rem;
+    fill: url(#grad);
+    filter:
+      drop-shadow(0 0 6px #e04fff)
+      drop-shadow(0 0 15px #c56dfb)
+      drop-shadow(0 0 20px #b041c6);
     opacity: 0;
+    transform-origin: center center;
     animation: zoomOut 2.5s ease forwards;
-    z-index: 9;
   }
   @keyframes fadeIn {
-    to {
-      opacity: 1;
-    }
+    to { opacity: 1; }
   }
   @keyframes zoomOut {
-    to {
+    0% {
+      opacity: 0;
+      transform: scale(2.3);
+    }
+    100% {
       opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
+      transform: scale(1);
     }
   }
 </style>
 </head>
 <body>
+
+  <!-- Cœur AF PNG -->
   <img id="heart" src="/AAFFXX.png" alt="Cœur AF néon violet" />
-  <!-- si tu as un autre PNG pour le titre AFFINIX, mets le ici : -->
-  <!-- <img id="title" src="/AFFINIX.png" alt="Titre AFFINIX néon violet" /> -->
+
+  <!-- Texte SVG néon dégradé -->
+  <svg viewBox="0 0 400 100" width="380" height="100" aria-label="AFFINIX" role="img">
+    <defs>
+      <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#e04fff" />
+        <stop offset="50%" stop-color="#c56dfb" />
+        <stop offset="100%" stop-color="#8a2de8" />
+      </linearGradient>
+    </defs>
+    <text x="50%" y="70%" text-anchor="middle" dominant-baseline="middle">
+      AFFINIX
+    </text>
+  </svg>
+
 </body>
 </html>
