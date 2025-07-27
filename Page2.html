@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Affinix • Page 2</title>
+  <title>Affinix • Portail des connexions</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
       background: black;
     }
 
@@ -19,7 +20,7 @@
       top: 0; left: 0;
       width: 100%;
       height: 100%;
-      background: url("/4DDF0589-D69E-48F8-9D74-8CC58C0380E2.jpeg") no-repeat center center;
+      background: url("planete-magique.jpg") no-repeat center center;
       background-size: cover;
       z-index: 0;
       animation: moveGlow 30s infinite ease-in-out;
@@ -27,18 +28,9 @@
     }
 
     @keyframes moveGlow {
-      0% {
-        transform: scale(1) translate(0px, 0px);
-        filter: brightness(1.1) saturate(1.3);
-      }
-      50% {
-        transform: scale(1.02) translate(2px, -1px);
-        filter: brightness(1.2) saturate(1.4);
-      }
-      100% {
-        transform: scale(1) translate(-1px, 1px);
-        filter: brightness(1.1) saturate(1.2);
-      }
+      0% { transform: scale(1) translate(0, 0); }
+      50% { transform: scale(1.02) translate(2px, -1px); }
+      100% { transform: scale(1) translate(-1px, 1px); }
     }
 
     .light-overlay {
@@ -56,9 +48,56 @@
       0%, 100% { opacity: 0.1; }
       50% { opacity: 0.3; }
     }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-size: 1.1em;
+      backdrop-filter: blur(5px);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      color: #fff;
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    @media (max-width: 500px) {
+      .btn {
+        font-size: 1em;
+        padding: 12px 20px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="light-overlay"></div>
+
+  <div class="content">
+    <button class="btn">Connexion Authentique sérieuse</button>
+    <button class="btn">Connexion Sincère amicale</button>
+    <button class="btn">Connexion Fun</button>
+    <button class="btn">Connexion Mystérieuse</button>
+  </div>
 </body>
 </html>
