@@ -60,6 +60,7 @@
       text-align:center;
       transition: transform .3s, box-shadow .3s;
       cursor:pointer;
+      position: relative;
     }
     .card img {
       width:120px; height:120px;
@@ -72,13 +73,29 @@
     .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
     .name { font-size:1.1em; margin-bottom:5px;}
     .desc { font-size:0.9em; color:#ccc;}
-
     .card.center {
       transform: scale(1.1);
       box-shadow: 0 0 20px #ff00ff;
     }
 
-    /* Modal */
+    .super-like {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: #ff66cc;
+      border: none;
+      color: white;
+      font-size: 0.8em;
+      padding: 5px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ff66cc;
+      transition: transform 0.2s;
+    }
+    .super-like:hover {
+      transform: scale(1.1);
+    }
+
     .modal {
       display:none; position:fixed;
       top:0; left:0; width:100%; height:100%;
@@ -110,29 +127,54 @@
 
 <div class="carousel-container fade-in">
   <div class="carousel" id="carousel">
-    <!-- profils -->
+
+    <!-- Profils -->
     <div class="card girl" data-name="Sophie, 28" data-age="28" data-lieu="Paris" data-search="Relation sérieuse" data-desc="Passionnée par l’astronomie et les romans de science‑fiction. Cherche un lien vrai.">
-      <img src="https://i.pravatar.cc/150?img=47" alt="Sophie"><div class="name">Sophie</div><div class="desc">Relation sérieuse</div>
+      <img src="https://i.pravatar.cc/150?img=47" alt="Sophie">
+      <div class="name">Sophie</div>
+      <div class="desc">Relation sérieuse</div>
+      <button class="super-like">💖 Super Like</button>
     </div>
+
     <div class="card boy" data-name="Lucas, 31" data-age="31" data-lieu="Lyon" data-search="Relation sérieuse" data-desc="Fan de jeux coopératifs et nature. Prêt pour une belle histoire sérieuse.">
-      <img src="https://i.pravatar.cc/150?img=12" alt="Lucas"><div class="name">Lucas</div><div class="desc">Relation sérieuse</div>
+      <img src="https://i.pravatar.cc/150?img=12" alt="Lucas">
+      <div class="name">Lucas</div>
+      <div class="desc">Relation sérieuse</div>
+      <button class="super-like">💖 Super Like</button>
     </div>
+
     <div class="card girl" data-name="Maya, 26" data-age="26" data-lieu="Marseille" data-search="Relation sérieuse" data-desc="Créative, amoureuse de design futuriste et de moments magiques.">
-      <img src="https://i.pravatar.cc/150?img=58" alt="Maya"><div class="name">Maya</div><div class="desc">Relation sérieuse</div>
+      <img src="https://i.pravatar.cc/150?img=58" alt="Maya">
+      <div class="name">Maya</div>
+      <div class="desc">Relation sérieuse</div>
+      <button class="super-like">💖 Super Like</button>
     </div>
+
     <div class="card boy" data-name="Nolan, 30" data-age="30" data-lieu="Toulouse" data-search="Relation sérieuse" data-desc="Curieux, sincère, rêve d’un amour aussi intense qu’une supernova.">
-      <img src="https://i.pravatar.cc/150?img=33" alt="Nolan"><div class="name">Nolan</div><div class="desc">Relation sérieuse</div>
+      <img src="https://i.pravatar.cc/150?img=33" alt="Nolan">
+      <div class="name">Nolan</div>
+      <div class="desc">Relation sérieuse</div>
+      <button class="super-like">💖 Super Like</button>
     </div>
+
     <div class="card girl" data-name="Elena, 27" data-age="27" data-lieu="Nice" data-search="Relation sérieuse" data-desc="Musicienne, aimant les étoiles et la poésie cosmique.">
-      <img src="https://i.pravatar.cc/150?img=65" alt="Elena"><div class="name">Elena</div><div class="desc">Relation sérieuse</div>
+      <img src="https://i.pravatar.cc/150?img=65" alt="Elena">
+      <div class="name">Elena</div>
+      <div class="desc">Relation sérieuse</div>
+      <button class="super-like">💖 Super Like</button>
     </div>
+
     <div class="card boy" data-name="Théo, 29" data-age="29" data-lieu="Bordeaux" data-search="Relation sérieuse" data-desc="Explorateur dans l’âme et amateur de voyages spatiaux.">
-      <img src="https://i.pravatar.cc/150?img=5" alt="Théo"><div class="name">Théo</div><div class="desc">Relation sérieuse</div>
+      <img src="https://i.pravatar.cc/150?img=5" alt="Théo">
+      <div class="name">Théo</div>
+      <div class="desc">Relation sérieuse</div>
+      <button class="super-like">💖 Super Like</button>
     </div>
+
   </div>
 </div>
 
-<!-- modal détail -->
+<!-- Modal profil -->
 <div class="modal" id="modal">
   <div class="modal-content">
     <span class="modal-close">&times;</span>
@@ -145,9 +187,9 @@
 </div>
 
 <script>
-// centrage dynamique + swipe
 const carousel = document.getElementById('carousel');
 const cards = carousel.children;
+
 function updateCenter() {
   const center = carousel.scrollLeft + carousel.offsetWidth / 2;
   Array.from(cards).forEach(c => {
@@ -155,13 +197,17 @@ function updateCenter() {
     c.classList.toggle('center', Math.abs(cardCenter - center) < c.offsetWidth/2);
   });
 }
+
 carousel.addEventListener('scroll', updateCenter);
 window.addEventListener('load', () => {
   carousel.scrollLeft = (carousel.scrollWidth - carousel.offsetWidth)/2;
   updateCenter();
 });
-cards.forEach(c => {
-  c.addEventListener('click', () => {
+
+// ouvrir modal
+Array.from(cards).forEach(c => {
+  c.addEventListener('click', e => {
+    if (e.target.classList.contains('super-like')) return;
     document.getElementById('modal-name').textContent = c.dataset.name;
     document.getElementById('modal-age').textContent = c.dataset.age;
     document.getElementById('modal-lieu').textContent = c.dataset.lieu;
@@ -170,6 +216,8 @@ cards.forEach(c => {
     document.getElementById('modal').classList.add('active');
   });
 });
+
+// fermer modal
 document.querySelector('.modal-close').onclick = () => {
   document.getElementById('modal').classList.remove('active');
 };
