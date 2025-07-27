@@ -2,180 +2,178 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Connexion Authentique Sérieuse</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: url('planete-magique.jpg') no-repeat center center/cover;
+    * { box-sizing: border-box; margin:0; padding:0; }
+    html, body {
+      height:100%; width:100%;
       font-family: 'Orbitron', sans-serif;
-      color: white;
-      overflow-x: hidden;
+      background: url('planete-magique.jpg') no-repeat center center/cover;
+      overflow: hidden; color: white;
     }
-
-    h1 {
-      text-align: center;
-      padding: 1em 0;
-      font-size: 2em;
-      background: linear-gradient(90deg, #ff00ff, #6600ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    body::before {
+      content:""; position:fixed; top:0; left:0;
+      width:100%; height:100%;
+      background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%);
+      z-index:1; pointer-events:none;
+      animation: floatStars 60s linear infinite;
     }
+    @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
 
-    .profiles-container {
-      display: flex;
-      overflow-x: auto;
-      padding: 2em;
-      gap: 20px;
+    .header {
+      position: relative; z-index:2;
+      padding: 20px;
     }
+    .btn-back {
+      position: absolute; top:20px; left:20px;
+      color: #ff66cc; font-size:1.5em;
+      cursor:pointer; text-decoration:none;
+      transition: transform .2s;
+    }
+    .btn-back:hover { transform: scale(1.2); }
 
-    .profile-card {
-      min-width: 260px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 15px;
-      padding: 1em;
-      box-shadow: 0 0 15px #ff00ff88;
-      backdrop-filter: blur(5px);
-      cursor: pointer;
+    .carousel-container {
+      z-index:2;
       position: relative;
-      transition: transform 0.3s ease;
+      width:100%; height:calc(100% - 60px);
+      overflow: hidden;
+      display: flex;
+      align-items:center;
+    }
+    .carousel {
+      display:flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      gap:40px;
+      padding:40px;
+    }
+    .carousel::-webkit-scrollbar { display:none; }
+    .card {
+      scroll-snap-align: center;
+      flex: 0 0 200px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 16px;
+      padding: 15px;
+      text-align:center;
+      transition: transform .3s, box-shadow .3s;
+      cursor:pointer;
+    }
+    .card img {
+      width:120px; height:120px;
+      border-radius:50%;
+      object-fit:cover;
+      margin-bottom:10px;
+      border:3px solid;
+    }
+    .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
+    .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
+    .name { font-size:1.1em; margin-bottom:5px;}
+    .desc { font-size:0.9em; color:#ccc;}
+
+    .card.center {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px #ff00ff;
     }
 
-    .profile-card:hover {
-      transform: scale(1.05);
+    /* Modal */
+    .modal {
+      display:none; position:fixed;
+      top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.8);
+      align-items:center; justify-content:center;
+      z-index:10;
     }
-
-    .profile-card img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 10px;
+    .modal.active { display:flex; }
+    .modal-content {
+      background: rgba(0,0,0,0.7);
+      padding:20px; border-radius:12px;
+      width:90%; max-width:400px;
+      text-align:center; position:relative;
     }
-
-    .super-like-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: radial-gradient(circle, #ff66cc, #ff00ff);
-      border: none;
-      border-radius: 50%;
-      color: white;
-      font-size: 1.2em;
-      width: 40px;
-      height: 40px;
-      box-shadow: 0 0 10px #ff00ff;
-      cursor: pointer;
-      transition: transform 0.2s;
+    .modal-content h2 { margin-bottom:10px; color:#ff66cc;}
+    .modal-content p { margin-bottom:8px; color:#ddd; font-size:0.95em;}
+    .modal-close {
+      position:absolute; top:10px; right:10px;
+      font-size:1.3em; color:#ff66cc;
+      cursor:pointer;
     }
-
-    .super-like-btn:hover {
-      transform: scale(1.2);
-    }
-
-    .detail-view {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.9);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2em;
-      z-index: 999;
-      color: white;
-    }
-
-    .detail-content {
-      max-width: 400px;
-      background: rgba(255,255,255,0.1);
-      padding: 1.5em;
-      border-radius: 15px;
-      box-shadow: 0 0 20px #cc33ff;
-    }
-
-    .back-btn {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      font-size: 1.5em;
-      background: none;
-      border: none;
-      color: #ff99ff;
-      cursor: pointer;
-    }
-
-    .detail-view img {
-      width: 100%;
-      height: auto;
-      border-radius: 12px;
-      margin-bottom: 1em;
-    }
-
-    .detail-content p {
-      margin: 0.5em 0;
-    }
-
   </style>
 </head>
 <body>
 
-  <h1>Connexion Authentique Sérieuse</h1>
+<div class="header">
+  <a href="page2.html" class="btn-back">&larr; Retour</a>
+</div>
 
-  <div class="profiles-container">
-    <div class="profile-card" onclick="showProfile('Luna', 28, 'Paris', 'Relation sérieuse', 'Je suis une rêveuse passionnée par l’astrologie et les balades nocturnes.', 'https://i.imgur.com/aKQOg3G.jpg')">
-      <img src="https://i.imgur.com/aKQOg3G.jpg" alt="Profil Luna" />
-      <button class="super-like-btn">💖</button>
-      <h3>Luna</h3>
-      <p>Paris, 28 ans</p>
+<div class="carousel-container fade-in">
+  <div class="carousel" id="carousel">
+    <!-- profils -->
+    <div class="card girl" data-name="Sophie, 28" data-age="28" data-lieu="Paris" data-search="Relation sérieuse" data-desc="Passionnée par l’astronomie et les romans de science‑fiction. Cherche un lien vrai.">
+      <img src="https://i.pravatar.cc/150?img=47" alt="Sophie"><div class="name">Sophie</div><div class="desc">Relation sérieuse</div>
     </div>
-
-    <div class="profile-card" onclick="showProfile('Alex', 32, 'Lyon', 'Construire un avenir à deux', 'Passionné de voyage, de technologie et de cuisine maison.', 'https://i.imgur.com/fQF6Q7x.jpg')">
-      <img src="https://i.imgur.com/fQF6Q7x.jpg" alt="Profil Alex" />
-      <button class="super-like-btn">💖</button>
-      <h3>Alex</h3>
-      <p>Lyon, 32 ans</p>
+    <div class="card boy" data-name="Lucas, 31" data-age="31" data-lieu="Lyon" data-search="Relation sérieuse" data-desc="Fan de jeux coopératifs et nature. Prêt pour une belle histoire sérieuse.">
+      <img src="https://i.pravatar.cc/150?img=12" alt="Lucas"><div class="name">Lucas</div><div class="desc">Relation sérieuse</div>
     </div>
-
-    <div class="profile-card" onclick="showProfile('Sasha', 30, 'Marseille', 'Une relation sincère', 'J’aime la mer, les romans futuristes et les couchers de soleil magiques.', 'https://i.imgur.com/WVPR7Pb.jpg')">
-      <img src="https://i.imgur.com/WVPR7Pb.jpg" alt="Profil Sasha" />
-      <button class="super-like-btn">💖</button>
-      <h3>Sasha</h3>
-      <p>Marseille, 30 ans</p>
+    <div class="card girl" data-name="Maya, 26" data-age="26" data-lieu="Marseille" data-search="Relation sérieuse" data-desc="Créative, amoureuse de design futuriste et de moments magiques.">
+      <img src="https://i.pravatar.cc/150?img=58" alt="Maya"><div class="name">Maya</div><div class="desc">Relation sérieuse</div>
     </div>
-
-    <!-- Tu peux dupliquer les blocs profile-card ci-dessus pour ajouter d'autres profils -->
-  </div>
-
-  <!-- Détail du profil -->
-  <div class="detail-view" id="detailView">
-    <button class="back-btn" onclick="hideProfile()">←</button>
-    <div class="detail-content" id="detailContent">
-      <!-- Contenu dynamique injecté via JS -->
+    <div class="card boy" data-name="Nolan, 30" data-age="30" data-lieu="Toulouse" data-search="Relation sérieuse" data-desc="Curieux, sincère, rêve d’un amour aussi intense qu’une supernova.">
+      <img src="https://i.pravatar.cc/150?img=33" alt="Nolan"><div class="name">Nolan</div><div class="desc">Relation sérieuse</div>
+    </div>
+    <div class="card girl" data-name="Elena, 27" data-age="27" data-lieu="Nice" data-search="Relation sérieuse" data-desc="Musicienne, aimant les étoiles et la poésie cosmique.">
+      <img src="https://i.pravatar.cc/150?img=65" alt="Elena"><div class="name">Elena</div><div class="desc">Relation sérieuse</div>
+    </div>
+    <div class="card boy" data-name="Théo, 29" data-age="29" data-lieu="Bordeaux" data-search="Relation sérieuse" data-desc="Explorateur dans l’âme et amateur de voyages spatiaux.">
+      <img src="https://i.pravatar.cc/150?img=5" alt="Théo"><div class="name">Théo</div><div class="desc">Relation sérieuse</div>
     </div>
   </div>
+</div>
 
-  <script>
-    function showProfile(name, age, location, recherche, description, img) {
-      const content = `
-        <img src="${img}" alt="Avatar ${name}" />
-        <h2>${name}, ${age} ans</h2>
-        <p><strong>Lieu :</strong> ${location}</p>
-        <p><strong>Recherche :</strong> ${recherche}</p>
-        <p><strong>Description :</strong> ${description}</p>
-      `;
-      document.getElementById('detailContent').innerHTML = content;
-      document.getElementById('detailView').style.display = 'flex';
-    }
+<!-- modal détail -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <span class="modal-close">&times;</span>
+    <h2 id="modal-name"></h2>
+    <p><strong>Âge :</strong> <span id="modal-age"></span></p>
+    <p><strong>Lieu :</strong> <span id="modal-lieu"></span></p>
+    <p><strong>Recherche :</strong> <span id="modal-search"></span></p>
+    <p id="modal-desc"></p>
+  </div>
+</div>
 
-    function hideProfile() {
-      document.getElementById('detailView').style.display = 'none';
-    }
-  </script>
+<script>
+// centrage dynamique + swipe
+const carousel = document.getElementById('carousel');
+const cards = carousel.children;
+function updateCenter() {
+  const center = carousel.scrollLeft + carousel.offsetWidth / 2;
+  Array.from(cards).forEach(c => {
+    const cardCenter = c.offsetLeft + c.offsetWidth / 2;
+    c.classList.toggle('center', Math.abs(cardCenter - center) < c.offsetWidth/2);
+  });
+}
+carousel.addEventListener('scroll', updateCenter);
+window.addEventListener('load', () => {
+  carousel.scrollLeft = (carousel.scrollWidth - carousel.offsetWidth)/2;
+  updateCenter();
+});
+cards.forEach(c => {
+  c.addEventListener('click', () => {
+    document.getElementById('modal-name').textContent = c.dataset.name;
+    document.getElementById('modal-age').textContent = c.dataset.age;
+    document.getElementById('modal-lieu').textContent = c.dataset.lieu;
+    document.getElementById('modal-search').textContent = c.dataset.search;
+    document.getElementById('modal-desc').textContent = c.dataset.desc;
+    document.getElementById('modal').classList.add('active');
+  });
+});
+document.querySelector('.modal-close').onclick = () => {
+  document.getElementById('modal').classList.remove('active');
+};
+</script>
 
 </body>
 </html>
