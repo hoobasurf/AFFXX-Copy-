@@ -13,19 +13,19 @@
       font-family: 'Orbitron', sans-serif;
       overflow: hidden;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      flex-direction: column;
     }
 
     #logo {
-      width: 300px;
+      width: 320px;
       max-width: 90vw;
       filter: drop-shadow(0 0 5px #8a2be2) drop-shadow(0 0 15px #d354f7);
     }
 
     #phrase {
-      margin-top: 30px;
+      margin-top: 20px;
       font-size: 2rem;
       font-weight: 700;
       letter-spacing: 0.1em;
@@ -33,47 +33,44 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000,
         0 0 10px #ff66cc,
         0 0 20px #d600d6;
-      animation: zoomBig 1.5s ease-in 1.5s forwards;
-    }
-
-    @keyframes zoomBig {
-      from {
-        transform: scale(1);
-        opacity: 1;
-      }
-      to {
-        transform: scale(20);
-        opacity: 0;
-      }
     }
 
     #flash {
       position: absolute;
       top: 0; left: 0;
-      width: 100vw; height: 100vh;
+      width: 100vw;
+      height: 100vh;
       background: white;
       opacity: 0;
-      z-index: 10;
-      transition: opacity 0.3s ease-in;
       pointer-events: none;
+      transition: opacity 0.3s ease-in;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
+
+<div id="logo-container">
   <img id="logo" src="/AAFFXX.png" alt="Logo Néon AFFINIX" />
   <div id="phrase">Prépare-toi au voyage</div>
-  <div id="flash"></div>
+</div>
 
-  <script>
-    // Explosion blanche après le zoom
+<div id="flash"></div>
+
+<script>
+  setTimeout(() => {
+    document.getElementById('flash').style.opacity = 1; // flash blanc
     setTimeout(() => {
-      document.getElementById('flash').style.opacity = 1;
-      setTimeout(() => {
-        window.location.href = 'vortex.html';
-      }, 400); // délai après le flash
-    }, 3000); // temps total avant redirection (~1.5s + 1.5s)
-  </script>
+      window.location.href = 'home.html'; // Redirige vers ta page
+    }, 300); // après le flash
+  }, 2500); // délai avant transition (2.5s)
+</script>
+
 </body>
 </html>
