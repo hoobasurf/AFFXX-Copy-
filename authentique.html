@@ -5,281 +5,248 @@
   <title>Connexion Authentique Sérieuse</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    html, body {
-      margin: 0; padding: 0;
-      font-family: 'Arial', sans-serif;
-      background: url('planete-magique.jpg') no-repeat center center/cover;
-      overflow: hidden;
-    }
-    .header {
-      position: absolute; top: 10px; left: 10px;
-      z-index: 999;
-    }
-    .back-btn {
-      background: none;
-      border: none;
-      font-size: 24px;
-      color: #ff7ad9;
-      cursor: pointer;
-    }
-    .profile-container {
-      display: flex;
-      gap: 20px;
-      overflow-x: auto;
-      padding: 80px 20px 100px;
-      scroll-snap-type: x mandatory;
-    }
-    .profile-card {
-      flex: 0 0 auto;
-      scroll-snap-align: center;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 20px;
-      padding: 15px;
-      width: 260px;
-      position: relative;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 0 15px #ff70d9;
-      cursor: pointer;
-      transition: transform 0.4s ease;
-    }
-    .profile-card:hover {
-      transform: scale(1.04);
-    }
-    .profile-card img {
-      width: 100%;
-      border-radius: 16px;
-    }
-    .profile-name {
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: url('images/fond-univers.jpg') no-repeat center center fixed;
+      background-size: cover;
       color: white;
-      font-size: 18px;
-      margin-top: 8px;
-    }
-    .btns {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 10px;
-    }
-    .icon-btn {
-      background: none;
-      border: none;
-      font-size: 22px;
-      color: #fff;
-      cursor: pointer;
-    }
-    .icon-btn.heart {
-      color: #ff4d88;
-    }
-    .icon-btn.chat {
-      color: #7a7aff;
-    }
-    .icon-btn.star {
-      color: #ffd700;
+      overflow-x: hidden;
     }
 
-    /* Profil détaillé */
-    .profile-modal {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      animation: zoomIn 0.4s ease;
-    }
-    @keyframes zoomIn {
-      from { transform: scale(0.7); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-    .modal-content {
-      background: rgba(255,255,255,0.1);
+    .carrousel {
+      display: flex;
+      overflow-x: auto;
+      gap: 20px;
       padding: 20px;
-      border-radius: 20px;
-      backdrop-filter: blur(10px);
-      max-width: 300px;
-      color: white;
-      position: relative;
-      text-align: center;
+      scroll-snap-type: x mandatory;
     }
-    .modal-content img {
-      width: 100%;
-      border-radius: 16px;
+
+    .profil-card {
+      flex: 0 0 auto;
+      width: 250px;
+      height: 380px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      box-shadow: 0 0 15px #ff00ff99;
+      scroll-snap-align: center;
+      position: relative;
+      padding: 10px;
+      backdrop-filter: blur(6px);
       cursor: pointer;
     }
-    .modal-content .small-pics {
+
+    .profil-card img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 15px;
+    }
+
+    .profil-info {
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .profil-actions {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .profil-actions button {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .profil-actions .like {
+      color: red;
+    }
+
+    .profil-actions .chat {
+      color: white;
+    }
+
+    .profil-actions .favori {
+      color: gold;
+    }
+
+    .profil-ouvert {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(10, 0, 30, 0.95);
+      z-index: 999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      animation: zoomIn 0.4s ease;
+      padding-top: 60px;
+    }
+
+    .profil-ouvert img {
+      width: 90%;
+      max-height: 300px;
+      object-fit: cover;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+
+    .photos-secondaires {
       display: flex;
       gap: 10px;
       margin-top: 10px;
-      justify-content: center;
     }
-    .modal-content .small-pics img {
-      width: 50px; height: 50px;
-      object-fit: cover;
+
+    .photos-secondaires img {
+      width: 60px;
+      height: 60px;
       border-radius: 10px;
       cursor: pointer;
     }
+
+    .zoom-photo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+    }
+
+    .zoom-photo img {
+      max-width: 90%;
+      max-height: 90%;
+    }
+
     .close-btn {
       position: absolute;
-      top: 10px; right: 10px;
-      background: none;
-      border: none;
-      color: #ff7ad9;
-      font-size: 24px;
+      top: 20px;
+      left: 20px;
+      color: #ff66cc;
+      font-size: 30px;
       cursor: pointer;
     }
 
-    /* Favoris */
-    .favorites-bar {
-      position: absolute;
-      top: 80px;
-      right: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    @keyframes zoomIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
-    .favorites-bar img {
-      width: 50px;
+
+    .favoris-bar {
+      position: fixed;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px 0 0 10px;
+      padding: 10px;
+      z-index: 1000;
+    }
+
+    .favoris-bar img {
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      box-shadow: 0 0 8px #ffd700;
+      margin-bottom: 10px;
       cursor: pointer;
     }
 
-    /* Mini dock discussion */
-    .chat-dock {
+    .dock-message {
       position: fixed;
       bottom: 0;
       left: 0;
-      width: 100%;
-      height: 60px;
-      background: rgba(0,0,0,0.6);
+      background: rgba(255,255,255,0.1);
+      padding: 5px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 0 10px;
-      box-shadow: 0 -3px 10px rgba(0,0,0,0.3);
-    }
-    .chat-dock img {
-      width: 40px;
-      border-radius: 50%;
-      border: 2px solid #fff;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-    }
-    .chat-dock img:hover {
-      transform: scale(1.1);
+      z-index: 1000;
     }
 
-    /* Zoom photo */
-    .zoom-img {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.85);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-    }
-    .zoom-img img {
-      max-width: 90vw;
-      max-height: 90vh;
-      border-radius: 16px;
-    }
-    .zoom-img .close-btn {
-      position: absolute;
-      top: 20px; right: 20px;
+    .dock-message img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+      cursor: pointer;
     }
 
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <button class="back-btn" onclick="history.back()">⟵</button>
-  </div>
-
-  <!-- Favoris -->
-  <div class="favorites-bar" id="favorites"></div>
-
-  <!-- Profils -->
-  <div class="profile-container" id="profiles">
-    <!-- Exemple de profil -->
-    <div class="profile-card" onclick="openProfile(0)">
-      <img src="avatar1.jpg" alt="Profil 1">
-      <div class="profile-name">Léna, 26 ans - Paris</div>
-      <div class="btns">
-        <button class="icon-btn chat">💬</button>
-        <button class="icon-btn heart" onclick="like(event)">❤️</button>
-        <button class="icon-btn star" onclick="saveFavorite(event, 'avatar1.jpg')">⭐</button>
-      </div>
-    </div>
-    <!-- D’autres profils ici -->
-  </div>
-
-  <!-- Fenêtre Profil -->
-  <div class="profile-modal" id="profileModal">
-    <div class="modal-content" id="modalContent">
-      <button class="close-btn" onclick="closeProfile()">✖</button>
-      <img src="avatar1.jpg" onclick="zoomPhoto(this.src)">
-      <div class="small-pics">
-        <img src="avatar1.jpg" onclick="zoomPhoto(this.src)">
-        <img src="avatar1b.jpg" onclick="zoomPhoto(this.src)">
-        <img src="avatar1c.jpg" onclick="zoomPhoto(this.src)">
-      </div>
-      <h3>Léna, 26 ans</h3>
-      <p>📍 Paris</p>
-      <p>🔍 Recherche : Relation sérieuse</p>
-      <p>Description : Passionnée de voyage et d'art, j’adore les discussions profondes et sincères.</p>
+<div class="carrousel">
+  <div class="profil-card" onclick="ouvrirProfil('Léna', 26, 'Paris', 'Elle recherche une connexion vraie et stable.', ['img1.jpg', 'img2.jpg'])">
+    <img src="img1.jpg" alt="Profil Léna">
+    <div class="profil-info">Léna, 26 ans - Paris</div>
+    <div class="profil-actions">
+      <button class="chat">💬</button>
+      <button class="like" onclick="event.stopPropagation(); likeProfil()">❤️</button>
+      <button class="favori">⭐</button>
     </div>
   </div>
+  <!-- Ajoute ici d'autres profils identiques -->
+</div>
 
-  <!-- Zoom photo -->
-  <div class="zoom-img" id="zoomView">
-    <button class="close-btn" onclick="closeZoom()">✖</button>
-    <img src="">
-  </div>
+<div class="favoris-bar">
+  <img src="img1.jpg" onclick="ouvrirProfil('Léna', 26, 'Paris', 'Elle recherche une connexion vraie et stable.', ['img1.jpg', 'img2.jpg'])">
+</div>
 
-  <!-- Dock discussion -->
-  <div class="chat-dock">
-    <img src="avatar1.jpg" onclick="openProfile(0)">
-    <!-- autres mini profils ici -->
-  </div>
+<div class="dock-message">
+  <img src="img1.jpg" onclick="ouvrirProfil('Léna', 26, 'Paris', 'Elle recherche une connexion vraie et stable.', ['img1.jpg', 'img2.jpg'])">
+  <span style="color:white;">Léna</span>
+</div>
 
-  <script>
-    function openProfile(index) {
-      document.getElementById('profileModal').style.display = 'flex';
+<div id="profil-ouvert" class="profil-ouvert">
+  <div class="close-btn" onclick="fermerProfil()">✕</div>
+  <img id="main-photo" src="" alt="">
+  <div class="photos-secondaires" id="photos-secondaires"></div>
+  <div id="info-detail" style="padding: 10px; text-align: center;"></div>
+</div>
+
+<div id="zoom-photo" class="zoom-photo" onclick="this.style.display='none'">
+  <div class="close-btn" style="top:10px;right:20px;left:auto;">✕</div>
+  <img src="" alt="">
+</div>
+
+<script>
+  function ouvrirProfil(nom, age, ville, description, photos) {
+    document.getElementById('profil-ouvert').style.display = 'flex';
+    document.getElementById('main-photo').src = photos[0];
+    document.getElementById('info-detail').innerHTML = `<h2>${nom}, ${age} ans - ${ville}</h2><p>${description}</p>`;
+    let photoZone = document.getElementById('photos-secondaires');
+    photoZone.innerHTML = '';
+    for(let i = 0; i < photos.length; i++) {
+      let img = document.createElement('img');
+      img.src = photos[i];
+      img.onclick = function(e){
+        e.stopPropagation();
+        document.getElementById('zoom-photo').style.display = 'flex';
+        document.querySelector('#zoom-photo img').src = photos[i];
+      };
+      photoZone.appendChild(img);
     }
+  }
 
-    function closeProfile() {
-      document.getElementById('profileModal').style.display = 'none';
-    }
+  function fermerProfil() {
+    document.getElementById('profil-ouvert').style.display = 'none';
+  }
 
-    function zoomPhoto(src) {
-      document.querySelector("#zoomView img").src = src;
-      document.getElementById("zoomView").style.display = "flex";
-    }
-
-    function closeZoom() {
-      document.getElementById("zoomView").style.display = "none";
-    }
-
-    function like(e) {
-      e.stopPropagation();
-      alert("❤️ Like envoyé !");
-    }
-
-    function saveFavorite(e, img) {
-      e.stopPropagation();
-      const container = document.getElementById("favorites");
-      const pic = document.createElement("img");
-      pic.src = img;
-      pic.onclick = () => openProfile(0);
-      container.appendChild(pic);
-    }
-  </script>
+  function likeProfil() {
+    alert("Like envoyé !");
+  }
+</script>
 
 </body>
 </html>
