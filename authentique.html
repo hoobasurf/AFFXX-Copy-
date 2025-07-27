@@ -11,7 +11,7 @@
       height:100%; width:100%;
       font-family: 'Orbitron', sans-serif;
       background: url('planete-magique.jpg') no-repeat center center/cover;
-      overflow: hidden; color: white;
+      overflow: hidden;
     }
     body::before {
       content:""; position:fixed; top:0; left:0;
@@ -23,215 +23,185 @@
     @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
 
     .header {
-      position: relative; z-index:2;
-      padding: 20px;
+      position: absolute; top: 20px; left: 20px; z-index: 2;
     }
     .btn-back {
-      position: absolute; top:20px; left:20px;
-      color: #ff66cc; font-size:1.5em;
-      cursor:pointer; text-decoration:none;
-      transition: transform .2s;
+      color: #ff66cc;
+      font-size: 1.5em;
+      text-decoration: none;
+      cursor: pointer;
     }
-    .btn-back:hover { transform: scale(1.2); }
 
     .carousel-container {
-      z-index:2;
-      position: relative;
-      width:100%; height:calc(100% - 60px);
-      overflow: hidden;
+      height: 100%;
       display: flex;
-      align-items:center;
+      align-items: center;
+      justify-content: center;
     }
     .carousel {
-      display:flex;
+      display: flex;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      gap:40px;
-      padding:40px;
+      gap: 40px;
+      padding: 40px;
     }
-    .carousel::-webkit-scrollbar { display:none; }
+    .carousel::-webkit-scrollbar { display: none; }
+
     .card {
       scroll-snap-align: center;
       flex: 0 0 200px;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
       border-radius: 16px;
       padding: 15px;
-      text-align:center;
-      transition: transform .3s, box-shadow .3s;
-      cursor:pointer;
+      text-align: center;
+      transition: transform .3s;
+      cursor: pointer;
       position: relative;
     }
     .card img {
-      width:120px; height:120px;
-      border-radius:50%;
-      object-fit:cover;
-      margin-bottom:10px;
-      border:3px solid;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 10px;
+      border: 3px solid;
     }
     .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
     .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
-    .name { font-size:1.1em; margin-bottom:5px;}
 
-    .card.center {
-      transform: scale(1.1);
-      box-shadow: 0 0 20px #ff00ff;
-    }
-
-    .actions {
+    .buttons {
       display: flex;
       justify-content: center;
       gap: 10px;
       margin-top: 8px;
     }
-    .btn-circle {
-      width:32px; height:32px;
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:1em;
-      cursor:pointer;
-      border:none;
-      background: #ff66cc;
-      color: white;
-      box-shadow: 0 0 8px #ff66cc;
-      transition: transform .2s;
-    }
-    .btn-circle:hover {
-      transform: scale(1.2);
-    }
-    .btn-chat {
-      background:#66ccff;
-      box-shadow:0 0 8px #66ccff;
+
+    .super-like, .chat-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid #ff66cc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ff66cc;
+      font-size: 1em;
+      cursor: pointer;
+      transition: transform 0.2s;
     }
 
-    /* Modal */
-    .modal {
-      display:none; position:fixed;
-      top:0; left:0; width:100%; height:100%;
-      background: rgba(0,0,0,0.8);
-      align-items:center; justify-content:center;
-      z-index:10;
+    .super-like:hover, .chat-btn:hover {
+      transform: scale(1.2);
     }
-    .modal.active { display:flex; }
-    .modal-content {
-      background: rgba(0,0,0,0.7);
-      padding:20px; border-radius:12px;
-      width:90%; max-width:400px;
-      text-align:center; position:relative;
+
+    .modal, .chat-window {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 99;
+      animation: fadeIn 0.5s ease forwards;
     }
-    .modal-content h2 { margin-bottom:10px; color:#ff66cc;}
-    .modal-content p { margin-bottom:8px; color:#ddd; font-size:0.95em;}
-    .modal-close {
-      position:absolute; top:10px; right:10px;
-      font-size:1.3em; color:#ff66cc;
-      cursor:pointer;
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-content, .chat-content {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      color: white;
+      width: 90%;
+      max-width: 320px;
+      border: 1px solid #ff66cc;
+    }
+
+    .close {
+      position: absolute;
+      top: 10px; right: 15px;
+      color: #ff66cc;
+      font-size: 1.5em;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
+  <div class="header">
+    <a href="page2.html" class="btn-back">⟵</a>
+  </div>
 
-<div class="header">
-  <a href="page2.html" class="btn-back">&larr; Retour</a>
-</div>
+  <div class="carousel-container">
+    <div class="carousel">
+      <div class="card girl" onclick="openModal('Luna', 27, 'Paris', 'Une relation sérieuse', 'Passionnée d’astrologie et de cinéma romantique.')">
+        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Luna">
+        <div class="name">Luna</div>
+        <div class="buttons">
+          <div class="chat-btn" onclick="event.stopPropagation(); openChat();">💬</div>
+          <div class="super-like">★</div>
+        </div>
+      </div>
 
-<div class="carousel-container fade-in">
-  <div class="carousel" id="carousel">
-    <!-- profils -->
-    <div class="card girl" data-name="Sophie, 28" data-age="28" data-lieu="Paris" data-search="Relation sérieuse" data-desc="Passionnée par l’astronomie et les romans de science‑fiction. Cherche un lien vrai.">
-      <img src="https://i.pravatar.cc/150?img=47" alt="Sophie">
-      <div class="name">Sophie</div>
-      <div class="actions">
-        <button class="btn-circle btn-chat">💬</button>
-        <button class="btn-circle">💖</button>
-      </div>
-    </div>
-    <div class="card boy" data-name="Lucas, 31" data-age="31" data-lieu="Lyon" data-search="Relation sérieuse" data-desc="Fan de jeux coopératifs et nature. Prêt pour une belle histoire sérieuse.">
-      <img src="https://i.pravatar.cc/150?img=12" alt="Lucas">
-      <div class="name">Lucas</div>
-      <div class="actions">
-        <button class="btn-circle btn-chat">💬</button>
-        <button class="btn-circle">💖</button>
-      </div>
-    </div>
-    <div class="card girl" data-name="Maya, 26" data-age="26" data-lieu="Marseille" data-search="Relation sérieuse" data-desc="Créative, amoureuse de design futuriste et de moments magiques.">
-      <img src="https://i.pravatar.cc/150?img=58" alt="Maya">
-      <div class="name">Maya</div>
-      <div class="actions">
-        <button class="btn-circle btn-chat">💬</button>
-        <button class="btn-circle">💖</button>
-      </div>
-    </div>
-    <div class="card boy" data-name="Nolan, 30" data-age="30" data-lieu="Toulouse" data-search="Relation sérieuse" data-desc="Curieux, sincère, rêve d’un amour aussi intense qu’une supernova.">
-      <img src="https://i.pravatar.cc/150?img=33" alt="Nolan">
-      <div class="name">Nolan</div>
-      <div class="actions">
-        <button class="btn-circle btn-chat">💬</button>
-        <button class="btn-circle">💖</button>
-      </div>
-    </div>
-    <div class="card girl" data-name="Elena, 27" data-age="27" data-lieu="Nice" data-search="Relation sérieuse" data-desc="Musicienne, aimant les étoiles et la poésie cosmique.">
-      <img src="https://i.pravatar.cc/150?img=65" alt="Elena">
-      <div class="name">Elena</div>
-      <div class="actions">
-        <button class="btn-circle btn-chat">💬</button>
-        <button class="btn-circle">💖</button>
-      </div>
-    </div>
-    <div class="card boy" data-name="Théo, 29" data-age="29" data-lieu="Bordeaux" data-search="Relation sérieuse" data-desc="Explorateur dans l’âme et amateur de voyages spatiaux.">
-      <img src="https://i.pravatar.cc/150?img=5" alt="Théo">
-      <div class="name">Théo</div>
-      <div class="actions">
-        <button class="btn-circle btn-chat">💬</button>
-        <button class="btn-circle">💖</button>
+      <div class="card boy" onclick="openModal('Ethan', 30, 'Lyon', 'Amour sincère', 'Musicien rêveur, aime les balades nocturnes.')">
+        <img src="https://randomuser.me/api/portraits/men/46.jpg" alt="Ethan">
+        <div class="name">Ethan</div>
+        <div class="buttons">
+          <div class="chat-btn" onclick="event.stopPropagation(); openChat();">💬</div>
+          <div class="super-like">★</div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- modal détail -->
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <span class="modal-close">&times;</span>
-    <h2 id="modal-name"></h2>
-    <p><strong>Âge :</strong> <span id="modal-age"></span></p>
-    <p><strong>Lieu :</strong> <span id="modal-lieu"></span></p>
-    <p><strong>Recherche :</strong> <span id="modal-search"></span></p>
-    <p id="modal-desc"></p>
+  <!-- Modal Profil -->
+  <div class="modal" id="profileModal">
+    <div class="modal-content">
+      <div class="close" onclick="closeModal()">✖</div>
+      <h2 id="modalName"></h2>
+      <p><strong>Âge :</strong> <span id="modalAge"></span></p>
+      <p><strong>Ville :</strong> <span id="modalCity"></span></p>
+      <p><strong>Recherche :</strong> <span id="modalLooking"></span></p>
+      <p><strong>Description :</strong></p>
+      <p id="modalDesc"></p>
+    </div>
   </div>
-</div>
 
-<script>
-// centrage dynamique + swipe
-const carousel = document.getElementById('carousel');
-const cards = carousel.children;
-function updateCenter() {
-  const center = carousel.scrollLeft + carousel.offsetWidth / 2;
-  Array.from(cards).forEach(c => {
-    const cardCenter = c.offsetLeft + c.offsetWidth / 2;
-    c.classList.toggle('center', Math.abs(cardCenter - center) < c.offsetWidth/2);
-  });
-}
-carousel.addEventListener('scroll', updateCenter);
-window.addEventListener('load', () => {
-  carousel.scrollLeft = (carousel.scrollWidth - carousel.offsetWidth)/2;
-  updateCenter();
-});
-Array.from(cards).forEach(c => {
-  c.addEventListener('click', () => {
-    document.getElementById('modal-name').textContent = c.dataset.name;
-    document.getElementById('modal-age').textContent = c.dataset.age;
-    document.getElementById('modal-lieu').textContent = c.dataset.lieu;
-    document.getElementById('modal-search').textContent = c.dataset.search;
-    document.getElementById('modal-desc').textContent = c.dataset.desc;
-    document.getElementById('modal').classList.add('active');
-  });
-});
-document.querySelector('.modal-close').onclick = () => {
-  document.getElementById('modal').classList.remove('active');
-};
-</script>
+  <!-- Chat -->
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-content">
+      <div class="close" onclick="closeChat()">✖</div>
+      <h3>Messagerie</h3>
+      <p>Fonctionnalité à venir !</p>
+    </div>
+  </div>
 
+  <script>
+    function openModal(name, age, city, looking, desc) {
+      document.getElementById('modalName').textContent = name;
+      document.getElementById('modalAge').textContent = age;
+      document.getElementById('modalCity').textContent = city;
+      document.getElementById('modalLooking').textContent = looking;
+      document.getElementById('modalDesc').textContent = desc;
+      document.getElementById('profileModal').style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('profileModal').style.display = 'none';
+    }
+
+    function openChat() {
+      document.getElementById('chatWindow').style.display = 'block';
+    }
+
+    function closeChat() {
+      document.getElementById('chatWindow').style.display = 'none';
+    }
+  </script>
 </body>
 </html>
