@@ -5,23 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Affinix Intro</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
-
   <style>
     html, body {
-      margin: 0; padding: 0;
-      width: 100vw; height: 100vh;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
       background: url('/fond-galactique.jpg') no-repeat center center/cover;
       font-family: 'Orbitron', sans-serif;
       overflow: hidden;
-      position: relative;
+    }
+
+    #video-vortex {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 1.2s ease-in;
+      z-index: 1;
+      pointer-events: none;
     }
 
     #container {
-      position: absolute;
-      top: 12vh;
-      width: 100%;
+      position: relative;
+      z-index: 2;
       text-align: center;
-      z-index: 10;
+      margin-top: 12vh;
     }
 
     #logo {
@@ -33,40 +43,6 @@
       animation: zoomFade 2s ease-out forwards;
       opacity: 0;
       transform: scale(2);
-    }
-
-    @keyframes zoomFade {
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    @keyframes fadeZoomIn {
-      from { opacity: 0; transform: scale(0.3); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    @keyframes zoomBig {
-      from { transform: scale(1); opacity: 1; }
-      to { transform: scale(25); opacity: 0; }
-    }
-
-    @keyframes flashOut {
-      0% { opacity: 1; filter: drop-shadow(0 0 0px #fff); transform: scale(1); }
-      50% { opacity: 1; filter: drop-shadow(0 0 30px #fff) brightness(2); transform: scale(1.2); }
-      100% { opacity: 0; filter: drop-shadow(0 0 60px #ff66ff) brightness(4); transform: scale(1.8); }
-    }
-
-    @keyframes zoomBackIn {
-      from { opacity: 0; transform: scale(3); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    @keyframes whiteExplosion {
-      0% { opacity: 0; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.5); }
-      100% { opacity: 0; transform: scale(8); }
     }
 
     #phrase, #phrase2 {
@@ -87,83 +63,97 @@
       opacity: 0;
     }
 
-    #video-vortex {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      object-fit: cover;
-      opacity: 0;
-      transition: opacity 1s ease-in;
-      z-index: 1;
+    @keyframes zoomFade {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
 
-    #explosion {
+    @keyframes fadeZoomIn {
+      from { opacity: 0; transform: scale(0.3); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes zoomBig {
+      from { transform: scale(1); opacity: 1; }
+      to { transform: scale(25); opacity: 0; }
+    }
+
+    @keyframes shrinkAndFade {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.01); }
+    }
+
+    .flash-light {
       position: absolute;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      background: white;
+      background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(200,160,255,0.5) 100%);
+      z-index: 999;
+      animation: flash 0.8s ease-out forwards;
       opacity: 0;
-      z-index: 100;
-      pointer-events: none;
+    }
+
+    @keyframes flash {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
     }
   </style>
 </head>
 <body>
 
-  <div id="container">
-    <img id="logo" src="/AAFFXX.png" alt="Logo Néon AFFINIX" />
-    <div id="phrase">Prépare-toi au voyage</div>
-    <div id="phrase2">Avec une Connexion interdimensionnelle…</div>
-  </div>
+<video id="video-vortex" src="/vortex.mov" autoplay muted loop></video>
 
-  <video id="video-vortex" src="/vortex.mov" autoplay muted playsinline></video>
-  <div id="explosion"></div>
+<div id="container">
+  <img id="logo" src="/AAFFXX.png" alt="Logo Néon AFFINIX" />
+  <div id="phrase">Prépare-toi au voyage</div>
+  <div id="phrase2">Avec une Connexion interdimensionnelle…</div>
+</div>
 
-  <script>
-    const logo = document.getElementById('logo');
-    const phrase = document.getElementById('phrase');
-    const phrase2 = document.getElementById('phrase2');
-    const vortex = document.getElementById('video-vortex');
-    const explosion = document.getElementById('explosion');
+<div id="flash" class="flash-light" style="display: none;"></div>
 
-    // Affichage logo
-    logo.style.animation = 'zoomFade 2s ease-out forwards';
+<script>
+  const logo = document.getElementById('logo');
+  const phrase = document.getElementById('phrase');
+  const phrase2 = document.getElementById('phrase2');
+  const vortex = document.getElementById('video-vortex');
+  const flash = document.getElementById('flash');
 
-    // Apparition du texte “Prépare-toi au voyage”
-    setTimeout(() => {
-      phrase.style.animation = 'fadeZoomIn 1s forwards ease-out';
-    }, 2000);
+  // Logo entre
+  logo.style.animation = 'zoomFade 2s ease-out forwards';
 
-    // Zoom géant du texte
-    setTimeout(() => {
-      phrase.style.animation = 'zoomBig 1.2s forwards ease-in';
-    }, 3700);
+  // Phrase 1 (prépare-toi...) après logo
+  setTimeout(() => {
+    phrase.style.animation = 'fadeZoomIn 1s forwards ease-out';
+  }, 2000);
 
-    // Effet lumineux du logo juste avant l'apparition du texte interdimensionnel
-    setTimeout(() => {
-      logo.style.animation = 'flashOut 1s forwards ease-out';
-    }, 4800);
+  // Phrase 1 disparaît
+  setTimeout(() => {
+    phrase.style.animation = 'zoomBig 2s forwards ease-in';
+  }, 3500);
 
-    // Changement de fond vers le vortex
-    setTimeout(() => {
-      vortex.style.opacity = '1';
-    }, 5000);
+  // Flash lumineux + logo disparaît
+  setTimeout(() => {
+    flash.style.display = 'block';
+    logo.style.opacity = '0';
+  }, 4800);
 
-    // Apparition du texte “Connexion interdimensionnelle…”
-    setTimeout(() => {
-      phrase2.style.animation = 'zoomBackIn 1.5s forwards ease-out';
-    }, 5400);
+  // Vortex monte à 0.5 d'opacité
+  setTimeout(() => {
+    vortex.style.opacity = '0.5';
+  }, 5200);
 
-    // Explosion blanche
-    setTimeout(() => {
-      explosion.style.animation = 'whiteExplosion 1s forwards ease-out';
-    }, 7400);
+  // Phrase 2 apparaît
+  setTimeout(() => {
+    phrase2.style.animation = 'fadeZoomIn 1.2s forwards ease-out';
+  }, 5800);
 
-    // Redirection finale
-    setTimeout(() => {
-      window.location.href = 'recapitule.html';
-    }, 8500);
-  </script>
+  // Phrase 2 disparaît au centre
+  setTimeout(() => {
+    phrase2.style.animation = 'shrinkAndFade 1.3s forwards ease-in';
+  }, 7300);
+</script>
 
 </body>
 </html>
