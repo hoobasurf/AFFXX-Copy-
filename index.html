@@ -43,6 +43,7 @@
       animation: zoomFade 2s ease-out forwards;
       opacity: 0;
       transform: scale(2);
+      transition: transform 1.2s ease-in-out, opacity 1s ease-in-out;
     }
 
     #phrase, #phrase2 {
@@ -85,6 +86,14 @@
       100% { opacity: 0; transform: scale(0.01); }
     }
 
+    @keyframes logoToCenter {
+      0% { transform: scale(1) translate(0, 0); opacity: 1; }
+      100% {
+        transform: scale(0.05) translate(calc(-50vw + 50%), calc(-50vh + 50%));
+        opacity: 0;
+      }
+    }
+
     .flash-light {
       position: absolute;
       top: 0; left: 0;
@@ -93,11 +102,28 @@
       z-index: 999;
       animation: flash 0.8s ease-out forwards;
       opacity: 0;
+      display: none;
+    }
+
+    .final-explosion {
+      background: white;
+      z-index: 1000;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      opacity: 0;
+      animation: explosion 1.2s ease-out forwards;
     }
 
     @keyframes flash {
       0% { opacity: 1; }
       100% { opacity: 0; }
+    }
+
+    @keyframes explosion {
+      0% { opacity: 0; }
+      50% { opacity: 0.9; }
+      100% { opacity: 1; }
     }
   </style>
 </head>
@@ -111,7 +137,8 @@
   <div id="phrase2">Avec une Connexion interdimensionnelle…</div>
 </div>
 
-<div id="flash" class="flash-light" style="display: none;"></div>
+<div id="flash" class="flash-light"></div>
+<div id="explosion" class="final-explosion" style="display: none;"></div>
 
 <script>
   const logo = document.getElementById('logo');
@@ -119,11 +146,12 @@
   const phrase2 = document.getElementById('phrase2');
   const vortex = document.getElementById('video-vortex');
   const flash = document.getElementById('flash');
+  const explosion = document.getElementById('explosion');
 
   // Logo entre
   logo.style.animation = 'zoomFade 2s ease-out forwards';
 
-  // Phrase 1 (prépare-toi...) après logo
+  // Phrase 1
   setTimeout(() => {
     phrase.style.animation = 'fadeZoomIn 1s forwards ease-out';
   }, 2000);
@@ -133,26 +161,35 @@
     phrase.style.animation = 'zoomBig 2s forwards ease-in';
   }, 3500);
 
-  // Flash lumineux + logo disparaît
+  // Flash + logo s'envole au centre
   setTimeout(() => {
     flash.style.display = 'block';
-    logo.style.opacity = '0';
+    logo.style.animation = 'logoToCenter 1.3s forwards ease-in';
   }, 4800);
 
-  // Vortex monte à 0.5 d'opacité
+  // Vortex se montre
   setTimeout(() => {
     vortex.style.opacity = '0.5';
-  }, 5200);
+  }, 5400);
 
   // Phrase 2 apparaît
   setTimeout(() => {
     phrase2.style.animation = 'fadeZoomIn 1.2s forwards ease-out';
-  }, 5800);
+  }, 6000);
 
-  // Phrase 2 disparaît au centre
+  // Phrase 2 se réduit au centre
   setTimeout(() => {
     phrase2.style.animation = 'shrinkAndFade 1.3s forwards ease-in';
-  }, 7300);
+  }, 7500);
+
+  // Explosion finale + redirection
+  setTimeout(() => {
+    explosion.style.display = 'block';
+  }, 8800);
+
+  setTimeout(() => {
+    window.location.href = "recapitule.html";
+  }, 10000);
 </script>
 
 </body>
