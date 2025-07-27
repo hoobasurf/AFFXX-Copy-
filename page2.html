@@ -3,57 +3,103 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Affinix • Portail des connexions</title>
+  <title>Affinix • Connexions</title>
   <style>
     html, body {
       margin: 0; padding: 0;
       height: 100%; overflow: hidden;
-      font-family: sans-serif; background: black;
+      font-family: 'Segoe UI', sans-serif;
+      background: black;
     }
+
+    /* Fond animé */
     body::before {
       content: "";
-      position: absolute; top: 0; left: 0;
+      position: absolute;
+      top: 0; left: 0;
       width: 100%; height:100%;
       background: url("planete-magique.jpg") no-repeat center center/cover;
       z-index: 0;
       animation: moveGlow 30s ease-in-out infinite;
-      filter: brightness(1.05) saturate(1.1);
+      filter: brightness(1.1) saturate(1.2);
     }
+
     @keyframes moveGlow {
       0% { transform: scale(1) translate(0, 0); }
       50% { transform: scale(1.02) translate(2px, -1px); }
       100% { transform: scale(1) translate(-1px, 1px); }
     }
+
     .light-overlay {
-      position: absolute; top: 0; left: 0;
+      position: absolute;
+      top: 0; left: 0;
       width: 100%; height: 100%;
       background: radial-gradient(circle at center, rgba(255,0,255,0.07), transparent 70%);
       animation: pulse 6s ease-in-out infinite;
       z-index: 1; pointer-events: none;
     }
+
     @keyframes pulse {
-      0%, 100% { opacity: 0.1; } 50% { opacity: 0.3; }
+      0%, 100% { opacity: 0.1; }
+      50% { opacity: 0.3; }
     }
+
     .content {
-      position: relative; z-index: 2;
-      height: 100%; display: flex;
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
       flex-direction: column;
-      justify-content: center; align-items: center;
-      gap: 20px; padding: 20px;
+      justify-content: center;
+      align-items: center;
+      gap: 25px;
+      padding: 20px;
     }
+
     .btn {
-      padding: 14px 28px; border: none;
-      border-radius: 30px;
-      background: rgba(255,255,255,0.15);
-      color: #fff; font-size: 1.1em;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      font-size: 1.2em;
       backdrop-filter: blur(5px);
-      transition: all 0.3s; cursor: pointer;
-      box-shadow: 0 0 12px rgba(255,255,255,0.1);
+      position: relative;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.4s ease;
     }
+
+    .btn::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      background: radial-gradient(circle, rgba(255,0,255,0.6), rgba(255,0,255,0) 70%);
+      border-radius: 50px;
+      z-index: -1;
+      opacity: 0.7;
+      animation: neonPulse 2s infinite;
+      filter: blur(8px);
+    }
+
     .btn:hover {
-      background: rgba(255,255,255,0.3);
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(255,255,255,0.3);
+      transform: scale(1.08);
+    }
+
+    @keyframes neonPulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    @media (max-width: 600px) {
+      .btn {
+        font-size: 1em;
+        padding: 12px 20px;
+      }
     }
   </style>
 </head>
@@ -63,7 +109,6 @@
     <button class="btn">Connexion Authentique sérieuse</button>
     <button class="btn">Connexion Sincère amicale</button>
     <button class="btn">Connexion Fun</button>
-    <button class="btn">Connexion Mystérieuse</button>
   </div>
 </body>
 </html>
