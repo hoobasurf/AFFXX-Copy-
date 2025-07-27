@@ -2,177 +2,223 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Connexion Authentique Sérieuse</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
-    * { box-sizing: border-box; margin:0; padding:0; }
-    html, body {
-      height:100%; width:100%;
+    body {
+      margin: 0;
+      padding: 0;
       font-family: 'Orbitron', sans-serif;
       background: url('planete-magique.jpg') no-repeat center center/cover;
-      overflow: hidden; color: white;
-    }
-    body::before {
-      content:""; position:fixed; top:0; left:0;
-      width:100%; height:100%;
-      background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%);
-      z-index:1; pointer-events:none;
-      animation: floatStars 60s linear infinite;
-    }
-    @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
-
-    .header {
-      position: relative; z-index:2;
-      padding: 20px;
-    }
-    .btn-back {
-      position: absolute; top:20px; left:20px;
-      color: #ff66cc; font-size:1.5em;
-      cursor:pointer; text-decoration:none;
-      transition: transform .2s;
-    }
-    .btn-back:hover { transform: scale(1.2); }
-
-    .carousel-container {
-      z-index:2;
-      position: relative;
-      width:100%; height:calc(100% - 60px);
       overflow: hidden;
-      display: flex;
-      align-items:center;
     }
-    .carousel {
-      display:flex;
+
+    .stars {
+      position: fixed;
+      width: 100%; height: 100%;
+      background: url('https://i.ibb.co/hVYTnVv/stars.gif') repeat;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .cards {
+      display: flex;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      gap:40px;
-      padding:40px;
+      padding: 30px 0;
+      gap: 20px;
+      width: 100%;
+      max-width: 100vw;
     }
-    .carousel::-webkit-scrollbar { display:none; }
-    .card {
-      scroll-snap-align: center;
-      flex: 0 0 200px;
-      background: rgba(0,0,0,0.5);
-      border-radius: 16px;
-      padding: 15px;
-      text-align:center;
-      transition: transform .3s, box-shadow .3s;
-      cursor:pointer;
-    }
-    .card img {
-      width:120px; height:120px;
-      border-radius:50%;
-      object-fit:cover;
-      margin-bottom:10px;
-      border:3px solid;
-    }
-    .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
-    .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
-    .name { font-size:1.1em; margin-bottom:5px;}
-    .desc { font-size:0.9em; color:#ccc;}
 
-    .card.center {
-      transform: scale(1.1);
+    .card {
+      position: relative;
+      scroll-snap-align: center;
+      flex: 0 0 280px;
+      height: 420px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: transform 0.4s ease;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .cards:has(.card:hover) .card:not(:hover) {
+      transform: scale(0.9);
+    }
+
+    .card.girl {
+      border: 2px solid #ff66cc;
+    }
+
+    .card.boy {
+      border: 2px solid #9933ff;
+    }
+
+    .card img {
+      width: 100%;
+      height: 70%;
+      object-fit: cover;
+    }
+
+    .card .name {
+      font-size: 1.5em;
+      color: white;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .card .desc {
+      font-size: 1em;
+      text-align: center;
+      color: #ccc;
+    }
+
+    .super-like {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: transparent;
+      border: 2px solid #ff00ff;
+      color: #ff00ff;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 1.3em;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ff00ff;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .super-like:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 20px #ff33ff, 0 0 30px #cc00ff;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      max-width: 500px;
+      border-radius: 16px;
+      background: rgba(40, 0, 60, 0.9);
+      padding: 20px;
       box-shadow: 0 0 20px #ff00ff;
     }
 
-    /* Modal */
-    .modal {
-      display:none; position:fixed;
-      top:0; left:0; width:100%; height:100%;
-      background: rgba(0,0,0,0.8);
-      align-items:center; justify-content:center;
-      z-index:10;
+    .close {
+      position: absolute;
+      top: 10px; right: 20px;
+      font-size: 2em;
+      cursor: pointer;
+      color: #fff;
     }
-    .modal.active { display:flex; }
-    .modal-content {
-      background: rgba(0,0,0,0.7);
-      padding:20px; border-radius:12px;
-      width:90%; max-width:400px;
-      text-align:center; position:relative;
-    }
-    .modal-content h2 { margin-bottom:10px; color:#ff66cc;}
-    .modal-content p { margin-bottom:8px; color:#ddd; font-size:0.95em;}
-    .modal-close {
-      position:absolute; top:10px; right:10px;
-      font-size:1.3em; color:#ff66cc;
-      cursor:pointer;
+
+    .back-button {
+      position: fixed;
+      top: 15px; left: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid #ff99ff;
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-size: 0.8em;
+      cursor: pointer;
+      z-index: 9999;
+      backdrop-filter: blur(5px);
     }
   </style>
 </head>
 <body>
 
-<div class="header">
-  <a href="page2.html" class="btn-back">&larr; Retour</a>
-</div>
+<div class="stars"></div>
+<button class="back-button" onclick="window.location.href='page2.html'">← Retour</button>
 
-<div class="carousel-container fade-in">
-  <div class="carousel" id="carousel">
-    <!-- profils -->
-    <div class="card girl" data-name="Sophie, 28" data-age="28" data-lieu="Paris" data-search="Relation sérieuse" data-desc="Passionnée par l’astronomie et les romans de science‑fiction. Cherche un lien vrai.">
-      <img src="https://i.pravatar.cc/150?img=47" alt="Sophie"><div class="name">Sophie</div><div class="desc">Relation sérieuse</div>
+<div class="container">
+  <div class="cards">
+    <div class="card girl" data-name="Sophie" data-age="28" data-lieu="Paris" data-search="Relation sérieuse" data-desc="Passionnée par l’astronomie, cherche quelqu’un de sincère.">
+      <img src="https://i.pravatar.cc/300?img=47" alt="Sophie">
+      <div class="name">Sophie</div>
+      <div class="desc">Relation sérieuse</div>
+      <button class="super-like">★</button>
     </div>
-    <div class="card boy" data-name="Lucas, 31" data-age="31" data-lieu="Lyon" data-search="Relation sérieuse" data-desc="Fan de jeux coopératifs et nature. Prêt pour une belle histoire sérieuse.">
-      <img src="https://i.pravatar.cc/150?img=12" alt="Lucas"><div class="name">Lucas</div><div class="desc">Relation sérieuse</div>
+
+    <div class="card boy" data-name="Alex" data-age="30" data-lieu="Lyon" data-search="Connexion authentique" data-desc="Aventurier du quotidien, aime les étoiles et les longues discussions.">
+      <img src="https://i.pravatar.cc/300?img=12" alt="Alex">
+      <div class="name">Alex</div>
+      <div class="desc">Connexion authentique</div>
+      <button class="super-like">★</button>
     </div>
-    <div class="card girl" data-name="Maya, 26" data-age="26" data-lieu="Marseille" data-search="Relation sérieuse" data-desc="Créative, amoureuse de design futuriste et de moments magiques.">
-      <img src="https://i.pravatar.cc/150?img=58" alt="Maya"><div class="name">Maya</div><div class="desc">Relation sérieuse</div>
-    </div>
-    <div class="card boy" data-name="Nolan, 30" data-age="30" data-lieu="Toulouse" data-search="Relation sérieuse" data-desc="Curieux, sincère, rêve d’un amour aussi intense qu’une supernova.">
-      <img src="https://i.pravatar.cc/150?img=33" alt="Nolan"><div class="name">Nolan</div><div class="desc">Relation sérieuse</div>
-    </div>
-    <div class="card girl" data-name="Elena, 27" data-age="27" data-lieu="Nice" data-search="Relation sérieuse" data-desc="Musicienne, aimant les étoiles et la poésie cosmique.">
-      <img src="https://i.pravatar.cc/150?img=65" alt="Elena"><div class="name">Elena</div><div class="desc">Relation sérieuse</div>
-    </div>
-    <div class="card boy" data-name="Théo, 29" data-age="29" data-lieu="Bordeaux" data-search="Relation sérieuse" data-desc="Explorateur dans l’âme et amateur de voyages spatiaux.">
-      <img src="https://i.pravatar.cc/150?img=5" alt="Théo"><div class="name">Théo</div><div class="desc">Relation sérieuse</div>
+
+    <div class="card girl" data-name="Léa" data-age="25" data-lieu="Marseille" data-search="Amitié ou plus" data-desc="Créative, aime la musique électronique et les balades nocturnes.">
+      <img src="https://i.pravatar.cc/300?img=20" alt="Léa">
+      <div class="name">Léa</div>
+      <div class="desc">Amitié ou plus</div>
+      <button class="super-like">★</button>
     </div>
   </div>
 </div>
 
-<!-- modal détail -->
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <span class="modal-close">&times;</span>
-    <h2 id="modal-name"></h2>
-    <p><strong>Âge :</strong> <span id="modal-age"></span></p>
-    <p><strong>Lieu :</strong> <span id="modal-lieu"></span></p>
-    <p><strong>Recherche :</strong> <span id="modal-search"></span></p>
-    <p id="modal-desc"></p>
-  </div>
+<!-- Modal de détail -->
+<div class="modal" id="profile-modal">
+  <div class="close" onclick="document.getElementById('profile-modal').style.display='none'">×</div>
+  <div class="modal-content" id="modal-content"></div>
 </div>
 
 <script>
-// centrage dynamique + swipe
-const carousel = document.getElementById('carousel');
-const cards = carousel.children;
-function updateCenter() {
-  const center = carousel.scrollLeft + carousel.offsetWidth / 2;
-  Array.from(cards).forEach(c => {
-    const cardCenter = c.offsetLeft + c.offsetWidth / 2;
-    c.classList.toggle('center', Math.abs(cardCenter - center) < c.offsetWidth/2);
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', () => {
+      const name = card.getAttribute('data-name');
+      const age = card.getAttribute('data-age');
+      const lieu = card.getAttribute('data-lieu');
+      const search = card.getAttribute('data-search');
+      const desc = card.getAttribute('data-desc');
+      const imgSrc = card.querySelector('img').src;
+
+      const modalContent = `
+        <img src="${imgSrc}" style="width:100%; max-height:300px; object-fit:cover; border-radius:12px;">
+        <h2>${name}, ${age} ans</h2>
+        <p><strong>Ville :</strong> ${lieu}</p>
+        <p><strong>Recherche :</strong> ${search}</p>
+        <p>${desc}</p>
+      `;
+      document.getElementById('modal-content').innerHTML = modalContent;
+      document.getElementById('profile-modal').style.display = 'flex';
+    });
   });
-}
-carousel.addEventListener('scroll', updateCenter);
-window.addEventListener('load', () => {
-  carousel.scrollLeft = (carousel.scrollWidth - carousel.offsetWidth)/2;
-  updateCenter();
-});
-cards.forEach(c => {
-  c.addEventListener('click', () => {
-    document.getElementById('modal-name').textContent = c.dataset.name;
-    document.getElementById('modal-age').textContent = c.dataset.age;
-    document.getElementById('modal-lieu').textContent = c.dataset.lieu;
-    document.getElementById('modal-search').textContent = c.dataset.search;
-    document.getElementById('modal-desc').textContent = c.dataset.desc;
-    document.getElementById('modal').classList.add('active');
+
+  document.querySelectorAll('.super-like').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      btn.innerText = '❤️';
+      btn.style.color = '#ff66cc';
+      alert("✨ Super Like envoyé !");
+    });
   });
-});
-document.querySelector('.modal-close').onclick = () => {
-  document.getElementById('modal').classList.remove('active');
-};
 </script>
 
 </body>
