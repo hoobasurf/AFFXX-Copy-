@@ -22,7 +22,7 @@
       width: 100vw; height: 100vh;
       object-fit: cover;
       opacity: 0;
-      transition: opacity 1.2s ease-in;
+      transition: opacity 1.5s ease-in;
       z-index: 1;
       pointer-events: none;
     }
@@ -161,35 +161,39 @@
     phrase.style.animation = 'zoomBig 2s forwards ease-in';
   }, 3500);
 
-  // Flash + logo s'envole au centre
-  setTimeout(() => {
-    flash.style.display = 'block';
-    logo.style.animation = 'logoToCenter 1.3s forwards ease-in';
-  }, 4800);
-
-  // Vortex se montre
+  // Vortex visible
   setTimeout(() => {
     vortex.style.opacity = '0.5';
-  }, 5400);
+  }, 4800);
 
   // Phrase 2 apparaît
   setTimeout(() => {
     phrase2.style.animation = 'fadeZoomIn 1.2s forwards ease-out';
-  }, 6000);
+  }, 5500);
 
-  // Phrase 2 se réduit au centre
+  // Phrase 2 rétrécit et disparaît
   setTimeout(() => {
     phrase2.style.animation = 'shrinkAndFade 1.3s forwards ease-in';
-  }, 7500);
+  }, 7000);
 
-  // Explosion finale + redirection
+  // Logo aspiré dans le vortex
+  setTimeout(() => {
+    logo.style.animation = 'logoToCenter 1.2s forwards ease-in';
+  }, 7600);
+
+  // Flash + explosion blanche
+  setTimeout(() => {
+    flash.style.display = 'block';
+  }, 8500);
+
   setTimeout(() => {
     explosion.style.display = 'block';
-  }, 8800);
+  }, 8900);
 
+  // Redirection
   setTimeout(() => {
     window.location.href = "recapitule.html";
-  }, 10000);
+  }, 10100);
 </script>
 
 </body>
