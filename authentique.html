@@ -2,200 +2,180 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Connexion Authentique Sérieuse</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
   <style>
     body {
       margin: 0;
+      padding: 0;
+      background: url('planete-magique.jpg') no-repeat center center/cover;
       font-family: 'Orbitron', sans-serif;
-      background: url('planete-magique.jpg') no-repeat center center fixed;
-      background-size: cover;
-      overflow: hidden;
-    }
-
-    .back-button {
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      background: rgba(0,0,0,0.6);
       color: white;
-      border: none;
-      padding: 8px 12px;
-      font-size: 1.2em;
-      border-radius: 8px;
-      z-index: 1001;
-      cursor: pointer;
+      overflow-x: hidden;
     }
 
-    .carousel {
+    h1 {
+      text-align: center;
+      padding: 1em 0;
+      font-size: 2em;
+      background: linear-gradient(90deg, #ff00ff, #6600ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .profiles-container {
       display: flex;
       overflow-x: auto;
+      padding: 2em;
       gap: 20px;
-      padding: 80px 20px 20px;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
     }
 
     .profile-card {
-      flex: 0 0 80%;
-      max-width: 320px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 2px solid #ff66cc;
+      min-width: 260px;
+      background: rgba(255, 255, 255, 0.05);
       border-radius: 15px;
-      padding: 15px;
-      scroll-snap-align: center;
+      padding: 1em;
+      box-shadow: 0 0 15px #ff00ff88;
       backdrop-filter: blur(5px);
-      text-align: center;
+      cursor: pointer;
       position: relative;
-      color: white;
       transition: transform 0.3s ease;
     }
 
-    .carousel:has(.profile-card:hover) .profile-card:not(:hover) {
-      transform: scale(0.9);
-      opacity: 0.6;
+    .profile-card:hover {
+      transform: scale(1.05);
     }
 
     .profile-card img {
       width: 100%;
+      height: 200px;
+      object-fit: cover;
       border-radius: 10px;
-      border: 3px solid #ff66cc;
     }
 
-    .profile-card .super-like {
+    .super-like-btn {
       position: absolute;
-      bottom: 10px;
+      top: 10px;
       right: 10px;
-      background: linear-gradient(45deg, #ff00cc, #6600ff);
-      color: white;
+      background: radial-gradient(circle, #ff66cc, #ff00ff);
       border: none;
       border-radius: 50%;
-      width: 45px;
-      height: 45px;
+      color: white;
       font-size: 1.2em;
+      width: 40px;
+      height: 40px;
+      box-shadow: 0 0 10px #ff00ff;
       cursor: pointer;
-      box-shadow: 0 0 10px #ff66cc;
-      transition: transform 0.2s ease;
+      transition: transform 0.2s;
     }
 
-    .profile-card .super-like:hover {
+    .super-like-btn:hover {
       transform: scale(1.2);
     }
 
-    .profile-card h2 {
-      margin: 10px 0 5px;
-    }
-
-    .profile-card p {
-      font-size: 0.9em;
-      color: #eee;
-    }
-
-    .profile-details {
-      display: none;
+    .detail-view {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(15, 0, 30, 0.95);
+      background: rgba(0,0,0,0.9);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2em;
+      z-index: 999;
       color: white;
-      padding: 30px;
-      z-index: 1000;
     }
 
-    .profile-details .close-btn {
+    .detail-content {
+      max-width: 400px;
+      background: rgba(255,255,255,0.1);
+      padding: 1.5em;
+      border-radius: 15px;
+      box-shadow: 0 0 20px #cc33ff;
+    }
+
+    .back-btn {
       position: absolute;
-      top: 15px;
-      left: 15px;
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
+      top: 20px;
+      left: 20px;
       font-size: 1.5em;
+      background: none;
+      border: none;
+      color: #ff99ff;
       cursor: pointer;
-      padding: 6px 12px;
-      border-radius: 50%;
     }
 
-    .profile-details img {
-      width: 200px;
-      border-radius: 12px;
-      margin-bottom: 15px;
-      border: 3px solid #cc33ff;
-    }
-
-    .floating-stars {
-      position: absolute;
-      top: 0; left: 0;
+    .detail-view img {
       width: 100%;
-      height: 100%;
-      background: url('https://i.imgur.com/vnLvhYw.gif') repeat;
-      opacity: 0.3;
-      pointer-events: none;
-      z-index: 0;
+      height: auto;
+      border-radius: 12px;
+      margin-bottom: 1em;
     }
+
+    .detail-content p {
+      margin: 0.5em 0;
+    }
+
   </style>
 </head>
 <body>
 
-<div class="floating-stars"></div>
+  <h1>Connexion Authentique Sérieuse</h1>
 
-<button class="back-button" onclick="window.location.href='page2.html'">←</button>
+  <div class="profiles-container">
+    <div class="profile-card" onclick="showProfile('Luna', 28, 'Paris', 'Relation sérieuse', 'Je suis une rêveuse passionnée par l’astrologie et les balades nocturnes.', 'https://i.imgur.com/aKQOg3G.jpg')">
+      <img src="https://i.imgur.com/aKQOg3G.jpg" alt="Profil Luna" />
+      <button class="super-like-btn">💖</button>
+      <h3>Luna</h3>
+      <p>Paris, 28 ans</p>
+    </div>
 
-<div class="carousel" id="carousel">
-  <!-- Exemple de profil -->
-  <div class="profile-card" onclick="showProfile('Anna', 27, 'Paris', 'Relation sérieuse', 'Je suis passionnée de voyage, sincère et douce.', 'https://i.imgur.com/l60Hf.png')">
-    <img src="https://i.imgur.com/l60Hf.png" alt="Profil Anna">
-    <h2>Anna</h2>
-    <p>27 ans – Paris</p>
-    <button class="super-like">★</button>
+    <div class="profile-card" onclick="showProfile('Alex', 32, 'Lyon', 'Construire un avenir à deux', 'Passionné de voyage, de technologie et de cuisine maison.', 'https://i.imgur.com/fQF6Q7x.jpg')">
+      <img src="https://i.imgur.com/fQF6Q7x.jpg" alt="Profil Alex" />
+      <button class="super-like-btn">💖</button>
+      <h3>Alex</h3>
+      <p>Lyon, 32 ans</p>
+    </div>
+
+    <div class="profile-card" onclick="showProfile('Sasha', 30, 'Marseille', 'Une relation sincère', 'J’aime la mer, les romans futuristes et les couchers de soleil magiques.', 'https://i.imgur.com/WVPR7Pb.jpg')">
+      <img src="https://i.imgur.com/WVPR7Pb.jpg" alt="Profil Sasha" />
+      <button class="super-like-btn">💖</button>
+      <h3>Sasha</h3>
+      <p>Marseille, 30 ans</p>
+    </div>
+
+    <!-- Tu peux dupliquer les blocs profile-card ci-dessus pour ajouter d'autres profils -->
   </div>
 
-  <div class="profile-card" onclick="showProfile('Lucas', 30, 'Lyon', 'Connexion authentique', 'Adepte de lecture, musique et nature.', 'https://i.imgur.com/0fXrP4p.png')">
-    <img src="https://i.imgur.com/0fXrP4p.png" alt="Profil Lucas">
-    <h2>Lucas</h2>
-    <p>30 ans – Lyon</p>
-    <button class="super-like">★</button>
+  <!-- Détail du profil -->
+  <div class="detail-view" id="detailView">
+    <button class="back-btn" onclick="hideProfile()">←</button>
+    <div class="detail-content" id="detailContent">
+      <!-- Contenu dynamique injecté via JS -->
+    </div>
   </div>
 
-  <div class="profile-card" onclick="showProfile('Sophie', 25, 'Toulouse', 'Amour sincère', 'Douce, rêveuse et loyale.', 'https://i.imgur.com/8Km9tLL.png')">
-    <img src="https://i.imgur.com/8Km9tLL.png" alt="Profil Sophie">
-    <h2>Sophie</h2>
-    <p>25 ans – Toulouse</p>
-    <button class="super-like">★</button>
-  </div>
+  <script>
+    function showProfile(name, age, location, recherche, description, img) {
+      const content = `
+        <img src="${img}" alt="Avatar ${name}" />
+        <h2>${name}, ${age} ans</h2>
+        <p><strong>Lieu :</strong> ${location}</p>
+        <p><strong>Recherche :</strong> ${recherche}</p>
+        <p><strong>Description :</strong> ${description}</p>
+      `;
+      document.getElementById('detailContent').innerHTML = content;
+      document.getElementById('detailView').style.display = 'flex';
+    }
 
-  <!-- Ajoute ici d'autres profils -->
-</div>
-
-<div class="profile-details" id="profileDetails">
-  <button class="close-btn" onclick="closeProfile()">×</button>
-  <div style="text-align:center;">
-    <img id="profileImage" src="" alt="Avatar">
-    <h2 id="profileName"></h2>
-    <p><strong>Âge : </strong><span id="profileAge"></span></p>
-    <p><strong>Lieu : </strong><span id="profileCity"></span></p>
-    <p><strong>Recherche : </strong><span id="profileGoal"></span></p>
-    <p><strong>Description : </strong><span id="profileDesc"></span></p>
-  </div>
-</div>
-
-<script>
-  function showProfile(name, age, city, goal, desc, img) {
-    document.getElementById('profileDetails').style.display = 'block';
-    document.getElementById('profileName').textContent = name;
-    document.getElementById('profileAge').textContent = age;
-    document.getElementById('profileCity').textContent = city;
-    document.getElementById('profileGoal').textContent = goal;
-    document.getElementById('profileDesc').textContent = desc;
-    document.getElementById('profileImage').src = img;
-  }
-
-  function closeProfile() {
-    document.getElementById('profileDetails').style.display = 'none';
-  }
-</script>
+    function hideProfile() {
+      document.getElementById('detailView').style.display = 'none';
+    }
+  </script>
 
 </body>
 </html>
