@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Connexion Authentique Sérieuse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: url('planete-magique.jpg') no-repeat center center/cover;
+      overflow: hidden;
+      height: 100%;
+      color: white;
+    }
+
+    /* Filtre étoilé flottant */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%);
+      pointer-events: none;
+      z-index: 1;
+      animation: floatStars 60s linear infinite;
+    }
+
+    @keyframes floatStars {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-10px); }
+    }
+
+    /* Animation apparition page */
+    .fade-in {
+      animation: fadeIn 2s ease forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.6em;
+      color: #ff66cc;
+      margin-top: 40px;
+      text-shadow: 0 0 15px #ff66cc;
+      z-index: 2;
+      position: relative;
+    }
+
+    .profile-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      padding: 40px 20px;
+      z-index: 2;
+      position: relative;
+    }
+
+    .profile-card {
+      width: 240px;
+      height: 350px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      backdrop-filter: blur(6px);
+      box-shadow:
+        0 0 15px #ff00ff,
+        0 0 30px #6600cc inset;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      transition: transform 0.3s ease;
+      opacity: 0;
+      animation: fadeInUp 1.5s ease forwards;
+    }
+
+    .profile-card:nth-child(1) { animation-delay: 0.3s; }
+    .profile-card:nth-child(2) { animation-delay: 0.6s; }
+    .profile-card:nth-child(3) { animation-delay: 0.9s; }
+    .profile-card:nth-child(4) { animation-delay: 1.2s; }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .avatar {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      margin-bottom: 20px;
+    }
+
+    .girl {
+      border: 3px solid #ff66cc;
+      box-shadow: 0 0 15px #ff66cc;
+    }
+
+    .boy {
+      border: 3px solid #9933ff;
+      box-shadow: 0 0 15px #9933ff;
+    }
+
+    .name {
+      font-size: 1.3em;
+      margin-bottom: 10px;
+      text-shadow: 0 0 5px #fff;
+    }
+
+    .desc {
+      font-size: 0.9em;
+      color: #ddd;
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="fade-in">
+
+  <h1>Connexion Authentique Sérieuse</h1>
+
+  <div class="profile-grid">
+
+    <!-- Profil 1 -->
+    <div class="profile-card">
+      <img src="https://i.pravatar.cc/150?img=47" alt="Avatar" class="avatar girl">
+      <div class="name">Sophie, 28</div>
+      <div class="desc">Passionnée par l’astronomie et les romans de science-fiction. Cherche un lien vrai.</div>
+    </div>
+
+    <!-- Profil 2 -->
+    <div class="profile-card">
+      <img src="https://i.pravatar.cc/150?img=12" alt="Avatar" class="avatar boy">
+      <div class="name">Lucas, 31</div>
+      <div class="desc">Fan de jeux coopératifs et nature. Prêt pour une belle histoire sérieuse.</div>
+    </div>
+
+    <!-- Profil 3 -->
+    <div class="profile-card">
+      <img src="https://i.pravatar.cc/150?img=58" alt="Avatar" class="avatar girl">
+      <div class="name">Maya, 26</div>
+      <div class="desc">Créative, amoureuse de design futuriste et de moments magiques.</div>
+    </div>
+
+    <!-- Profil 4 -->
+    <div class="profile-card">
+      <img src="https://i.pravatar.cc/150?img=33" alt="Avatar" class="avatar boy">
+      <div class="name">Nolan, 30</div>
+      <div class="desc">Curieux, sincère, rêve d’un amour aussi intense qu’une supernova.</div>
+    </div>
+
+  </div>
+</body>
+</html>
