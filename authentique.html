@@ -49,6 +49,7 @@
       -webkit-overflow-scrolling: touch;
       gap:40px;
       padding:40px;
+      flex: 1;
     }
     .carousel::-webkit-scrollbar { display:none; }
     .card {
@@ -61,6 +62,9 @@
       transition: transform .3s, box-shadow .3s;
       cursor:pointer;
       position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .card img {
       width:120px; height:120px;
@@ -78,7 +82,7 @@
       gap: 8px;
       margin-top: 6px;
     }
-    .btn-like, .btn-chat {
+    .btn-like, .btn-chat, .btn-star {
       width:30px; height:30px;
       border-radius:50%;
       background-color:rgba(255,255,255,0.1);
@@ -88,12 +92,138 @@
       font-size:1em;
       cursor:pointer;
       transition: transform .2s;
+      user-select:none;
     }
-    .btn-like:hover, .btn-chat:hover { transform: scale(1.2); }
+    .btn-like:hover, .btn-chat:hover, .btn-star:hover { transform: scale(1.2); }
+    .btn-star.active {
+      background-color:#ff66cc;
+      color:#220022;
+      border-color:#ff66cc;
+      box-shadow: 0 0 10px #ff66cc;
+    }
 
     .card.center {
       transform: scale(1.1);
       box-shadow: 0 0 20px #ff00ff;
+    }
+
+    /* Profil miniature à gauche */
+    .mini-profiles {
+      position: fixed;
+      top: 80px;
+      left: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 20;
+      max-height: 80vh;
+      overflow-y: auto;
+      width: 60px;
+    }
+    .mini-profile {
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      border: 2px solid #ff66cc;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 0 6px #ff66cc;
+      position: relative;
+      background: black;
+    }
+    .mini-profile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    /* Animation d'ouverture agrandie */
+    .expanded-profile {
+      position: fixed;
+      top: 50%;
+      left: 80px;
+      transform: translateY(-50%);
+      width: 300px;
+      background: rgba(0,0,0,0.8);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 0 30px #ff66cc;
+      color: white;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: openExpand 0.3s ease forwards;
+    }
+    @keyframes openExpand {
+      0% { transform: translateY(-50%) scale(0.3); opacity: 0; }
+      100% { transform: translateY(-50%) scale(1); opacity: 1; }
+    }
+    .expanded-profile img {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      border: 3px solid #ff66cc;
+      margin-bottom: 12px;
+      box-shadow: 0 0 15px #ff66cc;
+    }
+    .expanded-profile .name {
+      font-size: 1.4em;
+      margin-bottom: 6px;
+    }
+    .expanded-profile p {
+      font-size: 0.95em;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .expanded-profile .btns {
+      margin-top: 10px;
+      gap: 10px;
+    }
+
+    /* Sidebar favoris à droite */
+    .favorites-sidebar {
+      position: fixed;
+      top: 80px;
+      right: 10px;
+      width: 70px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 16px;
+      padding: 10px 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 20;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .favorite-mini {
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      border: 2px solid #ff66cc;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 0 8px #ff66cc;
+      position: relative;
+      background: black;
+    }
+    .favorite-mini img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .favorite-mini:hover::after {
+      content: attr(data-name);
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ff66cc;
+      color: #220022;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.75em;
+      white-space: nowrap;
+      pointer-events: none;
+      box-shadow: 0 0 5px #ff66cc;
+      z-index: 50;
     }
 
     /* Modal */
@@ -124,176 +254,263 @@
       justify-content: center;
       flex-wrap: wrap;
       gap: 8px;
-      margin-top: 10px;
     }
     .photo-gallery img {
-      width: 60px;
-      height: 60px;
+      width: 70px; height: 70px;
       object-fit: cover;
-      border-radius: 8px;
-      cursor: pointer;
-      border:2px solid #ff66cc;
-    }
-    .photo-zoom img {
-      max-width: 90vw;
-      max-height: 90vh;
       border-radius: 10px;
-      border: 3px solid #ff66cc;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.3s;
     }
-
-    /* Chat modal */
-    .chat-box {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid #ff66cc;
-      border-radius: 12px;
-      padding: 15px;
-      width: 90%;
-      max-width: 400px;
-      position: relative;
+    .photo-gallery img:hover {
+      border-color: #ff66cc;
     }
-    .chat-box textarea {
-      width: 100%;
-      height: 80px;
-      border-radius: 8px;
-      border: none;
-      padding: 8px;
-      font-family: 'Orbitron';
-      resize: none;
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
-    .chat-box button {
-      margin-top: 10px;
-      padding: 8px 16px;
-      background: #ff66cc;
-      border: none;
-      color: white;
-      border-radius: 8px;
+    .zoomed-photo {
+      max-width: 90vw;
+      max-height: 80vh;
+      border-radius: 16px;
+      box-shadow: 0 0 25px #ff66cc;
       cursor: pointer;
     }
 
+    /* Responsive */
+    @media (max-width: 600px) {
+      .carousel {
+        padding: 20px;
+        gap: 25px;
+      }
+      .card {
+        flex: 0 0 140px;
+      }
+      .expanded-profile {
+        left: 10px;
+        width: 90%;
+        top: 20%;
+        transform: translateY(0);
+      }
+      .mini-profiles, .favorites-sidebar {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
 
-<div class="header">
-  <a href="page2.html" class="btn-back">&larr; Retour</a>
-</div>
+  <!-- Miniatures profils à gauche -->
+  <div class="mini-profiles" id="miniProfiles">
+    <!-- Mini profils seront injectés ici -->
+  </div>
 
-<div class="carousel-container fade-in">
-  <div class="carousel" id="carousel">
-    <!-- profils -->
-    <div class="card girl" data-name="Sophie, 28" data-age="28" data-lieu="Paris" data-desc="Passionnée par l’astronomie et les romans SF." data-gallery="47,49,51">
-      <img src="https://i.pravatar.cc/150?img=47" alt="Sophie">
-      <div class="name">Sophie</div>
-      <div class="btns">
-        <div class="btn-chat">💬</div>
-        <div class="btn-like">💖</div>
-      </div>
+  <!-- Sidebar favoris à droite -->
+  <div class="favorites-sidebar" id="favoritesSidebar">
+    <!-- Favoris en miniatures -->
+  </div>
+
+  <div class="header">
+    <a href="#" class="btn-back" title="Retour">&#8592; Retour</a>
+  </div>
+
+  <div class="carousel-container">
+    <div class="carousel" id="carousel">
+      <!-- Cartes profils -->
     </div>
-    <div class="card boy" data-name="Lucas, 31" data-age="31" data-lieu="Lyon" data-desc="Fan de jeux coopératifs et nature." data-gallery="12,14,16">
-      <img src="https://i.pravatar.cc/150?img=12" alt="Lucas">
-      <div class="name">Lucas</div>
-      <div class="btns">
-        <div class="btn-chat">💬</div>
-        <div class="btn-like">💖</div>
-      </div>
+  </div>
+
+  <!-- Profil agrandi (cliqué dans mini-profiles) -->
+  <div id="expandedProfile" class="expanded-profile" style="display:none;">
+    <img src="" alt="Photo Profil" id="expandedImg" />
+    <div class="name" id="expandedName"></div>
+    <p id="expandedDesc"></p>
+    <div class="btns">
+      <button class="btn-like" title="Like">&#10084;</button>
+      <button class="btn-chat" title="Message">&#9993;</button>
+      <button class="btn-star" id="expandedStarBtn" title="Favori">&#9733;</button>
     </div>
-    <!-- Ajoute ici d'autres profils similaires -->
   </div>
-</div>
-
-<!-- modal détail -->
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <span class="modal-close" onclick="closeModal()">&times;</span>
-    <h2 id="modal-name"></h2>
-    <p><strong>Âge :</strong> <span id="modal-age"></span></p>
-    <p><strong>Lieu :</strong> <span id="modal-lieu"></span></p>
-    <p id="modal-desc"></p>
-    <div class="photo-gallery" id="modal-gallery"></div>
-  </div>
-</div>
-
-<!-- Zoom photo -->
-<div class="photo-zoom" id="photoZoom">
-  <span class="modal-close" onclick="document.getElementById('photoZoom').classList.remove('active')">&times;</span>
-  <img id="zoomedImage" src="" alt="Zoomed Photo">
-</div>
-
-<!-- Chat futuriste -->
-<div class="chat-modal" id="chatModal">
-  <div class="chat-box">
-    <span class="modal-close" onclick="document.getElementById('chatModal').classList.remove('active')">&times;</span>
-    <textarea placeholder="Écris ton message ici..."></textarea>
-    <button>Envoyer</button>
-  </div>
-</div>
 
 <script>
-const carousel = document.getElementById('carousel');
-const cards = carousel.children;
-
-function updateCenter() {
-  const center = carousel.scrollLeft + carousel.offsetWidth / 2;
-  Array.from(cards).forEach(c => {
-    const cardCenter = c.offsetLeft + c.offsetWidth / 2;
-    c.classList.toggle('center', Math.abs(cardCenter - center) < c.offsetWidth/2);
-  });
-}
-
-carousel.addEventListener('scroll', updateCenter);
-window.addEventListener('load', () => {
-  carousel.scrollLeft = (carousel.scrollWidth - carousel.offsetWidth)/2;
-  updateCenter();
-});
-
-// Modal profil
-Array.from(cards).forEach(c => {
-  c.addEventListener('click', () => {
-    document.getElementById('modal-name').textContent = c.dataset.name;
-    document.getElementById('modal-age').textContent = c.dataset.age;
-    document.getElementById('modal-lieu').textContent = c.dataset.lieu;
-    document.getElementById('modal-desc').textContent = c.dataset.desc;
-    
-    const gallery = document.getElementById('modal-gallery');
-    gallery.innerHTML = '';
-    if (c.dataset.gallery) {
-      const ids = c.dataset.gallery.split(',');
-      ids.forEach(id => {
-        const img = document.createElement('img');
-        img.src = `https://i.pravatar.cc/150?img=${id}`;
-        img.onclick = () => {
-          document.getElementById('zoomedImage').src = img.src;
-          document.getElementById('photoZoom').classList.add('active');
-        };
-        gallery.appendChild(img);
-      });
+  // Données profils exemple
+  const profiles = [
+    {
+      id: 1,
+      name: 'Lisa',
+      desc: 'Passionnée de danse et musique.',
+      photo: 'fille1.jpg',
+      gender: 'girl'
+    },
+    {
+      id: 2,
+      name: 'Anna',
+      desc: 'Amoureuse de la nature et zen.',
+      photo: 'fille2.jpg',
+      gender: 'girl'
+    },
+    {
+      id: 3,
+      name: 'Marie',
+      desc: 'Artiste peintre en devenir.',
+      photo: 'fille3.jpg',
+      gender: 'girl'
+    },
+    {
+      id: 4,
+      name: 'John',
+      desc: 'Fan de technologies futuristes.',
+      photo: 'garcon1.jpg',
+      gender: 'boy'
+    },
+    {
+      id: 5,
+      name: 'Alex',
+      desc: 'Aventurier et sportif.',
+      photo: 'garcon2.jpg',
+      gender: 'boy'
+    },
+    {
+      id: 6,
+      name: 'Paul',
+      desc: 'Passionné de cinéma et lecture.',
+      photo: 'garcon3.jpg',
+      gender: 'boy'
     }
+  ];
 
-    document.getElementById('modal').classList.add('active');
+  // Favoris stockés (ids)
+  let favorites = [];
+
+  const carousel = document.getElementById('carousel');
+  const miniProfiles = document.getElementById('miniProfiles');
+  const favoritesSidebar = document.getElementById('favoritesSidebar');
+  const expandedProfile = document.getElementById('expandedProfile');
+  const expandedImg = document.getElementById('expandedImg');
+  const expandedName = document.getElementById('expandedName');
+  const expandedDesc = document.getElementById('expandedDesc');
+  const expandedStarBtn = document.getElementById('expandedStarBtn');
+
+  // Créer les cartes du carousel
+  profiles.forEach(profile => {
+    const card = document.createElement('div');
+    card.classList.add('card', profile.gender);
+    card.setAttribute('data-id', profile.id);
+    card.innerHTML = `
+      <img src="${profile.photo}" alt="Photo de ${profile.name}" />
+      <div class="name">${profile.name}</div>
+      <div class="btns">
+        <button class="btn-like" title="Like">&#10084;</button>
+        <button class="btn-chat" title="Message">&#9993;</button>
+        <button class="btn-star" title="Favori">&#9733;</button>
+      </div>
+    `;
+    carousel.appendChild(card);
+
+    // Étoile bouton dans la carte
+    const starBtn = card.querySelector('.btn-star');
+    starBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      toggleFavorite(profile.id, starBtn);
+    });
+
+    // Click sur carte = agrandir profil à gauche
+    card.addEventListener('click', () => openExpandedProfile(profile));
   });
-});
 
-function closeModal() {
-  document.getElementById('modal').classList.remove('active');
-}
+  // Créer miniatures profils à gauche
+  profiles.forEach(profile => {
+    const mini = document.createElement('div');
+    mini.classList.add('mini-profile');
+    mini.setAttribute('data-id', profile.id);
+    mini.title = profile.name;
+    mini.innerHTML = `<img src="${profile.photo}" alt="Miniature de ${profile.name}" />`;
+    miniProfiles.appendChild(mini);
 
-// Chat bouton
-document.querySelectorAll('.btn-chat').forEach(btn => {
-  btn.onclick = (e) => {
-    e.stopPropagation();
-    document.getElementById('chatModal').classList.add('active');
+    mini.addEventListener('click', () => openExpandedProfile(profile));
+  });
+
+  // Afficher ou cacher profil agrandi
+  function openExpandedProfile(profile) {
+    expandedProfile.style.display = 'flex';
+    expandedImg.src = profile.photo;
+    expandedName.textContent = profile.name;
+    expandedDesc.textContent = profile.desc;
+    expandedProfile.setAttribute('data-id', profile.id);
+
+    // Mettre à jour l’état favori du bouton étoile dans profil agrandi
+    if (favorites.includes(profile.id)) {
+      expandedStarBtn.classList.add('active');
+    } else {
+      expandedStarBtn.classList.remove('active');
+    }
+  }
+  // Clic sur étoile dans profil agrandi
+  expandedStarBtn.onclick = function() {
+    const profileId = parseInt(expandedProfile.getAttribute('data-id'));
+    toggleFavorite(profileId, expandedStarBtn);
   };
-});
 
-// Like bouton
-document.querySelectorAll('.btn-like').forEach(btn => {
-  btn.onclick = (e) => {
-    e.stopPropagation();
-    alert("💖 Like envoyé !");
-  };
-});
+  // Fermer profil agrandi si clic à l'extérieur
+  expandedProfile.addEventListener('click', e => {
+    if (e.target === expandedProfile) {
+      expandedProfile.style.display = 'none';
+    }
+  });
+
+  // Fonction toggle favoris
+  function toggleFavorite(id, btn) {
+    if (favorites.includes(id)) {
+      favorites = favorites.filter(fid => fid !== id);
+      btn.classList.remove('active');
+    } else {
+      favorites.push(id);
+      btn.classList.add('active');
+    }
+    updateFavoritesSidebar();
+    updateStarButtons();
+  }
+
+  // Met à jour la sidebar des favoris à droite
+  function updateFavoritesSidebar() {
+    favoritesSidebar.innerHTML = '';
+    favorites.forEach(id => {
+      const profile = profiles.find(p => p.id === id);
+      if (!profile) return;
+      const favMini = document.createElement('div');
+      favMini.classList.add('favorite-mini');
+      favMini.setAttribute('data-id', profile.id);
+      favMini.title = profile.name;
+      favMini.setAttribute('data-name', profile.name);
+      favMini.innerHTML = `<img src="${profile.photo}" alt="Favori ${profile.name}" />`;
+      favoritesSidebar.appendChild(favMini);
+
+      favMini.addEventListener('click', () => openExpandedProfile(profile));
+    });
+  }
+
+  // Met à jour les boutons étoile dans carousel selon favoris
+  function updateStarButtons() {
+    const cards = carousel.querySelectorAll('.card');
+    cards.forEach(card => {
+      const id = parseInt(card.getAttribute('data-id'));
+      const starBtn = card.querySelector('.btn-star');
+      if (favorites.includes(id)) {
+        starBtn.classList.add('active');
+      } else {
+        starBtn.classList.remove('active');
+      }
+    });
+
+    // Également mettre à jour le bouton étoile dans profil agrandi
+    const expandedId = parseInt(expandedProfile.getAttribute('data-id'));
+    if (favorites.includes(expandedId)) {
+      expandedStarBtn.classList.add('active');
+    } else {
+      expandedStarBtn.classList.remove('active');
+    }
+  }
+
+  // Initial update
+  updateFavoritesSidebar();
+  updateStarButtons();
 </script>
 
 </body>
