@@ -1,125 +1,146 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Affinix Intro</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
-
-<style>
-  html, body {
-    margin: 0; padding: 0;
-    height: 100vh; width: 100vw;
-    background: url('/fond-galactique.jpg') no-repeat center center/cover;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    font-family: 'Orbitron', sans-serif;
-    background-color: black;
-    overflow: hidden;
-    opacity: 1;           /* Pour animation fondu */
-    transition: opacity 0.5s ease-out;  /* transition fondu */
-  }
-
-  #container {
-    margin-top: 12vh;
-    text-align: center;
-    user-select: none;
-  }
-
-  #logo {
-    width: 320px;
-    max-width: 90vw;
-    filter:
-      drop-shadow(0 0 5px #8a2be2)
-      drop-shadow(0 0 15px #d354f7);
-    animation: zoomFade 2s ease-out forwards;
-    opacity: 0;
-    transform: scale(2);
-  }
-
-  @keyframes zoomFade {
-    to {
-      opacity: 1;
-      transform: scale(1);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Affinix Intro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      background: url('/fond-galactique.jpg') no-repeat center center/cover;
+      font-family: 'Orbitron', sans-serif;
+      overflow: hidden;
+      position: relative;
     }
-  }
 
-  #phrase {
-    margin-top: 40px;
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    user-select: none;
-    background: linear-gradient(90deg, #ff00ff, #ff66cc, #cc33ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow:
-      -1px -1px 0 #000,
-      1px -1px 0 #000,
-      -1px 1px 0 #000,
-      1px 1px 0 #000,
-      0 0 10px #ff66cc,
-      0 0 20px #d600d6;
-    opacity: 0;
-    transform-origin: center center;
-  }
+    #container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 2;
+    }
 
-  @keyframes fadeZoomIn {
-    from {
+    #logo {
+      width: 280px;
+      filter: drop-shadow(0 0 5px #8a2be2) drop-shadow(0 0 15px #d354f7);
+    }
+
+    #phrase1 {
+      margin-top: 30px;
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #ff00ff, #ff66cc, #cc33ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 15px #ff66cc;
       opacity: 0;
-      transform: scale(0.3);
+      animation: fadeIn 1.5s ease-out 1s forwards;
     }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
 
-  @keyframes zoomBig {
-    from {
-      transform: scale(1);
-      opacity: 1;
-    }
-    to {
-      transform: scale(25);
+    #phrase2 {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(3);
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #ffffff, #dddddd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       opacity: 0;
+      z-index: 3;
     }
-  }
-</style>
+
+    video#vortex {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      opacity: 0;
+      z-index: 1;
+      transition: opacity 1s ease-in-out;
+      pointer-events: none;
+    }
+
+    #white-flash {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: white;
+      opacity: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    @keyframes zoomOut {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-50%, -200%) scale(10); opacity: 0; }
+    }
+
+    @keyframes zoomBackIn {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(3); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    @keyframes explode {
+      0% { opacity: 0; transform: scale(0.1); }
+      100% { opacity: 1; transform: scale(5); }
+    }
+  </style>
 </head>
 <body>
 
-<div id="container">
-  <img id="logo" src="/AAFFXX.png" alt="Logo Néon AFFINIX" />
-  <div id="phrase">Prépare-toi au voyage</div>
-</div>
+  <div id="container">
+    <img id="logo" src="/AAFFXX.png" alt="Logo Affinix" />
+    <div id="phrase1">Prépare-toi au voyage</div>
+  </div>
 
-<script>
-  const logo = document.getElementById('logo');
-  const phrase = document.getElementById('phrase');
+  <video id="vortex" src="/vortex.mov" autoplay muted playsinline></video>
+  <div id="phrase2">Avec une Connexion interdimensionnelle…</div>
+  <div id="white-flash"></div>
 
-  logo.style.animation = 'zoomFade 2s ease-out forwards';
+  <script>
+    const phrase1 = document.getElementById('phrase1');
+    const phrase2 = document.getElementById('phrase2');
+    const video = document.getElementById('vortex');
+    const whiteFlash = document.getElementById('white-flash');
 
-  setTimeout(() => {
-    phrase.style.animation = 'fadeZoomIn 1s forwards ease-out';
-  }, 2000);
-
-  setTimeout(() => {
-    phrase.style.animation = 'zoomBig 2.5s forwards ease-in';
-  }, 3500);
-
-  // Nouveau : fondu et changement de page
-  setTimeout(() => {
-    document.body.style.opacity = '0';  // fondu sortant
+    // Zoom vers le haut de "Prépare-toi au voyage"
     setTimeout(() => {
-      window.location.href = 'vortex.html';  // puis changement page
-    }, 500); // temps du fondu (0.5s)
-  }, 5500);  // un peu avant la fin du zoomBig
+      phrase1.style.animation = 'zoomOut 1.5s forwards ease-in';
+    }, 3000);
 
-</script>
+    // Changement de fond en fondu (affiche la vidéo)
+    setTimeout(() => {
+      video.style.opacity = 1;
+    }, 4600);
+
+    // Affiche le nouveau texte par zoom arrière
+    setTimeout(() => {
+      phrase2.style.animation = 'zoomBackIn 1.5s forwards ease-out';
+    }, 5400);
+
+    // Explosion blanche
+    setTimeout(() => {
+      whiteFlash.style.animation = 'explode 0.8s forwards ease-out';
+    }, 7500);
+
+    // Redirection vers recap.html
+    setTimeout(() => {
+      window.location.href = 'recap.html';
+    }, 8300);
+  </script>
 
 </body>
 </html>
