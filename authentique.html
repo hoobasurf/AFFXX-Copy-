@@ -1,300 +1,285 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Connexion Authentique Sérieuse</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    * { box-sizing: border-box; margin:0; padding:0; }
     html, body {
-      height:100%; width:100%;
-      font-family: 'Orbitron', sans-serif;
+      margin: 0; padding: 0;
+      font-family: 'Arial', sans-serif;
       background: url('planete-magique.jpg') no-repeat center center/cover;
-      overflow: hidden; color: white;
-    }
-    body::before {
-      content:""; position:fixed; top:0; left:0;
-      width:100%; height:100%;
-      background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%);
-      z-index:1; pointer-events:none;
-      animation: floatStars 60s linear infinite;
-    }
-    @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
-
-    .header {
-      position: relative; z-index:2;
-      padding: 20px;
-    }
-    .btn-back {
-      position: absolute; top:20px; left:20px;
-      color: #ff66cc; font-size:1.5em;
-      cursor:pointer; text-decoration:none;
-      transition: transform .2s;
-    }
-    .btn-back:hover { transform: scale(1.2); }
-
-    .carousel-container {
-      z-index:2;
-      position: relative;
-      width:100%; height:calc(100% - 60px);
       overflow: hidden;
-      display: flex;
-      align-items:center;
     }
-    .carousel {
-      display:flex;
+    .header {
+      position: absolute; top: 10px; left: 10px;
+      z-index: 999;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: #ff7ad9;
+      cursor: pointer;
+    }
+    .profile-container {
+      display: flex;
+      gap: 20px;
       overflow-x: auto;
+      padding: 80px 20px 100px;
       scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      gap:40px;
-      padding:40px;
     }
-    .carousel::-webkit-scrollbar { display:none; }
-    .card {
+    .profile-card {
+      flex: 0 0 auto;
       scroll-snap-align: center;
-      flex: 0 0 200px;
-      background: rgba(0,0,0,0.5);
-      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
       padding: 15px;
-      text-align:center;
-      transition: transform .3s, box-shadow .3s;
-      cursor:pointer;
+      width: 260px;
       position: relative;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 15px #ff70d9;
+      cursor: pointer;
+      transition: transform 0.4s ease;
     }
-    .card img {
-      width:120px; height:120px;
-      border-radius:50%;
-      object-fit:cover;
-      margin-bottom:10px;
-      border:3px solid;
+    .profile-card:hover {
+      transform: scale(1.04);
     }
-    .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
-    .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
-    .name { font-size:1.1em; margin-bottom:5px;}
+    .profile-card img {
+      width: 100%;
+      border-radius: 16px;
+    }
+    .profile-name {
+      color: white;
+      font-size: 18px;
+      margin-top: 8px;
+    }
     .btns {
-      display:flex;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 6px;
-    }
-    .btn-like, .btn-chat {
-      width:30px; height:30px;
-      border-radius:50%;
-      background-color:rgba(255,255,255,0.1);
-      border:1px solid #ff66cc;
-      color:#ff66cc;
-      display:flex; align-items:center; justify-content:center;
-      font-size:1em;
-      cursor:pointer;
-      transition: transform .2s;
-    }
-    .btn-like:hover, .btn-chat:hover { transform: scale(1.2); }
-
-    .card.center {
-      transform: scale(1.1);
-      box-shadow: 0 0 20px #ff00ff;
-    }
-
-    /* Modal */
-    .modal, .chat-modal, .photo-zoom {
-      display:none; position:fixed;
-      top:0; left:0; width:100%; height:100%;
-      background: rgba(0,0,0,0.8);
-      align-items:center; justify-content:center;
-      z-index:10;
-    }
-    .modal.active, .chat-modal.active, .photo-zoom.active { display:flex; }
-
-    .modal-content {
-      background: rgba(0,0,0,0.7);
-      padding:20px; border-radius:12px;
-      width:90%; max-width:400px;
-      text-align:center; position:relative;
-    }
-    .modal-content h2 { margin-bottom:10px; color:#ff66cc;}
-    .modal-content p { margin-bottom:8px; color:#ddd; font-size:0.95em;}
-    .modal-close {
-      position:absolute; top:10px; right:10px;
-      font-size:1.3em; color:#ff66cc;
-      cursor:pointer;
-    }
-    .photo-gallery {
       display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 8px;
+      justify-content: space-between;
       margin-top: 10px;
     }
-    .photo-gallery img {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 8px;
+    .icon-btn {
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: #fff;
       cursor: pointer;
-      border:2px solid #ff66cc;
     }
-    .photo-zoom img {
+    .icon-btn.heart {
+      color: #ff4d88;
+    }
+    .icon-btn.chat {
+      color: #7a7aff;
+    }
+    .icon-btn.star {
+      color: #ffd700;
+    }
+
+    /* Profil détaillé */
+    .profile-modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: zoomIn 0.4s ease;
+    }
+    @keyframes zoomIn {
+      from { transform: scale(0.7); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-content {
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      max-width: 300px;
+      color: white;
+      position: relative;
+      text-align: center;
+    }
+    .modal-content img {
+      width: 100%;
+      border-radius: 16px;
+      cursor: pointer;
+    }
+    .modal-content .small-pics {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      justify-content: center;
+    }
+    .modal-content .small-pics img {
+      width: 50px; height: 50px;
+      object-fit: cover;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px; right: 10px;
+      background: none;
+      border: none;
+      color: #ff7ad9;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    /* Favoris */
+    .favorites-bar {
+      position: absolute;
+      top: 80px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .favorites-bar img {
+      width: 50px;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #ffd700;
+      cursor: pointer;
+    }
+
+    /* Mini dock discussion */
+    .chat-dock {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 10px;
+      box-shadow: 0 -3px 10px rgba(0,0,0,0.3);
+    }
+    .chat-dock img {
+      width: 40px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .chat-dock img:hover {
+      transform: scale(1.1);
+    }
+
+    /* Zoom photo */
+    .zoom-img {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+    .zoom-img img {
       max-width: 90vw;
       max-height: 90vh;
-      border-radius: 10px;
-      border: 3px solid #ff66cc;
+      border-radius: 16px;
     }
-
-    /* Chat modal */
-    .chat-box {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid #ff66cc;
-      border-radius: 12px;
-      padding: 15px;
-      width: 90%;
-      max-width: 400px;
-      position: relative;
-    }
-    .chat-box textarea {
-      width: 100%;
-      height: 80px;
-      border-radius: 8px;
-      border: none;
-      padding: 8px;
-      font-family: 'Orbitron';
-      resize: none;
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
-    .chat-box button {
-      margin-top: 10px;
-      padding: 8px 16px;
-      background: #ff66cc;
-      border: none;
-      color: white;
-      border-radius: 8px;
-      cursor: pointer;
+    .zoom-img .close-btn {
+      position: absolute;
+      top: 20px; right: 20px;
     }
 
   </style>
 </head>
 <body>
 
-<div class="header">
-  <a href="page2.html" class="btn-back">&larr; Retour</a>
-</div>
+  <div class="header">
+    <button class="back-btn" onclick="history.back()">⟵</button>
+  </div>
 
-<div class="carousel-container fade-in">
-  <div class="carousel" id="carousel">
-    <!-- profils -->
-    <div class="card girl" data-name="Sophie, 28" data-age="28" data-lieu="Paris" data-desc="Passionnée par l’astronomie et les romans SF." data-gallery="47,49,51">
-      <img src="https://i.pravatar.cc/150?img=47" alt="Sophie">
-      <div class="name">Sophie</div>
+  <!-- Favoris -->
+  <div class="favorites-bar" id="favorites"></div>
+
+  <!-- Profils -->
+  <div class="profile-container" id="profiles">
+    <!-- Exemple de profil -->
+    <div class="profile-card" onclick="openProfile(0)">
+      <img src="avatar1.jpg" alt="Profil 1">
+      <div class="profile-name">Léna, 26 ans - Paris</div>
       <div class="btns">
-        <div class="btn-chat">💬</div>
-        <div class="btn-like">💖</div>
+        <button class="icon-btn chat">💬</button>
+        <button class="icon-btn heart" onclick="like(event)">❤️</button>
+        <button class="icon-btn star" onclick="saveFavorite(event, 'avatar1.jpg')">⭐</button>
       </div>
     </div>
-    <div class="card boy" data-name="Lucas, 31" data-age="31" data-lieu="Lyon" data-desc="Fan de jeux coopératifs et nature." data-gallery="12,14,16">
-      <img src="https://i.pravatar.cc/150?img=12" alt="Lucas">
-      <div class="name">Lucas</div>
-      <div class="btns">
-        <div class="btn-chat">💬</div>
-        <div class="btn-like">💖</div>
+    <!-- D’autres profils ici -->
+  </div>
+
+  <!-- Fenêtre Profil -->
+  <div class="profile-modal" id="profileModal">
+    <div class="modal-content" id="modalContent">
+      <button class="close-btn" onclick="closeProfile()">✖</button>
+      <img src="avatar1.jpg" onclick="zoomPhoto(this.src)">
+      <div class="small-pics">
+        <img src="avatar1.jpg" onclick="zoomPhoto(this.src)">
+        <img src="avatar1b.jpg" onclick="zoomPhoto(this.src)">
+        <img src="avatar1c.jpg" onclick="zoomPhoto(this.src)">
       </div>
+      <h3>Léna, 26 ans</h3>
+      <p>📍 Paris</p>
+      <p>🔍 Recherche : Relation sérieuse</p>
+      <p>Description : Passionnée de voyage et d'art, j’adore les discussions profondes et sincères.</p>
     </div>
-    <!-- Ajoute ici d'autres profils similaires -->
   </div>
-</div>
 
-<!-- modal détail -->
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <span class="modal-close" onclick="closeModal()">&times;</span>
-    <h2 id="modal-name"></h2>
-    <p><strong>Âge :</strong> <span id="modal-age"></span></p>
-    <p><strong>Lieu :</strong> <span id="modal-lieu"></span></p>
-    <p id="modal-desc"></p>
-    <div class="photo-gallery" id="modal-gallery"></div>
+  <!-- Zoom photo -->
+  <div class="zoom-img" id="zoomView">
+    <button class="close-btn" onclick="closeZoom()">✖</button>
+    <img src="">
   </div>
-</div>
 
-<!-- Zoom photo -->
-<div class="photo-zoom" id="photoZoom">
-  <span class="modal-close" onclick="document.getElementById('photoZoom').classList.remove('active')">&times;</span>
-  <img id="zoomedImage" src="" alt="Zoomed Photo">
-</div>
-
-<!-- Chat futuriste -->
-<div class="chat-modal" id="chatModal">
-  <div class="chat-box">
-    <span class="modal-close" onclick="document.getElementById('chatModal').classList.remove('active')">&times;</span>
-    <textarea placeholder="Écris ton message ici..."></textarea>
-    <button>Envoyer</button>
+  <!-- Dock discussion -->
+  <div class="chat-dock">
+    <img src="avatar1.jpg" onclick="openProfile(0)">
+    <!-- autres mini profils ici -->
   </div>
-</div>
 
-<script>
-const carousel = document.getElementById('carousel');
-const cards = carousel.children;
-
-function updateCenter() {
-  const center = carousel.scrollLeft + carousel.offsetWidth / 2;
-  Array.from(cards).forEach(c => {
-    const cardCenter = c.offsetLeft + c.offsetWidth / 2;
-    c.classList.toggle('center', Math.abs(cardCenter - center) < c.offsetWidth/2);
-  });
-}
-
-carousel.addEventListener('scroll', updateCenter);
-window.addEventListener('load', () => {
-  carousel.scrollLeft = (carousel.scrollWidth - carousel.offsetWidth)/2;
-  updateCenter();
-});
-
-// Modal profil
-Array.from(cards).forEach(c => {
-  c.addEventListener('click', () => {
-    document.getElementById('modal-name').textContent = c.dataset.name;
-    document.getElementById('modal-age').textContent = c.dataset.age;
-    document.getElementById('modal-lieu').textContent = c.dataset.lieu;
-    document.getElementById('modal-desc').textContent = c.dataset.desc;
-    
-    const gallery = document.getElementById('modal-gallery');
-    gallery.innerHTML = '';
-    if (c.dataset.gallery) {
-      const ids = c.dataset.gallery.split(',');
-      ids.forEach(id => {
-        const img = document.createElement('img');
-        img.src = `https://i.pravatar.cc/150?img=${id}`;
-        img.onclick = () => {
-          document.getElementById('zoomedImage').src = img.src;
-          document.getElementById('photoZoom').classList.add('active');
-        };
-        gallery.appendChild(img);
-      });
+  <script>
+    function openProfile(index) {
+      document.getElementById('profileModal').style.display = 'flex';
     }
 
-    document.getElementById('modal').classList.add('active');
-  });
-});
+    function closeProfile() {
+      document.getElementById('profileModal').style.display = 'none';
+    }
 
-function closeModal() {
-  document.getElementById('modal').classList.remove('active');
-}
+    function zoomPhoto(src) {
+      document.querySelector("#zoomView img").src = src;
+      document.getElementById("zoomView").style.display = "flex";
+    }
 
-// Chat bouton
-document.querySelectorAll('.btn-chat').forEach(btn => {
-  btn.onclick = (e) => {
-    e.stopPropagation();
-    document.getElementById('chatModal').classList.add('active');
-  };
-});
+    function closeZoom() {
+      document.getElementById("zoomView").style.display = "none";
+    }
 
-// Like bouton
-document.querySelectorAll('.btn-like').forEach(btn => {
-  btn.onclick = (e) => {
-    e.stopPropagation();
-    alert("💖 Like envoyé !");
-  };
-});
-</script>
+    function like(e) {
+      e.stopPropagation();
+      alert("❤️ Like envoyé !");
+    }
+
+    function saveFavorite(e, img) {
+      e.stopPropagation();
+      const container = document.getElementById("favorites");
+      const pic = document.createElement("img");
+      pic.src = img;
+      pic.onclick = () => openProfile(0);
+      container.appendChild(pic);
+    }
+  </script>
 
 </body>
 </html>
