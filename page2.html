@@ -20,14 +20,14 @@
       width: 100%; height:100%;
       background: url("planete-magique.jpg") no-repeat center center/cover;
       z-index: 0;
-      animation: moveGlow 30s ease-in-out infinite;
+      animation: moveGlow 60s ease-in-out infinite alternate;
       filter: brightness(1.1) saturate(1.2);
     }
 
     @keyframes moveGlow {
       0% { transform: scale(1) translate(0, 0); }
-      50% { transform: scale(1.02) translate(2px, -1px); }
-      100% { transform: scale(1) translate(-1px, 1px); }
+      50% { transform: scale(1.02) translate(-10px, 5px); }
+      100% { transform: scale(1) translate(8px, -6px); }
     }
 
     .light-overlay {
@@ -69,6 +69,17 @@
       text-transform: uppercase;
       letter-spacing: 1px;
       transition: all 0.4s ease;
+      animation: fadeZoomIn 1.2s ease forwards;
+      opacity: 0;
+    }
+
+    .btn:nth-child(1) { animation-delay: 0.4s; }
+    .btn:nth-child(2) { animation-delay: 0.8s; }
+    .btn:nth-child(3) { animation-delay: 1.2s; }
+
+    @keyframes fadeZoomIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
     }
 
     .btn::before {
@@ -78,10 +89,10 @@
       left: -10px;
       right: -10px;
       bottom: -10px;
-      background: radial-gradient(circle, rgba(255,0,255,0.6), rgba(255,0,255,0) 70%);
+      background: radial-gradient(circle, rgba(255,0,255,0.5), rgba(255,0,255,0) 70%);
       border-radius: 50px;
       z-index: -1;
-      opacity: 0.7;
+      opacity: 0.6;
       animation: neonPulse 2s infinite;
       filter: blur(8px);
     }
@@ -91,8 +102,8 @@
     }
 
     @keyframes neonPulse {
-      0%, 100% { opacity: 0.5; }
-      50% { opacity: 1; }
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.9; }
     }
 
     @media (max-width: 600px) {
