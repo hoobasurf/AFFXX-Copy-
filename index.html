@@ -2,15 +2,14 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Affinix Intro</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
+
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      width: 100vw;
+      margin: 0; padding: 0;
+      width: 100vw; height: 100vh;
       background: url('/fond-galactique.jpg') no-repeat center center/cover;
       font-family: 'Orbitron', sans-serif;
       overflow: hidden;
@@ -19,127 +18,151 @@
 
     #container {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      top: 12vh;
+      width: 100%;
       text-align: center;
-      z-index: 2;
+      z-index: 10;
     }
 
     #logo {
-      width: 280px;
-      filter: drop-shadow(0 0 5px #8a2be2) drop-shadow(0 0 15px #d354f7);
+      width: 320px;
+      max-width: 90vw;
+      filter:
+        drop-shadow(0 0 5px #8a2be2)
+        drop-shadow(0 0 15px #d354f7);
+      animation: zoomFade 2s ease-out forwards;
+      opacity: 0;
+      transform: scale(2);
     }
 
-    #phrase1 {
-      margin-top: 30px;
+    @keyframes zoomFade {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes fadeZoomIn {
+      from { opacity: 0; transform: scale(0.3); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes zoomBig {
+      from { transform: scale(1); opacity: 1; }
+      to { transform: scale(25); opacity: 0; }
+    }
+
+    @keyframes flashOut {
+      0% { opacity: 1; filter: drop-shadow(0 0 0px #fff); transform: scale(1); }
+      50% { opacity: 1; filter: drop-shadow(0 0 30px #fff) brightness(2); transform: scale(1.2); }
+      100% { opacity: 0; filter: drop-shadow(0 0 60px #ff66ff) brightness(4); transform: scale(1.8); }
+    }
+
+    @keyframes zoomBackIn {
+      from { opacity: 0; transform: scale(3); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes whiteExplosion {
+      0% { opacity: 0; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.5); }
+      100% { opacity: 0; transform: scale(8); }
+    }
+
+    #phrase, #phrase2 {
+      margin-top: 40px;
       font-size: 2rem;
       font-weight: 700;
+      letter-spacing: 0.1em;
       background: linear-gradient(90deg, #ff00ff, #ff66cc, #cc33ff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 15px #ff66cc;
+      text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000,
+        0 0 10px #ff66cc,
+        0 0 20px #d600d6;
       opacity: 0;
-      animation: fadeIn 1.5s ease-out 1s forwards;
     }
 
-    #phrase2 {
+    #video-vortex {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(3);
-      font-size: 2rem;
-      font-weight: 700;
-      background: linear-gradient(90deg, #ffffff, #dddddd);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      opacity: 0;
-      z-index: 3;
-    }
-
-    video#vortex {
-      position: fixed;
       top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100vw; height: 100vh;
       object-fit: cover;
       opacity: 0;
+      transition: opacity 1s ease-in;
       z-index: 1;
-      transition: opacity 1s ease-in-out;
-      pointer-events: none;
     }
 
-    #white-flash {
-      position: fixed;
+    #explosion {
+      position: absolute;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
       background: white;
       opacity: 0;
-      z-index: 10;
+      z-index: 100;
       pointer-events: none;
-    }
-
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
-
-    @keyframes zoomOut {
-      0% { transform: translate(-50%, -50%) scale(1); }
-      100% { transform: translate(-50%, -200%) scale(10); opacity: 0; }
-    }
-
-    @keyframes zoomBackIn {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(3); }
-      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    }
-
-    @keyframes explode {
-      0% { opacity: 0; transform: scale(0.1); }
-      100% { opacity: 1; transform: scale(5); }
     }
   </style>
 </head>
 <body>
 
   <div id="container">
-    <img id="logo" src="/AAFFXX.png" alt="Logo Affinix" />
-    <div id="phrase1">Prépare-toi au voyage</div>
+    <img id="logo" src="/AAFFXX.png" alt="Logo Néon AFFINIX" />
+    <div id="phrase">Prépare-toi au voyage</div>
+    <div id="phrase2">Avec une Connexion interdimensionnelle…</div>
   </div>
 
-  <video id="vortex" src="/vortex.mov" autoplay muted playsinline></video>
-  <div id="phrase2">Avec une Connexion interdimensionnelle…</div>
-  <div id="white-flash"></div>
+  <video id="video-vortex" src="/vortex.mov" autoplay muted playsinline></video>
+  <div id="explosion"></div>
 
   <script>
-    const phrase1 = document.getElementById('phrase1');
+    const logo = document.getElementById('logo');
+    const phrase = document.getElementById('phrase');
     const phrase2 = document.getElementById('phrase2');
-    const video = document.getElementById('vortex');
-    const whiteFlash = document.getElementById('white-flash');
+    const vortex = document.getElementById('video-vortex');
+    const explosion = document.getElementById('explosion');
 
-    // Zoom vers le haut de "Prépare-toi au voyage"
+    // Affichage logo
+    logo.style.animation = 'zoomFade 2s ease-out forwards';
+
+    // Apparition du texte “Prépare-toi au voyage”
     setTimeout(() => {
-      phrase1.style.animation = 'zoomOut 1.5s forwards ease-in';
-    }, 3000);
+      phrase.style.animation = 'fadeZoomIn 1s forwards ease-out';
+    }, 2000);
 
-    // Changement de fond en fondu (affiche la vidéo)
+    // Zoom géant du texte
     setTimeout(() => {
-      video.style.opacity = 1;
-    }, 4600);
+      phrase.style.animation = 'zoomBig 1.2s forwards ease-in';
+    }, 3700);
 
-    // Affiche le nouveau texte par zoom arrière
+    // Effet lumineux du logo juste avant l'apparition du texte interdimensionnel
+    setTimeout(() => {
+      logo.style.animation = 'flashOut 1s forwards ease-out';
+    }, 4800);
+
+    // Changement de fond vers le vortex
+    setTimeout(() => {
+      vortex.style.opacity = '1';
+    }, 5000);
+
+    // Apparition du texte “Connexion interdimensionnelle…”
     setTimeout(() => {
       phrase2.style.animation = 'zoomBackIn 1.5s forwards ease-out';
     }, 5400);
 
     // Explosion blanche
     setTimeout(() => {
-      whiteFlash.style.animation = 'explode 0.8s forwards ease-out';
-    }, 7500);
+      explosion.style.animation = 'whiteExplosion 1s forwards ease-out';
+    }, 7400);
 
-    // Redirection vers recap.html
+    // Redirection finale
     setTimeout(() => {
-      window.location.href = 'recap.html';
-    }, 8300);
+      window.location.href = 'recapitule.html';
+    }, 8500);
   </script>
 
 </body>
