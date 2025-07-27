@@ -4,222 +4,197 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Connexion Authentique Sérieuse</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet"/>
   <style>
     body {
       margin: 0;
-      padding: 0;
       font-family: 'Orbitron', sans-serif;
-      background: url('planete-magique.jpg') no-repeat center center/cover;
+      background: url('planete-magique.jpg') no-repeat center center fixed;
+      background-size: cover;
       overflow: hidden;
-    }
-
-    .stars {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      background: url('https://i.ibb.co/hVYTnVv/stars.gif') repeat;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    .container {
-      position: relative;
-      z-index: 1;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .cards {
-      display: flex;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      padding: 30px 0;
-      gap: 20px;
-      width: 100%;
-      max-width: 100vw;
-    }
-
-    .card {
-      position: relative;
-      scroll-snap-align: center;
-      flex: 0 0 280px;
-      height: 420px;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-      cursor: pointer;
-      transition: transform 0.4s ease;
-      background: rgba(0, 0, 0, 0.6);
-    }
-
-    .cards:has(.card:hover) .card:not(:hover) {
-      transform: scale(0.9);
-    }
-
-    .card.girl {
-      border: 2px solid #ff66cc;
-    }
-
-    .card.boy {
-      border: 2px solid #9933ff;
-    }
-
-    .card img {
-      width: 100%;
-      height: 70%;
-      object-fit: cover;
-    }
-
-    .card .name {
-      font-size: 1.5em;
-      color: white;
-      text-align: center;
-      margin-top: 10px;
-    }
-
-    .card .desc {
-      font-size: 1em;
-      text-align: center;
-      color: #ccc;
-    }
-
-    .super-like {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background: transparent;
-      border: 2px solid #ff00ff;
-      color: #ff00ff;
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      font-size: 1.3em;
-      cursor: pointer;
-      box-shadow: 0 0 10px #ff00ff;
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-
-    .super-like:hover {
-      transform: scale(1.2);
-      box-shadow: 0 0 20px #ff33ff, 0 0 30px #cc00ff;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 999;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(0, 0, 0, 0.9);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 20px;
-    }
-
-    .modal-content {
-      max-width: 500px;
-      border-radius: 16px;
-      background: rgba(40, 0, 60, 0.9);
-      padding: 20px;
-      box-shadow: 0 0 20px #ff00ff;
-    }
-
-    .close {
-      position: absolute;
-      top: 10px; right: 20px;
-      font-size: 2em;
-      cursor: pointer;
-      color: #fff;
     }
 
     .back-button {
       position: fixed;
-      top: 15px; left: 15px;
-      background: rgba(255, 255, 255, 0.1);
+      top: 15px;
+      left: 15px;
+      background: rgba(0,0,0,0.6);
       color: white;
-      border: 1px solid #ff99ff;
-      border-radius: 12px;
+      border: none;
       padding: 8px 12px;
-      font-size: 0.8em;
+      font-size: 1.2em;
+      border-radius: 8px;
+      z-index: 1001;
       cursor: pointer;
-      z-index: 9999;
+    }
+
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      gap: 20px;
+      padding: 80px 20px 20px;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+    }
+
+    .profile-card {
+      flex: 0 0 80%;
+      max-width: 320px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid #ff66cc;
+      border-radius: 15px;
+      padding: 15px;
+      scroll-snap-align: center;
       backdrop-filter: blur(5px);
+      text-align: center;
+      position: relative;
+      color: white;
+      transition: transform 0.3s ease;
+    }
+
+    .carousel:has(.profile-card:hover) .profile-card:not(:hover) {
+      transform: scale(0.9);
+      opacity: 0.6;
+    }
+
+    .profile-card img {
+      width: 100%;
+      border-radius: 10px;
+      border: 3px solid #ff66cc;
+    }
+
+    .profile-card .super-like {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: linear-gradient(45deg, #ff00cc, #6600ff);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      font-size: 1.2em;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ff66cc;
+      transition: transform 0.2s ease;
+    }
+
+    .profile-card .super-like:hover {
+      transform: scale(1.2);
+    }
+
+    .profile-card h2 {
+      margin: 10px 0 5px;
+    }
+
+    .profile-card p {
+      font-size: 0.9em;
+      color: #eee;
+    }
+
+    .profile-details {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 0, 30, 0.95);
+      color: white;
+      padding: 30px;
+      z-index: 1000;
+    }
+
+    .profile-details .close-btn {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      font-size: 1.5em;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 50%;
+    }
+
+    .profile-details img {
+      width: 200px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      border: 3px solid #cc33ff;
+    }
+
+    .floating-stars {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('https://i.imgur.com/vnLvhYw.gif') repeat;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 0;
     }
   </style>
 </head>
 <body>
 
-<div class="stars"></div>
-<button class="back-button" onclick="window.location.href='page2.html'">← Retour</button>
+<div class="floating-stars"></div>
 
-<div class="container">
-  <div class="cards">
-    <div class="card girl" data-name="Sophie" data-age="28" data-lieu="Paris" data-search="Relation sérieuse" data-desc="Passionnée par l’astronomie, cherche quelqu’un de sincère.">
-      <img src="https://i.pravatar.cc/300?img=47" alt="Sophie">
-      <div class="name">Sophie</div>
-      <div class="desc">Relation sérieuse</div>
-      <button class="super-like">★</button>
-    </div>
+<button class="back-button" onclick="window.location.href='page2.html'">←</button>
 
-    <div class="card boy" data-name="Alex" data-age="30" data-lieu="Lyon" data-search="Connexion authentique" data-desc="Aventurier du quotidien, aime les étoiles et les longues discussions.">
-      <img src="https://i.pravatar.cc/300?img=12" alt="Alex">
-      <div class="name">Alex</div>
-      <div class="desc">Connexion authentique</div>
-      <button class="super-like">★</button>
-    </div>
+<div class="carousel" id="carousel">
+  <!-- Exemple de profil -->
+  <div class="profile-card" onclick="showProfile('Anna', 27, 'Paris', 'Relation sérieuse', 'Je suis passionnée de voyage, sincère et douce.', 'https://i.imgur.com/l60Hf.png')">
+    <img src="https://i.imgur.com/l60Hf.png" alt="Profil Anna">
+    <h2>Anna</h2>
+    <p>27 ans – Paris</p>
+    <button class="super-like">★</button>
+  </div>
 
-    <div class="card girl" data-name="Léa" data-age="25" data-lieu="Marseille" data-search="Amitié ou plus" data-desc="Créative, aime la musique électronique et les balades nocturnes.">
-      <img src="https://i.pravatar.cc/300?img=20" alt="Léa">
-      <div class="name">Léa</div>
-      <div class="desc">Amitié ou plus</div>
-      <button class="super-like">★</button>
-    </div>
+  <div class="profile-card" onclick="showProfile('Lucas', 30, 'Lyon', 'Connexion authentique', 'Adepte de lecture, musique et nature.', 'https://i.imgur.com/0fXrP4p.png')">
+    <img src="https://i.imgur.com/0fXrP4p.png" alt="Profil Lucas">
+    <h2>Lucas</h2>
+    <p>30 ans – Lyon</p>
+    <button class="super-like">★</button>
+  </div>
+
+  <div class="profile-card" onclick="showProfile('Sophie', 25, 'Toulouse', 'Amour sincère', 'Douce, rêveuse et loyale.', 'https://i.imgur.com/8Km9tLL.png')">
+    <img src="https://i.imgur.com/8Km9tLL.png" alt="Profil Sophie">
+    <h2>Sophie</h2>
+    <p>25 ans – Toulouse</p>
+    <button class="super-like">★</button>
+  </div>
+
+  <!-- Ajoute ici d'autres profils -->
+</div>
+
+<div class="profile-details" id="profileDetails">
+  <button class="close-btn" onclick="closeProfile()">×</button>
+  <div style="text-align:center;">
+    <img id="profileImage" src="" alt="Avatar">
+    <h2 id="profileName"></h2>
+    <p><strong>Âge : </strong><span id="profileAge"></span></p>
+    <p><strong>Lieu : </strong><span id="profileCity"></span></p>
+    <p><strong>Recherche : </strong><span id="profileGoal"></span></p>
+    <p><strong>Description : </strong><span id="profileDesc"></span></p>
   </div>
 </div>
 
-<!-- Modal de détail -->
-<div class="modal" id="profile-modal">
-  <div class="close" onclick="document.getElementById('profile-modal').style.display='none'">×</div>
-  <div class="modal-content" id="modal-content"></div>
-</div>
-
 <script>
-  document.querySelectorAll('.card').forEach(card => {
-    card.addEventListener('click', () => {
-      const name = card.getAttribute('data-name');
-      const age = card.getAttribute('data-age');
-      const lieu = card.getAttribute('data-lieu');
-      const search = card.getAttribute('data-search');
-      const desc = card.getAttribute('data-desc');
-      const imgSrc = card.querySelector('img').src;
+  function showProfile(name, age, city, goal, desc, img) {
+    document.getElementById('profileDetails').style.display = 'block';
+    document.getElementById('profileName').textContent = name;
+    document.getElementById('profileAge').textContent = age;
+    document.getElementById('profileCity').textContent = city;
+    document.getElementById('profileGoal').textContent = goal;
+    document.getElementById('profileDesc').textContent = desc;
+    document.getElementById('profileImage').src = img;
+  }
 
-      const modalContent = `
-        <img src="${imgSrc}" style="width:100%; max-height:300px; object-fit:cover; border-radius:12px;">
-        <h2>${name}, ${age} ans</h2>
-        <p><strong>Ville :</strong> ${lieu}</p>
-        <p><strong>Recherche :</strong> ${search}</p>
-        <p>${desc}</p>
-      `;
-      document.getElementById('modal-content').innerHTML = modalContent;
-      document.getElementById('profile-modal').style.display = 'flex';
-    });
-  });
-
-  document.querySelectorAll('.super-like').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      btn.innerText = '❤️';
-      btn.style.color = '#ff66cc';
-      alert("✨ Super Like envoyé !");
-    });
-  });
+  function closeProfile() {
+    document.getElementById('profileDetails').style.display = 'none';
+  }
 </script>
 
 </body>
