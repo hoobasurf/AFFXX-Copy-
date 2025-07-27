@@ -52,23 +52,24 @@
     }
     .carousel::-webkit-scrollbar { display:none; }
     .card {
-      scroll-snap-align: center;
-      flex: 0 0 200px;
-      background: rgba(0,0,0,0.5);
-      border-radius: 16px;
-      padding: 15px;
-      text-align:center;
-      transition: transform .3s, box-shadow .3s;
-      cursor:pointer;
-      position: relative;
-    }
-    .card img {
-      width:120px; height:120px;
-      border-radius:50%;
-      object-fit:cover;
-      margin-bottom:10px;
-      border:3px solid;
-    }
+  scroll-snap-align: center;
+  flex: 0 0 150px;  /* réduit de 200px à 150px */
+  background: rgba(0,0,0,0.5);
+  border-radius: 16px;
+  padding: 15px;
+  text-align: center;
+  transition: transform .3s, box-shadow .3s;
+  cursor: pointer;
+  position: relative;
+}
+.card img {
+  width: 90px;   /* réduit de 120px à 90px */
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+  border: 3px solid;
+}
     .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
     .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
     .name { font-size:1.1em; margin-bottom:5px;}
