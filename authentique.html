@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Connexion Authentique Sérieuse</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin:0; padding:0; }
     html, body {
@@ -176,6 +176,7 @@
     .expanded-profile .btns {
       margin-top: 10px;
       gap: 10px;
+      display: flex;
     }
 
     /* Sidebar favoris à droite */
@@ -232,7 +233,7 @@
       top:0; left:0; width:100%; height:100%;
       background: rgba(0,0,0,0.8);
       align-items:center; justify-content:center;
-      z-index:10;
+      z-index:100;
     }
     .modal.active, .chat-modal.active, .photo-zoom.active { display:flex; }
 
@@ -246,272 +247,391 @@
     .modal-content p { margin-bottom:8px; color:#ddd; font-size:0.95em;}
     .modal-close {
       position:absolute; top:10px; right:10px;
-      font-size:1.3em; color:#ff66cc;
+      font-size:1.5em; color:#ff66cc;
       cursor:pointer;
-    }
-    .photo-gallery {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .photo-gallery img {
-      width: 70px; height: 70px;
-      object-fit: cover;
-      border-radius: 10px;
-      cursor: pointer;
-      border: 2px solid transparent;
-      transition: border-color 0.3s;
-    }
-    .photo-gallery img:hover {
-      border-color: #ff66cc;
-    }
-    .zoomed-photo {
-      max-width: 90vw;
-      max-height: 80vh;
-      border-radius: 16px;
-      box-shadow: 0 0 25px #ff66cc;
-      cursor: pointer;
+      user-select:none;
     }
 
-    /* Responsive */
-    @media (max-width: 600px) {
-      .carousel {
-        padding: 20px;
-        gap: 25px;
-      }
-      .card {
-        flex: 0 0 140px;
-      }
-      .expanded-profile {
-        left: 10px;
-        width: 90%;
-        top: 20%;
-        transform: translateY(0);
-      }
-      .mini-profiles, .favorites-sidebar {
-        display: none;
-      }
+    /* Chat modal */
+    .chat-modal .chat-box {
+      display:flex; flex-direction: column;
+      height: 60vh;
+      width: 90vw;
+      max-width: 400px;
+      background: rgba(20, 0, 30, 0.95);
+      border-radius: 12px;
+      padding: 10px;
+      color: #eee;
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .chat-input {
+      display:flex; gap: 8px;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1em;
+      outline:none;
+    }
+    .chat-input button {
+      background: #ff66cc;
+      border:none;
+      border-radius: 8px;
+      padding: 8px 15px;
+      color: #220022;
+      font-weight: bold;
+      cursor:pointer;
+      transition: background-color 0.3s;
+    }
+    .chat-input button:hover {
+      background-color: #e055bb;
+    }
+
+    /* Photo zoom */
+    .photo-zoom img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 20px;
+      box-shadow: 0 0 30px #ff66cc;
     }
   </style>
 </head>
 <body>
 
-  <!-- Miniatures profils à gauche -->
-  <div class="mini-profiles" id="miniProfiles">
-    <!-- Mini profils seront injectés ici -->
-  </div>
-
-  <!-- Sidebar favoris à droite -->
-  <div class="favorites-sidebar" id="favoritesSidebar">
-    <!-- Favoris en miniatures -->
-  </div>
-
-  <div class="header">
-    <a href="#" class="btn-back" title="Retour">&#8592; Retour</a>
-  </div>
+  <a href="index.html" class="btn-back" title="Retour">&larr;</a>
 
   <div class="carousel-container">
     <div class="carousel" id="carousel">
-      <!-- Cartes profils -->
+      <!-- Cartes profils générées dynamiquement -->
     </div>
   </div>
 
-  <!-- Profil agrandi (cliqué dans mini-profiles) -->
+  <div class="mini-profiles" id="miniProfiles">
+    <!-- Miniatures à gauche générées dynamiquement -->
+  </div>
+
+  <div class="favorites-sidebar" id="favoritesSidebar">
+    <!-- Favoris à droite -->
+  </div>
+
+  <!-- Profil agrandi sur clic miniature -->
   <div id="expandedProfile" class="expanded-profile" style="display:none;">
-    <img src="" alt="Photo Profil" id="expandedImg" />
+    <img src="" alt="Profil" id="expandedImg" />
     <div class="name" id="expandedName"></div>
     <p id="expandedDesc"></p>
     <div class="btns">
-      <button class="btn-like" title="Like">&#10084;</button>
-      <button class="btn-chat" title="Message">&#9993;</button>
-      <button class="btn-star" id="expandedStarBtn" title="Favori">&#9733;</button>
+      <button class="btn-like" id="expandedLikeBtn" title="Like">&#10084;</button>
+      <button class="btn-chat" id="expandedChatBtn" title="Chat">&#9993;</button>
+      <button class="btn-star" id="expandedStarBtn" title="Favoris">&#9733;</button>
     </div>
   </div>
 
-<script>
-  // Données profils exemple
-  const profiles = [
-    {
-      id: 1,
-      name: 'Lisa',
-      desc: 'Passionnée de danse et musique.',
-      photo: 'fille1.jpg',
-      gender: 'girl'
-    },
-    {
-      id: 2,
-      name: 'Anna',
-      desc: 'Amoureuse de la nature et zen.',
-      photo: 'fille2.jpg',
-      gender: 'girl'
-    },
-    {
-      id: 3,
-      name: 'Marie',
-      desc: 'Artiste peintre en devenir.',
-      photo: 'fille3.jpg',
-      gender: 'girl'
-    },
-    {
-      id: 4,
-      name: 'John',
-      desc: 'Fan de technologies futuristes.',
-      photo: 'garcon1.jpg',
-      gender: 'boy'
-    },
-    {
-      id: 5,
-      name: 'Alex',
-      desc: 'Aventurier et sportif.',
-      photo: 'garcon2.jpg',
-      gender: 'boy'
-    },
-    {
-      id: 6,
-      name: 'Paul',
-      desc: 'Passionné de cinéma et lecture.',
-      photo: 'garcon3.jpg',
-      gender: 'boy'
-    }
-  ];
+  <!-- Modal simple -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <span class="modal-close" id="modalClose">&times;</span>
+      <h2 id="modalTitle"></h2>
+      <p id="modalText"></p>
+    </div>
+  </div>
 
-  // Favoris stockés (ids)
-  let favorites = [];
-
-  const carousel = document.getElementById('carousel');
-  const miniProfiles = document.getElementById('miniProfiles');
-  const favoritesSidebar = document.getElementById('favoritesSidebar');
-  const expandedProfile = document.getElementById('expandedProfile');
-  const expandedImg = document.getElementById('expandedImg');
-  const expandedName = document.getElementById('expandedName');
-  const expandedDesc = document.getElementById('expandedDesc');
-  const expandedStarBtn = document.getElementById('expandedStarBtn');
-
-  // Créer les cartes du carousel
-  profiles.forEach(profile => {
-    const card = document.createElement('div');
-    card.classList.add('card', profile.gender);
-    card.setAttribute('data-id', profile.id);
-    card.innerHTML = `
-      <img src="${profile.photo}" alt="Photo de ${profile.name}" />
-      <div class="name">${profile.name}</div>
-      <div class="btns">
-        <button class="btn-like" title="Like">&#10084;</button>
-        <button class="btn-chat" title="Message">&#9993;</button>
-        <button class="btn-star" title="Favori">&#9733;</button>
+  <!-- Chat modal -->
+  <div class="chat-modal" id="chatModal">
+    <div class="chat-box">
+      <span class="modal-close" id="chatClose">&times;</span>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="Écrire un message..." />
+        <button id="sendChat">Envoyer</button>
       </div>
-    `;
-    carousel.appendChild(card);
+    </div>
+  </div>
 
-    // Étoile bouton dans la carte
-    const starBtn = card.querySelector('.btn-star');
-    starBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      toggleFavorite(profile.id, starBtn);
-    });
+  <!-- Photo zoom -->
+  <div class="photo-zoom" id="photoZoom">
+    <img src="" alt="Photo Zoomée" id="photoZoomImg" />
+  </div>
 
-    // Click sur carte = agrandir profil à gauche
-    card.addEventListener('click', () => openExpandedProfile(profile));
-  });
+  <script>
+    // Données profils (exemple)
+    const profiles = [
+      {
+        id: 1,
+        name: "Elise",
+        gender: "girl",
+        img: "elise.jpg",
+        description: "Femme sérieuse, passionnée par l'art et la musique.",
+      },
+      {
+        id: 2,
+        name: "Marc",
+        gender: "boy",
+        img: "marc.jpg",
+        description: "Homme gentil, cherche relation sérieuse.",
+      },
+      {
+        id: 3,
+        name: "Clara",
+        gender: "girl",
+        img: "clara.jpg",
+        description: "Amoureuse de la nature et des balades en forêt.",
+      },
+      {
+        id: 4,
+        name: "Julien",
+        gender: "boy",
+        img: "julien.jpg",
+        description: "Sportif et cultivé, aime les soirées tranquilles.",
+      }
+      // ajoute d'autres profils ici
+    ];
 
-  // Créer miniatures profils à gauche
-  profiles.forEach(profile => {
-    const mini = document.createElement('div');
-    mini.classList.add('mini-profile');
-    mini.setAttribute('data-id', profile.id);
-    mini.title = profile.name;
-    mini.innerHTML = `<img src="${profile.photo}" alt="Miniature de ${profile.name}" />`;
-    miniProfiles.appendChild(mini);
+    // État
+    let currentIndex = 0;
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    let liked = new Set();
 
-    mini.addEventListener('click', () => openExpandedProfile(profile));
-  });
+    // Eléments DOM
+    const carousel = document.getElementById('carousel');
+    const miniProfiles = document.getElementById('miniProfiles');
+    const favoritesSidebar = document.getElementById('favoritesSidebar');
+    const expandedProfile = document.getElementById('expandedProfile');
+    const expandedImg = document.getElementById('expandedImg');
+    const expandedName = document.getElementById('expandedName');
+    const expandedDesc = document.getElementById('expandedDesc');
+    const expandedLikeBtn = document.getElementById('expandedLikeBtn');
+    const expandedChatBtn = document.getElementById('expandedChatBtn');
+    const expandedStarBtn = document.getElementById('expandedStarBtn');
+    const modal = document.getElementById('modal');
+    const modalClose = document.getElementById('modalClose');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalText = document.getElementById('modalText');
+    const chatModal = document.getElementById('chatModal');
+    const chatClose = document.getElementById('chatClose');
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendChat = document.getElementById('sendChat');
+    const photoZoom = document.getElementById('photoZoom');
+    const photoZoomImg = document.getElementById('photoZoomImg');
 
-  // Afficher ou cacher profil agrandi
-  function openExpandedProfile(profile) {
-    expandedProfile.style.display = 'flex';
-    expandedImg.src = profile.photo;
-    expandedName.textContent = profile.name;
-    expandedDesc.textContent = profile.desc;
-    expandedProfile.setAttribute('data-id', profile.id);
+    // Générer carousel profils
+    function renderCarousel() {
+      carousel.innerHTML = '';
+      profiles.forEach((profile, i) => {
+        const card = document.createElement('div');
+        card.className = `card ${profile.gender}`;
+        if(i === currentIndex) card.classList.add('center');
+        card.dataset.id = profile.id;
+        card.innerHTML = `
+          <img src="${profile.img}" alt="${profile.name}" />
+          <div class="name">${profile.name}</div>
+          <div class="btns">
+            <button class="btn-like" title="Like">&#10084;</button>
+            <button class="btn-chat" title="Chat">&#9993;</button>
+            <button class="btn-star ${favorites.includes(profile.id) ? 'active' : ''}" title="Favoris">&#9733;</button>
+          </div>
+        `;
+        carousel.appendChild(card);
 
-    // Mettre à jour l’état favori du bouton étoile dans profil agrandi
-    if (favorites.includes(profile.id)) {
-      expandedStarBtn.classList.add('active');
-    } else {
-      expandedStarBtn.classList.remove('active');
+        // Écouteurs boutons
+        const likeBtn = card.querySelector('.btn-like');
+        likeBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          toggleLike(profile.id);
+        });
+        const chatBtn = card.querySelector('.btn-chat');
+        chatBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          openChat(profile);
+        });
+        const starBtn = card.querySelector('.btn-star');
+        starBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          toggleFavorite(profile.id);
+        });
+
+        // Clic sur la carte ouvre détail profil
+        card.addEventListener('click', () => openExpandedProfile(profile));
+      });
     }
-  }
-  // Clic sur étoile dans profil agrandi
-  expandedStarBtn.onclick = function() {
-    const profileId = parseInt(expandedProfile.getAttribute('data-id'));
-    toggleFavorite(profileId, expandedStarBtn);
-  };
 
-  // Fermer profil agrandi si clic à l'extérieur
-  expandedProfile.addEventListener('click', e => {
-    if (e.target === expandedProfile) {
-      expandedProfile.style.display = 'none';
+    // Générer miniatures gauche
+    function renderMiniProfiles() {
+      miniProfiles.innerHTML = '';
+      profiles.forEach(profile => {
+        const mini = document.createElement('div');
+        mini.className = 'mini-profile';
+        mini.dataset.id = profile.id;
+        mini.title = profile.name;
+        mini.innerHTML = `<img src="${profile.img}" alt="${profile.name}" />`;
+        miniProfiles.appendChild(mini);
+
+        mini.addEventListener('click', () => openExpandedProfile(profile));
+      });
     }
-  });
 
-  // Fonction toggle favoris
-  function toggleFavorite(id, btn) {
-    if (favorites.includes(id)) {
-      favorites = favorites.filter(fid => fid !== id);
-      btn.classList.remove('active');
-    } else {
-      favorites.push(id);
-      btn.classList.add('active');
+    // Générer favoris droite
+    function renderFavoritesSidebar() {
+      favoritesSidebar.innerHTML = '';
+      favorites.forEach(id => {
+        const profile = profiles.find(p => p.id === id);
+        if(!profile) return;
+        const fav = document.createElement('div');
+        fav.className = 'favorite-mini';
+        fav.dataset.id = profile.id;
+        fav.dataset.name = profile.name;
+        fav.innerHTML = `<img src="${profile.img}" alt="${profile.name}" />`;
+        favoritesSidebar.appendChild(fav);
+
+        fav.addEventListener('click', () => openExpandedProfile(profile));
+      });
     }
-    updateFavoritesSidebar();
-    updateStarButtons();
-  }
 
-  // Met à jour la sidebar des favoris à droite
-  function updateFavoritesSidebar() {
-    favoritesSidebar.innerHTML = '';
-    favorites.forEach(id => {
-      const profile = profiles.find(p => p.id === id);
-      if (!profile) return;
-      const favMini = document.createElement('div');
-      favMini.classList.add('favorite-mini');
-      favMini.setAttribute('data-id', profile.id);
-      favMini.title = profile.name;
-      favMini.setAttribute('data-name', profile.name);
-      favMini.innerHTML = `<img src="${profile.photo}" alt="Favori ${profile.name}" />`;
-      favoritesSidebar.appendChild(favMini);
-
-      favMini.addEventListener('click', () => openExpandedProfile(profile));
-    });
-  }
-
-  // Met à jour les boutons étoile dans carousel selon favoris
-  function updateStarButtons() {
-    const cards = carousel.querySelectorAll('.card');
-    cards.forEach(card => {
-      const id = parseInt(card.getAttribute('data-id'));
-      const starBtn = card.querySelector('.btn-star');
-      if (favorites.includes(id)) {
-        starBtn.classList.add('active');
+    // Toggle like
+    function toggleLike(id) {
+      if(liked.has(id)) {
+        liked.delete(id);
+        showModal('Like retiré', 'Vous n’aimez plus ce profil.');
       } else {
-        starBtn.classList.remove('active');
+        liked.add(id);
+        showModal('Profil aimé', 'Merci pour votre like !');
+      }
+    }
+
+    // Toggle favori
+    function toggleFavorite(id) {
+      const index = favorites.indexOf(id);
+      if(index >= 0) {
+        favorites.splice(index,1);
+        showModal('Favori retiré', 'Ce profil a été retiré de vos favoris.');
+      } else {
+        favorites.push(id);
+        showModal('Favori ajouté', 'Ce profil a été ajouté à vos favoris.');
+      }
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+      renderCarousel();
+      renderFavoritesSidebar();
+      renderExpandedStar();
+    }
+
+    // Ouvrir profil agrandi
+    function openExpandedProfile(profile) {
+      expandedProfile.style.display = 'flex';
+      expandedImg.src = profile.img;
+      expandedName.textContent = profile.name;
+      expandedDesc.textContent = profile.description;
+      expandedProfile.dataset.id = profile.id;
+      renderExpandedStar();
+    }
+    // Met à jour le bouton étoile dans profil agrandi
+    function renderExpandedStar() {
+      const id = parseInt(expandedProfile.dataset.id);
+      if(favorites.includes(id)) {
+        expandedStarBtn.classList.add('active');
+      } else {
+        expandedStarBtn.classList.remove('active');
+      }
+    }
+
+    // Fermer profil agrandi
+    expandedProfile.addEventListener('click', e => {
+      if(e.target === expandedProfile) expandedProfile.style.display = 'none';
+    });
+
+    // Click boutons dans profil agrandi
+    expandedLikeBtn.addEventListener('click', () => {
+      const id = parseInt(expandedProfile.dataset.id);
+      toggleLike(id);
+    });
+    expandedStarBtn.addEventListener('click', () => {
+      const id = parseInt(expandedProfile.dataset.id);
+      toggleFavorite(id);
+    });
+    expandedChatBtn.addEventListener('click', () => {
+      const id = parseInt(expandedProfile.dataset.id);
+      const profile = profiles.find(p => p.id === id);
+      if(profile) openChat(profile);
+    });
+
+    // Modal show
+    function showModal(title, text) {
+      modalTitle.textContent = title;
+      modalText.textContent = text;
+      modal.classList.add('active');
+    }
+    modalClose.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+    modal.addEventListener('click', e => {
+      if(e.target === modal) modal.classList.remove('active');
+    });
+
+    // Chat system basique (sans backend)
+    let currentChatProfile = null;
+    function openChat(profile) {
+      currentChatProfile = profile;
+      chatMessages.innerHTML = `<div><em>Début de la conversation avec ${profile.name}</em></div>`;
+      chatModal.classList.add('active');
+      chatInput.value = '';
+      chatInput.focus();
+    }
+    chatClose.addEventListener('click', () => {
+      chatModal.classList.remove('active');
+      currentChatProfile = null;
+    });
+    chatModal.addEventListener('click', e => {
+      if(e.target === chatModal) {
+        chatModal.classList.remove('active');
+        currentChatProfile = null;
       }
     });
+    sendChat.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keydown', e => {
+      if(e.key === 'Enter') sendMessage();
+    });
+    function sendMessage() {
+      const text = chatInput.value.trim();
+      if(!text) return;
+      const userMsg = document.createElement('div');
+      userMsg.style.textAlign = 'right';
+      userMsg.textContent = 'Vous : ' + text;
+      chatMessages.appendChild(userMsg);
+      chatInput.value = '';
+      chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    // Également mettre à jour le bouton étoile dans profil agrandi
-    const expandedId = parseInt(expandedProfile.getAttribute('data-id'));
-    if (favorites.includes(expandedId)) {
-      expandedStarBtn.classList.add('active');
-    } else {
-      expandedStarBtn.classList.remove('active');
+      // Réponse simulée
+      setTimeout(() => {
+        const botMsg = document.createElement('div');
+        botMsg.style.textAlign = 'left';
+        botMsg.textContent = `${currentChatProfile.name} : Merci pour votre message.`;
+        chatMessages.appendChild(botMsg);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }, 1200);
     }
-  }
 
-  // Initial update
-  updateFavoritesSidebar();
-  updateStarButtons();
-</script>
+    // Photo zoom au clic image
+    document.body.addEventListener('click', e => {
+      if(e.target.tagName === 'IMG' && e.target.closest('.card, .mini-profile, .expanded-profile')) {
+        photoZoomImg.src = e.target.src;
+        photoZoom.classList.add('active');
+      }
+    });
+    photoZoom.addEventListener('click', () => {
+      photoZoom.classList.remove('active');
+      photoZoomImg.src = '';
+    });
 
+    // Initialisation
+    renderCarousel();
+    renderMiniProfiles();
+    renderFavoritesSidebar();
+
+  </script>
 </body>
 </html>
