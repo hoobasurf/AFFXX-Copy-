@@ -1,184 +1,174 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Connexion Authentique Sérieuse</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: url('images/fond-univers.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: white;
-      overflow-x: hidden;
+    * { box-sizing: border-box; margin:0; padding:0; }
+    html, body {
+      height:100%; width:100%;
+      font-family: 'Orbitron', sans-serif;
+      background: url('planete-magique.jpg') no-repeat center center/cover;
+      overflow: hidden; color: white;
     }
+    body::before {
+      content:""; position:fixed; top:0; left:0;
+      width:100%; height:100%;
+      background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%);
+      z-index:1; pointer-events:none;
+      animation: floatStars 60s linear infinite;
+    }
+    @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
 
-    .carrousel {
-      display: flex;
-      overflow-x: auto;
-      gap: 20px;
+    .header {
+      position: relative; z-index:2;
       padding: 20px;
-      scroll-snap-type: x mandatory;
     }
+    .btn-back {
+      position: absolute; top:20px; left:20px;
+      color: #ff66cc; font-size:1.5em;
+      cursor:pointer; text-decoration:none;
+      transition: transform .2s;
+    }
+    .btn-back:hover { transform: scale(1.2); }
 
-    .profil-card {
-      flex: 0 0 auto;
-      width: 250px;
-      height: 380px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 20px;
-      box-shadow: 0 0 15px #ff00ff99;
-      scroll-snap-align: center;
+    .carousel-container {
+      z-index:2;
       position: relative;
-      padding: 10px;
-      backdrop-filter: blur(6px);
-      cursor: pointer;
-    }
-
-    .profil-card img {
-      width: 100%;
-      height: 250px;
-      object-fit: cover;
-      border-radius: 15px;
-    }
-
-    .profil-info {
-      margin-top: 10px;
-      text-align: center;
-    }
-
-    .profil-actions {
-      position: absolute;
-      bottom: 10px;
-      width: 100%;
+      width:100%; height:calc(100% - 60px);
+      overflow: hidden;
       display: flex;
-      justify-content: space-around;
+      align-items:center;
+    }
+    .carousel {
+      display:flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      gap:40px;
+      padding:40px;
+    }
+    .carousel::-webkit-scrollbar { display:none; }
+    .card {
+      scroll-snap-align: center;
+      flex: 0 0 200px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 16px;
+      padding: 15px;
+      text-align:center;
+      transition: transform .3s, box-shadow .3s;
+      cursor:pointer;
+      position: relative;
+    }
+    .card img {
+      width:120px; height:120px;
+      border-radius:50%;
+      object-fit:cover;
+      margin-bottom:10px;
+      border:3px solid;
+    }
+    .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
+    .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
+    .name { font-size:1.1em; margin-bottom:5px;}
+    .btns {
+      display:flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .btn-like, .btn-chat {
+      width:30px; height:30px;
+      border-radius:50%;
+      background-color:rgba(255,255,255,0.1);
+      border:1px solid #ff66cc;
+      color:#ff66cc;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1em;
+      cursor:pointer;
+      transition: transform .2s;
+    }
+    .btn-like:hover, .btn-chat:hover { transform: scale(1.2); }
+
+    .card.center {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px #ff00ff;
     }
 
-    .profil-actions button {
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
+    /* Modal */
+    .modal, .chat-modal, .photo-zoom {
+      display:none; position:fixed;
+      top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.8);
+      align-items:center; justify-content:center;
+      z-index:10;
     }
+    .modal.active, .chat-modal.active, .photo-zoom.active { display:flex; }
 
-    .profil-actions .like {
-      color: red;
+    .modal-content {
+      background: rgba(0,0,0,0.7);
+      padding:20px; border-radius:12px;
+      width:90%; max-width:400px;
+      text-align:center; position:relative;
     }
-
-    .profil-actions .chat {
-      color: white;
+    .modal-content h2 { margin-bottom:10px; color:#ff66cc;}
+    .modal-content p { margin-bottom:8px; color:#ddd; font-size:0.95em;}
+    .modal-close {
+      position:absolute; top:10px; right:10px;
+      font-size:1.3em; color:#ff66cc;
+      cursor:pointer;
     }
-
-    .profil-actions .favori {
-      color: gold;
-    }
-
-    .profil-ouvert {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(10, 0, 30, 0.95);
-      z-index: 999;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: start;
-      animation: zoomIn 0.4s ease;
-      padding-top: 60px;
-    }
-
-    .profil-ouvert img {
-      width: 90%;
-      max-height: 300px;
-      object-fit: cover;
-      border-radius: 20px;
-      margin-bottom: 10px;
-    }
-
-    .photos-secondaires {
+    .photo-gallery {
       display: flex;
-      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
       margin-top: 10px;
     }
-
-    .photos-secondaires img {
+    .photo-gallery img {
       width: 60px;
       height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      border:2px solid #ff66cc;
+    }
+    .photo-zoom img {
+      max-width: 90vw;
+      max-height: 90vh;
       border-radius: 10px;
-      cursor: pointer;
+      border: 3px solid #ff66cc;
     }
 
-    .zoom-photo {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.9);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1001;
+    /* Chat modal */
+    .chat-box {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid #ff66cc;
+      border-radius: 12px;
+      padding: 15px;
+      width: 90%;
+      max-width: 400px;
+      position: relative;
     }
-
-    .zoom-photo img {
-      max-width: 90%;
-      max-height: 90%;
-    }
-
-    .close-btn {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      color: #ff66cc;
-      font-size: 30px;
-      cursor: pointer;
-    }
-
-    @keyframes zoomIn {
-      from { transform: scale(0.8); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-
-    .favoris-bar {
-      position: fixed;
-      top: 50%;
-      right: 0;
-      transform: translateY(-50%);
+    .chat-box textarea {
+      width: 100%;
+      height: 80px;
+      border-radius: 8px;
+      border: none;
+      padding: 8px;
+      font-family: 'Orbitron';
+      resize: none;
       background: rgba(255,255,255,0.1);
-      border-radius: 10px 0 0 10px;
-      padding: 10px;
-      z-index: 1000;
+      color: white;
     }
-
-    .favoris-bar img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      margin-bottom: 10px;
-      cursor: pointer;
-    }
-
-    .dock-message {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      background: rgba(255,255,255,0.1);
-      padding: 5px;
-      display: flex;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .dock-message img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      margin-right: 10px;
+    .chat-box button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background: #ff66cc;
+      border: none;
+      color: white;
+      border-radius: 8px;
       cursor: pointer;
     }
 
@@ -186,66 +176,124 @@
 </head>
 <body>
 
-<div class="carrousel">
-  <div class="profil-card" onclick="ouvrirProfil('Léna', 26, 'Paris', 'Elle recherche une connexion vraie et stable.', ['img1.jpg', 'img2.jpg'])">
-    <img src="img1.jpg" alt="Profil Léna">
-    <div class="profil-info">Léna, 26 ans - Paris</div>
-    <div class="profil-actions">
-      <button class="chat">💬</button>
-      <button class="like" onclick="event.stopPropagation(); likeProfil()">❤️</button>
-      <button class="favori">⭐</button>
+<div class="header">
+  <a href="page2.html" class="btn-back">&larr; Retour</a>
+</div>
+
+<div class="carousel-container fade-in">
+  <div class="carousel" id="carousel">
+    <!-- profils -->
+    <div class="card girl" data-name="Sophie, 28" data-age="28" data-lieu="Paris" data-desc="Passionnée par l’astronomie et les romans SF." data-gallery="47,49,51">
+      <img src="https://i.pravatar.cc/150?img=47" alt="Sophie">
+      <div class="name">Sophie</div>
+      <div class="btns">
+        <div class="btn-chat">💬</div>
+        <div class="btn-like">💖</div>
+      </div>
     </div>
+    <div class="card boy" data-name="Lucas, 31" data-age="31" data-lieu="Lyon" data-desc="Fan de jeux coopératifs et nature." data-gallery="12,14,16">
+      <img src="https://i.pravatar.cc/150?img=12" alt="Lucas">
+      <div class="name">Lucas</div>
+      <div class="btns">
+        <div class="btn-chat">💬</div>
+        <div class="btn-like">💖</div>
+      </div>
+    </div>
+    <!-- Ajoute ici d'autres profils similaires -->
   </div>
-  <!-- Ajoute ici d'autres profils identiques -->
 </div>
 
-<div class="favoris-bar">
-  <img src="img1.jpg" onclick="ouvrirProfil('Léna', 26, 'Paris', 'Elle recherche une connexion vraie et stable.', ['img1.jpg', 'img2.jpg'])">
+<!-- modal détail -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeModal()">&times;</span>
+    <h2 id="modal-name"></h2>
+    <p><strong>Âge :</strong> <span id="modal-age"></span></p>
+    <p><strong>Lieu :</strong> <span id="modal-lieu"></span></p>
+    <p id="modal-desc"></p>
+    <div class="photo-gallery" id="modal-gallery"></div>
+  </div>
 </div>
 
-<div class="dock-message">
-  <img src="img1.jpg" onclick="ouvrirProfil('Léna', 26, 'Paris', 'Elle recherche une connexion vraie et stable.', ['img1.jpg', 'img2.jpg'])">
-  <span style="color:white;">Léna</span>
+<!-- Zoom photo -->
+<div class="photo-zoom" id="photoZoom">
+  <span class="modal-close" onclick="document.getElementById('photoZoom').classList.remove('active')">&times;</span>
+  <img id="zoomedImage" src="" alt="Zoomed Photo">
 </div>
 
-<div id="profil-ouvert" class="profil-ouvert">
-  <div class="close-btn" onclick="fermerProfil()">✕</div>
-  <img id="main-photo" src="" alt="">
-  <div class="photos-secondaires" id="photos-secondaires"></div>
-  <div id="info-detail" style="padding: 10px; text-align: center;"></div>
-</div>
-
-<div id="zoom-photo" class="zoom-photo" onclick="this.style.display='none'">
-  <div class="close-btn" style="top:10px;right:20px;left:auto;">✕</div>
-  <img src="" alt="">
+<!-- Chat futuriste -->
+<div class="chat-modal" id="chatModal">
+  <div class="chat-box">
+    <span class="modal-close" onclick="document.getElementById('chatModal').classList.remove('active')">&times;</span>
+    <textarea placeholder="Écris ton message ici..."></textarea>
+    <button>Envoyer</button>
+  </div>
 </div>
 
 <script>
-  function ouvrirProfil(nom, age, ville, description, photos) {
-    document.getElementById('profil-ouvert').style.display = 'flex';
-    document.getElementById('main-photo').src = photos[0];
-    document.getElementById('info-detail').innerHTML = `<h2>${nom}, ${age} ans - ${ville}</h2><p>${description}</p>`;
-    let photoZone = document.getElementById('photos-secondaires');
-    photoZone.innerHTML = '';
-    for(let i = 0; i < photos.length; i++) {
-      let img = document.createElement('img');
-      img.src = photos[i];
-      img.onclick = function(e){
-        e.stopPropagation();
-        document.getElementById('zoom-photo').style.display = 'flex';
-        document.querySelector('#zoom-photo img').src = photos[i];
-      };
-      photoZone.appendChild(img);
+const carousel = document.getElementById('carousel');
+const cards = carousel.children;
+
+function updateCenter() {
+  const center = carousel.scrollLeft + carousel.offsetWidth / 2;
+  Array.from(cards).forEach(c => {
+    const cardCenter = c.offsetLeft + c.offsetWidth / 2;
+    c.classList.toggle('center', Math.abs(cardCenter - center) < c.offsetWidth/2);
+  });
+}
+
+carousel.addEventListener('scroll', updateCenter);
+window.addEventListener('load', () => {
+  carousel.scrollLeft = (carousel.scrollWidth - carousel.offsetWidth)/2;
+  updateCenter();
+});
+
+// Modal profil
+Array.from(cards).forEach(c => {
+  c.addEventListener('click', () => {
+    document.getElementById('modal-name').textContent = c.dataset.name;
+    document.getElementById('modal-age').textContent = c.dataset.age;
+    document.getElementById('modal-lieu').textContent = c.dataset.lieu;
+    document.getElementById('modal-desc').textContent = c.dataset.desc;
+    
+    const gallery = document.getElementById('modal-gallery');
+    gallery.innerHTML = '';
+    if (c.dataset.gallery) {
+      const ids = c.dataset.gallery.split(',');
+      ids.forEach(id => {
+        const img = document.createElement('img');
+        img.src = `https://i.pravatar.cc/150?img=${id}`;
+        img.onclick = () => {
+          document.getElementById('zoomedImage').src = img.src;
+          document.getElementById('photoZoom').classList.add('active');
+        };
+        gallery.appendChild(img);
+      });
     }
-  }
 
-  function fermerProfil() {
-    document.getElementById('profil-ouvert').style.display = 'none';
-  }
+    document.getElementById('modal').classList.add('active');
+  });
+});
 
-  function likeProfil() {
-    alert("Like envoyé !");
-  }
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+// Chat bouton
+document.querySelectorAll('.btn-chat').forEach(btn => {
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    document.getElementById('chatModal').classList.add('active');
+  };
+});
+
+// Like bouton
+document.querySelectorAll('.btn-like').forEach(btn => {
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    alert("💖 Like envoyé !");
+  };
+});
 </script>
 
 </body>
