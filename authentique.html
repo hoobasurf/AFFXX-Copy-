@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>Connexion Authentique Sérieuse</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin:0; padding:0; }
     html, body {
@@ -59,6 +59,7 @@
       transition: transform .3s, box-shadow .3s;
       cursor: pointer;
       position: relative;
+      user-select:none;
     }
     .card img {
       width: 90px;
@@ -196,208 +197,35 @@
           <div class="btn-fav" title="Favoris">⭐️</div>
         </div>
       </div>
-      <div class="card girl" data-name="Emma, 25" data-age="25" data-lieu="Marseille" data-desc="Amoureuse de la musique électronique et du voyage." data-gallery="35,37,39" data-msg="true">
-        <img src="https://i.pravatar.cc/150?img=35" alt="Emma">
-        <div class="name">Emma</div>
-        <div class="btns">
-          <div class="btn-chat" title="Chat">💬</div>
-          <div class="btn-like" title="Like">💖</div>
-          <div class="btn-fav" title="Favoris">⭐️</div>
-        </div>
-      </div>
-      <div class="card boy" data-name="Alex, 29" data-age="29" data-lieu="Toulouse" data-desc="Gamer et passionné par la technologie." data-gallery="21,23,25" data-msg="false">
-        <img src="https://i.pravatar.cc/150?img=21" alt="Alex">
-        <div class="name">Alex</div>
-        <div class="btns">
-          <div class="btn-chat" title="Chat">💬</div>
-          <div class="btn-like" title="Like">💖</div>
-          <div class="btn-fav" title="Favoris">⭐️</div>
-        </div>
-      </div>
-      <div class="card girl" data-name="Clara, 27" data-age="27" data-lieu="Nice" data-desc="Adoratrice de yoga et méditation." data-gallery="40,42,44" data-msg="false">
-        <img src="https://i.pravatar.cc/150?img=40" alt="Clara">
-        <div class="name">Clara</div>
-        <div class="btns">
-          <div class="btn-chat" title="Chat">💬</div>
-          <div class="btn-like" title="Like">💖</div>
-          <div class="btn-fav" title="Favoris">⭐️</div>
-        </div>
-      </div>
+      <!-- Ajoute d’autres cartes ici -->
     </div>
   </div>
 
-  <!-- Modal détails -->
-  <div class="modal" id="modalDetails">
+  <!-- Modal principal -->
+  <div class="modal" id="modal">
     <div class="modal-content">
-      <span class="modal-close" id="modalClose">&times;</span>
+      <span class="modal-close">&times;</span>
       <h2 id="modalName"></h2>
-      <p><strong>Âge:</strong> <span id="modalAge"></span></p>
-      <p><strong>Lieu:</strong> <span id="modalLieu"></span></p>
+      <p id="modalAge"></p>
+      <p id="modalLieu"></p>
       <p id="modalDesc"></p>
       <div class="photo-gallery" id="photoGallery"></div>
     </div>
   </div>
 
-  <!-- Zoom photo -->
+  <!-- Modal Zoom Photo -->
   <div class="photo-zoom" id="photoZoom">
-    <img src="" alt="Photo zoom" id="zoomedPhoto" />
+    <img src="" alt="Zoom" id="zoomedPhoto">
   </div>
 
-  <!-- Chat modal -->
+  <!-- Modal Chat -->
   <div class="chat-modal" id="chatModal">
     <div class="chat-box">
-      <textarea placeholder="Écris un message..."></textarea>
+      <textarea id="chatMessage" placeholder="Tape ton message..."></textarea>
       <button id="sendMessage">Envoyer</button>
     </div>
   </div>
 
-  <script>
-    const carousel = document.getElementById('carousel');
-    const cards = carousel.querySelectorAll('.card');
-    const modal = document.getElementById('modalDetails');
-    const modalClose = document.getElementById('modalClose');
-    const modalName = document.getElementById('modalName');
-    const modalAge = document.getElementById('modalAge');
-    const modalLieu = document.getElementById('modalLieu');
-    const modalDesc = document.getElementById('modalDesc');
-    const photoGallery = document.getElementById('photoGallery');
-    const photoZoom = document.getElementById('photoZoom');
-    const zoomedPhoto = document.getElementById('zoomedPhoto');
-    const chatModal = document.getElementById('chatModal');
-    const sendMessageBtn = document.getElementById('sendMessage');
-    const leftMiniProfiles = document.getElementById('leftMiniProfiles');
-
-    // Fonction pour centrer la carte active (scroll automatique)
-    function centerCard(card) {
-      const containerRect = carousel.getBoundingClientRect();
-      const cardRect = card.getBoundingClientRect();
-      const scrollLeft = carousel.scrollLeft;
-      const offset = (cardRect.left - containerRect.left) + scrollLeft - (containerRect.width / 2) + (cardRect.width / 2);
-      carousel.scrollTo({ left: offset, behavior: 'smooth' });
-    }
-
-    // Initial center sur la première carte
-    centerCard(cards[0]);
-    cards[0].classList.add('center');
-
-    // Gestion click carte pour ouvrir modal
-    cards.forEach(card => {
-      card.addEventListener('click', (e) => {
-        if(e.target.classList.contains('btn-chat') || e.target.classList.contains('btn-like') || e.target.classList.contains('btn-fav')) {
-          return; // Ne pas ouvrir modal si clic sur bouton
-        }
-        openModal(card);
-        centerCard(card);
-        updateCenterCard(card);
-      });
-    });
-
-    function updateCenterCard(activeCard) {
-      cards.forEach(c => c.classList.remove('center'));
-      activeCard.classList.add('center');
-    }
-
-    function openModal(card) {
-      modalName.textContent = card.dataset.name;
-      modalAge.textContent = card.dataset.age;
-      modalLieu.textContent = card.dataset.lieu;
-      modalDesc.textContent = card.dataset.desc;
-
-      // Charger photos
-      photoGallery.innerHTML = '';
-      if(card.dataset.gallery) {
-        const photoIds = card.dataset.gallery.split(',');
-        photoIds.forEach(id => {
-          const img = document.createElement('img');
-          img.src = `https://i.pravatar.cc/150?img=${id.trim()}`;
-          img.alt = card.dataset.name + ' photo';
-          img.addEventListener('click', () => {
-            zoomedPhoto.src = img.src;
-            photoZoom.classList.add('active');
-          });
-          photoGallery.appendChild(img);
-        });
-      }
-      modal.classList.add('active');
-    }
-
-    modalClose.addEventListener('click', () => {
-      modal.classList.remove('active');
-    });
-
-    photoZoom.addEventListener('click', () => {
-      photoZoom.classList.remove('active');
-    });
-
-    // Boutons chat
-    carousel.addEventListener('click', e => {
-      if(e.target.classList.contains('btn-chat')) {
-        openChat(e.target.closest('.card'));
-        e.stopPropagation();
-      }
-      else if(e.target.classList.contains('btn-like')) {
-        toggleLike(e.target);
-        e.stopPropagation();
-      }
-      else if(e.target.classList.contains('btn-fav')) {
-        toggleFavorite(e.target);
-        e.stopPropagation();
-      }
-    });
-
-    // Fonction chat
-    function openChat(card) {
-      chatModal.classList.add('active');
-      chatModal.dataset.user = card.dataset.name;
-    }
-
-    sendMessageBtn.addEventListener('click', () => {
-      const textarea = chatModal.querySelector('textarea');
-      const message = textarea.value.trim();
-      if(message === '') return alert('Écris un message avant d\'envoyer.');
-
-      // Fermer chat
-      chatModal.classList.remove('active');
-      textarea.value = '';
-
-      // Ajouter mini-profil à gauche avec animation
-      addMiniProfile(chatModal.dataset.user);
-      alert(`Message envoyé à ${chatModal.dataset.user}: "${message}"`);
-    });
-
-    // Ajouter mini-profil à gauche après envoi message
-    function addMiniProfile(userName) {
-      // Trouver la carte par nom
-      const card = [...cards].find(c => c.dataset.name === userName);
-      if(!card) return;
-      const imgSrc = card.querySelector('img').src;
-
-      const miniImg = document.createElement('img');
-      miniImg.src = imgSrc;
-      miniImg.alt = userName;
-      leftMiniProfiles.prepend(miniImg);
-
-      // Effacer après 10s
-      setTimeout(() => {
-        miniImg.remove();
-      }, 10000);
-    }
-
-    // Toggle like (animation cœur)
-    function toggleLike(btn) {
-      if(btn.classList.contains('liked')) {
-        btn.classList.remove('liked');
-        btn.textContent = '💖';
-      } else {
-        btn.classList.add('liked');
-        btn.textContent = '❤️';
-      }
-    }
-
-    // Toggle favoris (étoile)
-    function toggleFavorite(btn) {
-      btn.classList.toggle('active');
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
