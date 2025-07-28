@@ -3,359 +3,309 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Affinix profils + chat + favoris + sidebar mini profils</title>
+<title>Profils avec Favoris, Chat & Mini Profils Draggables</title>
 <style>
   body {
     font-family: Arial, sans-serif;
-    margin: 20px;
-    background: #fafafa;
+    margin: 0; padding: 0;
+    background: #f0f0f0;
   }
-  .cards-container {
+  #carousel {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    justify-content: center;
+    margin: 20px;
   }
   .card {
-    position: relative;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    width: 180px;
-    padding: 10px;
     background: white;
-    box-shadow: 0 0 5px #ccc;
+    border-radius: 8px;
+    box-shadow: 0 0 8px #ccc;
+    width: 200px;
+    margin: 10px;
+    padding: 15px;
+    text-align: center;
+    position: relative;
   }
   .card img {
-    width: 100%;
-    border-radius: 10px;
-    height: 120px;
-    object-fit: cover;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
   }
   .card h3 {
-    margin: 8px 0 4px 0;
-    font-size: 18px;
+    margin: 10px 0 15px;
   }
-  .card p {
-    font-size: 14px;
-    color: #555;
-  }
-  /* Boutons */
-  .btn-fav, .btn-chat {
+
+  /* Bouton Favori */
+  .btn-fav {
     position: absolute;
-    top: 10px;
+    top: 12px;
+    right: 12px;
     font-size: 24px;
     cursor: pointer;
+    color: #ccc;
     user-select: none;
     transition: color 0.3s ease;
   }
-  .btn-fav {
-    right: 40px;
-    color: #aaa;
-  }
-  .btn-fav.fav-active {
+  .btn-fav.active {
     color: gold;
-    text-shadow: 0 0 5px gold;
   }
+
+  /* Bouton Chat */
   .btn-chat {
-    right: 10px;
-    color: #555;
+    background: #4a90e2;
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
   }
   .btn-chat:hover {
-    color: #000;
+    background: #357abd;
   }
 
-  /* Sidebar mini profils */
-  .sidebar {
+  /* Sidebar mini-profils */
+  #leftMiniProfiles {
     position: fixed;
-    top: 10px;
+    top: 100px;
     left: 10px;
-    width: 100px;
-    min-height: 100px;
-    background: rgba(255 255 255 / 0.9);
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    padding: 8px 5px;
-    box-sizing: border-box;
+    width: 160px;
+    max-height: 90vh;
+    overflow: visible;
     z-index: 9999;
   }
+
   .mini-profile {
-    position: absolute;
-    width: 80px;
-    height: 80px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
+    display: flex;
+    align-items: center;
     background: white;
-    cursor: move;
+    border-radius: 5px;
+    margin-bottom: 10px;
     padding: 5px;
-    box-sizing: border-box;
-    text-align: center;
+    box-shadow: 0 0 5px #ccc;
     user-select: none;
-    box-shadow: 0 0 6px rgba(0,0,0,0.1);
-  }
-  .mini-profile img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-  .mini-profile div {
-    font-size: 12px;
-    margin-top: 4px;
+    width: 150px;
+    position: absolute; /* pour drag & drop */
+    cursor: grab;
   }
 
-  /* Chat Modal */
+  .mini-profile img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  /* Chat modal */
   #chatModal {
     display: none;
     position: fixed;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
+    background: white;
     width: 320px;
     max-width: 90vw;
-    background: white;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
     border-radius: 10px;
-    box-shadow: 0 0 15px #888;
     z-index: 10000;
     flex-direction: column;
+    padding: 20px;
   }
-  #chatModal.active {
-    display: flex;
+
+  #chatModal h3 {
+    margin: 0 0 10px;
   }
-  #chatModal header {
-    background: #007bff;
-    color: white;
-    padding: 10px;
-    border-radius: 10px 10px 0 0;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  #chatModal header button {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-  }
-  #chatBody {
-    padding: 10px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  #chatTextarea {
-    flex: 1;
-    resize: none;
+  #chatModal textarea {
     width: 100%;
+    height: 120px;
+    margin-bottom: 10px;
+    resize: vertical;
     font-size: 14px;
     padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-    margin-bottom: 8px;
-    font-family: monospace;
-    height: 150px;
-    overflow-y: auto;
   }
-  #sendChatBtn {
-    background: #007bff;
-    color: white;
+  #chatModal button {
+    background: #4a90e2;
     border: none;
-    padding: 8px;
-    border-radius: 6px;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 4px;
     cursor: pointer;
-    font-weight: bold;
+    margin-right: 8px;
   }
+  #chatModal button:hover {
+    background: #357abd;
+  }
+
+  #closeChatModal {
+    background: #d9534f;
+  }
+  #closeChatModal:hover {
+    background: #b52b27;
+  }
+
 </style>
 </head>
 <body>
 
-<h1>Profils Affinix avec Favoris, Chat & Sidebar Mini-Profils</h1>
+<!-- Sidebar mini profils -->
+<div id="leftMiniProfiles"></div>
 
-<div class="cards-container">
-  <div class="card" data-name="Clara, 28 ans, sportive, artiste">
-    <img src="https://i.pravatar.cc/150?img=3" alt="Clara" />
-    <h3>Clara</h3>
-    <p>28 ans, sportive, artiste</p>
-    <div class="btn-fav" title="Ajouter aux favoris" role="button" aria-label="Ajouter aux favoris">&#9734;</div>
-    <div class="btn-chat" title="Ouvrir chat" role="button" aria-label="Ouvrir chat">&#9993;</div>
+<!-- Carousel profils -->
+<div id="carousel">
+  <div class="card" data-name="Alice">
+    <div class="btn-fav" title="Ajouter aux favoris">☆</div>
+    <img src="https://i.pravatar.cc/100?u=alice" alt="Alice" />
+    <h3>Alice</h3>
+    <button class="btn-chat">💬 Chat</button>
   </div>
-  <div class="card" data-name="Maxime, 31 ans, passionné de musique">
-    <img src="https://i.pravatar.cc/150?img=5" alt="Maxime" />
-    <h3>Maxime</h3>
-    <p>31 ans, passionné de musique</p>
-    <div class="btn-fav" title="Ajouter aux favoris" role="button" aria-label="Ajouter aux favoris">&#9734;</div>
-    <div class="btn-chat" title="Ouvrir chat" role="button" aria-label="Ouvrir chat">&#9993;</div>
+  <div class="card" data-name="Bob">
+    <div class="btn-fav" title="Ajouter aux favoris">☆</div>
+    <img src="https://i.pravatar.cc/100?u=bob" alt="Bob" />
+    <h3>Bob</h3>
+    <button class="btn-chat">💬 Chat</button>
   </div>
-  <div class="card" data-name="Sophie, 26 ans, amatrice de lecture">
-    <img src="https://i.pravatar.cc/150?img=7" alt="Sophie" />
-    <h3>Sophie</h3>
-    <p>26 ans, amatrice de lecture</p>
-    <div class="btn-fav" title="Ajouter aux favoris" role="button" aria-label="Ajouter aux favoris">&#9734;</div>
-    <div class="btn-chat" title="Ouvrir chat" role="button" aria-label="Ouvrir chat">&#9993;</div>
+  <div class="card" data-name="Caroline">
+    <div class="btn-fav" title="Ajouter aux favoris">☆</div>
+    <img src="https://i.pravatar.cc/100?u=caroline" alt="Caroline" />
+    <h3>Caroline</h3>
+    <button class="btn-chat">💬 Chat</button>
   </div>
 </div>
 
-<div class="sidebar"></div>
-
 <!-- Chat Modal -->
-<div id="chatModal" role="dialog" aria-modal="true" aria-labelledby="chatWith">
-  <header>
-    <span id="chatWith">Chat avec ...</span>
-    <button id="closeChatModal" aria-label="Fermer chat">&times;</button>
-  </header>
-  <div id="chatBody">
-    <textarea id="chatTextarea" placeholder="Écris ton message ici..."></textarea>
-    <button id="sendChatBtn">Envoyer</button>
+<div id="chatModal">
+  <h3>Chat avec <span id="chatUserName"></span></h3>
+  <textarea id="chatMessage" placeholder="Écris ton message ici..."></textarea>
+  <div>
+    <button id="sendMessageBtn">Envoyer</button>
+    <button id="closeChatModal">Fermer</button>
   </div>
 </div>
 
 <script>
-  // 1. Favoris (étoile vide/pleine jaune) + stockage local
-  document.querySelectorAll('.btn-fav').forEach(btn => {
-    const card = btn.closest('.card');
-    const profName = card.dataset.name;
+document.addEventListener('DOMContentLoaded', () => {
+  const carousel = document.getElementById('carousel');
+  const cards = carousel.querySelectorAll('.card');
+  const leftMiniProfiles = document.getElementById('leftMiniProfiles');
 
-    // Charger état favori
-    const favs = JSON.parse(localStorage.getItem('affinix-favs') || '{}');
-    if (favs[profName]) btn.classList.add('fav-active');
-
-    btn.addEventListener('click', e => {
-      e.stopPropagation(); // éviter ouverture modal profil au clic sur étoile
-      if (btn.classList.contains('fav-active')) {
-        btn.classList.remove('fav-active');
-        delete favs[profName];
-      } else {
-        btn.classList.add('fav-active');
-        favs[profName] = true;
-      }
-      localStorage.setItem('affinix-favs', JSON.stringify(favs));
+  // --- Bouton Favori ⭐ toggle ---
+  cards.forEach(card => {
+    const btnFav = card.querySelector('.btn-fav');
+    btnFav.addEventListener('click', () => {
+      btnFav.classList.toggle('active');
+      // Changer l’étoile visuellement
+      btnFav.textContent = btnFav.classList.contains('active') ? '★' : '☆';
     });
   });
 
-  // 2. Chat modal gestion + historique par profil (localStorage)
+  // --- Sidebar mini-profils et chat ---
   const chatModal = document.getElementById('chatModal');
-  const chatWith = document.getElementById('chatWith');
-  const chatTextarea = document.getElementById('chatTextarea');
-  const sendChatBtn = document.getElementById('sendChatBtn');
+  const chatUserNameSpan = document.getElementById('chatUserName');
+  const chatMessageTextarea = document.getElementById('chatMessage');
+  const sendMessageBtn = document.getElementById('sendMessageBtn');
+  const closeChatModalBtn = document.getElementById('closeChatModal');
 
-  let currentChatProf = null;
+  let currentChatProfile = null; // profil en cours de chat
 
-  document.querySelectorAll('.btn-chat').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const card = btn.closest('.card');
-      currentChatProf = card.dataset.name;
-      chatWith.textContent = `Chat avec ${currentChatProf}`;
+  // Ouvre le chat modal pour un profil
+  function openChat(profileCard) {
+    currentChatProfile = profileCard.getAttribute('data-name');
+    chatUserNameSpan.textContent = currentChatProfile;
+    chatMessageTextarea.value = '';
 
-      // Charger historique
-      const history = JSON.parse(localStorage.getItem('affinix-chat-' + currentChatProf) || '[]');
-      chatTextarea.value = history.join('\n') + (history.length ? '\n' : '');
-      chatModal.classList.add('active');
-
-      // Ajouter mini profil si pas déjà affiché
-      addMiniProfile(card);
-    });
-  });
-
-  document.getElementById('closeChatModal').addEventListener('click', () => {
-    chatModal.classList.remove('active');
-  });
-
-  // Envoyer message
-  sendChatBtn.addEventListener('click', () => {
-    if (!currentChatProf) return;
-    const msg = chatTextarea.value.trim();
-    if (!msg) return;
-
-    let history = JSON.parse(localStorage.getItem('affinix-chat-' + currentChatProf) || '[]');
-    history.push(msg);
-    localStorage.setItem('affinix-chat-' + currentChatProf, JSON.stringify(history));
-
-    alert('Message enregistré localement.');
-  });
-
-  // 3 + 4 + 5 Sidebar mini profils avec drag & drop + stockage position + pas de suppression auto
-  const sidebar = document.querySelector('.sidebar');
-
-  function addMiniProfile(card) {
-    const profName = card.dataset.name;
-    if (document.querySelector(`.sidebar .mini-profile[data-name="${profName}"]`)) return; // déjà ajouté
-
-    const mini = document.createElement('div');
-    mini.className = 'mini-profile';
-    mini.dataset.name = profName;
-    mini.style.position = 'absolute';
-    mini.style.width = '80px';
-    mini.style.height = '80px';
-    mini.style.border = '1px solid #ccc';
-    mini.style.borderRadius = '10px';
-    mini.style.background = 'white';
-    mini.style.cursor = 'move';
-    mini.style.padding = '5px';
-    mini.style.boxSizing = 'border-box';
-    mini.style.textAlign = 'center';
-    mini.style.userSelect = 'none';
-
-    const img = card.querySelector('img').cloneNode();
-    img.style.width = '50px';
-    img.style.height = '50px';
-    img.style.borderRadius = '50%';
-    img.style.objectFit = 'cover';
-    mini.appendChild(img);
-
-    const shortName = profName.split(',')[0].slice(0, 3);
-    const nameSpan = document.createElement('div');
-    nameSpan.textContent = shortName;
-    nameSpan.style.fontSize = '12px';
-    mini.appendChild(nameSpan);
-
-    // Charger position depuis localStorage
-    const pos = JSON.parse(localStorage.getItem('affinix-mini-pos') || '{}');
-    if (pos[profName]) {
-      mini.style.left = pos[profName].x + 'px';
-      mini.style.top = pos[profName].y + 'px';
-    } else {
-      mini.style.left = '10px';
-      mini.style.top = (10 + 90 * sidebar.children.length) + 'px';
+    // Affiche l’historique s’il existe
+    const history = localStorage.getItem('chat_' + currentChatProfile);
+    if (history) {
+      chatMessageTextarea.value = history;
     }
 
-    // Drag & Drop
-    let offsetX, offsetY, dragging = false;
+    chatModal.style.display = 'flex';
+  }
 
-    mini.addEventListener('mousedown', e => {
-      dragging = true;
-      offsetX = e.clientX - mini.offsetLeft;
-      offsetY = e.clientY - mini.offsetTop;
-      mini.style.transition = 'none';
+  // Fermer modal chat
+  closeChatModalBtn.addEventListener('click', () => {
+    chatModal.style.display = 'none';
+    currentChatProfile = null;
+  });
+
+  // Envoyer message dans chat (stockage local)
+  sendMessageBtn.addEventListener('click', () => {
+    if (!currentChatProfile) return;
+
+    const msg = chatMessageTextarea.value.trim();
+    if (msg.length === 0) return alert("Tapez un message.");
+
+    // Sauvegarde dans localStorage
+    localStorage.setItem('chat_' + currentChatProfile, msg);
+
+    // Ajoute mini-profil dans sidebar s'il n'existe pas
+    if (!leftMiniProfiles.querySelector(`[data-name='${CSS.escape(currentChatProfile)}']`)) {
+      const origCard = Array.from(cards).find(c => c.getAttribute('data-name') === currentChatProfile);
+      if (origCard) {
+        const mini = createMiniProfile(origCard);
+        // Position initiale dans la sidebar
+        mini.style.left = '0px';
+        mini.style.top = (leftMiniProfiles.childElementCount * 50) + 'px';
+        leftMiniProfiles.appendChild(mini);
+        makeDraggable(mini);
+      }
+    }
+
+    alert("Message sauvegardé pour " + currentChatProfile);
+  });
+
+  // Crée un mini-profil pour la sidebar à partir d’une carte profil
+  function createMiniProfile(card) {
+    const mini = document.createElement('div');
+    mini.classList.add('mini-profile');
+    mini.setAttribute('data-name', card.getAttribute('data-name'));
+
+    const imgSrc = card.querySelector('img').src;
+    const name = card.getAttribute('data-name');
+
+    mini.innerHTML = `<img src="${imgSrc}" alt="${name}"><span>${name}</span>`;
+
+    return mini;
+  }
+
+  // Rend un élément draggable (drag & drop libre)
+  function makeDraggable(element) {
+    element.style.position = 'absolute';
+    element.style.cursor = 'grab';
+
+    let offsetX = 0, offsetY = 0, isDragging = false;
+
+    element.addEventListener('mousedown', e => {
+      isDragging = true;
+      offsetX = e.clientX - element.getBoundingClientRect().left;
+      offsetY = e.clientY - element.getBoundingClientRect().top;
+      element.style.cursor = 'grabbing';
       e.preventDefault();
     });
 
-    document.addEventListener('mouseup', () => {
-      if (dragging) {
-        dragging = false;
-        mini.style.transition = '';
-        // Sauvegarder position
-        const pos = JSON.parse(localStorage.getItem('affinix-mini-pos') || '{}');
-        pos[profName] = { x: mini.offsetLeft, y: mini.offsetTop };
-        localStorage.setItem('affinix-mini-pos', JSON.stringify(pos));
-      }
-    });
-
     document.addEventListener('mousemove', e => {
-      if (dragging) {
-        let x = e.clientX - offsetX;
-        let y = e.clientY - offsetY;
-        // Limiter dans sidebar (largeur sidebar = 100px)
-        x = Math.min(Math.max(x, 0), window.innerWidth - mini.offsetWidth);
-        y = Math.min(Math.max(y, 0), window.innerHeight - mini.offsetHeight);
-        mini.style.left = x + 'px';
-        mini.style.top = y + 'px';
-      }
+      if (!isDragging) return;
+      element.style.left = (e.clientX - offsetX) + 'px';
+      element.style.top = (e.clientY - offsetY) + 'px';
     });
 
-    sidebar.appendChild(mini);
+    document.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        element.style.cursor = 'grab';
+      }
+    });
   }
+
+  // --- Boutons chat ouvrant la modal ---
+  cards.forEach(card => {
+    const btnChat = card.querySelector('.btn-chat');
+    btnChat.addEventListener('click', () => {
+      openChat(card);
+    });
+  });
+
+});
 </script>
 
 </body>
