@@ -2,230 +2,160 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Connexion Authentique Sérieuse</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mini Profils</title>
   <style>
-    * { box-sizing: border-box; margin:0; padding:0; }
-    html, body {
-      height:100%; width:100%;
-      font-family: 'Orbitron', sans-serif;
-      background: url('planete-magique.jpg') no-repeat center center/cover;
-      overflow: hidden; color: white;
-    }
-    body::before {
-      content:""; position:fixed; top:0; left:0;
-      width:100%; height:100%;
-      background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%);
-      z-index:1; pointer-events:none;
-      animation: floatStars 60s linear infinite;
-    }
-    @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
-    .header {
-      position: relative; z-index:2;
-      padding: 20px;
-    }
-    .btn-back {
-      position: absolute; top:20px; left:20px;
-      color: #ff66cc; font-size:1.5em;
-      cursor:pointer; text-decoration:none;
-      transition: transform .2s;
-    }
-    .btn-back:hover { transform: scale(1.2); }
-    .carousel-container {
-      z-index:2;
-      position: relative;
-      width:100%; height:calc(100% - 60px);
-      overflow: hidden;
-      display: flex;
-      align-items:center;
-    }
-    .carousel {
-      display:flex;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      gap:40px;
-      padding:40px;
-    }
-    .carousel::-webkit-scrollbar { display:none; }
-    .card {
-      scroll-snap-align: center;
-      flex: 0 0 150px;
-      background: rgba(0,0,0,0.5);
-      border-radius: 16px;
-      padding: 15px;
-      text-align: center;
-      transition: transform .3s, box-shadow .3s;
-      cursor: pointer;
-      position: relative;
-      user-select:none;
-    }
-    .card img {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-bottom: 10px;
-      border: 3px solid;
-    }
-    .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
-    .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
-    .name { font-size:1.1em; margin-bottom:5px;}
-    .btns {
-      display:flex;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 6px;
-    }
-    .btn-like, .btn-chat, .btn-fav {
-      width:30px; height:30px;
-      border-radius:50%;
-      background-color:rgba(255,255,255,0.1);
-      border:1px solid #ff66cc;
-      color:#ff66cc;
-      display:flex; align-items:center; justify-content:center;
-      font-size:1em;
-      cursor:pointer;
-      transition: transform .2s, background-color .3s, color .3s;
-      user-select:none;
-    }
-    .btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
-    /* Bouton favoris en jaune quand actif */
-    .btn-fav.active {
-      background-color: #ffea00;
-      border-color: #ffea00;
-      color: #333;
-      transform: scale(1.3);
-    }
-    .card.center {
-      transform: scale(1.1);
-      box-shadow: 0 0 20px #ff00ff;
-    }
-    /* Mini‑profil gauche après message */
-    .left-mini-profiles {
-      position: fixed;
-      top: 50%;
-      left: 10px;
-      transform: translateY(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      z-index: 5;
-    }
-    .left-mini-profiles img {
-      width:50px; height:50px;
-      border-radius:50%;
-      border:2px solid #ff66cc;
-      object-fit:cover;
-      cursor:pointer;
-      box-shadow:0 0 8px #ff66cc;
-      transition:transform .2s;
-    }
-    .left-mini-profiles img:hover { transform: scale(1.2); }
-    .modal, .chat-modal, .photo-zoom {
-      display:none; position:fixed;
-      top:0; left:0; width:100%; height:100%;
-      background: rgba(0,0,0,0.8);
-      align-items:center; justify-content:center;
-      z-index:10;
-    }
-    .modal.active, .chat-modal.active, .photo-zoom.active { display:flex; }
-    .modal-content {
-      background: rgba(0,0,0,0.7);
-      padding:20px; border-radius:12px;
-      width:90%; max-width:400px;
-      text-align:center; position:relative;
-      max-height:90vh; overflow-y:auto;
-    }
-    .modal-content h2 { margin-bottom:10px; color:#ff66cc;}
-    .modal-content p { margin-bottom:8px; color:#ddd; font-size:0.95em;}
-    .modal-close {
-      position:absolute; top:10px; right:10px;
-      font-size:1.3em; color:#ff66cc;
-      cursor:pointer;
-    }
-    .photo-gallery { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin-top:10px;}
-    .photo-gallery img { width:60px; height:60px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid #ff66cc;}
-    .photo-zoom img { max-width:90vw; max-height:90vh; border-radius:10px; border:3px solid #ff66cc;}
-    .chat-box {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid #ff66cc;
-      border-radius:12px;
-      padding:15px;
-      width:90%;
-      max-width:400px;
-      position: relative;
-    }
-    .chat-box textarea {
-      width:100%; height:80px; border-radius:8px; border:none;
-      padding:8px; font-family:'Orbitron'; background:rgba(255,255,255,0.1); color:white; resize:none;
-    }
-    .chat-box button {
-      margin-top:10px; padding:8px 16px;
-      background:#ff66cc; border:none; color:white; border-radius:8px; cursor:pointer;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; background: #111; color: #fff; }
+    .container { padding: 20px; }
+    .mini-profiles { position: fixed; top: 20px; left: 20px; background: #222; padding: 10px; border-radius: 8px; cursor: move; z-index: 1000; }
+    .card { background: #333; border-radius: 10px; padding: 15px; margin-bottom: 10px; position: relative; }
+    .card .name { font-weight: bold; font-size: 18px; }
+    .btns { margin-top: 10px; display: flex; gap: 10px; }
+    .btns div { cursor: pointer; font-size: 20px; }
+    .modal, .chat-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 2000; }
+    .modal-content, .chat-box { background: #222; padding: 20px; border-radius: 10px; max-width: 90vw; color: #fff; }
+    .chat-box textarea { width: 100%; height: 80px; background: #111; color: #fff; }
+    .chat-box button { margin-top: 10px; background: #ff66cc; border: none; padding: 10px; color: #fff; cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <a href="page2.html" class="btn-back">&larr; Retour</a>
-  </div>
-
-  <div class="left-mini-profiles" id="leftMiniProfiles">
-    <!-- Mini-profil s’affiche ici après message -->
-  </div>
-
-  <div class="carousel-container fade-in">
-    <div class="carousel" id="carousel">
-      <div class="card girl" data-name="Sophie, 28" data-age="28" data-lieu="Paris" data-desc="Passionnée par l’astronomie et les romans SF." data-gallery="47,49,51" data-msg="false">
-        <img src="https://i.pravatar.cc/150?img=47" alt="Sophie">
-        <div class="name">Sophie</div>
-        <div class="btns">
-          <div class="btn-chat" title="Chat">💬</div>
-          <div class="btn-like" title="Like">💖</div>
-          <div class="btn-fav" title="Favoris">⭐️</div>
-        </div>
+<div class="container">
+  <div class="mini-profiles" id="miniProfiles">
+    <div class="card" data-name="Lucas">
+      <div class="name">Lucas</div>
+      <div class="btns">
+        <div class="btn-chat" title="Chat">💬</div>
+        <div class="btn-like" title="Like">💖</div>
+        <div class="btn-fav" title="Favoris">⭐️</div>
       </div>
-      <div class="card boy" data-name="Lucas, 31" data-age="31" data-lieu="Lyon" data-desc="Fan de jeux coopératifs et nature." data-gallery="12,14,16" data-msg="false">
-        <img src="https://i.pravatar.cc/150?img=12" alt="Lucas">
-        <div class="name">Lucas</div>
-        <div class="btns">
-          <div class="btn-chat" title="Chat">💬</div>
-          <div class="btn-like" title="Like">💖</div>
-          <div class="btn-fav" title="Favoris">⭐️</div>
-        </div>
-      </div>
-      <!-- Ajoute d’autres cartes ici -->
     </div>
   </div>
+</div>
 
-  <!-- Modal principal -->
-  <div class="modal" id="modal">
-    <div class="modal-content">
-      <span class="modal-close">&times;</span>
-      <h2 id="modalName"></h2>
-      <p id="modalAge"></p>
-      <p id="modalLieu"></p>
-      <p id="modalDesc"></p>
-      <div class="photo-gallery" id="photoGallery"></div>
-    </div>
+<!-- Modal Chat -->
+<div class="chat-modal" id="chatModal">
+  <div class="chat-box">
+    <textarea id="chatMessage" placeholder="Tape ton message..."></textarea>
+    <button id="sendMessage">Envoyer</button>
   </div>
+</div>
 
-  <!-- Modal Zoom Photo -->
-  <div class="photo-zoom" id="photoZoom">
-    <img src="" alt="Zoom" id="zoomedPhoto">
-  </div>
+<script>
+  // Boutons
+  document.querySelectorAll('.btn-chat').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const name = btn.closest('.card').dataset.name;
+      document.getElementById('chatModal').style.display = 'flex';
+      document.getElementById('chatModal').dataset.user = name;
+      showChatHistory(name);
+    });
+  });
 
-  <!-- Modal Chat -->
-  <div class="chat-modal" id="chatModal">
-    <div class="chat-box">
-      <textarea id="chatMessage" placeholder="Tape ton message..."></textarea>
-      <button id="sendMessage">Envoyer</button>
-    </div>
-  </div>
+  document.querySelectorAll('.btn-like').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const name = btn.closest('.card').dataset.name;
+      let likes = JSON.parse(localStorage.getItem('likes') || '[]');
+      if (!likes.includes(name)) {
+        likes.push(name);
+        localStorage.setItem('likes', JSON.stringify(likes));
+      }
+      alert(name + " liké !");
+    });
+  });
 
-  <script src="script.js"></script>
+  document.querySelectorAll('.btn-fav').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const name = btn.closest('.card').dataset.name;
+      let favs = JSON.parse(localStorage.getItem('favoris') || '[]');
+      if (!favs.includes(name)) {
+        favs.push(name);
+        localStorage.setItem('favoris', JSON.stringify(favs));
+      }
+      alert(name + " ajouté aux favoris !");
+    });
+  });
+
+  // Chat : envoyer message
+  document.getElementById('sendMessage').addEventListener('click', () => {
+    const msg = document.getElementById('chatMessage').value.trim();
+    if (!msg) return alert("Écris un message");
+    const name = document.getElementById('chatModal').dataset.user;
+    const history = JSON.parse(localStorage.getItem('chatHistory') || '{}');
+    if (!history[name]) history[name] = [];
+    history[name].push({ content: msg, date: new Date().toLocaleString() });
+    localStorage.setItem('chatHistory', JSON.stringify(history));
+    document.getElementById('chatModal').style.display = 'none';
+    document.getElementById('chatMessage').value = '';
+  });
+
+  function showChatHistory(name) {
+    const box = document.querySelector('.chat-box');
+    const old = box.querySelector('.history');
+    if (old) old.remove();
+    const hist = document.createElement('div');
+    hist.className = 'history';
+    const data = JSON.parse(localStorage.getItem('chatHistory') || '{}')[name] || [];
+    data.forEach(m => {
+      const p = document.createElement('p');
+      p.innerHTML = `<span style="color:#ff66cc;">[${m.date}]</span><br>${m.content}`;
+      p.style.marginBottom = '10px';
+      p.style.fontSize = '0.85em';
+      p.style.color = '#eee';
+      hist.appendChild(p);
+    });
+    box.prepend(hist);
+  }
+
+  // Déplacement mini-profil
+  const mini = document.getElementById('miniProfiles');
+  let isDragging = false, offsetX = 0, offsetY = 0;
+
+  mini.addEventListener('mousedown', e => {
+    isDragging = true;
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+    mini.style.cursor = 'grabbing';
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (isDragging) {
+      mini.style.position = 'fixed';
+      mini.style.left = (e.clientX - offsetX) + 'px';
+      mini.style.top = (e.clientY - offsetY) + 'px';
+      localStorage.setItem('miniProfilePosition', JSON.stringify({ left: mini.style.left, top: mini.style.top }));
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    mini.style.cursor = 'move';
+  });
+
+  // Restaurer position
+  window.addEventListener('DOMContentLoaded', () => {
+    const pos = JSON.parse(localStorage.getItem('miniProfilePosition'));
+    if (pos) {
+      mini.style.position = 'fixed';
+      mini.style.left = pos.left;
+      mini.style.top = pos.top;
+    }
+  });
+
+  // Suppression pression longue
+  document.querySelectorAll('.card').forEach(card => {
+    let timer;
+    card.addEventListener('mousedown', () => {
+      timer = setTimeout(() => {
+        if (confirm(`Supprimer ${card.dataset.name} ?`)) {
+          card.remove();
+        }
+      }, 5000);
+    });
+    card.addEventListener('mouseup', () => clearTimeout(timer));
+    card.addEventListener('mouseleave', () => clearTimeout(timer));
+  });
+</script>
+
 </body>
 </html>
