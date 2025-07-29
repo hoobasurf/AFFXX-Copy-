@@ -1,206 +1,205 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Carrousel avec Fonctions</title>
-<style>
-  body {
-    margin: 0; padding: 0; font-family: Arial, sans-serif; background: #222; color: #eee;
-  }
-  #carousel {
-    position: relative;
-    width: 100%;
-    height: 200px;
-    overflow: hidden;
-    background: #111;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  #carousel .items {
-    display: flex;
-    transition: transform 0.3s ease;
-  }
-  #carousel .item {
-    min-width: 120px;
-    margin: 0 10px;
-    background: #444;
-    border-radius: 8px;
-    padding: 10px;
-    text-align: center;
-    user-select: none;
-    cursor: pointer;
-    position: relative;
-  }
-  #carousel .item.dragging {
-    opacity: 0.6;
-  }
-  #mini-profile {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    width: 60px;
-    height: 60px;
-    background: #ff4081;
-    border-radius: 50%;
-    cursor: grab;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    user-select: none;
-    z-index: 1000;
-    color: white;
-    font-size: 18px;
-  }
-  #mini-profile.dragging {
-    cursor: grabbing;
-    opacity: 0.8;
-  }
-  /* Juste pour montrer boutons - on garde à l’état brut */
-  #buttons {
-    margin: 20px;
-    text-align: center;
-  }
-  button {
-    margin: 0 10px;
-    padding: 10px 15px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cartes Profil Interactives</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+    }
+
+    .card {
+      background: #222;
+      border: 2px solid #444;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 10px;
+      width: 200px;
+      text-align: center;
+      display: inline-block;
+      position: relative;
+    }
+
+    .card img {
+      width: 100%;
+      border-radius: 50%;
+    }
+
+    .card .name {
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .btns {
+      margin-top: 10px;
+    }
+
+    .btns button {
+      font-size: 20px;
+      padding: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #ccc;
+    }
+
+    .btns .btn-fav.active {
+      color: yellow;
+    }
+
+    #leftMiniProfiles {
+      position: fixed;
+      left: 10px;
+      top: 10px;
+      z-index: 9999;
+    }
+
+    #leftMiniProfiles img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin: 5px;
+      cursor: grab;
+    }
+  </style>
 </head>
 <body>
 
-<div id="carousel">
-  <div class="items" id="items-container">
-    <div class="item" data-id="1">Profil 1</div>
-    <div class="item" data-id="2">Profil 2</div>
-    <div class="item" data-id="3">Profil 3</div>
-    <div class="item" data-id="4">Profil 4</div>
-    <div class="item" data-id="5">Profil 5</div>
+  <div class="card" data-name="Alice">
+    <img src="https://placekitten.com/200/200" alt="Alice" />
+    <div class="name">Alice</div>
+    <div class="btns">
+      <button class="btn-message">💬</button>
+      <button class="btn-fav">⭐</button>
+    </div>
   </div>
-</div>
 
-<div id="mini-profile" draggable="true" title="Déplace-moi">
-  MP
-</div>
+  <div class="card" data-name="Bob">
+    <img src="https://placekitten.com/201/201" alt="Bob" />
+    <div class="name">Bob</div>
+    <div class="btns">
+      <button class="btn-message">💬</button>
+      <button class="btn-fav">⭐</button>
+    </div>
+  </div>
 
-<div id="buttons">
-  <button id="likeBtn">J'aime</button>
-  <button id="messageBtn">Message</button>
-  <button id="showDataBtn">Afficher données</button>
-</div>
+  <div id="leftMiniProfiles"></div>
 
-<script>
-  // ======== Mini-profile draggable + stockage position ========
-  const miniProfile = document.getElementById('mini-profile');
+  <script>
+    const cards = document.querySelectorAll('.card');
+    const leftMiniProfiles = document.getElementById('leftMiniProfiles');
 
-  // Charge position stockée si existante
-  const savedPos = localStorage.getItem('miniProfilePos');
-  if (savedPos) {
-    const pos = JSON.parse(savedPos);
-    miniProfile.style.top = pos.top;
-    miniProfile.style.left = pos.left;
-    miniProfile.style.right = 'auto'; // supprime right si on set left
-  }
+    cards.forEach(card => {
+      const favBtn = card.querySelector('.btn-fav');
+      const msgBtn = card.querySelector('.btn-message');
+      const userName = card.dataset.name;
 
-  let offsetX, offsetY;
-  let isDragging = false;
+      favBtn.addEventListener('click', () => {
+        favBtn.classList.toggle('active');
+      });
 
-  miniProfile.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    offsetX = e.clientX - miniProfile.getBoundingClientRect().left;
-    offsetY = e.clientY - miniProfile.getBoundingClientRect().top;
-    miniProfile.classList.add('dragging');
-  });
+      msgBtn.addEventListener('click', () => {
+        addMiniProfile(userName);
+      });
+    });
 
-  document.addEventListener('mouseup', () => {
-    if (isDragging) {
-      isDragging = false;
-      miniProfile.classList.remove('dragging');
-      // Sauvegarde position
-      localStorage.setItem('miniProfilePos', JSON.stringify({
-        top: miniProfile.style.top,
-        left: miniProfile.style.left
-      }));
+    function addMiniProfile(userName) {
+      const card = [...cards].find(c => c.dataset.name === userName);
+      if (!card) return;
+
+      const imgSrc = card.querySelector('img').src;
+      const miniImg = document.createElement('img');
+      miniImg.src = imgSrc;
+      miniImg.alt = userName;
+
+      miniImg.style.position = 'absolute';
+      miniImg.style.top = '0px';
+      miniImg.style.left = '0px';
+      miniImg.draggable = false;
+
+      leftMiniProfiles.appendChild(miniImg);
+      makeDraggable(miniImg);
+
+      // Suppression après appui long (3s)
+      let pressTimer = null;
+      miniImg.addEventListener('mousedown', startPress);
+      miniImg.addEventListener('touchstart', startPress);
+      miniImg.addEventListener('mouseup', cancelPress);
+      miniImg.addEventListener('mouseleave', cancelPress);
+      miniImg.addEventListener('touchend', cancelPress);
+      miniImg.addEventListener('touchcancel', cancelPress);
+
+      function startPress(e) {
+        e.preventDefault();
+        pressTimer = setTimeout(() => {
+          miniImg.remove();
+        }, 3000);
+      }
+
+      function cancelPress() {
+        clearTimeout(pressTimer);
+      }
+
+      // Cliquer = ouvrir le profil complet
+      miniImg.addEventListener('click', () => {
+        alert(`Ouverture du profil de ${userName}`);
+        // Tu peux ici insérer openModal(card) si tu as un système modal
+      });
     }
-  });
 
-  document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    let x = e.clientX - offsetX;
-    let y = e.clientY - offsetY;
+    function makeDraggable(el) {
+      let offsetX = 0, offsetY = 0, startX = 0, startY = 0;
 
-    // Limite dans fenêtre
-    const winWidth = window.innerWidth;
-    const winHeight = window.innerHeight;
-    const elemWidth = miniProfile.offsetWidth;
-    const elemHeight = miniProfile.offsetHeight;
+      el.addEventListener('mousedown', dragStart);
+      el.addEventListener('touchstart', dragStartTouch, { passive: false });
 
-    if (x < 0) x = 0;
-    if (y < 0) y = 0;
-    if (x > winWidth - elemWidth) x = winWidth - elemWidth;
-    if (y > winHeight - elemHeight) y = winHeight - elemHeight;
+      function dragStart(e) {
+        e.preventDefault();
+        startX = e.clientX;
+        startY = e.clientY;
+        document.addEventListener('mousemove', dragMove);
+        document.addEventListener('mouseup', dragEnd);
+      }
 
-    miniProfile.style.left = x + 'px';
-    miniProfile.style.top = y + 'px';
-    miniProfile.style.right = 'auto'; // pour éviter conflit avec right css
-  });
+      function dragStartTouch(e) {
+        e.preventDefault();
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        document.addEventListener('touchmove', dragMoveTouch, { passive: false });
+        document.addEventListener('touchend', dragEnd);
+      }
 
-  // ======== Suppression mini-profile par appui long 5s ========
-  let pressTimer = null;
+      function dragMove(e) {
+        offsetX = e.clientX - startX;
+        offsetY = e.clientY - startY;
+        el.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+      }
 
-  miniProfile.addEventListener('mousedown', () => {
-    pressTimer = setTimeout(() => {
-      // Supprime mini-profile
-      miniProfile.style.display = 'none';
-      localStorage.removeItem('miniProfilePos');
-      alert("Mini-profil supprimé (appui long)");
-    }, 5000);
-  });
-  miniProfile.addEventListener('mouseup', () => {
-    clearTimeout(pressTimer);
-  });
-  miniProfile.addEventListener('mouseleave', () => {
-    clearTimeout(pressTimer);
-  });
+      function dragMoveTouch(e) {
+        offsetX = e.touches[0].clientX - startX;
+        offsetY = e.touches[0].clientY - startY;
+        el.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+      }
 
-  // ======== Gestion Likes + Messages avec stockage ========
-  const likeBtn = document.getElementById('likeBtn');
-  const messageBtn = document.getElementById('messageBtn');
-  const showDataBtn = document.getElementById('showDataBtn');
-
-  // On stocke les actions dans localStorage sous forme :
-  // {likes: [{id, date}], messages: [{id, date}]}
-
-  function getStoredData() {
-    return JSON.parse(localStorage.getItem('userData') || '{"likes":[], "messages":[]}');
-  }
-  function saveStoredData(data) {
-    localStorage.setItem('userData', JSON.stringify(data));
-  }
-
-  likeBtn.addEventListener('click', () => {
-    const data = getStoredData();
-    data.likes.push({id: Date.now(), date: new Date().toLocaleString()});
-    saveStoredData(data);
-    alert("Like ajouté !");
-  });
-
-  messageBtn.addEventListener('click', () => {
-    const data = getStoredData();
-    data.messages.push({id: Date.now(), date: new Date().toLocaleString()});
-    saveStoredData(data);
-    alert("Message ajouté !");
-  });
-
-  showDataBtn.addEventListener('click', () => {
-    const data = getStoredData();
-    alert(`Likes : ${data.likes.length}\nMessages : ${data.messages.length}`);
-  });
-</script>
-
+      function dragEnd() {
+        el.style.left = `${el.offsetLeft + offsetX}px`;
+        el.style.top = `${el.offsetTop + offsetY}px`;
+        el.style.transform = 'none';
+        document.removeEventListener('mousemove', dragMove);
+        document.removeEventListener('mouseup', dragEnd);
+        document.removeEventListener('touchmove', dragMoveTouch);
+        document.removeEventListener('touchend', dragEnd);
+      }
+    }
+  </script>
 </body>
 </html>
