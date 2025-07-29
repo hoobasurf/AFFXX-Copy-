@@ -212,6 +212,89 @@
 
     setupMessageButtons();
   </script>
+<script>
+(function(){
+  const leftMini = document.getElementById('leftMiniProfiles');
+  let activeMini = null;
+  const chatBox = document.createElement('div');
+  chatBox.id = 'miniChatBox';
+  chatBox.style.cssText = 'position:fixed;left:80px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.8);color:#ff66cc;padding:10px;border-radius:12px;display:none;flex-direction:column;max-height:300px;z-index:20;';
+  const titleEl = document.createElement('h3'); titleEl.style.margin='0 0 8px';
+  const msgsEl = document.createElement('div'); msgsEl.style.flex='1'; msgsEl.style.overflowY='auto'; msgsEl.style.marginBottom='8px';
+  const inputWrapper = document.createElement('div'); inputWrapper.style.display='flex';
+  const input = document.createElement('input'); input.type='text'; input.placeholder='Écrire un message...'; input.style.flex='1'; input.style.border='1px solid #ff66cc'; input.style.background='transparent'; input.style.color='#ff66cc'; input.style.padding='6px'; input.style.borderRadius='6px';
+  const btn = document.createElement('button'); btn.textContent='Envoyer'; btn.style.marginLeft='6px'; btn.style.background='#ff66cc'; btn.style.color='#222'; btn.style.border='none'; btn.style.padding='6px 12px'; btn.style.borderRadius='6px'; btn.style.cursor='pointer';
+  inputWrapper.append(input, btn);
+  chatBox.append(titleEl, msgsEl, inputWrapper);
+  document.body.appendChild(chatBox);
 
+  function openChat(name) {
+    activeMini && activeMini.classList.remove('active-mini');
+    activeMini = leftMini.querySelector(`img[alt="${name}"]`);
+    titleEl.textContent = `Chat avec ${name}`;
+    msgsEl.innerHTML = '';
+    chatBox.style.display='flex';
+    input.focus();
+  }
+  btn.addEventListener('click', () => {
+    const txt = input.value.trim();
+    if (!txt || !activeMini) return;
+    const d = document.createElement('div');
+    d.textContent = txt;
+    d.style.cssText = 'background:#ff66cc;color:#222;padding:6px 10px;margin-bottom:6px;border-radius:12px;align-self:flex-end;';
+    msgsEl.appendChild(d);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+    input.value='';
+  });
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter'){e.preventDefault(); btn.click(); } });
+
+  // fonction d'ajout miniature
+  window._addMini = function(card){
+    const nm = card.dataset.name;
+    if (leftMini.querySelector(`img[alt="${nm}"]`)) return;
+    const m = document.createElement('img');
+    m.src = card.querySelector('img').src;
+    m.alt = nm; m.title = nm; m.draggable=true;
+    m.style.cursor = 'pointer';
+    leftMini.appendChild(m);
+
+    m.addEventListener('click', ()=> openChat(nm));
+    let to;
+    m.addEventListener('mousedown', ()=> to = setTimeout(()=>{
+        if (confirm(`Supprimer ${nm} ?`)){ leftMini.removeChild(m); chatBox.style.display='none'; }
+      },3000));
+    m.addEventListener('mouseup', ()=> clearTimeout(to));
+    m.addEventListener('mouseleave', ()=> clearTimeout(to));
+
+    // DnD reorder
+    m.addEventListener('dragstart', e=>{
+      m.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', nm);
+    });
+    m.addEventListener('dragend', ()=> m.classList.remove('dragging'));
+    leftMini.addEventListener('dragover', e=>{
+      e.preventDefault();
+      const dragging = leftMini.querySelector('.dragging');
+      const all = [...leftMini.querySelectorAll('img:not(.dragging)')];
+      const after = all.reduce((closest,ch)=>{
+        const box=ch.getBoundingClientRect();
+        const offset = e.clientY - box.top - box.height/2;
+        if (offset < 0 && offset > closest.offset) return {offset,element:ch};
+        return closest;
+      },{offset:Infinity}).element;
+      if (!after) leftMini.appendChild(dragging); else leftMini.insertBefore(dragging, after);
+    });
+  };
+
+  // attacher aux boutons chat existants
+  document.querySelectorAll('.btn-chat').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      e.stopPropagation();
+      const card = btn.closest('.card');
+      window._addMini(card);
+    });
+  });
+})();
+</script>
 </body>
 </html>
