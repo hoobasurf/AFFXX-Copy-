@@ -2,231 +2,132 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chat Planète</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat Galaxie</title>
   <style>
     body {
       margin: 0;
-      font-family: 'Arial Rounded MT Bold', sans-serif;
-      background: url('https://images.unsplash.com/photo-1549887534-248d45f6c869?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+      font-family: 'Arial', sans-serif;
+      background: url('https://img.freepik.com/fond-galaxie.jpg') no-repeat center center fixed;
       background-size: cover;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      color: white;
     }
 
-    .miniatures {
+    .carrousel {
+      display: flex;
+      overflow-x: auto;
+      gap: 20px;
+      padding: 20px;
+      scroll-snap-type: x mandatory;
+    }
+
+    .profil {
+      background: rgba(0,0,0,0.6);
+      border-radius: 15px;
+      padding: 15px;
+      min-width: 200px;
+      scroll-snap-align: start;
+      text-align: center;
+    }
+
+    .profil img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ff00cc;
+    }
+
+    .profil button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #ff00cc;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #miniatures {
       display: flex;
       gap: 10px;
-      margin-top: 20px;
-      flex-wrap: wrap;
+      padding: 15px;
+      overflow-x: auto;
     }
 
     .miniature {
       width: 60px;
       height: 60px;
       border-radius: 50%;
-      background-color: #ff00cc;
-      background-image: url('https://via.placeholder.com/60');
+      border: 2px solid white;
       background-size: cover;
-      border: 2px solid #fff;
+      background-position: center;
       cursor: grab;
-      transition: transform 0.2s;
     }
 
-    .miniature:active {
-      cursor: grabbing;
-    }
-
-    .chat-container {
+    #chatContainer {
       display: none;
-      margin-top: 30px;
-      background-color: rgba(0, 0, 0, 0.6);
-      border-radius: 15px;
-      padding: 20px;
-      width: 80%;
-      max-width: 400px;
-    }
-
-    .chat-title {
-      font-size: 20px;
-      color: #ff70e8;
-      margin-bottom: 10px;
-    }
-
-    .chat-box {
-      border: 2px solid #ff70e8;
-      border-radius: 10px;
-      padding: 10px;
-      min-height: 150px;
-      margin-bottom: 10px;
-      background-color: #111;
-      overflow-y: auto;
-      max-height: 300px;
-    }
-
-    .chat-input {
-      display: flex;
-      gap: 10px;
-    }
-
-    input[type="text"] {
-      flex: 1;
-      padding: 10px;
-      border-radius: 10px;
-      border: 2px solid #ff70e8;
-      background: #000;
-      color: #fff;
-      font-size: 16px;
-    }
-
-    button {
-      padding: 10px 15px;
-      background: #ff70e8;
-      border: none;
-      border-radius: 10px;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .profiles {
-      margin-top: 40px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      align-items: center;
-    }
-
-    .profile-card {
-      background-color: rgba(0, 0, 0, 0.6);
+      margin: 20px;
+      background: rgba(0,0,0,0.6);
       padding: 15px;
-      border-radius: 15px;
-      width: 300px;
-      text-align: center;
+      border-radius: 10px;
+      max-width: 500px;
     }
 
-    .profile-card button {
-      margin-top: 10px;
+    #chatBox {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+
+    #messageInput {
+      flex:1;
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    #sendBtn {
+      padding: 10px 15px;
+      background: #ff00cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-<div id="miniatures" style="display: flex; gap: 10px; margin-top: 20px; padding-left: 20px; overflow-x: auto;"></div>
 
-<div id="chatContainer" style="display:none; margin: 20px; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 10px; max-width: 500px;">
-  <div id="chatBox" style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;"></div>
-  <div style="display: flex; gap: 10px;">
-    <input type="text" id="messageInput" placeholder="Écris ici..." style="flex:1; padding:10px; border-radius: 5px; border:none;">
-    <button onclick="sendMessage()" style="padding: 10px 15px; background: #ff00cc; color: white; border: none; border-radius: 5px;">Envoyer</button>
-  </div>
-</div>
-
-<script>
-  const miniatures = document.getElementById('miniatures');
-  const chatContainer = document.getElementById('chatContainer');
-  const chatBox = document.getElementById('chatBox');
-  const messageInput = document.getElementById('messageInput');
-
-  let activeChat = null;
-
-  function addMiniature(id, img = 'https://via.placeholder.com/60') {
-    if (document.getElementById('mini-' + id)) return;
-
-    const mini = document.createElement('div');
-    mini.className = 'miniature';
-    mini.id = 'mini-' + id;
-    mini.draggable = true;
-    mini.style.width = '60px';
-    mini.style.height = '60px';
-    mini.style.borderRadius = '50%';
-    mini.style.background = `url(${img}) center/cover no-repeat`;
-    mini.style.border = '2px solid white';
-    mini.style.cursor = 'grab';
-
-    mini.addEventListener('click', () => {
-      activeChat = id;
-      chatContainer.style.display = 'block';
-    });
-
-    let timer;
-    mini.addEventListener('mousedown', () => {
-      timer = setTimeout(() => {
-        mini.remove();
-        if (activeChat === id) chatContainer.style.display = 'none';
-      }, 3000);
-    });
-    mini.addEventListener('mouseup', () => clearTimeout(timer));
-
-    mini.addEventListener('dragstart', (e) => {
-      e.dataTransfer.setData('text/plain', mini.id);
-    });
-
-    miniatures.appendChild(mini);
-  }
-
-  miniatures.addEventListener('dragover', (e) => e.preventDefault());
-  miniatures.addEventListener('drop', (e) => {
-    e.preventDefault();
-    const id = e.dataTransfer.getData('text/plain');
-    const dragged = document.getElementById(id);
-    const target = e.target.closest('.miniature');
-    if (dragged && target && dragged !== target) {
-      miniatures.insertBefore(dragged, target);
-    }
-  });
-
-  function sendMessage() {
-    const msg = messageInput.value.trim();
-    if (!msg) return;
-
-    const bubble = document.createElement('div');
-    bubble.textContent = msg;
-    bubble.style.background = '#ff00cc';
-    bubble.style.color = 'white';
-    bubble.style.padding = '8px 12px';
-    bubble.style.marginBottom = '5px';
-    bubble.style.borderRadius = '8px';
-    bubble.style.maxWidth = '80%';
-
-    chatBox.appendChild(bubble);
-    messageInput.value = '';
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-
-  // Ajoute cette fonction à chaque bouton "Message"
-  function setupMessageButtons() {
-    document.querySelectorAll('[data-message-id]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.getAttribute('data-message-id');
-        const img = btn.getAttribute('data-img') || 'https://via.placeholder.com/60';
-        addMiniature(id, img);
-      });
-    });
-  }
-
-  setupMessageButtons();
-</script>
-  <div class="miniatures" id="miniatures"></div>
-
-  <div class="chat-container" id="chatContainer">
-    <div class="chat-title">Chat</div>
-    <div class="chat-box" id="chatBox"></div>
-    <div class="chat-input">
-      <input type="text" id="messageInput" placeholder="Cc" />
-      <button onclick="sendMessage()">Envoyer</button>
+  <div class="carrousel">
+    <div class="profil">
+      <img src="https://randomuser.me/api/portraits/women/1.jpg" />
+      <h4>Élise</h4>
+      <button data-message-id="elise" data-img="https://randomuser.me/api/portraits/women/1.jpg">Message</button>
+    </div>
+    <div class="profil">
+      <img src="https://randomuser.me/api/portraits/men/2.jpg" />
+      <h4>Lucas</h4>
+      <button data-message-id="lucas" data-img="https://randomuser.me/api/portraits/men/2.jpg">Message</button>
+    </div>
+    <div class="profil">
+      <img src="https://randomuser.me/api/portraits/women/3.jpg" />
+      <h4>Claire</h4>
+      <button data-message-id="claire" data-img="https://randomuser.me/api/portraits/women/3.jpg">Message</button>
+    </div>
+    <div class="profil">
+      <img src="https://randomuser.me/api/portraits/men/4.jpg" />
+      <h4>Hugo</h4>
+      <button data-message-id="hugo" data-img="https://randomuser.me/api/portraits/men/4.jpg">Message</button>
     </div>
   </div>
 
-  <div class="profiles">
-    <div class="profile-card">
-      <div>Nom : Profil 1</div>
-      <button onclick="addMiniature('profil1')">Message</button>
-    </div>
-    <div class="profile-card">
-      <div>Nom : Profil 2</div>
-      <button onclick="addMiniature('profil2')">Message</button>
+  <div id="miniatures"></div>
+
+  <div id="chatContainer">
+    <div id="chatBox"></div>
+    <div style="display: flex; gap: 10px;">
+      <input type="text" id="messageInput" placeholder="Écris ici..." />
+      <button id="sendBtn" onclick="sendMessage()">Envoyer</button>
     </div>
   </div>
 
@@ -235,47 +136,36 @@
     const chatContainer = document.getElementById('chatContainer');
     const chatBox = document.getElementById('chatBox');
     const messageInput = document.getElementById('messageInput');
-
     let activeChat = null;
 
-    function addMiniature(id) {
-      if (document.getElementById(id)) return;
+    function addMiniature(id, img) {
+      if (document.getElementById('mini-' + id)) return;
 
       const mini = document.createElement('div');
       mini.className = 'miniature';
-      mini.id = id;
-      mini.setAttribute('draggable', 'true');
+      mini.id = 'mini-' + id;
+      mini.draggable = true;
+      mini.style.backgroundImage = `url(${img})`;
 
       mini.addEventListener('click', () => {
         activeChat = id;
         chatContainer.style.display = 'block';
       });
 
-      let pressTimer;
-      mini.addEventListener('touchstart', () => {
-        pressTimer = setTimeout(() => {
-          mini.remove();
-          if (activeChat === id) {
-            chatContainer.style.display = 'none';
-          }
-        }, 3000);
-      });
-
-      mini.addEventListener('touchend', () => clearTimeout(pressTimer));
+      let timer;
       mini.addEventListener('mousedown', () => {
-        pressTimer = setTimeout(() => {
+        timer = setTimeout(() => {
           mini.remove();
           if (activeChat === id) {
             chatContainer.style.display = 'none';
+            chatBox.innerHTML = '';
           }
         }, 3000);
       });
+      mini.addEventListener('mouseup', () => clearTimeout(timer));
 
-      mini.addEventListener('mouseup', () => clearTimeout(pressTimer));
-
-      // drag events
       mini.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', id);
+        e.dataTransfer.setData('text/plain', mini.id);
       });
 
       miniatures.appendChild(mini);
@@ -284,31 +174,44 @@
     miniatures.addEventListener('dragover', (e) => e.preventDefault());
     miniatures.addEventListener('drop', (e) => {
       e.preventDefault();
-      const draggedId = e.dataTransfer.getData('text/plain');
-      const draggedEl = document.getElementById(draggedId);
+      const id = e.dataTransfer.getData('text/plain');
+      const dragged = document.getElementById(id);
       const target = e.target.closest('.miniature');
-      if (draggedEl && target && draggedEl !== target) {
-        miniatures.insertBefore(draggedEl, target);
+      if (dragged && target && dragged !== target) {
+        miniatures.insertBefore(dragged, target);
       }
     });
 
     function sendMessage() {
       const msg = messageInput.value.trim();
-      if (msg === '') return;
+      if (!msg || !activeChat) return;
 
       const bubble = document.createElement('div');
       bubble.textContent = msg;
-      bubble.style.marginBottom = '5px';
-      bubble.style.background = '#ff70e8';
+      bubble.style.background = '#ff00cc';
+      bubble.style.color = 'white';
       bubble.style.padding = '8px 12px';
-      bubble.style.borderRadius = '10px';
-      bubble.style.color = '#000';
-      bubble.style.width = 'fit-content';
+      bubble.style.marginBottom = '5px';
+      bubble.style.borderRadius = '8px';
+      bubble.style.maxWidth = '80%';
 
       chatBox.appendChild(bubble);
       messageInput.value = '';
       chatBox.scrollTop = chatBox.scrollHeight;
     }
+
+    function setupMessageButtons() {
+      document.querySelectorAll('[data-message-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-message-id');
+          const img = btn.getAttribute('data-img');
+          addMiniature(id, img);
+        });
+      });
+    }
+
+    setupMessageButtons();
   </script>
+
 </body>
 </html>
