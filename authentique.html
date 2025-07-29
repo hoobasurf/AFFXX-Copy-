@@ -2,309 +2,278 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Connexion Authentique Sérieuse</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carte + Modal + Favoris</title>
   <style>
-  /* ... Ton CSS complet ... (je garde celui que tu as donné, corrigé) */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #leftMiniProfiles {
+      width: 100px;
+      background: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 0;
+      overflow-y: auto;
+    }
+    #leftMiniProfiles img {
+      width: 60px;
+      height: 60px;
+      margin: 5px 0;
+      border-radius: 12px;
+      cursor: pointer;
+      position: relative; /* Pour drag */
+      user-select: none;
+    }
+    #cardsContainer {
+      flex: 1;
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding: 20px;
+      background: #f5f5f5;
+      align-items: center;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      width: 200px;
+      margin-right: 20px;
+      padding: 15px;
+      cursor: pointer;
+      user-select: none;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .card img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-bottom: 10px;
+    }
+    .btns {
+      margin-top: auto;
+      display: flex;
+      gap: 10px;
+    }
+    .btn-fav {
+      background: transparent;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      transition: color 0.3s;
+      user-select: none;
+    }
+    .btn-fav.active {
+      color: gold;
+    }
 
-  * { box-sizing: border-box; margin:0; padding:0; }
-  html, body {
-    height:100%; width:100%;
-    font-family: 'Orbitron', sans-serif;
-    background: url('planete-magique.jpg') no-repeat center center/cover;
-    overflow: hidden; color: white;
-  }
-  body::before {
-    content:""; position:fixed; top:0; left:0;
-    width:100%; height:100%;
-    background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%);
-    z-index:1; pointer-events:none;
-    animation: floatStars 60s linear infinite;
-  }
-  @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
-  .header {
-    position: relative; z-index:2;
-    padding: 20px;
-  }
-  .btn-back {
-    position: absolute; top:20px; left:20px;
-    color: #ff66cc; font-size:1.5em;
-    cursor:pointer; text-decoration:none;
-    transition: transform .2s;
-  }
-  .btn-back:hover { transform: scale(1.2); }
-  .carousel-container {
-    z-index:2;
-    position: relative;
-    width:100%; height:calc(100% - 60px);
-    overflow: hidden;
-    display: flex;
-    align-items:center;
-  }
-  .carousel {
-    display:flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    gap:40px;
-    padding:40px;
-  }
-  .carousel::-webkit-scrollbar { display:none; }
-  .card {
-    scroll-snap-align: center;
-    flex: 0 0 150px;
-    background: rgba(0,0,0,0.5);
-    border-radius: 16px;
-    padding: 15px;
-    text-align: center;
-    transition: transform .3s, box-shadow .3s;
-    cursor: pointer;
-    position: relative;
-  }
-  .card img {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 10px;
-    border: 3px solid;
-  }
-  .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
-  .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
-  .name { font-size:1.1em; margin-bottom:5px;}
-  .btns {
-    display:flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 6px;
-  }
-  .btn-like, .btn-chat, .btn-fav {
-    width:30px; height:30px;
-    border-radius:50%;
-    background-color:rgba(255,255,255,0.1);
-    border:1px solid #ff66cc;
-    color:#ff66cc;
-    display:flex; align-items:center; justify-content:center;
-    font-size:1em;
-    cursor:pointer;
-    transition: transform .2s, background-color .3s, color .3s;
-    user-select:none;
-  }
-  .btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
-  /* Bouton favoris en jaune quand actif */
-  .btn-fav.active {
-    background-color: #ffea00;
-    border-color: #ffea00;
-    color: #333;
-    transform: scale(1.3);
-  }
-  .card.center {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px #ff00ff;
-  }
-  /* Mini‑profil gauche après message */
-  .left-mini-profiles {
-    position: fixed;
-    top: 50%;
-    left: 10px;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    z-index: 5;
-  }
-  .left-mini-profiles img {
-    width:50px; height:50px;
-    border-radius:50%;
-    border:2px solid #ff66cc;
-    object-fit:cover;
-    cursor:pointer;
-    box-shadow:0 0 8px #ff66cc;
-    transition:transform .2s;
-  }
-  .left-mini-profiles img:hover { transform: scale(1.2); }
-  .modal {
-    display:none; position:fixed;
-    top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.8);
-    align-items:center; justify-content:center;
-    z-index:10;
-  }
-  .modal.active { display:flex; }
-  .modal-content {
-    background: rgba(0,0,0,0.7);
-    padding:20px; border-radius:12px;
-    width:90%; max-width:400px;
-    text-align:center; position:relative;
-    max-height:90vh; overflow-y:auto;
-  }
-  .modal-content h2 { margin-bottom:10px; color:#ff66cc;}
-  .modal-content p { margin-bottom:8px; color:#ddd; font-size:0.95em;}
-  .modal-close {
-    position:absolute; top:10px; right:10px;
-    font-size:1.3em; color:#ff66cc;
-    cursor:pointer;
-  }
-  .photo-gallery {
-    display:flex; justify-content:center; flex-wrap: wrap; gap: 8px; margin-top: 10px;
-  }
-  .photo-gallery img {
-    width: 80px; height: 80px;
-    border-radius: 12px;
-    object-fit: cover;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: border-color 0.3s;
-  }
-  .photo-gallery img:hover {
-    border-color: #ff66cc;
-  }
+    /* Modal */
+    #modalDetails {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+    #modalDetails.active {
+      display: flex;
+    }
+    #modalContent {
+      background: white;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 500px;
+      padding: 20px;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    #modalClose {
+      position: absolute;
+      top: 10px; right: 15px;
+      font-size: 24px;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+    #modalName {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    #photoGallery {
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
   </style>
 </head>
 <body>
+  <div id="leftMiniProfiles" title="Favoris"></div>
 
-  <div class="header">
-    <a href="page2.html" class="btn-back">&larr; Retour</a>
-  </div>
+  <div id="cardsContainer">
+    <!-- Exemple de cartes -->
+    <div class="card" data-name="Alice" data-age="28" data-lieu="Paris" data-desc="Passionnée de voyage et photo." data-gallery="10,15,20">
+      <img src="https://i.pravatar.cc/150?img=10" alt="Alice" />
+      <div><strong>Alice</strong>, 28</div>
+      <div>Paris</div>
+      <div class="btns">
+        <button class="btn-fav" title="Ajouter aux favoris">⭐️</button>
+      </div>
+    </div>
 
-  <div class="left-mini-profiles" id="leftMiniProfiles">
-    <!-- Mini-profil s’affiche ici après message -->
-  </div>
+    <div class="card" data-name="Bob" data-age="34" data-lieu="Lyon" data-desc="Fan de musique et de sport." data-gallery="12,18,22">
+      <img src="https://i.pravatar.cc/150?img=12" alt="Bob" />
+      <div><strong>Bob</strong>, 34</div>
+      <div>Lyon</div>
+      <div class="btns">
+        <button class="btn-fav" title="Ajouter aux favoris">⭐️</button>
+      </div>
+    </div>
 
-  <div class="carousel-container fade-in">
-    <div class="carousel" id="carousel">
-      <div class="card girl" data-name="Sophie" data-age="28" data-lieu="Paris" data-desc="Passionnée par l’astronomie et les romans SF." data-gallery="47,49,51" data-msg="false">
-        <img src="https://i.pravatar.cc/150?img=47" alt="Sophie">
-        <div class="name">Sophie</div>
-        <div class="btns">
-          <div class="btn-chat" title="Chat">💬</div>
-          <div class="btn-like" title="Like">💖</div>
-          <div class="btn-fav" title="Favoris">⭐️</div>
-        </div>
+    <div class="card" data-name="Chloé" data-age="25" data-lieu="Marseille" data-desc="Amoureuse de la nature et des animaux." data-gallery="5,8,14">
+      <img src="https://i.pravatar.cc/150?img=5" alt="Chloé" />
+      <div><strong>Chloé</strong>, 25</div>
+      <div>Marseille</div>
+      <div class="btns">
+        <button class="btn-fav" title="Ajouter aux favoris">⭐️</button>
       </div>
-      <div class="card boy" data-name="Lucas" data-age="31" data-lieu="Lyon" data-desc="Fan de jeux coopératifs et nature." data-gallery="12,14,16" data-msg="false">
-        <img src="https://i.pravatar.cc/150?img=12" alt="Lucas">
-        <div class="name">Lucas</div>
-        <div class="btns">
-          <div class="btn-chat" title="Chat">💬</div>
-          <div class="btn-like" title="Like">💖</div>
-          <div class="btn-fav" title="Favoris">⭐️</div>
-        </div>
-      </div>
-      <div class="card girl" data-name="Emma" data-age="24" data-lieu="Marseille" data-desc="Danseuse et amoureuse des chats." data-gallery="55,56,58" data-msg="false">
-        <img src="https://i.pravatar.cc/150?img=55" alt="Emma">
-        <div class="name">Emma</div>
-        <div class="btns">
-          <div class="btn-chat" title="Chat">💬</div>
-          <div class="btn-like" title="Like">💖</div>
-          <div class="btn-fav" title="Favoris">⭐️</div>
-        </div>
-      </div>
-      <!-- Ajoute plus de profils ici -->
     </div>
   </div>
 
-  <!-- Modal Profil -->
-  <div class="modal" id="profileModal">
-    <div class="modal-content">
-      <span class="modal-close" id="modalClose">&times;</span>
-      <h2 id="modalName"></h2>
-      <p id="modalAgeLieu"></p>
+  <!-- Modal détails -->
+  <div id="modalDetails" role="dialog" aria-modal="true" aria-labelledby="modalName">
+    <div id="modalContent">
+      <button id="modalClose" aria-label="Fermer modal">&times;</button>
+      <div id="modalName"></div>
+      <div><strong>Âge :</strong> <span id="modalAge"></span></div>
+      <div><strong>Lieu :</strong> <span id="modalLieu"></span></div>
       <p id="modalDesc"></p>
-      <div class="photo-gallery" id="modalGallery"></div>
+      <div id="photoGallery"></div>
     </div>
   </div>
 
-<script>
-  const carousel = document.getElementById('carousel');
-  const modal = document.getElementById('profileModal');
-  const modalClose = document.getElementById('modalClose');
-  const modalName = document.getElementById('modalName');
-  const modalAgeLieu = document.getElementById('modalAgeLieu');
-  const modalDesc = document.getElementById('modalDesc');
-  const modalGallery = document.getElementById('modalGallery');
-  const leftMiniProfiles = document.getElementById('leftMiniProfiles');
+  <script>
+    const cards = document.querySelectorAll('.card');
+    const modal = document.getElementById('modalDetails');
+    const modalClose = document.getElementById('modalClose');
+    const modalName = document.getElementById('modalName');
+    const modalAge = document.getElementById('modalAge');
+    const modalLieu = document.getElementById('modalLieu');
+    const modalDesc = document.getElementById('modalDesc');
+    const photoGallery = document.getElementById('photoGallery');
+    const leftMiniProfiles = document.getElementById('leftMiniProfiles');
 
-  // Ouvre modal au clic sur une carte (hors boutons)
-  carousel.addEventListener('click', (e) => {
-    let card = e.target.closest('.card');
-    if (!card) return;
+    // Ouvrir modal détails au clic sur une carte (sauf sur boutons)
+    cards.forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.btns')) return; // ignorer si clic sur bouton
+        modalName.textContent = card.dataset.name;
+        modalAge.textContent = card.dataset.age;
+        modalLieu.textContent = card.dataset.lieu;
+        modalDesc.textContent = card.dataset.desc;
 
-    // Si clic sur boutons, ne pas ouvrir modal
-    if (e.target.closest('.btn-chat') || e.target.closest('.btn-like') || e.target.closest('.btn-fav')) {
-      return;
+        // Générer miniatures photo galerie
+        photoGallery.innerHTML = '';
+        const imgs = card.dataset.gallery ? card.dataset.gallery.split(',') : [];
+        imgs.forEach(id => {
+          const img = document.createElement('img');
+          img.src = `https://i.pravatar.cc/150?img=${id.trim()}`;
+          img.style.width = '70px';
+          img.style.height = '70px';
+          img.style.margin = '5px';
+          img.style.borderRadius = '12px';
+          photoGallery.appendChild(img);
+        });
+
+        modal.classList.add('active');
+      });
+
+      // Gérer le clic sur favoris (⭐️)
+      const favBtn = card.querySelector('.btn-fav');
+      favBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        favBtn.classList.toggle('active');
+        if (favBtn.classList.contains('active')) {
+          addMiniProfile(card);
+        } else {
+          removeMiniProfile(card.dataset.name);
+        }
+      });
+    });
+
+    modalClose.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        modal.classList.remove('active');
+      }
+    });
+
+    // Ajouter miniature dans la barre gauche
+    function addMiniProfile(card) {
+      // Vérifier si déjà ajouté
+      if ([...leftMiniProfiles.children].some(img => img.alt === card.dataset.name)) return;
+
+      const img = document.createElement('img');
+      img.src = card.querySelector('img').src;
+      img.alt = card.dataset.name;
+      img.title = card.dataset.name;
+      leftMiniProfiles.appendChild(img);
+
+      // Clic sur miniature scroll carousel vers la carte
+      img.addEventListener('click', () => {
+        card.scrollIntoView({behavior: 'smooth', inline: 'center', block: 'nearest'});
+      });
+
+      // Déplacement miniature (drag)
+      let isDragging = false, startX, startY, origX, origY;
+      img.style.position = 'relative';
+
+      img.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        origX = img.offsetLeft;
+        origY = img.offsetTop;
+        img.style.cursor = 'grabbing';
+        e.preventDefault();
+      });
+      window.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          img.style.cursor = 'pointer';
+        }
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        img.style.left = (origX + dx) + 'px';
+        img.style.top = (origY + dy) + 'px';
+      });
     }
 
-    showModal(card);
-  });
-
-  // Affiche modal avec infos du profil
-  function showModal(card) {
-    modalName.textContent = card.dataset.name;
-    modalAgeLieu.textContent = `${card.dataset.age} ans · ${card.dataset.lieu}`;
-    modalDesc.textContent = card.dataset.desc;
-
-    // Galerie images (avatar + 2 images d'exemple)
-    modalGallery.innerHTML = '';
-    const baseImgUrl = 'https://i.pravatar.cc/150?img=';
-    const imgs = card.dataset.gallery.split(',');
-    imgs.forEach(id => {
-      const imgEl = document.createElement('img');
-      imgEl.src = baseImgUrl + id.trim();
-      imgEl.alt = card.dataset.name + ' photo';
-      modalGallery.appendChild(imgEl);
-    });
-
-    modal.classList.add('active');
-  }
-
-  // Ferme modal au clic sur croix
-  modalClose.addEventListener('click', () => {
-    modal.classList.remove('active');
-  });
-
-  // Ferme modal au clic hors contenu
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) modal.classList.remove('active');
-  });
-
-  // Toggle favoris
-  carousel.querySelectorAll('.btn-fav').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation(); // Pour pas ouvrir modal
-      btn.classList.toggle('active');
-    });
-  });
-
-  // Chat : simule ajout mini-profil à gauche
-  carousel.querySelectorAll('.btn-chat').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const card = btn.closest('.card');
-      addMiniProfile(card);
-      alert(`Début du chat avec ${card.dataset.name}`);
-    });
-  });
-
-  // Ajoute une miniature profil dans la colonne gauche
-  function addMiniProfile(card) {
-    // Si déjà présent, pas dupliquer
-    const existing = leftMiniProfiles.querySelector(`img[alt="${card.dataset.name}"]`);
-    if (existing) return;
-
-    const miniImg = document.createElement('img');
-    miniImg.src = card.querySelector('img').src;
-    miniImg.alt = card.dataset.name;
-    miniImg.title = card.dataset.name;
-
-    miniImg.addEventListener('click', () => {
-      showModal(card);
-    });
-
-    leftMiniProfiles.appendChild(miniImg);
-  }
-</script>
+    // Supprimer miniature
+    function removeMiniProfile(name) {
+      [...leftMiniProfiles.children].forEach(img => {
+        if (img.alt === name) leftMiniProfiles.removeChild(img);
+      });
+    }
+  </script>
 </body>
 </html>
