@@ -113,7 +113,101 @@
   </style>
 </head>
 <body>
+<div id="miniatures" style="display: flex; gap: 10px; margin-top: 20px; padding-left: 20px; overflow-x: auto;"></div>
 
+<div id="chatContainer" style="display:none; margin: 20px; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 10px; max-width: 500px;">
+  <div id="chatBox" style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;"></div>
+  <div style="display: flex; gap: 10px;">
+    <input type="text" id="messageInput" placeholder="Écris ici..." style="flex:1; padding:10px; border-radius: 5px; border:none;">
+    <button onclick="sendMessage()" style="padding: 10px 15px; background: #ff00cc; color: white; border: none; border-radius: 5px;">Envoyer</button>
+  </div>
+</div>
+
+<script>
+  const miniatures = document.getElementById('miniatures');
+  const chatContainer = document.getElementById('chatContainer');
+  const chatBox = document.getElementById('chatBox');
+  const messageInput = document.getElementById('messageInput');
+
+  let activeChat = null;
+
+  function addMiniature(id, img = 'https://via.placeholder.com/60') {
+    if (document.getElementById('mini-' + id)) return;
+
+    const mini = document.createElement('div');
+    mini.className = 'miniature';
+    mini.id = 'mini-' + id;
+    mini.draggable = true;
+    mini.style.width = '60px';
+    mini.style.height = '60px';
+    mini.style.borderRadius = '50%';
+    mini.style.background = `url(${img}) center/cover no-repeat`;
+    mini.style.border = '2px solid white';
+    mini.style.cursor = 'grab';
+
+    mini.addEventListener('click', () => {
+      activeChat = id;
+      chatContainer.style.display = 'block';
+    });
+
+    let timer;
+    mini.addEventListener('mousedown', () => {
+      timer = setTimeout(() => {
+        mini.remove();
+        if (activeChat === id) chatContainer.style.display = 'none';
+      }, 3000);
+    });
+    mini.addEventListener('mouseup', () => clearTimeout(timer));
+
+    mini.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', mini.id);
+    });
+
+    miniatures.appendChild(mini);
+  }
+
+  miniatures.addEventListener('dragover', (e) => e.preventDefault());
+  miniatures.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const id = e.dataTransfer.getData('text/plain');
+    const dragged = document.getElementById(id);
+    const target = e.target.closest('.miniature');
+    if (dragged && target && dragged !== target) {
+      miniatures.insertBefore(dragged, target);
+    }
+  });
+
+  function sendMessage() {
+    const msg = messageInput.value.trim();
+    if (!msg) return;
+
+    const bubble = document.createElement('div');
+    bubble.textContent = msg;
+    bubble.style.background = '#ff00cc';
+    bubble.style.color = 'white';
+    bubble.style.padding = '8px 12px';
+    bubble.style.marginBottom = '5px';
+    bubble.style.borderRadius = '8px';
+    bubble.style.maxWidth = '80%';
+
+    chatBox.appendChild(bubble);
+    messageInput.value = '';
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  // Ajoute cette fonction à chaque bouton "Message"
+  function setupMessageButtons() {
+    document.querySelectorAll('[data-message-id]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-message-id');
+        const img = btn.getAttribute('data-img') || 'https://via.placeholder.com/60';
+        addMiniature(id, img);
+      });
+    });
+  }
+
+  setupMessageButtons();
+</script>
   <div class="miniatures" id="miniatures"></div>
 
   <div class="chat-container" id="chatContainer">
