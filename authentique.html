@@ -1,84 +1,102 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profil</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profils Interactifs</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+      font-family: 'Arial', sans-serif;
+      background: radial-gradient(circle at center, #1f0036, #0b001a);
+      color: white;
       overflow-x: hidden;
     }
-    .cards-container {
+
+    .carousel {
       display: flex;
       gap: 20px;
+      padding: 40px;
       overflow-x: auto;
-      padding: 20px;
+      scroll-snap-type: x mandatory;
     }
+
     .card {
-      min-width: 250px;
-      background: #1e1e2f;
-      color: white;
-      border-radius: 15px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
       padding: 20px;
+      width: 200px;
+      scroll-snap-align: start;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
       flex-shrink: 0;
-      position: relative;
+      text-align: center;
     }
+
     .card img {
       width: 100%;
       border-radius: 10px;
     }
-    .card .name {
-      font-size: 1.5em;
-      margin-top: 10px;
-    }
+
     .btns {
       margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
     }
-    .btns button {
-      font-size: 1.5em;
-      margin-right: 10px;
+
+    .btn-message, .btn-fav {
       background: none;
       border: none;
+      color: white;
+      font-size: 1.4em;
       cursor: pointer;
-      color: #ccc;
+      transition: transform 0.2s;
     }
-    .btns .btn-fav.active {
+
+    .btn-fav.active {
       color: gold;
     }
-    #leftMiniProfiles {
+
+    .miniatures {
       position: fixed;
-      top: 10px;
-      left: 10px;
-      z-index: 1000;
+      bottom: 20px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 999;
     }
-    #leftMiniProfiles img {
+
+    .miniatures img {
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      margin: 5px;
       cursor: grab;
-      position: absolute;
+      border: 2px solid white;
+    }
+
+    .miniatures img:active {
+      cursor: grabbing;
     }
   </style>
 </head>
 <body>
-  <div class="cards-container">
+
+  <div class="carousel">
     <div class="card" data-name="Alice">
-      <img src="https://placekitten.com/200/200" alt="Alice" />
-      <div class="name">Alice</div>
+      <img src="https://placekitten.com/200/200" alt="Alice">
+      <div>Alice</div>
       <div class="btns">
         <button class="btn-message">💬</button>
         <button class="btn-fav">⭐</button>
       </div>
     </div>
+
     <div class="card" data-name="Bob">
-      <img src="https://placekitten.com/201/201" alt="Bob" />
-      <div class="name">Bob</div>
+      <img src="https://placekitten.com/201/201" alt="Bob">
+      <div>Bob</div>
       <div class="btns">
         <button class="btn-message">💬</button>
         <button class="btn-fav">⭐</button>
@@ -86,108 +104,88 @@
     </div>
   </div>
 
-  <div id="leftMiniProfiles"></div>
+  <div class="miniatures" id="miniContainer"></div>
 
   <script>
-    const cards = document.querySelectorAll('.card');
-    const leftMiniProfiles = document.getElementById('leftMiniProfiles');
+    const miniContainer = document.getElementById('miniContainer');
 
-    cards.forEach(card => {
-      const favBtn = card.querySelector('.btn-fav');
-      const msgBtn = card.querySelector('.btn-message');
-      const userName = card.dataset.name;
+    document.querySelectorAll('.btn-message').forEach((btn, index) => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('.card');
+        const name = card.dataset.name;
+        const imgSrc = card.querySelector('img').src;
 
-      favBtn.addEventListener('click', () => {
-        favBtn.classList.toggle('active');
-      });
+        const mini = document.createElement('img');
+        mini.src = imgSrc;
+        mini.alt = name;
+        mini.style.position = 'absolute';
+        mini.style.top = '0px';
+        mini.style.left = '0px';
 
-      msgBtn.addEventListener('click', () => {
-        addMiniProfile(userName);
+        makeDraggable(mini);
+        miniContainer.appendChild(mini);
+
+        // Suppression après appui long (3s)
+        let timer = null;
+        mini.addEventListener('mousedown', startHold);
+        mini.addEventListener('mouseup', cancelHold);
+        mini.addEventListener('mouseleave', cancelHold);
+        mini.addEventListener('touchstart', startHold);
+        mini.addEventListener('touchend', cancelHold);
+
+        function startHold(e) {
+          e.preventDefault();
+          timer = setTimeout(() => {
+            mini.remove();
+          }, 3000);
+        }
+
+        function cancelHold() {
+          clearTimeout(timer);
+        }
       });
     });
 
-    function addMiniProfile(userName) {
-      const card = [...cards].find(c => c.dataset.name === userName);
-      if (!card) return;
-
-      const imgSrc = card.querySelector('img').src;
-      const miniImg = document.createElement('img');
-      miniImg.src = imgSrc;
-      miniImg.alt = userName;
-      miniImg.style.top = '0px';
-      miniImg.style.left = '0px';
-
-      leftMiniProfiles.appendChild(miniImg);
-      makeDraggable(miniImg);
-
-      let pressTimer = null;
-      miniImg.addEventListener('mousedown', startPress);
-      miniImg.addEventListener('touchstart', startPress);
-      miniImg.addEventListener('mouseup', cancelPress);
-      miniImg.addEventListener('mouseleave', cancelPress);
-      miniImg.addEventListener('touchend', cancelPress);
-      miniImg.addEventListener('touchcancel', cancelPress);
-
-      function startPress(e) {
-        e.preventDefault();
-        pressTimer = setTimeout(() => {
-          miniImg.remove();
-        }, 3000);
-      }
-
-      function cancelPress() {
-        clearTimeout(pressTimer);
-      }
-
-      miniImg.addEventListener('click', () => {
-        alert(`Ouverture du profil de ${userName}`);
+    document.querySelectorAll('.btn-fav').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('active');
       });
-    }
+    });
 
     function makeDraggable(el) {
       let offsetX = 0, offsetY = 0, startX = 0, startY = 0;
 
-      el.addEventListener('mousedown', dragStart);
-      el.addEventListener('touchstart', dragStartTouch, { passive: false });
-
-      function dragStart(e) {
+      const dragMouseDown = (e) => {
         e.preventDefault();
-        startX = e.clientX;
-        startY = e.clientY;
-        document.addEventListener('mousemove', dragMove);
-        document.addEventListener('mouseup', dragEnd);
-      }
+        startX = e.clientX || e.touches[0].clientX;
+        startY = e.clientY || e.touches[0].clientY;
+        document.onmousemove = elementDrag;
+        document.ontouchmove = elementDrag;
+        document.onmouseup = stopDrag;
+        document.ontouchend = stopDrag;
+      };
 
-      function dragStartTouch(e) {
-        e.preventDefault();
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-        document.addEventListener('touchmove', dragMoveTouch, { passive: false });
-        document.addEventListener('touchend', dragEnd);
-      }
-
-      function dragMove(e) {
-        offsetX = e.clientX - startX;
-        offsetY = e.clientY - startY;
+      const elementDrag = (e) => {
+        const x = e.clientX || e.touches[0].clientX;
+        const y = e.clientY || e.touches[0].clientY;
+        offsetX += x - startX;
+        offsetY += y - startY;
+        startX = x;
+        startY = y;
         el.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-      }
+      };
 
-      function dragMoveTouch(e) {
-        offsetX = e.touches[0].clientX - startX;
-        offsetY = e.touches[0].clientY - startY;
-        el.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-      }
+      const stopDrag = () => {
+        document.onmouseup = null;
+        document.onmousemove = null;
+        document.ontouchend = null;
+        document.ontouchmove = null;
+      };
 
-      function dragEnd() {
-        el.style.left = `${el.offsetLeft + offsetX}px`;
-        el.style.top = `${el.offsetTop + offsetY}px`;
-        el.style.transform = 'none';
-        document.removeEventListener('mousemove', dragMove);
-        document.removeEventListener('mouseup', dragEnd);
-        document.removeEventListener('touchmove', dragMoveTouch);
-        document.removeEventListener('touchend', dragEnd);
-      }
+      el.onmousedown = dragMouseDown;
+      el.ontouchstart = dragMouseDown;
     }
   </script>
+
 </body>
 </html>
