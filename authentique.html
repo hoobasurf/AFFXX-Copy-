@@ -378,102 +378,67 @@
     alert(`Message envoyé à ${card.dataset.name} :\n${msg}`);
   });
 
-  // Ajouter un mini profil dans la colonne gauche (draggable)
-  function addMiniProfile(card) {
-    // Créer l'élément img mini-profil
-    const imgMini = document.createElement('img');
-    imgMini.src = card.querySelector('img').src;
-    imgMini.alt = `Mini profil ${card.dataset.name}`;
-    imgMini.title = card.dataset.name;
+ let dragging = false;
+let pos = { x: 0, y: 0, left: 0, top: 0 };
+const el = document.querySelector('.mini-profile'); // adapte selon ton sélecteur
 
-    // Position initiale relative dans la colonne (pas fixe)
-    imgMini.style.position = 'relative';
-    imgMini.style.left = '0px';
-    imgMini.style.top = '0px';
+el.addEventListener('mousedown', dragStart);
+el.addEventListener('touchstart', dragStart, { passive: false });
 
-    // Permet d'ouvrir la fiche profil complète au clic mini-profil
-    imgMini.addEventListener('click', () => openProfile(card));
+function dragStart(e) {
+  e.preventDefault();
+  dragging = true;
 
-    // Activer drag and drop (souris et tactile)
-    makeDraggable(imgMini);
+  const rect = el.getBoundingClientRect();
+  pos = {
+    x: e.type === 'touchstart' ? e.touches[0].clientX : e.clientX,
+    y: e.type === 'touchstart' ? e.touches[0].clientY : e.clientY,
+    left: rect.left - el.parentElement.getBoundingClientRect().left,
+    top: rect.top - el.parentElement.getBoundingClientRect().top,
+  };
 
-    leftMiniProfiles.appendChild(imgMini);
-  }
+  window.addEventListener('mousemove', dragMove);
+  window.addEventListener('touchmove', dragMove, { passive: false });
+  window.addEventListener('mouseup', dragEnd);
+  window.addEventListener('touchend', dragEnd);
+}
 
-  // Fonction pour rendre un élément draggable verticalement et horizontalement (position: relative)
-  function makeDraggable(el) {
-    let pos = { x: 0, y: 0, left: 0, top: 0 };
-    let dragging = false;
+function dragMove(e) {
+  if (!dragging) return;
+  e.preventDefault();
 
-    // Souris
-    el.addEventListener('mousedown', dragStart);
-    document.addEventListener('mouseup', dragEnd);
-    document.addEventListener('mousemove', dragMove);
+  const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+  const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
 
-    // Touch
-    el.addEventListener('touchstart', dragStart, {passive:false});
-    document.addEventListener('touchend', dragEnd);
-    document.addEventListener('touchmove', dragMove, {passive:false});
+  const dx = clientX - pos.x;
+  const dy = clientY - pos.y;
 
-    function dragStart(e) {
-      e.preventDefault();
-      dragging = true;
-      if (e.type === 'touchstart') {
-        pos.x = e.touches[0].clientX;
-        pos.y = e.touches[0].clientY;
-      } else {
-        pos.x = e.clientX;
-        pos.y = e.clientY;
-      }
-      pos.left = parseInt(el.style.left) || 0;
-      pos.top = parseInt(el.style.top) || 0;
-      el.style.transition = 'none';
-      el.style.zIndex = 1000; // bring to front while dragging
-    }
-    function dragMove(e) {
-      if (!dragging) return;
-      e.preventDefault();
-      let clientX, clientY;
-      if (e.type === 'touchmove') {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-      } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-      }
-      const dx = clientX - pos.x;
-      const dy = clientY - pos.y;
+  let newLeft = pos.left + dx;
+  let newTop = pos.top + dy;
 
-      let newLeft = pos.left + dx;
-      let newTop = pos.top + dy;
+  const parentRect = el.parentElement.getBoundingClientRect();
+  const elRect = el.getBoundingClientRect();
 
-      // Limiter dans la fenêtre
-      const rect = el.getBoundingClientRect();
-      const parentRect = el.parentElement.getBoundingClientRect();
+  // Limites horizontales (dans le parent)
+  if (newLeft < 0) newLeft = 0;
+  if (newLeft + elRect.width > parentRect.width) newLeft = parentRect.width - elRect.width;
 
-      if (newLeft < -rect.left + parentRect.left) newLeft = -rect.left + parentRect.left;
-      if (newTop < -rect.top + parentRect.top) newTop = -rect.top + parentRect.top;
-      if (newLeft + rect.width > window.innerWidth) newLeft = window.innerWidth - rect.width - rect.left + newLeft;
-      if (newTop + rect.height > window.innerHeight) newTop = window.innerHeight - rect.height - rect.top + newTop;
+  // Limites verticales (dans le parent)
+  if (newTop < 0) newTop = 0;
+  if (newTop + elRect.height > parentRect.height) newTop = parentRect.height - elRect.height;
 
-      el.style.left = newLeft + 'px';
-      el.style.top = newTop + 'px';
-    }
-    function dragEnd(e) {
-      if (!dragging) return;
-      dragging = false;
-      el.style.transition = '';
-      el.style.zIndex = '';
-    }
-  }
+  el.style.position = 'absolute';
+  el.style.left = newLeft + 'px';
+  el.style.top = newTop + 'px';
+}
 
-  // Au chargement, on peut éventuellement afficher les profils déjà messagés (ici aucun)
-  window.addEventListener('DOMContentLoaded', () => {
-    cards.forEach(card => {
-      if (card.dataset.msg === "true") {
-        miniProfiles.push(card);
-        addMiniProfile(card);
-      }
+function dragEnd() {
+  dragging = false;
+  window.removeEventListener('mousemove', dragMove);
+  window.removeEventListener('touchmove', dragMove);
+  window.removeEventListener('mouseup', dragEnd);
+  window.removeEventListener('touchend', dragEnd);
+}
     });
   });
 </script>
