@@ -1,197 +1,225 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Connexion Authentique Sérieuse</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Affinix – Authentique</title>
   <style>
-    /* Ton CSS original inchangé */
-    /* … (pas modifié) … */
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: url('https://i.imgur.com/lc0N6kH.jpeg') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+    }
+
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      padding: 20px;
+      scroll-behavior: smooth;
+    }
+
+    .card {
+      min-width: 220px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid #ff66cc;
+      border-radius: 15px;
+      margin-right: 20px;
+      padding: 15px;
+      text-align: center;
+      position: relative;
+    }
+
+    .card img {
+      width: 100%;
+      border-radius: 12px;
+    }
+
+    .btns {
+      margin-top: 10px;
+    }
+
+    .btn {
+      border: none;
+      padding: 8px 12px;
+      margin: 0 5px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .btn-like.active {
+      background-color: gold;
+      color: black;
+    }
+
+    .leftBar {
+      position: fixed;
+      top: 60px;
+      left: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+
+    .leftBar img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #ff66cc;
+      transition: transform 0.2s;
+      position: relative;
+    }
+
+    .leftBar img:active {
+      transform: scale(0.9);
+    }
+
+    #chatBox {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.8);
+      padding: 10px;
+      display: none;
+    }
+
+    #chatMessages {
+      max-height: 120px;
+      overflow-y: auto;
+      margin-bottom: 5px;
+    }
+
+    #chatInput {
+      width: 80%;
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    #sendBtn {
+      padding: 8px 12px;
+      border-radius: 5px;
+      border: none;
+      background: #ff66cc;
+      color: white;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <a href="page2.html" class="btn-back">&larr; Retour</a>
-  </div>
+<div class="leftBar" id="miniProfiles"></div>
 
-  <div class="left-mini-profiles" id="leftMiniProfiles"></div>
-
-  <div class="carousel-container">
-    <div class="carousel" id="carousel">
-      <!-- Ton carousel d’origine avec les .card {...} -->
-      <div class="card girl" data-name="Sophie" data-age="28" data-lieu="Paris" data-desc="Passionnée par l’astronomie et les romans SF." data-gallery="47,49,51">
-        <img src="https://i.pravatar.cc/150?img=47" alt="Sophie">
-        <div class="name">Sophie</div>
-        <div class="btns">
-          <div class="btn-chat" title="Chat">💬</div>
-          <div class="btn-like" title="Like">💖</div>
-          <div class="btn-fav" title="Favoris">⭐️</div>
-        </div>
-      </div>
-      <!-- etc. -->
+<div class="carousel" id="carousel">
+  <div class="card" data-name="Léna" data-img="https://i.pravatar.cc/150?img=12">
+    <img src="https://i.pravatar.cc/150?img=12" alt="Léna">
+    <h3>Léna</h3>
+    <p>25 ans – Paris</p>
+    <div class="btns">
+      <button class="btn btn-like">⭐</button>
+      <button class="btn btn-message">Message</button>
     </div>
   </div>
-
-  <div class="modal" id="profileModal">
-    <div class="modal-content">
-      <span class="modal-close" id="modalClose">&times;</span>
-      <h2 id="modalName"></h2>
-      <p id="modalAgeLieu"></p>
-      <p id="modalDesc"></p>
-      <div class="photo-gallery" id="modalGallery"></div>
+  <div class="card" data-name="Sara" data-img="https://i.pravatar.cc/150?img=5">
+    <img src="https://i.pravatar.cc/150?img=5" alt="Sara">
+    <h3>Sara</h3>
+    <p>28 ans – Lyon</p>
+    <div class="btns">
+      <button class="btn btn-like">⭐</button>
+      <button class="btn btn-message">Message</button>
     </div>
   </div>
+</div>
 
-  <!-- Chat container déjà dans HTML / CSS d’origine -->
-  <div id="chatContainer">
-    <h3></h3>
-    <div id="messagesList"></div>
-    <div id="inputWrapper">
-      <input type="text" id="inputMessage" placeholder="Écrire un message..." />
-      <button id="sendButton">Envoyer</button>
-    </div>
-  </div>
+<div id="chatBox">
+  <div id="chatMessages"></div>
+  <input type="text" id="chatInput" placeholder="Écris un message...">
+  <button id="sendBtn">Envoyer</button>
+</div>
 
 <script>
-  // --- Ton script original conservé au-dessus ici (modals, styles...) ---
-  const carousel = document.getElementById('carousel');
-  const modal = document.getElementById('profileModal');
-  const modalName = document.getElementById('modalName');
-  const modalAgeLieu = document.getElementById('modalAgeLieu');
-  const modalDesc = document.getElementById('modalDesc');
-  const modalGallery = document.getElementById('modalGallery');
-  const leftMiniProfiles = document.getElementById('leftMiniProfiles');
-  const chatContainer = document.getElementById('chatContainer');
-  const messagesList = document.getElementById('messagesList');
-  const inputMessage = document.getElementById('inputMessage');
-  const sendButton = document.getElementById('sendButton');
+  const likeButtons = document.querySelectorAll('.btn-like');
+  const messageButtons = document.querySelectorAll('.btn-message');
+  const miniProfiles = document.getElementById('miniProfiles');
+  const chatBox = document.getElementById('chatBox');
+  const chatMessages = document.getElementById('chatMessages');
+  const chatInput = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('sendBtn');
 
-  // -- Comportement modal profil (inchangé) --
-  carousel.addEventListener('click', e => {
-    const card = e.target.closest('.card');
-    if (!card) return;
-    if (e.target.closest('.btn-chat') || e.target.closest('.btn-like') || e.target.closest('.btn-fav')) return;
-    modalName.textContent = card.dataset.name;
-    modalAgeLieu.textContent = `${card.dataset.age} ans · ${card.dataset.lieu}`;
-    modalDesc.textContent = card.dataset.desc;
-    modalGallery.innerHTML = '';
-    card.dataset.gallery.split(',').forEach(id => {
-      const img = document.createElement('img');
-      img.src = `https://i.pravatar.cc/150?img=${id.trim()}`;
-      img.alt = card.dataset.name;
-      modalGallery.appendChild(img);
-    });
-    modal.classList.add('active');
-  });
-  document.getElementById('modalClose').onclick = () => modal.classList.remove('active');
-  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+  let currentChatName = null;
+  const chats = {};
 
-  // -- Toggle favoris (btn-fav) --
-  carousel.querySelectorAll('.btn-fav').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
+  likeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
       btn.classList.toggle('active');
     });
   });
 
-  // -- Mini‑profil & chat logic --
-  let activeMini = null;
-  const store = {};
+  messageButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const card = e.target.closest('.card');
+      const name = card.dataset.name;
+      const imgSrc = card.dataset.img;
 
-  function addMini(card) {
-    const name = card.dataset.name;
-    if (leftMiniProfiles.querySelector(`img[alt="${name}"]`)) return;
-    const mini = document.createElement('img');
-    mini.src = card.querySelector('img').src;
-    mini.alt = name;
-    mini.title = name;
-    mini.draggable = true;
-    leftMiniProfiles.appendChild(mini);
+      if (!document.querySelector(`#miniProfiles img[alt="${name}"]`)) {
+        const img = document.createElement('img');
+        img.src = imgSrc;
+        img.alt = name;
+        img.title = name;
+        miniProfiles.appendChild(img);
 
-    // clic ouvre chat
-    mini.addEventListener('click', () => openChat(mini));
-    // maintien 3s supprime
-    let t;
-    mini.addEventListener('mousedown', () => t = setTimeout(() => mini.remove(), 3000));
-    ['mouseup', 'mouseleave'].forEach(ev => mini.addEventListener(ev, () => clearTimeout(t)));
-    // drag & drop
-    mini.addEventListener('dragstart', e => {
-      mini.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
+        let timer;
+        img.addEventListener('mousedown', () => {
+          timer = setTimeout(() => {
+            miniProfiles.removeChild(img);
+            if (currentChatName === name) {
+              chatBox.style.display = 'none';
+              currentChatName = null;
+            }
+          }, 3000);
+        });
+
+        img.addEventListener('mouseup', () => clearTimeout(timer));
+
+        img.addEventListener('click', () => {
+          currentChatName = name;
+          chatMessages.innerHTML = (chats[name] || []).map(m => `<div>${m}</div>`).join('');
+          chatBox.style.display = 'block';
+        });
+
+        // Drag
+        let isDragging = false, startX, startY;
+        img.addEventListener('mousedown', (e) => {
+          isDragging = true;
+          startX = e.clientX - img.offsetLeft;
+          startY = e.clientY - img.offsetTop;
+          img.style.position = 'absolute';
+        });
+        document.addEventListener('mousemove', (e) => {
+          if (isDragging) {
+            img.style.left = (e.clientX - startX) + 'px';
+            img.style.top = (e.clientY - startY) + 'px';
+          }
+        });
+        document.addEventListener('mouseup', () => isDragging = false);
+      }
+
+      currentChatName = name;
+      chatMessages.innerHTML = (chats[name] || []).map(m => `<div>${m}</div>`).join('');
+      chatBox.style.display = 'block';
     });
-    mini.addEventListener('dragend', () => mini.classList.remove('dragging'));
-  }
-
-  leftMiniProfiles.addEventListener('dragover', e => {
-    e.preventDefault();
-    const dragging = leftMiniProfiles.querySelector('.dragging');
-    const after = getAfter(leftMiniProfiles, e.clientY);
-    if (!after) leftMiniProfiles.appendChild(dragging);
-    else leftMiniProfiles.insertBefore(dragging, after);
   });
 
-  function getAfter(container, y) {
-    const imgs = [...container.querySelectorAll('img:not(.dragging)')];
-    return imgs.reduce((closest, el) => {
-      const box = el.getBoundingClientRect();
-      const offset = y - box.top - box.height / 2;
-      return (offset < 0 && offset > closest.offset)
-        ? { offset, element: el }
-        : closest;
-    }, { offset: Number.NEGATIVE_INFINITY }).element;
-  }
-
-  function openChat(mini) {
-    if (activeMini === mini) {
-      chatContainer.style.display = 'none';
-      activeMini = null;
-      return;
-    }
-    activeMini = mini;
-    chatContainer.style.display = 'flex';
-    chatContainer.querySelector('h3').textContent = `Chat avec ${mini.alt}`;
-    messagesList.innerHTML = '';
-    (store[mini.alt] || []).forEach(msg => {
-      const d = document.createElement('div');
-      d.textContent = msg;
-      messagesList.appendChild(d);
-    });
-    inputMessage.value = '';
-    inputMessage.focus();
-  }
-
-  function sendMsg() {
-    const text = inputMessage.value.trim();
-    if (!text || !activeMini) return;
-    const d = document.createElement('div');
-    d.textContent = text;
-    messagesList.appendChild(d);
-    messagesList.scrollTop = messagesList.scrollHeight;
-    store[activeMini.alt] = store[activeMini.alt] || [];
-    store[activeMini.alt].push(text);
-    inputMessage.value = '';
-    inputMessage.focus();
-  }
-
-  sendButton.addEventListener('click', sendMsg);
-  inputMessage.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      sendMsg();
-    }
-  });
-
-  // -- Bouton Message sur carte ajoute miniature + ouvre chat --
-  carousel.querySelectorAll('.btn-chat').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const card = btn.closest('.card');
-      addMini(card);
-      const mini = leftMiniProfiles.querySelector(`img[alt="${card.dataset.name}"]`);
-      openChat(mini);
-    });
+  sendBtn.addEventListener('click', () => {
+    const msg = chatInput.value.trim();
+    if (!msg || !currentChatName) return;
+    if (!chats[currentChatName]) chats[currentChatName] = [];
+    chats[currentChatName].push(msg);
+    chatMessages.innerHTML += `<div>${msg}</div>`;
+    chatInput.value = '';
   });
 </script>
 
