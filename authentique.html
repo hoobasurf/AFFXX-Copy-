@@ -412,6 +412,152 @@ sendBtn.addEventListener('click', () => {
 chatClose.addEventListener('click', () => {
   chatModal.classList.remove('active');
 });
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const cards = document.querySelectorAll('.card');
+  const leftMini = document.getElementById('leftMiniProfiles');
+  const modal = document.getElementById('profileModal');
+  const modalName = document.getElementById('modalName');
+  const modalAgeLieu = document.getElementById('modalAgeLieu');
+  const modalDesc = document.getElementById('modalDesc');
+  const modalGallery = document.getElementById('modalGallery');
+  const modalClose = document.getElementById('modalClose');
+
+  // Ouvrir modal profil
+  cards.forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.btns')) return; // Pas d'ouverture modal si clic sur bouton
+      modal.classList.add('active');
+      modalName.textContent = card.dataset.name;
+      modalAgeLieu.textContent = `${card.dataset.age} ans · ${card.dataset.lieu}`;
+      modalDesc.textContent = card.dataset.desc;
+      modalGallery.innerHTML = '';
+      card.dataset.gallery.split(',').forEach(id => {
+        const img = document.createElement('img');
+        img.src = `https://i.pravatar.cc/150?img=${id}`;
+        modalGallery.appendChild(img);
+      });
+    });
+  });
+  modalClose.addEventListener('click', () => modal.classList.remove('active'));
+
+  // Ajout gestion boutons like, chat, fav
+  cards.forEach(card => {
+    const btnMsg = card.querySelector('.btn-chat');
+    const btnFav = card.querySelector('.btn-fav');
+
+    if (btnMsg) {
+      btnMsg.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const name = card.dataset.name;
+        if (document.getElementById(`chatBox_${name}`)) return; // Chat déjà ouvert
+
+        // Créer mini-profil dans la colonne à gauche
+        const imgSrc = card.querySelector('img').src;
+        const img = document.createElement('img');
+        img.src = imgSrc;
+        img.alt = name;
+        img.title = name;
+        img.className = 'mini-profile';
+        img.draggable = true;
+        leftMini.appendChild(img);
+
+        img.addEventListener('click', () => openChat(name));
+        let pressTimer;
+        img.addEventListener('mousedown', () => pressTimer = setTimeout(() => img.remove(), 3000));
+        img.addEventListener('mouseup', () => clearTimeout(pressTimer));
+        img.addEventListener('dragstart', (ev) => {
+          ev.dataTransfer.setData('text/plain', name);
+          img.classList.add('dragging');
+        });
+        img.addEventListener('dragend', () => img.classList.remove('dragging'));
+
+        openChat(name); // Ouvre aussi le chat directement à la création
+      });
+    }
+    if (btnFav) {
+      btnFav.addEventListener('click', (e) => {
+        e.stopPropagation();
+        btnFav.classList.toggle('active');
+      });
+    }
+  });
+
+  // Fonction pour ouvrir la fenêtre de chat
+  function openChat(name) {
+    if (document.getElementById(`chatBox_${name}`)) {
+      // Chat déjà ouvert, juste le mettre au premier plan
+      const chatExist = document.getElementById(`chatBox_${name}`);
+      chatExist.style.zIndex = getMaxZIndex() + 1;
+      return;
+    }
+
+    const chatBox = document.createElement('div');
+    chatBox.id = `chatBox_${name}`;
+    chatBox.className = 'chat-modal active';
+    chatBox.style.zIndex = getMaxZIndex() + 1;
+
+    chatBox.innerHTML = `
+      <div class="chat-close" title="Fermer le chat">&times;</div>
+      <div id="chatTitle">${name}</div>
+      <div class="chat-messages" id="chatMessages_${name}"></div>
+      <div class="chat-input-area">
+        <input id="chatInput_${name}" type="text" placeholder="Écrire un message..." autocomplete="off" />
+        <button id="sendMessage_${name}">Envoyer</button>
+      </div>
+    `;
+
+    document.body.appendChild(chatBox);
+
+    // Gestion fermeture chat
+    chatBox.querySelector('.chat-close').addEventListener('click', () => {
+      chatBox.remove();
+      // Supprimer aussi la mini-profil à gauche
+      const mini = [...leftMini.children].find(img => img.title === name);
+      if (mini) mini.remove();
+    });
+
+    const input = document.getElementById(`chatInput_${name}`);
+    const sendBtn = document.getElementById(`sendMessage_${name}`);
+    const messages = document.getElementById(`chatMessages_${name}`);
+
+    // Fonction pour ajouter un message dans le chat (simulé)
+    function addMessage(text, fromUser = true) {
+      const p = document.createElement('p');
+      p.textContent = (fromUser ? 'Vous: ' : `${name}: `) + text;
+      p.style.backgroundColor = fromUser ? '#ff66cc' : '#9933ff';
+      p.style.color = 'white';
+      messages.appendChild(p);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    // Envoyer message
+    sendBtn.addEventListener('click', () => {
+      const text = input.value.trim();
+      if (!text) return;
+      addMessage(text, true);
+      input.value = '';
+      // Simulation réponse après 1.2s
+      setTimeout(() => addMessage("Réponse automatique 💬", false), 1200);
+    });
+
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendBtn.click();
+    });
+  }
+
+  // Utilitaire pour récupérer le max z-index des chats ouverts
+  function getMaxZIndex() {
+    const chats = document.querySelectorAll('.chat-modal');
+    let max = 100; // valeur par défaut
+    chats.forEach(c => {
+      const z = parseInt(window.getComputedStyle(c).zIndex) || 0;
+      if (z > max) max = z;
+    });
+    return max;
+  }
+});
 </script>
+  
 </body>
 </html>
