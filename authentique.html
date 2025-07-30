@@ -1,241 +1,481 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Chat avec Profils</title>
+  <meta charset="UTF-8" />
+  <title>Connexion Authentique Sérieuse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: url('planete-maqique.jpg') no-repeat center center fixed;
-      background-size: cover;
-      font-family: 'Arial', sans-serif;
-    }
+  /* ... Ton CSS complet ... (inchangé sauf ceci) */
 
-    #leftMini {
-      position: absolute;
-      top: 60px;
-      left: 10px;
-      z-index: 10;
-    }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  html, body {
+    height:100%; width:100%;
+    font-family: 'Orbitron', sans-serif;
+    background: url('planete-magique.jpg') no-repeat center center/cover;
+    overflow: hidden; color: white;
+  }
+  body::before {
+    content:""; position:fixed; top:0; left:0;
+    width:100%; height:100%;
+    background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%);
+    z-index:1; pointer-events:none;
+    animation: floatStars 60s linear infinite;
+  }
+  @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
+  .header {
+    position: relative; z-index:2;
+    padding: 20px;
+  }
+  .btn-back {
+    position: absolute; top:20px; left:20px;
+    color: #ff66cc; font-size:1.5em;
+    cursor:pointer; text-decoration:none;
+    transition: transform .2s;
+  }
+  .btn-back:hover { transform: scale(1.2); }
+  .carousel-container {
+    z-index:2;
+    position: relative;
+    width:100%; height:calc(100% - 60px);
+    overflow: hidden;
+    display: flex;
+    align-items:center;
+  }
+  .carousel {
+    display:flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap:40px;
+    padding:40px;
+  }
+  .carousel::-webkit-scrollbar { display:none; }
+  .card {
+    scroll-snap-align: center;
+    flex: 0 0 150px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 16px;
+    padding: 15px;
+    text-align: center;
+    transition: transform .3s, box-shadow .3s;
+    cursor: pointer;
+    position: relative;
+  }
+  .card img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border: 3px solid;
+  }
+  .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
+  .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
+  .name { font-size:1.1em; margin-bottom:5px;}
+  .btns {
+    display:flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .btn-like, .btn-chat, .btn-fav {
+    width:30px; height:30px;
+    border-radius:50%;
+    background-color:rgba(255,255,255,0.1);
+    border:1px solid #ff66cc;
+    color:#ff66cc;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1em;
+    cursor:pointer;
+    transition: transform .2s, background-color .3s, color .3s;
+    user-select:none;
+  }
+  .btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
+  /* Bouton favoris en jaune quand actif */
+  .btn-fav.active {
+    background-color: #ffea00;
+    border-color: #ffea00;
+    color: #333;
+    transform: scale(1.3);
+  }
+  .card.center {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px #ff00ff;
+  }
+  /* Mini‑profil gauche après message */
+  .left-mini-profiles {
+    position: fixed;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 5;
+  }
+  .left-mini-profiles img {
+    width:50px; height:50px;
+    border-radius:50%;
+    border:2px solid #ff66cc;
+    object-fit:cover;
+    cursor:pointer;
+    box-shadow:0 0 8px #ff66cc;
+    transition:transform .2s;
+    user-select:none;
+    touch-action: none;
+    position: relative; /* for drag */
+  }
+  .left-mini-profiles img:hover { transform: scale(1.2); }
 
-    .mini-profile {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: grab;
-      user-select: none;
-      border: 2px solid white;
-    }
+  /* Modal profil */
+  .modal {
+    display:none; position:fixed;
+    top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.8);
+    align-items:center; justify-content:center;
+    z-index:10;
+  }
+  .modal.active { display:flex; }
+  .modal-content {
+    background: rgba(0,0,0,0.7);
+    padding:20px; border-radius:12px;
+    width:90%; max-width:400px;
+    text-align:center; position:relative;
+    max-height:90vh; overflow-y:auto;
+  }
+  .modal-content h2 { margin-bottom:10px; color:#ff66cc;}
+  .modal-content p { margin-bottom:8px; color:#ddd; font-size:0.95em;}
+  .modal-close {
+    position:absolute; top:10px; right:10px;
+    font-size:1.3em; color:#ff66cc;
+    cursor:pointer;
+  }
+  .photo-gallery {
+    display:flex; justify-content:center; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+  }
+  .photo-gallery img {
+    width: 80px; height: 80px;
+    border-radius: 12px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.3s;
+  }
+  .photo-gallery img:hover {
+    border-color: #ff66cc;
+  }
 
-    .card {
-      width: 200px;
-      margin: 40px auto;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(8px);
-      border: 1px solid white;
-      border-radius: 10px;
-      text-align: center;
-      color: white;
-    }
-
-    .card img {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      border: 3px solid white;
-    }
-
-    .card button {
-      margin-top: 10px;
-      padding: 6px 12px;
-      background: #ff66cc;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      cursor: pointer;
-    }
-
-    .chat-modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 300px;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid white;
-      border-radius: 10px;
-      padding: 10px;
-      color: white;
-      z-index: 100;
-    }
-
-    .chat-close {
-      float: right;
-      cursor: pointer;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .chat-messages {
-      max-height: 150px;
-      overflow-y: auto;
-      margin-bottom: 10px;
-    }
-
-    .chat-input-area {
-      display: flex;
-      gap: 5px;
-    }
-
-    .chat-input-area input {
-      flex: 1;
-      padding: 5px;
-      border-radius: 5px;
-      border: none;
-    }
-
-    .chat-input-area button {
-      background: #ff66cc;
-      border: none;
-      color: white;
-      padding: 6px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+  /* Modal chat (copie style carte profil pour la modale) */
+  #chatModal .modal-content {
+    max-width: 350px;
+    background: rgba(0,0,0,0.7);
+    border-radius: 16px;
+    padding: 15px;
+    text-align: left;
+    font-size: 1em;
+    color: #ddd;
+  }
+  #chatModal .modal-header {
+    font-weight: bold;
+    color: #ff66cc;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+    text-align: center;
+  }
+  #chatModal textarea {
+    width: 100%;
+    height: 80px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border: 1px solid #ff66cc;
+    background: transparent;
+    color: #fff;
+    padding: 8px;
+    resize: none;
+    font-family: 'Orbitron', sans-serif;
+  }
+  #chatModal button {
+    background: #ff66cc;
+    color: #222;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  #chatModal button:hover {
+    background: #ff33ff;
+  }
   </style>
 </head>
 <body>
 
-<div id="leftMini"></div>
+  <div class="header">
+    <a href="page2.html" class="btn-back">&larr; Retour</a>
+  </div>
 
-<div class="card" data-name="Neela">
-  <img src="neela.jpg" alt="Neela">
-  <h3>Neela</h3>
-  <button onclick="openChat(this.parentElement)">Message</button>
-</div>
+  <div class="left-mini-profiles" id="leftMiniProfiles">
+    <!-- Mini-profil s’affiche ici après message -->
+  </div>
+
+  <div class="carousel-container fade-in">
+    <div class="carousel" id="carousel">
+      <div class="card girl" data-name="Sophie" data-age="28" data-lieu="Paris" data-desc="Passionnée par l’astronomie et les romans SF." data-gallery="47,49,51" data-msg="false">
+        <img src="https://i.pravatar.cc/150?img=47" alt="Sophie"/>
+        <div class="name">Sophie</div>
+        <div class="btns">
+          <button class="btn-like" title="J’aime">❤️</button>
+          <button class="btn-chat" title="Chat">💬</button>
+          <button class="btn-fav" title="Favoris">★</button>
+        </div>
+      </div>
+      <div class="card boy" data-name="Marc" data-age="35" data-lieu="Lyon" data-desc="Amateur de musculation et fan de manga." data-gallery="14,20,22" data-msg="false">
+        <img src="https://i.pravatar.cc/150?img=14" alt="Marc"/>
+        <div class="name">Marc</div>
+        <div class="btns">
+          <button class="btn-like" title="J’aime">❤️</button>
+          <button class="btn-chat" title="Chat">💬</button>
+          <button class="btn-fav" title="Favoris">★</button>
+        </div>
+      </div>
+      <div class="card girl" data-name="Clara" data-age="23" data-lieu="Marseille" data-desc="Danseuse et amatrice de thé vert." data-gallery="33,37,39" data-msg="false">
+        <img src="https://i.pravatar.cc/150?img=33" alt="Clara"/>
+        <div class="name">Clara</div>
+        <div class="btns">
+          <button class="btn-like" title="J’aime">❤️</button>
+          <button class="btn-chat" title="Chat">💬</button>
+          <button class="btn-fav" title="Favoris">★</button>
+        </div>
+      </div>
+      <!-- Ajoute d’autres profils ici -->
+    </div>
+  </div>
+
+  <!-- Modal profil complet -->
+  <div class="modal" id="profileModal" aria-hidden="true">
+    <div class="modal-content">
+      <span class="modal-close" id="modalClose">&times;</span>
+      <h2 id="modalName"></h2>
+      <p id="modalAgeLieu"></p>
+      <p id="modalDesc"></p>
+      <div class="photo-gallery" id="modalGallery"></div>
+    </div>
+  </div>
+
+  <!-- Modal chat -->
+  <div class="modal" id="chatModal" aria-hidden="true">
+    <div class="modal-content">
+      <span class="modal-close" id="chatClose">&times;</span>
+      <div class="modal-header" id="chatHeader"></div>
+      <textarea id="chatInput" placeholder="Écris ton message..."></textarea>
+      <button id="sendChatBtn">Envoyer</button>
+    </div>
+  </div>
 
 <script>
-  const leftMini = document.getElementById('leftMini');
+  // Récupérations globales
+  const cards = document.querySelectorAll('.card');
+  const profileModal = document.getElementById('profileModal');
+  const modalClose = document.getElementById('modalClose');
+  const modalName = document.getElementById('modalName');
+  const modalAgeLieu = document.getElementById('modalAgeLieu');
+  const modalDesc = document.getElementById('modalDesc');
+  const modalGallery = document.getElementById('modalGallery');
 
-  function openChat(card) {
+  const chatModal = document.getElementById('chatModal');
+  const chatClose = document.getElementById('chatClose');
+  const chatHeader = document.getElementById('chatHeader');
+  const chatInput = document.getElementById('chatInput');
+  const sendChatBtn = document.getElementById('sendChatBtn');
+
+  const leftMiniProfiles = document.getElementById('leftMiniProfiles');
+
+  // Stockage des mini profils affichés
+  let miniProfiles = [];
+
+  // Fonction pour ouvrir le profil complet
+  function openProfile(card) {
     const name = card.dataset.name;
-    if (document.getElementById(`chatBox_${name}`)) return;
+    const age = card.dataset.age;
+    const lieu = card.dataset.lieu;
+    const desc = card.dataset.desc;
+    const galleryIds = card.dataset.gallery.split(',');
 
-    const chatBox = document.createElement('div');
-    chatBox.id = `chatBox_${name}`;
-    chatBox.className = 'chat-modal';
+    modalName.textContent = name;
+    modalAgeLieu.textContent = `${age} ans, ${lieu}`;
+    modalDesc.textContent = desc;
 
-    chatBox.innerHTML = `
-      <div class="chat-close" title="Fermer">×</div>
-      <div id="chatTitle">${name}</div>
-      <div class="chat-messages" id="chatMessages_${name}"></div>
-      <div class="chat-input-area">
-        <input type="text" id="chatInput_${name}" placeholder="Écrire un message..." autocomplete="off" />
-        <button id="sendMessage_${name}">Envoyer</button>
-      </div>
-    `;
+    // Vider galerie précédente
+    modalGallery.innerHTML = '';
+    galleryIds.forEach(id => {
+      const img = document.createElement('img');
+      img.src = `https://i.pravatar.cc/150?img=${id.trim()}`;
+      img.alt = `${name} photo`;
+      modalGallery.appendChild(img);
+    });
 
-    document.body.appendChild(chatBox);
+    profileModal.classList.add('active');
+    profileModal.setAttribute('aria-hidden', 'false');
+  }
 
-    const closeBtn = chatBox.querySelector('.chat-close');
-    const messagesDiv = chatBox.querySelector(`#chatMessages_${name}`);
-    const input = chatBox.querySelector(`#chatInput_${name}`);
-    const sendBtn = chatBox.querySelector(`#sendMessage_${name}`);
+  // Fermeture modale profil
+  modalClose.addEventListener('click', () => {
+    profileModal.classList.remove('active');
+    profileModal.setAttribute('aria-hidden', 'true');
+  });
 
-    closeBtn.addEventListener('click', () => chatBox.remove());
+  // Fermeture modale chat
+  chatClose.addEventListener('click', () => {
+    chatModal.classList.remove('active');
+    chatModal.setAttribute('aria-hidden', 'true');
+  });
 
-    function addMessage(text, fromUser = true) {
-      const p = document.createElement('p');
-      p.textContent = text;
-      p.style.backgroundColor = fromUser ? '#ff66cc' : '#ddd';
-      p.style.color = fromUser ? 'white' : '#333';
-      p.style.padding = '5px';
-      p.style.borderRadius = '5px';
-      messagesDiv.appendChild(p);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  // Clic sur bouton chat : ouvre modale chat et prépare envoi message
+  cards.forEach(card => {
+    // Ouvrir profil au clic sur image ou nom
+    card.querySelector('img').addEventListener('click', () => openProfile(card));
+    card.querySelector('.name').addEventListener('click', () => openProfile(card));
+
+    // Bouton chat
+    const btnChat = card.querySelector('.btn-chat');
+    btnChat.addEventListener('click', () => {
+      chatHeader.textContent = `Chat avec ${card.dataset.name}`;
+      chatInput.value = '';
+      chatModal.classList.add('active');
+      chatModal.setAttribute('aria-hidden', 'false');
+
+      // Focus textarea
+      setTimeout(() => chatInput.focus(), 100);
+
+      // Garder la carte ciblée pour envoi message
+      chatModal.currentCard = card;
+    });
+  });
+
+  // Envoi du message chat
+  sendChatBtn.addEventListener('click', () => {
+    const msg = chatInput.value.trim();
+    if (!msg) return alert("Écris un message avant d'envoyer.");
+
+    const card = chatModal.currentCard;
+    if (!card) return;
+
+    // Marquer le profil comme "message envoyé"
+    card.dataset.msg = "true";
+
+    // Ajouter mini-profil à gauche si pas déjà là
+    if (!miniProfiles.includes(card)) {
+      miniProfiles.push(card);
+      addMiniProfile(card);
     }
 
-    sendBtn.addEventListener('click', () => {
-      const text = input.value.trim();
-      if (!text) return;
-      addMessage(text, true);
-      input.value = '';
-      setTimeout(() => addMessage("Réponse automatique à : " + text, false), 1000);
+    // Fermer la modale chat
+    chatModal.classList.remove('active');
+    chatModal.setAttribute('aria-hidden', 'true');
 
-      // Ajouter le mini-profil uniquement à l'envoi du message
-      addMiniProfile(card);
-    });
+    alert(`Message envoyé à ${card.dataset.name} :\n${msg}`);
+  });
 
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        sendBtn.click();
-      }
-    });
-  }
-
+  // Ajouter un mini profil dans la colonne gauche (draggable)
   function addMiniProfile(card) {
-    const name = card.dataset.name;
-    if (leftMini.querySelector(`img[alt="${name}"]`)) return;
+    // Créer l'élément img mini-profil
+    const imgMini = document.createElement('img');
+    imgMini.src = card.querySelector('img').src;
+    imgMini.alt = `Mini profil ${card.dataset.name}`;
+    imgMini.title = card.dataset.name;
 
-    const img = document.createElement('img');
-    img.src = card.querySelector('img').src;
-    img.alt = img.title = name;
-    img.className = 'mini-profile';
+    // Position initiale relative dans la colonne (pas fixe)
+    imgMini.style.position = 'relative';
+    imgMini.style.left = '0px';
+    imgMini.style.top = '0px';
 
-    img.style.left = '10px';
-    img.style.top = `${60 + leftMini.children.length * 50}px`;
+    // Permet d'ouvrir la fiche profil complète au clic mini-profil
+    imgMini.addEventListener('click', () => openProfile(card));
 
-    makeDraggable(img);
+    // Activer drag and drop (souris et tactile)
+    makeDraggable(imgMini);
 
-    img.onclick = () => openChat(card);
-    leftMini.appendChild(img);
+    leftMiniProfiles.appendChild(imgMini);
   }
 
+  // Fonction pour rendre un élément draggable verticalement et horizontalement (position: relative)
   function makeDraggable(el) {
-    let offsetX = 0, offsetY = 0, isDragging = false;
+    let pos = { x: 0, y: 0, left: 0, top: 0 };
+    let dragging = false;
 
-    el.addEventListener('mousedown', e => {
-      isDragging = true;
-      offsetX = e.clientX - el.getBoundingClientRect().left;
-      offsetY = e.clientY - el.getBoundingClientRect().top;
-      el.style.cursor = 'grabbing';
-    });
+    // Souris
+    el.addEventListener('mousedown', dragStart);
+    document.addEventListener('mouseup', dragEnd);
+    document.addEventListener('mousemove', dragMove);
 
-    el.addEventListener('touchstart', e => {
-      isDragging = true;
-      const touch = e.touches[0];
-      offsetX = touch.clientX - el.getBoundingClientRect().left;
-      offsetY = touch.clientY - el.getBoundingClientRect().top;
-    });
+    // Touch
+    el.addEventListener('touchstart', dragStart, {passive:false});
+    document.addEventListener('touchend', dragEnd);
+    document.addEventListener('touchmove', dragMove, {passive:false});
 
-    document.addEventListener('mousemove', e => {
-      if (!isDragging) return;
-      el.style.left = `${e.clientX - offsetX}px`;
-      el.style.top = `${e.clientY - offsetY}px`;
-    });
-
-    document.addEventListener('touchmove', e => {
-      if (!isDragging) return;
-      const touch = e.touches[0];
-      el.style.left = `${touch.clientX - offsetX}px`;
-      el.style.top = `${touch.clientY - offsetY}px`;
-    }, { passive: false });
-
-    const stopDrag = () => {
-      if (isDragging) {
-        isDragging = false;
-        el.style.cursor = 'grab';
+    function dragStart(e) {
+      e.preventDefault();
+      dragging = true;
+      if (e.type === 'touchstart') {
+        pos.x = e.touches[0].clientX;
+        pos.y = e.touches[0].clientY;
+      } else {
+        pos.x = e.clientX;
+        pos.y = e.clientY;
       }
-    };
+      pos.left = parseInt(el.style.left) || 0;
+      pos.top = parseInt(el.style.top) || 0;
+      el.style.transition = 'none';
+      el.style.zIndex = 1000; // bring to front while dragging
+    }
+    function dragMove(e) {
+      if (!dragging) return;
+      e.preventDefault();
+      let clientX, clientY;
+      if (e.type === 'touchmove') {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+      const dx = clientX - pos.x;
+      const dy = clientY - pos.y;
 
-    document.addEventListener('mouseup', stopDrag);
-    document.addEventListener('touchend', stopDrag);
+      let newLeft = pos.left + dx;
+      let newTop = pos.top + dy;
+
+      // Limiter dans la fenêtre
+      const rect = el.getBoundingClientRect();
+      const parentRect = el.parentElement.getBoundingClientRect();
+
+      if (newLeft < -rect.left + parentRect.left) newLeft = -rect.left + parentRect.left;
+      if (newTop < -rect.top + parentRect.top) newTop = -rect.top + parentRect.top;
+      if (newLeft + rect.width > window.innerWidth) newLeft = window.innerWidth - rect.width - rect.left + newLeft;
+      if (newTop + rect.height > window.innerHeight) newTop = window.innerHeight - rect.height - rect.top + newTop;
+
+      el.style.left = newLeft + 'px';
+      el.style.top = newTop + 'px';
+    }
+    function dragEnd(e) {
+      if (!dragging) return;
+      dragging = false;
+      el.style.transition = '';
+      el.style.zIndex = '';
+    }
   }
+
+  // Au chargement, on peut éventuellement afficher les profils déjà messagés (ici aucun)
+  window.addEventListener('DOMContentLoaded', () => {
+    cards.forEach(card => {
+      if (card.dataset.msg === "true") {
+        miniProfiles.push(card);
+        addMiniProfile(card);
+      }
+    });
+  });
 </script>
 
 </body>
