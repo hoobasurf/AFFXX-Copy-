@@ -124,6 +124,83 @@
         bottom: 60px !important;
       }
     }
+    .chat-modal {
+  display: none;
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%; max-width: 400px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px solid #ff66cc;
+  border-radius: 16px;
+  z-index: 20;
+  padding: 20px;
+  color: white;
+  box-shadow: 0 0 20px #ff66cc;
+  flex-direction: column;
+}
+
+.chat-modal.active { display: flex; }
+
+.chat-box {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-close {
+  position: absolute;
+  top: 10px; right: 12px;
+  font-size: 1.4em;
+  cursor: pointer;
+  color: #ff66cc;
+}
+
+#chatTitle {
+  margin-bottom: 10px;
+  font-size: 1.2em;
+  color: #ff66cc;
+}
+
+.chat-messages {
+  flex-grow: 1;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-bottom: 12px;
+  font-size: 0.95em;
+  color: #eee;
+}
+
+.chat-input-area {
+  display: flex;
+  gap: 8px;
+}
+
+#chatInput {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  font-family: inherit;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  outline: none;
+}
+
+#sendMessage {
+  background-color: #ff66cc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#sendMessage:hover {
+  background-color: #e055b3;
+}
   </style>
 </head>
 <body>
@@ -274,6 +351,67 @@
     });
   });
   </script>
+<!-- Fenêtre de Chat -->
+<div class="chat-modal" id="chatModal">
+  <div class="chat-box">
+    <span class="chat-close" id="chatClose">&times;</span>
+    <h3 id="chatTitle">Discussion</h3>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" placeholder="Écris un message..." />
+      <button id="sendMessage">Envoyer</button>
+    </div>
+  </div>
+</div>
+  <script>
+let activeChatUser = null;
+const chatModal = document.getElementById('chatModal');
+const chatTitle = document.getElementById('chatTitle');
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendMessage');
+const chatClose = document.getElementById('chatClose');
 
+// Stockage des messages par utilisateur
+const messagesMap = {};
+
+// Ouvrir chat
+function openChat(name) {
+  activeChatUser = name;
+  chatTitle.textContent = `Discussion avec ${name}`;
+  chatMessages.innerHTML = '';
+
+  if (messagesMap[name]) {
+    messagesMap[name].forEach(msg => {
+      const p = document.createElement('p');
+      p.textContent = msg;
+      chatMessages.appendChild(p);
+    });
+  }
+
+  chatModal.classList.add('active');
+  chatInput.focus();
+}
+
+// Envoyer message
+sendBtn.addEventListener('click', () => {
+  const msg = chatInput.value.trim();
+  if (msg && activeChatUser) {
+    if (!messagesMap[activeChatUser]) messagesMap[activeChatUser] = [];
+    messagesMap[activeChatUser].push(msg);
+
+    const p = document.createElement('p');
+    p.textContent = msg;
+    chatMessages.appendChild(p);
+    chatInput.value = '';
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+});
+
+// Fermer la fenêtre
+chatClose.addEventListener('click', () => {
+  chatModal.classList.remove('active');
+});
+</script>
 </body>
 </html>
