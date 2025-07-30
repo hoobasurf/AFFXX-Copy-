@@ -2,217 +2,216 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Profils Déplaçables + Chat</title>
+  <title>Mini-Chat Déplaçable</title>
   <style>
     body {
       margin: 0;
-      background: url('https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+      font-family: 'Poppins', sans-serif;
+      background: url('ton-fond-de-planète.jpg') no-repeat center center fixed;
       background-size: cover;
-      font-family: 'Arial', sans-serif;
     }
 
-    .mini-profile {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      overflow: hidden;
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      cursor: move;
-      border: 2px solid #ff66cc;
-      box-shadow: 0 0 10px #ff66cc;
-      z-index: 1000;
-    }
-
-    .mini-profile img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
+    /* ✅ STYLE CHAT CENTRÉ ET TRANSPARENT */
     .chat-modal {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 280px;
+      width: 300px;
+      max-height: 400px;
       background: rgba(255, 255, 255, 0.1);
-      border: 2px solid #ff66cc;
+      border: 1px solid #fff;
+      border-radius: 10px;
       backdrop-filter: blur(10px);
-      border-radius: 12px;
-      z-index: 2000;
+      z-index: 9999;
+      padding: 10px;
       color: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
     }
 
-    .chat-header {
-      padding: 10px;
-      background: rgba(255, 102, 204, 0.8);
-      font-weight: bold;
-      border-bottom: 1px solid #fff;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .chat-close {
+      text-align: right;
+      cursor: pointer;
+      font-size: 18px;
     }
 
     .chat-messages {
-      max-height: 180px;
+      flex: 1;
       overflow-y: auto;
-      padding: 10px;
-    }
-
-    .chat-messages p {
-      background: #ff66cc;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 8px;
-      margin: 4px 0;
-      font-size: 14px;
-      word-wrap: break-word;
+      margin: 10px 0;
     }
 
     .chat-input-area {
       display: flex;
-      padding: 10px;
       gap: 5px;
     }
 
     .chat-input-area input {
       flex: 1;
-      padding: 6px;
-      border-radius: 6px;
+      padding: 5px;
+      border-radius: 5px;
       border: none;
     }
 
     .chat-input-area button {
-      padding: 6px 10px;
-      border: none;
-      background: #ff66cc;
+      padding: 5px 10px;
+      border-radius: 5px;
+      background-color: #ff66cc;
       color: white;
-      border-radius: 6px;
+      border: none;
       cursor: pointer;
     }
 
-    .close-btn {
+    /* ✅ MINI PROFIL UNIQUE */
+    #miniProfile {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid #ff66cc;
+      position: fixed;
+      bottom: 100px;
+      left: 20px;
+      z-index: 9998;
+      display: none;
+      cursor: grab;
+    }
+
+    #miniProfile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Exemple bouton */
+    #boutonMessage {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background: #ff66cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
-      font-size: 18px;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
 
-  <!-- Plusieurs mini-profils -->
-  <div class="mini-profile" data-name="Alice" style="top:20px; left:20px;">
-    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Alice">
+  <!-- ✅ BOUTON POUR OUVRIR LE CHAT -->
+  <button id="boutonMessage">Message</button>
+
+  <!-- ✅ MINI PROFIL CACHÉ (qui s'affiche après un message) -->
+  <div id="miniProfile">
+    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profil" />
   </div>
 
-  <div class="mini-profile" data-name="Bob" style="top:100px; left:20px;">
-    <img src="https://randomuser.me/api/portraits/men/33.jpg" alt="Bob">
-  </div>
-
-  <!-- Script principal -->
+  <!-- ✅ SCRIPT PRINCIPAL -->
   <script>
-    document.querySelectorAll('.mini-profile').forEach(profile => {
-      let dragging = false;
-      let pos = {};
+    document.addEventListener("DOMContentLoaded", () => {
+      const boutonMessage = document.getElementById("boutonMessage");
+      const miniProfile = document.getElementById("miniProfile");
 
-      profile.addEventListener('mousedown', dragStart);
-      profile.addEventListener('touchstart', dragStart, { passive: false });
+      function createChatBox() {
+        if (document.querySelector(".chat-modal")) return;
 
-      profile.addEventListener('click', (e) => {
-        if (!dragging) openChat(profile.dataset.name);
-      });
+        const chatBox = document.createElement("div");
+        chatBox.className = "chat-modal";
 
-      function dragStart(e) {
-        e.preventDefault();
-        dragging = true;
+        chatBox.innerHTML = `
+          <div class="chat-close">×</div>
+          <div class="chat-messages" id="chatMessages"></div>
+          <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Écris ton message..." />
+            <button id="sendMessage">Envoyer</button>
+          </div>
+        `;
 
-        const rect = profile.getBoundingClientRect();
-        pos = {
-          x: e.type === 'touchstart' ? e.touches[0].clientX : e.clientX,
-          y: e.type === 'touchstart' ? e.touches[0].clientY : e.clientY,
-          left: rect.left,
-          top: rect.top
-        };
+        document.body.appendChild(chatBox);
 
-        const move = (e) => {
-          const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-          const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        const closeBtn = chatBox.querySelector(".chat-close");
+        const messagesDiv = chatBox.querySelector("#chatMessages");
+        const input = chatBox.querySelector("#chatInput");
+        const sendBtn = chatBox.querySelector("#sendMessage");
 
-          const dx = clientX - pos.x;
-          const dy = clientY - pos.y;
+        // ✅ Restaurer messages si existants
+        messagesDiv.innerHTML = localStorage.getItem("chatHistory") || "";
 
-          profile.style.left = (pos.left + dx) + 'px';
-          profile.style.top = (pos.top + dy) + 'px';
-          profile.style.position = 'fixed';
-        };
+        // ✅ Envoi message
+        sendBtn.addEventListener("click", () => {
+          const msg = input.value.trim();
+          if (!msg) return;
+          const p = document.createElement("p");
+          p.textContent = msg;
+          p.style.backgroundColor = "#ff66cc";
+          p.style.color = "white";
+          p.style.padding = "5px";
+          p.style.borderRadius = "5px";
+          messagesDiv.appendChild(p);
+          input.value = "";
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-        const end = () => {
-          dragging = false;
-          window.removeEventListener('mousemove', move);
-          window.removeEventListener('touchmove', move);
-          window.removeEventListener('mouseup', end);
-          window.removeEventListener('touchend', end);
-        };
+          // ✅ Sauvegarde
+          localStorage.setItem("chatHistory", messagesDiv.innerHTML);
 
-        window.addEventListener('mousemove', move);
-        window.addEventListener('touchmove', move, { passive: false });
-        window.addEventListener('mouseup', end);
-        window.addEventListener('touchend', end);
+          // ✅ Afficher le mini-profil
+          miniProfile.style.display = "block";
+        });
+
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            sendBtn.click();
+          }
+        });
+
+        // ✅ Fermeture de la fenêtre
+        closeBtn.addEventListener("click", () => {
+          chatBox.remove();
+        });
       }
-    });
 
-    function openChat(name) {
-      if (document.getElementById(`chat_${name}`)) return;
+      boutonMessage.addEventListener("click", createChatBox);
 
-      const chat = document.createElement('div');
-      chat.className = 'chat-modal';
-      chat.id = `chat_${name}`;
+      // ✅ Mini-profil déplaçable (souris + tactile)
+      let isDragging = false, offsetX = 0, offsetY = 0;
 
-      chat.innerHTML = `
-        <div class="chat-header">
-          <span>${name}</span>
-          <span class="close-btn" onclick="document.getElementById('chat_${name}').remove()">×</span>
-        </div>
-        <div class="chat-messages" id="messages_${name}"></div>
-        <div class="chat-input-area">
-          <input type="text" id="input_${name}" placeholder="Écrire un message..." />
-          <button onclick="sendMessage('${name}')">Envoyer</button>
-        </div>
-      `;
-
-      document.body.appendChild(chat);
-      loadMessages(name);
-    }
-
-    function sendMessage(name) {
-      const input = document.getElementById(`input_${name}`);
-      const messagesDiv = document.getElementById(`messages_${name}`);
-      const text = input.value.trim();
-      if (!text) return;
-
-      const p = document.createElement('p');
-      p.textContent = text;
-      messagesDiv.appendChild(p);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      input.value = '';
-
-      // Save to localStorage
-      const saved = JSON.parse(localStorage.getItem(`chat_${name}`)) || [];
-      saved.push(text);
-      localStorage.setItem(`chat_${name}`, JSON.stringify(saved));
-    }
-
-    function loadMessages(name) {
-      const messages = JSON.parse(localStorage.getItem(`chat_${name}`)) || [];
-      const container = document.getElementById(`messages_${name}`);
-      messages.forEach(msg => {
-        const p = document.createElement('p');
-        p.textContent = msg;
-        container.appendChild(p);
+      miniProfile.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
       });
-    }
+
+      document.addEventListener("mousemove", (e) => {
+        if (isDragging) {
+          miniProfile.style.left = (e.pageX - offsetX) + "px";
+          miniProfile.style.top = (e.pageY - offsetY) + "px";
+        }
+      });
+
+      document.addEventListener("mouseup", () => isDragging = false);
+
+      miniProfile.addEventListener("touchstart", (e) => {
+        isDragging = true;
+        const touch = e.touches[0];
+        offsetX = touch.clientX - miniProfile.getBoundingClientRect().left;
+        offsetY = touch.clientY - miniProfile.getBoundingClientRect().top;
+      });
+
+      document.addEventListener("touchmove", (e) => {
+        if (isDragging) {
+          const touch = e.touches[0];
+          miniProfile.style.left = (touch.clientX - offsetX) + "px";
+          miniProfile.style.top = (touch.clientY - offsetY) + "px";
+        }
+      });
+
+      document.addEventListener("touchend", () => isDragging = false);
+    });
   </script>
+
 </body>
 </html>
