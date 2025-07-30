@@ -2,299 +2,295 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Chat Galaxie</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion Authentique Sérieuse</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
-    body {
-      margin: 0;
-      font-family: 'Arial', sans-serif;
-      background: url('https://img.freepik.com/fond-galaxie.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: white;
-    }
-
-    .carrousel {
-      display: flex;
-      overflow-x: auto;
-      gap: 20px;
-      padding: 20px;
-      scroll-snap-type: x mandatory;
-    }
-
-    .profil {
-      background: rgba(0,0,0,0.6);
-      border-radius: 15px;
-      padding: 15px;
-      min-width: 200px;
-      scroll-snap-align: start;
-      text-align: center;
-    }
-
-    .profil img {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #ff00cc;
-    }
-
-    .profil button {
-      margin-top: 10px;
-      padding: 8px 12px;
-      background: #ff00cc;
-      border: none;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    #miniatures {
-      display: flex;
-      gap: 10px;
-      padding: 15px;
-      overflow-x: auto;
-    }
-
-    .miniature {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      border: 2px solid white;
-      background-size: cover;
-      background-position: center;
-      cursor: grab;
-    }
-
-    #chatContainer {
-      display: none;
-      margin: 20px;
-      background: rgba(0,0,0,0.6);
-      padding: 15px;
-      border-radius: 10px;
-      max-width: 500px;
-    }
-
-    #chatBox {
-      max-height: 200px;
-      overflow-y: auto;
-      margin-bottom: 10px;
-    }
-
-    #messageInput {
-      flex:1;
-      padding: 10px;
-      border-radius: 5px;
-      border: none;
-    }
-
-    #sendBtn {
-      padding: 10px 15px;
-      background: #ff00cc;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  html, body {
+    height:100%; width:100%;
+    font-family: 'Orbitron', sans-serif;
+    background: url('planete-magique.jpg') no-repeat center center/cover;
+    overflow: hidden; color: white;
+  }
+  body::before {
+    content:""; position:fixed; top:0; left:0;
+    width:100%; height:100%;
+    background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%);
+    z-index:1; pointer-events:none;
+    animation: floatStars 60s linear infinite;
+  }
+  @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
+  .header {
+    position: relative; z-index:2;
+    padding: 20px;
+  }
+  .btn-back {
+    position: absolute; top:20px; left:20px;
+    color: #ff66cc; font-size:1.5em; cursor:pointer;
+    text-decoration:none; transition: transform .2s;
+  }
+  .btn-back:hover { transform: scale(1.2); }
+  .carousel-container { z-index:2; position: relative;
+    width:100%; height:calc(100% - 60px); display:flex; align-items:center; }
+  .carousel {
+    display:flex; overflow-x:auto; scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling: touch; gap:40px; padding:40px;
+  }
+  .carousel::-webkit-scrollbar { display:none; }
+  .card {
+    scroll-snap-align:center; flex:0 0 150px;
+    background: rgba(0,0,0,0.5); border-radius:16px; padding:15px;
+    text-align:center; transition: transform .3s, box-shadow .3s;
+    cursor: pointer; position: relative; z-index:2;
+  }
+  .card img {
+    width:90px; height:90px; border-radius:50%;
+    object-fit:cover; margin-bottom:10px; border:3px solid;
+  }
+  .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc;}
+  .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff;}
+  .name { font-size:1.1em; margin-bottom:5px;}
+  .btns { display:flex; justify-content:center; gap:8px; margin-top:6px;}
+  .btn-chat, .btn-like, .btn-fav {
+    width:30px; height:30px; border-radius:50%;
+    background:rgba(255,255,255,0.1); border:1px solid #ff66cc;
+    color:#ff66cc; display:flex; align-items:center;
+    justify-content:center; font-size:1em; cursor:pointer;
+    transition: transform .2s, background-color .3s, color .3s;
+    user-select:none;
+  }
+  .btn-chat:hover, .btn-like:hover, .btn-fav:hover { transform:scale(1.2); }
+  .btn-fav.active {
+    background:#ffea00; border-color:#ffea00; color:#333; transform:scale(1.3);
+  }
+  .left-mini-profiles {
+    position:fixed; top:50%; left:10px; transform:translateY(-50%);
+    display:flex; flex-direction:column; gap:12px; z-index:5;
+  }
+  .left-mini-profiles img {
+    width:50px; height:50px; border-radius:50%;
+    border:2px solid #ff66cc; object-fit:cover; cursor:pointer;
+    box-shadow:0 0 8px #ff66cc; transition:transform .2s;
+  }
+  .left-mini-profiles img:hover { transform:scale(1.2); }
+  .left-mini-profiles img.dragging {
+    opacity:0.5; border-color:#ff66cc;
+  }
+  .modal { display:none; position:fixed; top:0; left:0;
+    width:100%; height:100%; background:rgba(0,0,0,0.8);
+    align-items:center; justify-content:center; z-index:10; }
+  .modal.active { display:flex; }
+  .modal-content { background:rgba(0,0,0,0.7); padding:20px;
+    border-radius:12px; width:90%; max-width:400px;
+    text-align:center; max-height:90vh; overflow-y:auto; }
+  .modal-close { position:absolute; top:10px; right:10px;
+    font-size:1.3em; color:#ff66cc; cursor:pointer;}
+  .photo-gallery {
+    display:flex; justify-content:center; flex-wrap: wrap; gap:8px; margin-top:10px;
+  }
+  .photo-gallery img {
+    width:80px; height:80px; border-radius:12px;
+    object-fit:cover; cursor:pointer; border:2px solid transparent;
+    transition:border-color .3s;
+  }
+  .photo-gallery img:hover { border-color:#ff66cc; }
+  #chatContainer {
+    position:fixed; left:80px; top:50%; transform:translateY(-50%);
+    background:rgba(0,0,0,0.8); border-radius:12px; padding:10px;
+    width:280px; max-height:400px; display:none; flex-direction:column;
+    z-index:20; color:#ff66cc; overflow:hidden;
+  }
+  #chatContainer h3 { margin:0 0 8px 0; color:#ff66cc;}
+  #messagesList { flex:1; overflow-y:auto; margin-bottom:8px; padding-right:6px;}
+  #messagesList div { background:#ff66cc; color:#222;
+    padding:6px 10px; margin-bottom:6px; border-radius:12px; align-self:flex-end;}
+  #inputWrapper { display:flex; gap:6px;}
+  #inputMessage {
+    flex:1; padding:6px 8px; border-radius:8px; border:1px solid #ff66cc;
+    background:transparent; color:#ff66cc; outline:none;
+  }
+  #sendButton {
+    padding:6px 12px; border-radius:8px; border:none;
+    background:#ff66cc; color:#222; cursor:pointer; font-weight:bold;
+  }
   </style>
 </head>
 <body>
 
-  <div class="carrousel">
-    <div class="profil">
-      <img src="https://randomuser.me/api/portraits/women/1.jpg" />
-      <h4>Élise</h4>
-      <button data-message-id="elise" data-img="https://randomuser.me/api/portraits/women/1.jpg">Message</button>
-    </div>
-    <div class="profil">
-      <img src="https://randomuser.me/api/portraits/men/2.jpg" />
-      <h4>Lucas</h4>
-      <button data-message-id="lucas" data-img="https://randomuser.me/api/portraits/men/2.jpg">Message</button>
-    </div>
-    <div class="profil">
-      <img src="https://randomuser.me/api/portraits/women/3.jpg" />
-      <h4>Claire</h4>
-      <button data-message-id="claire" data-img="https://randomuser.me/api/portraits/women/3.jpg">Message</button>
-    </div>
-    <div class="profil">
-      <img src="https://randomuser.me/api/portraits/men/4.jpg" />
-      <h4>Hugo</h4>
-      <button data-message-id="hugo" data-img="https://randomuser.me/api/portraits/men/4.jpg">Message</button>
+  <div class="header">
+    <a href="page2.html" class="btn-back">&larr; Retour</a>
+  </div>
+
+  <div class="left-mini-profiles" id="leftMiniProfiles"></div>
+
+  <div class="carousel-container">
+    <div class="carousel" id="carousel">
+      <div class="card girl" data-name="Sophie" data-age="28" data-lieu="Paris" data-desc="Passionnée par l’astronomie et les romans SF." data-gallery="47,49,51">
+        <img src="https://i.pravatar.cc/150?img=47" alt="Sophie">
+        <div class="name">Sophie</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div><div class="btn-like" title="Like">💖</div><div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
+      </div>
+      <div class="card boy" data-name="Lucas" data-age="31" data-lieu="Lyon" data-desc="Fan de jeux coopératifs et nature." data-gallery="12,14,16">
+        <img src="https://i.pravatar.cc/150?img=12" alt="Lucas">
+        <div class="name">Lucas</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div><div class="btn-like" title="Like">💖</div><div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
+      </div>
+      <div class="card girl" data-name="Emma" data-age="24" data-lieu="Marseille" data-desc="Danseuse et amoureuse des chats." data-gallery="55,56,58">
+        <img src="https://i.pravatar.cc/150?img=55" alt="Emma">
+        <div class="name">Emma</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div><div class="btn-like" title="Like">💖</div><div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div id="miniatures"></div>
-
-  <div id="chatContainer">
-    <div id="chatBox"></div>
-    <div style="display: flex; gap: 10px;">
-      <input type="text" id="messageInput" placeholder="Écris ici..." />
-      <button id="sendBtn" onclick="sendMessage()">Envoyer</button>
+  <div class="modal" id="profileModal">
+    <div class="modal-content">
+      <span class="modal-close" id="modalClose">&times;</span>
+      <h2 id="modalName"></h2>
+      <p id="modalAgeLieu"></p>
+      <p id="modalDesc"></p>
+      <div class="photo-gallery" id="modalGallery"></div>
     </div>
   </div>
 
-  <script>
-    const miniatures = document.getElementById('miniatures');
-    const chatContainer = document.getElementById('chatContainer');
-    const chatBox = document.getElementById('chatBox');
-    const messageInput = document.getElementById('messageInput');
-    let activeChat = null;
-
-    function addMiniature(id, img) {
-      if (document.getElementById('mini-' + id)) return;
-
-      const mini = document.createElement('div');
-      mini.className = 'miniature';
-      mini.id = 'mini-' + id;
-      mini.draggable = true;
-      mini.style.backgroundImage = `url(${img})`;
-
-      mini.addEventListener('click', () => {
-        activeChat = id;
-        chatContainer.style.display = 'block';
-      });
-
-      let timer;
-      mini.addEventListener('mousedown', () => {
-        timer = setTimeout(() => {
-          mini.remove();
-          if (activeChat === id) {
-            chatContainer.style.display = 'none';
-            chatBox.innerHTML = '';
-          }
-        }, 3000);
-      });
-      mini.addEventListener('mouseup', () => clearTimeout(timer));
-
-      mini.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', mini.id);
-      });
-
-      miniatures.appendChild(mini);
-    }
-
-    miniatures.addEventListener('dragover', (e) => e.preventDefault());
-    miniatures.addEventListener('drop', (e) => {
-      e.preventDefault();
-      const id = e.dataTransfer.getData('text/plain');
-      const dragged = document.getElementById(id);
-      const target = e.target.closest('.miniature');
-      if (dragged && target && dragged !== target) {
-        miniatures.insertBefore(dragged, target);
-      }
-    });
-
-    function sendMessage() {
-      const msg = messageInput.value.trim();
-      if (!msg || !activeChat) return;
-
-      const bubble = document.createElement('div');
-      bubble.textContent = msg;
-      bubble.style.background = '#ff00cc';
-      bubble.style.color = 'white';
-      bubble.style.padding = '8px 12px';
-      bubble.style.marginBottom = '5px';
-      bubble.style.borderRadius = '8px';
-      bubble.style.maxWidth = '80%';
-
-      chatBox.appendChild(bubble);
-      messageInput.value = '';
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    function setupMessageButtons() {
-      document.querySelectorAll('[data-message-id]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const id = btn.getAttribute('data-message-id');
-          const img = btn.getAttribute('data-img');
-          addMiniature(id, img);
-        });
-      });
-    }
-
-    setupMessageButtons();
-  </script>
 <script>
-(function(){
-  const leftMini = document.getElementById('leftMiniProfiles');
-  let activeMini = null;
-  const chatBox = document.createElement('div');
-  chatBox.id = 'miniChatBox';
-  chatBox.style.cssText = 'position:fixed;left:80px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.8);color:#ff66cc;padding:10px;border-radius:12px;display:none;flex-direction:column;max-height:300px;z-index:20;';
-  const titleEl = document.createElement('h3'); titleEl.style.margin='0 0 8px';
-  const msgsEl = document.createElement('div'); msgsEl.style.flex='1'; msgsEl.style.overflowY='auto'; msgsEl.style.marginBottom='8px';
-  const inputWrapper = document.createElement('div'); inputWrapper.style.display='flex';
-  const input = document.createElement('input'); input.type='text'; input.placeholder='Écrire un message...'; input.style.flex='1'; input.style.border='1px solid #ff66cc'; input.style.background='transparent'; input.style.color='#ff66cc'; input.style.padding='6px'; input.style.borderRadius='6px';
-  const btn = document.createElement('button'); btn.textContent='Envoyer'; btn.style.marginLeft='6px'; btn.style.background='#ff66cc'; btn.style.color='#222'; btn.style.border='none'; btn.style.padding='6px 12px'; btn.style.borderRadius='6px'; btn.style.cursor='pointer';
-  inputWrapper.append(input, btn);
-  chatBox.append(titleEl, msgsEl, inputWrapper);
-  document.body.appendChild(chatBox);
+  const carousel = document.getElementById('carousel');
+  const modal = document.getElementById('profileModal');
+  const modalName = document.getElementById('modalName');
+  const modalAgeLieu = document.getElementById('modalAgeLieu');
+  const modalDesc = document.getElementById('modalDesc');
+  const modalGallery = document.getElementById('modalGallery');
+  const leftMiniProfiles = document.getElementById('leftMiniProfiles');
+  const chatContainer = document.getElementById('chatContainer');
+  const messagesList = document.getElementById('messagesList');
+  const inputMessage = document.getElementById('inputMessage');
+  const sendButton = document.getElementById('sendButton');
 
-  function openChat(name) {
-    activeMini && activeMini.classList.remove('active-mini');
-    activeMini = leftMini.querySelector(`img[alt="${name}"]`);
-    titleEl.textContent = `Chat avec ${name}`;
-    msgsEl.innerHTML = '';
-    chatBox.style.display='flex';
-    input.focus();
-  }
-  btn.addEventListener('click', () => {
-    const txt = input.value.trim();
-    if (!txt || !activeMini) return;
-    const d = document.createElement('div');
-    d.textContent = txt;
-    d.style.cssText = 'background:#ff66cc;color:#222;padding:6px 10px;margin-bottom:6px;border-radius:12px;align-self:flex-end;';
-    msgsEl.appendChild(d);
-    msgsEl.scrollTop = msgsEl.scrollHeight;
-    input.value='';
+  // Show profile modal
+  carousel.addEventListener('click', e => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+    if (e.target.closest('.btn-chat')||e.target.closest('.btn-like')||e.target.closest('.btn-fav')) return;
+    modalName.textContent = card.dataset.name;
+    modalAgeLieu.textContent = `${card.dataset.age} ans · ${card.dataset.lieu}`;
+    modalDesc.textContent = card.dataset.desc;
+    modalGallery.innerHTML = '';
+    card.dataset.gallery.split(',').forEach(id => {
+      const img = document.createElement('img');
+      img.src = `https://i.pravatar.cc/150?img=${id.trim()}`;
+      img.alt = card.dataset.name;
+      modalGallery.appendChild(img);
+    });
+    modal.classList.add('active');
   });
-  input.addEventListener('keydown', e=>{ if(e.key==='Enter'){e.preventDefault(); btn.click(); } });
+  document.getElementById('modalClose').onclick = () => modal.classList.remove('active');
+  modal.addEventListener('click', e => { if(e.target===modal) modal.classList.remove('active'); });
 
-  // fonction d'ajout miniature
-  window._addMini = function(card){
-    const nm = card.dataset.name;
-    if (leftMini.querySelector(`img[alt="${nm}"]`)) return;
-    const m = document.createElement('img');
-    m.src = card.querySelector('img').src;
-    m.alt = nm; m.title = nm; m.draggable=true;
-    m.style.cursor = 'pointer';
-    leftMini.appendChild(m);
+  // Favorite toggle
+  carousel.querySelectorAll('.btn-fav').forEach(btn => btn.addEventListener('click', e => {
+    e.stopPropagation();
+    btn.classList.toggle('active');
+  }));
 
-    m.addEventListener('click', ()=> openChat(nm));
-    let to;
-    m.addEventListener('mousedown', ()=> to = setTimeout(()=>{
-        if (confirm(`Supprimer ${nm} ?`)){ leftMini.removeChild(m); chatBox.style.display='none'; }
-      },3000));
-    m.addEventListener('mouseup', ()=> clearTimeout(to));
-    m.addEventListener('mouseleave', ()=> clearTimeout(to));
+  // Mini-profile & chat logic
+  let activeMini = null;
+  const store = {};
 
-    // DnD reorder
-    m.addEventListener('dragstart', e=>{
-      m.classList.add('dragging');
-      e.dataTransfer.setData('text/plain', nm);
+  function addMini(card) {
+    if (leftMiniProfiles.querySelector(`img[alt="${card.dataset.name}"]`)) return;
+    const mini = document.createElement('img');
+    mini.src = card.querySelector('img').src;
+    mini.alt = card.dataset.name;
+    mini.title = card.dataset.name;
+    mini.draggable = true;
+    leftMiniProfiles.appendChild(mini);
+
+    // click open chat
+    mini.addEventListener('click', () => openChat(mini));
+    // long press delete
+    let t;
+    mini.addEventListener('mousedown', () => t = setTimeout(() => mini.remove(), 3000));
+    ['mouseup','mouseleave'].forEach(ev=>mini.addEventListener(ev,()=>clearTimeout(t)));
+    // drag & drop
+    mini.addEventListener('dragstart', e=>{
+      mini.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
     });
-    m.addEventListener('dragend', ()=> m.classList.remove('dragging'));
-    leftMini.addEventListener('dragover', e=>{
-      e.preventDefault();
-      const dragging = leftMini.querySelector('.dragging');
-      const all = [...leftMini.querySelectorAll('img:not(.dragging)')];
-      const after = all.reduce((closest,ch)=>{
-        const box=ch.getBoundingClientRect();
-        const offset = e.clientY - box.top - box.height/2;
-        if (offset < 0 && offset > closest.offset) return {offset,element:ch};
-        return closest;
-      },{offset:Infinity}).element;
-      if (!after) leftMini.appendChild(dragging); else leftMini.insertBefore(dragging, after);
-    });
-  };
+    mini.addEventListener('dragend', ()=>mini.classList.remove('dragging'));
+  }
 
-  // attacher aux boutons chat existants
-  document.querySelectorAll('.btn-chat').forEach(btn=>{
+  leftMiniProfiles.addEventListener('dragover', e => {
+    e.preventDefault();
+    const dragging = document.querySelector('.dragging');
+    const after = getAfter(leftMiniProfiles, e.clientY);
+    if (!after) leftMiniProfiles.appendChild(dragging);
+    else leftMiniProfiles.insertBefore(dragging, after);
+  });
+
+  function getAfter(container, y) {
+    const elems = [...container.querySelectorAll('img:not(.dragging)')];
+    return elems.reduce((closest, el) => {
+      const box = el.getBoundingClientRect();
+      const offset = y - box.top - box.height/2;
+      return offset<0 && offset>closest.offset ? {offset, element: el} : closest;
+    }, {offset: Number.NEGATIVE_INFINITY}).element;
+  }
+
+  function openChat(mini) {
+    if (activeMini===mini) { chatContainer.style.display='none'; activeMini=null; return; }
+    activeMini = mini;
+    chatContainer.style.display='flex';
+    chatContainer.querySelector('h3').textContent = `Chat avec ${mini.alt}`;
+    messagesList.innerHTML = '';
+    (store[mini.alt]||[]).forEach(msg=>{
+      const d = document.createElement('div');
+      d.textContent = msg;
+      messagesList.appendChild(d);
+    });
+    inputMessage.value = '';
+    inputMessage.focus();
+  }
+
+  function sendMsg() {
+    const txt = inputMessage.value.trim(); if(!txt) return;
+    const div = document.createElement('div');
+    div.textContent = txt;
+    messagesList.appendChild(div);
+    messagesList.scrollTop = messagesList.scrollHeight;
+    store[activeMini.alt] = store[activeMini.alt]||[];
+    store[activeMini.alt].push(txt);
+    inputMessage.value = '';
+    inputMessage.focus();
+  }
+
+  sendButton.addEventListener('click', sendMsg);
+  inputMessage.addEventListener('keydown', e => {
+    if (e.key==='Enter') { e.preventDefault(); sendMsg(); }
+  });
+
+  // On click Message button
+  carousel.querySelectorAll('.btn-chat').forEach(btn=>{
     btn.addEventListener('click', e=>{
       e.stopPropagation();
       const card = btn.closest('.card');
-      window._addMini(card);
+      addMini(card);
+      openChat(leftMiniProfiles.querySelector(`img[alt="${card.dataset.name}"]`));
     });
   });
-})();
+
+  // Append chat container element to body
+  const chatDiv = document.createElement('div');
+  chatDiv.id = 'chatContainer';
+  document.body.appendChild(chatDiv);
+  // MessagesList/input/send were already part of style/in markup earlier
 </script>
+
 </body>
 </html>
