@@ -5,22 +5,29 @@
   <title>Affinix - Chat Futuriste</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap" rel="stylesheet">
   <style>
-    body {
+    html, body {
       margin: 0;
+      height: 100%;
       font-family: 'Poppins', sans-serif;
-      background: url('https://yourdomain.com/ton-fond-de-planete.jpg') no-repeat center center fixed;
+      background: url('planete-magique.jpg') no-repeat center center fixed;
       background-size: cover;
       overflow-x: hidden;
     }
 
-    /* ✅ CENTRER LE CARROUSEL */
+    .center-page {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      padding: 20px;
+    }
+
     .carousel {
       display: flex;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
-      justify-content: center;
-      padding: 60px 0;
       gap: 20px;
+      padding: 40px 0;
     }
 
     .card {
@@ -46,7 +53,6 @@
       cursor: pointer;
     }
 
-    /* ✅ MINI PROFIL */
     .miniProfile {
       width: 60px;
       height: 60px;
@@ -67,7 +73,6 @@
       object-fit: cover;
     }
 
-    /* ✅ CHAT FENÊTRE */
     .chat-modal {
       position: fixed;
       top: 50%;
@@ -84,7 +89,7 @@
       display: flex;
       flex-direction: column;
       color: white;
-      font-size: 14px;
+      font-size: 13px;
       overflow: hidden;
     }
 
@@ -130,35 +135,35 @@
       font-size: 12px;
     }
 
-    #boutonMessage {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 10px 20px;
-      background: #ff66cc;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
+    @media (max-width: 500px) {
+      .chat-modal {
+        width: 95%;
+        max-height: 90vh;
+      }
+
+      .card {
+        min-width: 200px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- ✅ CARROUSEL -->
-  <div class="carousel">
-    <div class="card">
-      <h3>Alice</h3>
-      <button onclick="openChat('alice')">Message</button>
-      <button>💖</button>
-      <button>⭐</button>
-    </div>
-    <div class="card">
-      <h3>Bob</h3>
-      <button onclick="openChat('bob')">Message</button>
-      <button>💖</button>
-      <button>⭐</button>
+  <!-- ✅ CARROUSEL CENTRÉ -->
+  <div class="center-page">
+    <div class="carousel">
+      <div class="card">
+        <h3>Alice</h3>
+        <button onclick="openChat('alice')">Message</button>
+        <button>💖</button>
+        <button>⭐</button>
+      </div>
+      <div class="card">
+        <h3>Bob</h3>
+        <button onclick="openChat('bob')">Message</button>
+        <button>💖</button>
+        <button>⭐</button>
+      </div>
     </div>
   </div>
 
@@ -212,15 +217,12 @@
       const msgs = chatBox.querySelector(`#msgs-${name}`);
       msgs.innerHTML = localStorage.getItem(profile.storageKey) || "";
 
-      // Déplacement mini-profil
       profile.mini.style.display = "block";
       makeDraggable(profile.mini);
       makeDraggable(chatBox);
 
-      // Fermeture
       chatBox.querySelector(".chat-close").onclick = () => chatBox.remove();
 
-      // Réduction
       chatBox.querySelector(".chat-minimize").onclick = () => {
         const area = chatBox.querySelector(".chat-input-area");
         const msgs = chatBox.querySelector(".chat-messages");
@@ -240,13 +242,13 @@
       p.style.padding = "5px";
       p.style.borderRadius = "5px";
       p.style.margin = "2px 0";
+      p.style.fontSize = "13px";
       document.getElementById("msgs-" + name).appendChild(p);
 
       input.value = "";
       const messages = document.getElementById("msgs-" + name);
       messages.scrollTop = messages.scrollHeight;
 
-      // Sauvegarde
       localStorage.setItem(profiles[name].storageKey, messages.innerHTML);
     }
 
@@ -267,7 +269,6 @@
 
       document.addEventListener("mouseup", () => isDragging = false);
 
-      // Tactile
       el.addEventListener("touchstart", (e) => {
         isDragging = true;
         const t = e.touches[0];
