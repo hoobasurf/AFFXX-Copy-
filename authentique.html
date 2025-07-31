@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Affinix - Chat Futuriste</title>
+  <meta charset="UTF-8">
+  <title>Affinix - Ville Planète</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap" rel="stylesheet">
   <style>
     body {
@@ -15,48 +15,43 @@
 
     .carousel {
       display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 60px 20px;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
-      justify-content: center;
-      padding: 60px 0;
-      gap: 20px;
     }
 
     .card {
-      min-width: 260px;
+      min-width: 270px;
       background: rgba(255, 255, 255, 0.08);
       border: 2px solid #ff66cc;
       border-radius: 20px;
-      padding: 20px;
+      padding: 15px;
       scroll-snap-align: center;
       backdrop-filter: blur(10px);
       color: white;
       text-align: center;
       box-shadow: 0 0 15px #ff66cc;
-      transition: transform 0.3s ease;
-    }
-
-    .card:hover {
-      transform: scale(1.05);
     }
 
     .card img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
+      width: 100%;
+      height: 200px;
       object-fit: cover;
+      border-radius: 15px;
       margin-bottom: 10px;
-      border: 2px solid #ff66cc;
     }
 
     .card button {
       margin: 5px 4px;
       padding: 8px 12px;
       border: none;
+      border-radius: 5px;
       background: #ff66cc;
       color: white;
-      border-radius: 5px;
       cursor: pointer;
+      font-size: 14px;
     }
 
     .miniProfile {
@@ -66,6 +61,8 @@
       overflow: hidden;
       border: 2px solid #ff66cc;
       position: fixed;
+      bottom: 100px;
+      left: 20px;
       z-index: 9998;
       display: none;
       cursor: grab;
@@ -86,8 +83,8 @@
       max-height: 400px;
       background: rgba(255, 255, 255, 0.08);
       border: 2px solid #ff66cc;
-      border-radius: 15px;
-      backdrop-filter: blur(12px);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
       z-index: 9999;
       padding: 10px;
       display: flex;
@@ -126,7 +123,7 @@
       padding: 5px;
       border-radius: 5px;
       border: none;
-      font-size: 12px;
+      font-size: 13px;
     }
 
     .chat-input-area button {
@@ -136,47 +133,37 @@
       color: white;
       border: none;
       cursor: pointer;
-      font-size: 12px;
-    }
-
-    .voir-profil {
-      margin-top: 5px;
-      background: transparent;
-      color: #ffccff;
-      border: none;
-      font-size: 12px;
-      cursor: pointer;
-      text-decoration: underline;
+      font-size: 13px;
     }
   </style>
 </head>
 <body>
 
-  <!-- ✅ CARROUSEL -->
+  <!-- ✅ Carrousel avec 2 profils -->
   <div class="carousel">
     <div class="card">
-      <img src="https://i.imgur.com/3Y3ZKXX.jpg" alt="Alice" />
+      <img src="https://randomuser.me/api/portraits/women/81.jpg" alt="Alice">
       <h3>Alice</h3>
-      <button onclick="openChat('alice')">Message</button>
+      <button onclick="openChat('alice')">💬</button>
       <button>💖</button>
       <button>⭐</button>
     </div>
     <div class="card">
-      <img src="https://i.imgur.com/q13jEQb.jpg" alt="Bob" />
+      <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Bob">
       <h3>Bob</h3>
-      <button onclick="openChat('bob')">Message</button>
+      <button onclick="openChat('bob')">💬</button>
       <button>💖</button>
       <button>⭐</button>
     </div>
   </div>
 
-  <!-- ✅ MINI PROFILS -->
-  <div class="miniProfile" id="mini-alice" style="top: 300px; left: 20px;">
-    <img src="https://i.imgur.com/3Y3ZKXX.jpg" />
+  <!-- Mini-profils -->
+  <div class="miniProfile" id="mini-alice">
+    <img src="https://randomuser.me/api/portraits/women/81.jpg" />
   </div>
 
-  <div class="miniProfile" id="mini-bob" style="top: 400px; left: 20px;">
-    <img src="https://i.imgur.com/q13jEQb.jpg" />
+  <div class="miniProfile" id="mini-bob">
+    <img src="https://randomuser.me/api/portraits/men/45.jpg" />
   </div>
 
   <script>
@@ -212,23 +199,16 @@
           <input type="text" id="input-${name}" placeholder="Écris ton message..." />
           <button onclick="sendMessage('${name}')">Envoyer</button>
         </div>
-        <button class="voir-profil" onclick="alert('Profil de ${name}')">Voir profil</button>
       `;
       document.body.appendChild(chatBox);
 
-      // Historique
       const msgs = chatBox.querySelector(`#msgs-${name}`);
       msgs.innerHTML = localStorage.getItem(profile.storageKey) || "";
 
-      // Affiche le mini profil
-      profile.mini.style.display = "block";
-      makeDraggable(profile.mini);
       makeDraggable(chatBox);
 
-      // Fermeture
       chatBox.querySelector(".chat-close").onclick = () => chatBox.remove();
 
-      // Réduction
       chatBox.querySelector(".chat-minimize").onclick = () => {
         const area = chatBox.querySelector(".chat-input-area");
         const msgs = chatBox.querySelector(".chat-messages");
@@ -254,8 +234,11 @@
       const messages = document.getElementById("msgs-" + name);
       messages.scrollTop = messages.scrollHeight;
 
-      // Sauvegarde
       localStorage.setItem(profiles[name].storageKey, messages.innerHTML);
+
+      // Afficher mini profil après premier message
+      profiles[name].mini.style.display = "block";
+      makeDraggable(profiles[name].mini);
     }
 
     function makeDraggable(el) {
@@ -275,6 +258,7 @@
 
       document.addEventListener("mouseup", () => isDragging = false);
 
+      // Tactile
       el.addEventListener("touchstart", (e) => {
         isDragging = true;
         const t = e.touches[0];
