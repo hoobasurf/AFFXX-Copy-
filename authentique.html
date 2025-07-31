@@ -5,46 +5,52 @@
   <title>Affinix - Chat Futuriste</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap" rel="stylesheet">
   <style>
-    html, body {
+    body {
       margin: 0;
-      height: 100%;
       font-family: 'Poppins', sans-serif;
       background: url('planete-magique.jpg') no-repeat center center fixed;
       background-size: cover;
       overflow-x: hidden;
     }
 
-    .center-page {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-      padding: 20px;
-    }
-
     .carousel {
       display: flex;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
+      justify-content: center;
+      padding: 60px 0;
       gap: 20px;
-      padding: 40px 0;
     }
 
     .card {
-      min-width: 250px;
-      background: rgba(255, 255, 255, 0.1);
+      min-width: 260px;
+      background: rgba(255, 255, 255, 0.08);
       border: 2px solid #ff66cc;
-      border-radius: 15px;
+      border-radius: 20px;
       padding: 20px;
       scroll-snap-align: center;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
       color: white;
       text-align: center;
-      box-shadow: 0 0 10px #ff66cc;
+      box-shadow: 0 0 15px #ff66cc;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .card img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 10px;
+      border: 2px solid #ff66cc;
     }
 
     .card button {
-      margin: 5px;
+      margin: 5px 4px;
       padding: 8px 12px;
       border: none;
       background: #ff66cc;
@@ -60,8 +66,6 @@
       overflow: hidden;
       border: 2px solid #ff66cc;
       position: fixed;
-      bottom: 100px;
-      left: 20px;
       z-index: 9998;
       display: none;
       cursor: grab;
@@ -82,14 +86,14 @@
       max-height: 400px;
       background: rgba(255, 255, 255, 0.08);
       border: 2px solid #ff66cc;
-      border-radius: 12px;
-      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      backdrop-filter: blur(12px);
       z-index: 9999;
       padding: 10px;
       display: flex;
       flex-direction: column;
       color: white;
-      font-size: 13px;
+      font-size: 14px;
       overflow: hidden;
     }
 
@@ -135,48 +139,46 @@
       font-size: 12px;
     }
 
-    @media (max-width: 500px) {
-      .chat-modal {
-        width: 95%;
-        max-height: 90vh;
-      }
-
-      .card {
-        min-width: 200px;
-      }
+    .voir-profil {
+      margin-top: 5px;
+      background: transparent;
+      color: #ffccff;
+      border: none;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
 
-  <!-- ✅ CARROUSEL CENTRÉ -->
-  <div class="center-page">
-    <div class="carousel">
-      <div class="card">
-        <h3>Alice</h3>
-        <button onclick="openChat('alice')">Message</button>
-        <button>💖</button>
-        <button>⭐</button>
-      </div>
-      <div class="card">
-        <h3>Bob</h3>
-        <button onclick="openChat('bob')">Message</button>
-        <button>💖</button>
-        <button>⭐</button>
-      </div>
+  <!-- ✅ CARROUSEL -->
+  <div class="carousel">
+    <div class="card">
+      <img src="https://i.imgur.com/3Y3ZKXX.jpg" alt="Alice" />
+      <h3>Alice</h3>
+      <button onclick="openChat('alice')">Message</button>
+      <button>💖</button>
+      <button>⭐</button>
+    </div>
+    <div class="card">
+      <img src="https://i.imgur.com/q13jEQb.jpg" alt="Bob" />
+      <h3>Bob</h3>
+      <button onclick="openChat('bob')">Message</button>
+      <button>💖</button>
+      <button>⭐</button>
     </div>
   </div>
 
   <!-- ✅ MINI PROFILS -->
-  <div class="miniProfile" id="mini-alice" style="display:none; top: 300px; left: 20px;">
-    <img src="https://randomuser.me/api/portraits/women/44.jpg" />
+  <div class="miniProfile" id="mini-alice" style="top: 300px; left: 20px;">
+    <img src="https://i.imgur.com/3Y3ZKXX.jpg" />
   </div>
 
-  <div class="miniProfile" id="mini-bob" style="display:none; top: 400px; left: 20px;">
-    <img src="https://randomuser.me/api/portraits/men/46.jpg" />
+  <div class="miniProfile" id="mini-bob" style="top: 400px; left: 20px;">
+    <img src="https://i.imgur.com/q13jEQb.jpg" />
   </div>
 
-  <!-- ✅ SCRIPT -->
   <script>
     const profiles = {
       alice: {
@@ -210,19 +212,23 @@
           <input type="text" id="input-${name}" placeholder="Écris ton message..." />
           <button onclick="sendMessage('${name}')">Envoyer</button>
         </div>
+        <button class="voir-profil" onclick="alert('Profil de ${name}')">Voir profil</button>
       `;
       document.body.appendChild(chatBox);
 
-      // Chargement historique
+      // Historique
       const msgs = chatBox.querySelector(`#msgs-${name}`);
       msgs.innerHTML = localStorage.getItem(profile.storageKey) || "";
 
+      // Affiche le mini profil
       profile.mini.style.display = "block";
       makeDraggable(profile.mini);
       makeDraggable(chatBox);
 
+      // Fermeture
       chatBox.querySelector(".chat-close").onclick = () => chatBox.remove();
 
+      // Réduction
       chatBox.querySelector(".chat-minimize").onclick = () => {
         const area = chatBox.querySelector(".chat-input-area");
         const msgs = chatBox.querySelector(".chat-messages");
@@ -242,13 +248,13 @@
       p.style.padding = "5px";
       p.style.borderRadius = "5px";
       p.style.margin = "2px 0";
-      p.style.fontSize = "13px";
       document.getElementById("msgs-" + name).appendChild(p);
 
       input.value = "";
       const messages = document.getElementById("msgs-" + name);
       messages.scrollTop = messages.scrollHeight;
 
+      // Sauvegarde
       localStorage.setItem(profiles[name].storageKey, messages.innerHTML);
     }
 
