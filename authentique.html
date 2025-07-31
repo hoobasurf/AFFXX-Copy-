@@ -1,269 +1,520 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Affinix - Multivers Chat</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>Connexion Authentique Sérieuse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: url('planete-magique.jpg') no-repeat center center fixed;
-      background-size: cover;
-      overflow-x: hidden;
-    }
 
-    .carousel {
+.chat-box {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  width: 280px;
+  padding: 10px;
+  color: #fff;
+  font-family: inherit;
+  box-shadow: 0 0 12px rgba(255, 0, 255, 0.5);
+}
+.chat-box.minimized .chat-messages,
+.chat-box.minimized .chat-input {
+  display: none;
+}
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.chat-header button {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+}
+.chat-messages {
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 10px 0;
+}
+.chat-input textarea {
+  width: 100%;
+  height: 50px;
+  resize: none;
+}
+.chat-input button {
+  width: 100%;
+  margin-top: 5px;
+}
+.mini {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  position: fixed;
+  top: 10%;
+  left: 10%;
+  cursor: pointer;
+  border: 2px solid #ff00cc;
+  z-index: 999;
+}
+
+    * { box-sizing: border-box; margin:0; padding:0; }
+    html, body {
+      height:100%; width:100%;
+      font-family: 'Orbitron', sans-serif;
+      background: url('planete-magique.jpg') no-repeat center center/cover;
+      overflow: hidden; color: white;
+    }
+    body::before {
+      content:""; position:fixed; top:0; left:0;
+      width:100%; height:100%;
+      background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%);
+      z-index:1; pointer-events:none;
+      animation: floatStars 60s linear infinite;
+    }
+    @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
+    .header {
+      position: relative; z-index:2;
+      padding: 20px;
+    }
+    .btn-back {
+      position: absolute; top:20px; left:20px;
+      color: #ff66cc; font-size:1.5em;
+      cursor:pointer; text-decoration:none;
+      transition: transform .2s;
+    }
+    .btn-back:hover { transform: scale(1.2); }
+    .carousel-container {
+      z-index:2;
+      position: relative;
+      width:100%; height:calc(100% - 60px);
+      overflow: hidden;
       display: flex;
-      justify-content: center;
-      align-items: center;
+      align-items:center;
+    }
+    .carousel {
+      display:flex;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
-      padding: 60px 0;
-      gap: 30px;
+      -webkit-overflow-scrolling: touch;
+      gap:40px;
+      padding:40px;
     }
-
+    .carousel::-webkit-scrollbar { display:none; }
     .card {
-      min-width: 280px;
-      max-width: 280px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 2px solid #ff66cc;
-      border-radius: 20px;
-      padding: 20px;
       scroll-snap-align: center;
-      backdrop-filter: blur(10px);
-      color: white;
+      flex: 0 0 150px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 16px;
+      padding: 15px;
       text-align: center;
-      box-shadow: 0 0 15px #ff66cc;
-    }
-
-    .card img {
-      width: 100%;
-      height: 250px;
-      object-fit: cover;
-      border-radius: 15px;
-      margin-bottom: 10px;
-    }
-
-    .card h3 {
-      margin: 10px 0;
-      font-size: 20px;
-    }
-
-    .card .actions button {
-      margin: 5px;
-      padding: 8px 14px;
-      border: none;
-      background: #ff66cc;
-      color: white;
-      border-radius: 50px;
+      transition: transform .3s, box-shadow .3s;
       cursor: pointer;
-      font-size: 16px;
+      position: relative;
     }
-
-    .miniProfile {
-      width: 60px;
-      height: 60px;
+    .card img {
+      width: 90px;
+      height: 90px;
       border-radius: 50%;
-      overflow: hidden;
-      border: 2px solid #ff66cc;
-      position: fixed;
-      bottom: 100px;
-      left: 20px;
-      z-index: 9998;
-      display: none;
-      cursor: grab;
-    }
-
-    .miniProfile img {
-      width: 100%;
-      height: 100%;
       object-fit: cover;
+      margin-bottom: 10px;
+      border: 3px solid;
     }
-
-    .chat-modal {
+    .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
+    .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
+    .name { font-size:1.1em; margin-bottom:5px;}
+    .btns {
+      display:flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .btn-like, .btn-chat, .btn-fav {
+      width:30px; height:30px;
+      border-radius:50%;
+      background-color:rgba(255,255,255,0.1);
+      border:1px solid #ff66cc;
+      color:#ff66cc;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1em;
+      cursor:pointer;
+      transition: transform .2s, background-color .3s, color .3s;
+      user-select:none;
+    }
+    .btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
+    /* Bouton favoris en jaune quand actif */
+    .btn-fav.active {
+      background-color: #ffea00;
+      border-color: #ffea00;
+      color: #333;
+      transform: scale(1.3);
+    }
+    .card.center {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px #ff00ff;
+    }
+    /* Mini‑profil gauche après message */
+    .left-mini-profiles {
       position: fixed;
       top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 320px;
-      max-height: 400px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 2px solid #ff66cc;
-      border-radius: 12px;
-      backdrop-filter: blur(10px);
-      z-index: 9999;
-      padding: 10px;
+      left: 10px;
+      transform: translateY(-50%);
       display: flex;
       flex-direction: column;
-      color: white;
-      font-size: 14px;
-      overflow: hidden;
+      gap: 12px;
+      z-index: 5;
     }
-
-    .chat-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .left-mini-profiles img {
+      width:50px; height:50px;
+      border-radius:50%;
+      border:2px solid #ff66cc;
+      object-fit:cover;
+      cursor:pointer;
+      box-shadow:0 0 8px #ff66cc;
+      transition:transform .2s;
     }
-
-    .chat-close, .chat-minimize {
-      cursor: pointer;
-      font-size: 18px;
-      color: white;
-      margin-left: 8px;
+    .left-mini-profiles img:hover { transform: scale(1.2); }
+    .modal, .chat-modal, .photo-zoom {
+      display:none; position:fixed;
+      top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.8);
+      align-items:center; justify-content:center;
+      z-index:10;
     }
-
-    .chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      margin: 10px 0;
+    .modal.active, .chat-modal.active, .photo-zoom.active { display:flex; }
+    .modal-content {
+      background: rgba(0,0,0,0.7);
+      padding:20px; border-radius:12px;
+      width:90%; max-width:400px;
+      text-align:center; position:relative;
+      max-height:90vh; overflow-y:auto;
     }
-
-    .chat-input-area {
-      display: flex;
-      gap: 5px;
+    .modal-content h2 { margin-bottom:10px; color:#ff66cc;}
+    .modal-content p { margin-bottom:8px; color:#ddd; font-size:0.95em;}
+    .modal-close {
+      position:absolute; top:10px; right:10px;
+      font-size:1.3em; color:#ff66cc;
+      cursor:pointer;
     }
-
-    .chat-input-area input {
-      flex: 1;
-      padding: 5px;
-      border-radius: 5px;
-      border: none;
-      font-size: 12px;
+    .photo-gallery { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin-top:10px;}
+    .photo-gallery img { width:60px; height:60px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid #ff66cc;}
+    .photo-zoom img { max-width:90vw; max-height:90vh; border-radius:10px; border:3px solid #ff66cc;}
+    .chat-box {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid #ff66cc;
+      border-radius:12px;
+      padding:15px;
+      width:90%;
+      max-width:400px;
+      position: relative;
     }
-
-    .chat-input-area button {
-      padding: 5px 10px;
-      border-radius: 5px;
-      background-color: #ff66cc;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-size: 12px;
+    .chat-box textarea {
+      width:100%; height:80px; border-radius:8px; border:none;
+      padding:8px; font-family:'Orbitron'; background:rgba(255,255,255,0.1); color:white; resize:none;
+    }
+    .chat-box button {
+      margin-top:10px; padding:8px 16px;
+      background:#ff66cc; border:none; color:white; border-radius:8px; cursor:pointer;
     }
   </style>
 </head>
 <body>
 
-  <div class="carousel">
-    <div class="card">
-      <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Elena">
-      <h3>Elena</h3>
-      <div class="actions">
-        <button onclick="openChat('elena')">💬 Message</button>
-        <button>💖</button>
-        <button>⭐</button>
+  <div class="header">
+    <a href="page2.html" class="btn-back">&larr; Retour</a>
+  </div>
+
+  <div class="left-mini-profiles" id="leftMiniProfiles">
+    <!-- Mini-profil s’affiche ici après message -->
+  </div>
+
+  <div class="carousel-container fade-in">
+    <div class="carousel" id="carousel">
+      <div class="card girl" data-name="Sophie, 28" data-age="28" data-lieu="Paris" data-desc="Passionnée par l’astronomie et les romans SF." data-gallery="47,49,51" data-msg="false">
+        <img src="https://i.pravatar.cc/150?img=47" alt="Sophie">
+        <div class="name">Sophie</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div>
+          <div class="btn-like" title="Like">💖</div>
+          <div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
       </div>
-    </div>
-    <div class="card">
-      <img src="https://randomuser.me/api/portraits/men/72.jpg" alt="Léo">
-      <h3>Léo</h3>
-      <div class="actions">
-        <button onclick="openChat('leo')">💬 Message</button>
-        <button>💖</button>
-        <button>⭐</button>
+      <div class="card boy" data-name="Lucas, 31" data-age="31" data-lieu="Lyon" data-desc="Fan de jeux coopératifs et nature." data-gallery="12,14,16" data-msg="false">
+        <img src="https://i.pravatar.cc/150?img=12" alt="Lucas">
+        <div class="name">Lucas</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div>
+          <div class="btn-like" title="Like">💖</div>
+          <div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
+      </div>
+      <div class="card girl" data-name="Emma, 25" data-age="25" data-lieu="Marseille" data-desc="Amoureuse de la musique électronique et du voyage." data-gallery="35,37,39" data-msg="true">
+        <img src="https://i.pravatar.cc/150?img=35" alt="Emma">
+        <div class="name">Emma</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div>
+          <div class="btn-like" title="Like">💖</div>
+          <div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
+      </div>
+      <div class="card boy" data-name="Alex, 29" data-age="29" data-lieu="Toulouse" data-desc="Gamer et passionné par la technologie." data-gallery="21,23,25" data-msg="false">
+        <img src="https://i.pravatar.cc/150?img=21" alt="Alex">
+        <div class="name">Alex</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div>
+          <div class="btn-like" title="Like">💖</div>
+          <div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
+      </div>
+      <div class="card girl" data-name="Clara, 27" data-age="27" data-lieu="Nice" data-desc="Adoratrice de yoga et méditation." data-gallery="40,42,44" data-msg="false">
+        <img src="https://i.pravatar.cc/150?img=40" alt="Clara">
+        <div class="name">Clara</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div>
+          <div class="btn-like" title="Like">💖</div>
+          <div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="miniProfile" id="mini-elena">
-    <img src="https://randomuser.me/api/portraits/women/68.jpg" />
+  <!-- Modal détails -->
+  <div class="modal" id="modalDetails">
+    <div class="modal-content">
+      <span class="modal-close" id="modalClose">&times;</span>
+      <h2 id="modalName"></h2>
+      <p><strong>Âge:</strong> <span id="modalAge"></span></p>
+      <p><strong>Lieu:</strong> <span id="modalLieu"></span></p>
+      <p id="modalDesc"></p>
+      <div class="photo-gallery" id="photoGallery"></div>
+    </div>
   </div>
 
-  <div class="miniProfile" id="mini-leo">
-    <img src="https://randomuser.me/api/portraits/men/72.jpg" />
+  <!-- Zoom photo -->
+  <div class="photo-zoom" id="photoZoom">
+    <img src="" alt="Photo zoom" id="zoomedPhoto" />
+  </div>
+
+  <!-- Chat modal -->
+  <div class="chat-modal" id="chatModal">
+    <div class="chat-box">
+      <textarea placeholder="Écris un message..."></textarea>
+      <button id="sendMessage">Envoyer</button>
+    </div>
   </div>
 
   <script>
-    const profiles = {
-      elena: {
-        mini: document.getElementById("mini-elena"),
-        storageKey: "chatElena"
-      },
-      leo: {
-        mini: document.getElementById("mini-leo"),
-        storageKey: "chatLeo"
+    const carousel = document.getElementById('carousel');
+    const cards = carousel.querySelectorAll('.card');
+    const modal = document.getElementById('modalDetails');
+    const modalClose = document.getElementById('modalClose');
+    const modalName = document.getElementById('modalName');
+    const modalAge = document.getElementById('modalAge');
+    const modalLieu = document.getElementById('modalLieu');
+    const modalDesc = document.getElementById('modalDesc');
+    const photoGallery = document.getElementById('photoGallery');
+    const photoZoom = document.getElementById('photoZoom');
+    const zoomedPhoto = document.getElementById('zoomedPhoto');
+    const chatModal = document.getElementById('chatModal');
+    const sendMessageBtn = document.getElementById('sendMessage');
+    const leftMiniProfiles = document.getElementById('leftMiniProfiles');
+
+    // Fonction pour centrer la carte active (scroll automatique)
+    function centerCard(card) {
+      const containerRect = carousel.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      const scrollLeft = carousel.scrollLeft;
+      const offset = (cardRect.left - containerRect.left) + scrollLeft - (containerRect.width / 2) + (cardRect.width / 2);
+      carousel.scrollTo({ left: offset, behavior: 'smooth' });
+    }
+
+    // Initial center sur la première carte
+    centerCard(cards[0]);
+    cards[0].classList.add('center');
+
+    // Gestion click carte pour ouvrir modal
+    cards.forEach(card => {
+      card.addEventListener('click', (e) => {
+        if(e.target.classList.contains('btn-chat') || e.target.classList.contains('btn-like') || e.target.classList.contains('btn-fav')) {
+          return; // Ne pas ouvrir modal si clic sur bouton
+        }
+        openModal(card);
+        centerCard(card);
+        updateCenterCard(card);
+      });
+    });
+
+    function updateCenterCard(activeCard) {
+      cards.forEach(c => c.classList.remove('center'));
+      activeCard.classList.add('center');
+    }
+
+    function openModal(card) {
+      modalName.textContent = card.dataset.name;
+      modalAge.textContent = card.dataset.age;
+      modalLieu.textContent = card.dataset.lieu;
+      modalDesc.textContent = card.dataset.desc;
+
+      // Charger photos
+      photoGallery.innerHTML = '';
+      if(card.dataset.gallery) {
+        const photoIds = card.dataset.gallery.split(',');
+        photoIds.forEach(id => {
+          const img = document.createElement('img');
+          img.src = `https://i.pravatar.cc/150?img=${id.trim()}`;
+          img.alt = card.dataset.name + ' photo';
+          img.addEventListener('click', () => {
+            zoomedPhoto.src = img.src;
+            photoZoom.classList.add('active');
+          });
+          photoGallery.appendChild(img);
+        });
       }
-    };
+      modal.classList.add('active');
+    }
 
-    function openChat(name) {
-      const profile = profiles[name];
-      if (document.getElementById("chat-" + name)) return;
+    modalClose.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
 
-      const chatBox = document.createElement("div");
-      chatBox.className = "chat-modal";
-      chatBox.id = "chat-" + name;
+    photoZoom.addEventListener('click', () => {
+      photoZoom.classList.remove('active');
+    });
 
-      chatBox.innerHTML = `
-        <div class="chat-header">
-          <span>${name.charAt(0).toUpperCase() + name.slice(1)}</span>
-          <div>
-            <span class="chat-minimize">_</span>
-            <span class="chat-close">×</span>
-          </div>
-        </div>
-        <div class="chat-messages" id="msgs-${name}"></div>
-        <div class="chat-input-area">
-          <input type="text" id="input-${name}" placeholder="Écris ton message..." />
-          <button onclick="sendMessage('${name}')">Envoyer</button>
-        </div>
-      `;
-      document.body.appendChild(chatBox);
+<script>
+let openChats = {}; // Suivi des chats ouverts par user
 
-      // Historique
-      const msgs = chatBox.querySelector(`#msgs-${name}`);
-      msgs.innerHTML = localStorage.getItem(profile.storageKey) || "";
+function openChat(card) {
+  const userName = card.dataset.name;
+  if (openChats[userName]) return; // Empêcher double ouverture
 
-      // Actions
-      chatBox.querySelector(".chat-close").onclick = () => chatBox.remove();
-      chatBox.querySelector(".chat-minimize").onclick = () => {
-        const area = chatBox.querySelector(".chat-input-area");
-        const msgs = chatBox.querySelector(".chat-messages");
-        area.style.display = area.style.display === "none" ? "flex" : "none";
-        msgs.style.display = msgs.style.display === "none" ? "block" : "none";
+  // Créer fenêtre chat
+  const chatBox = document.createElement('div');
+  chatBox.className = 'chat-box';
+  chatBox.innerHTML = `
+    <div class="chat-header">
+      <span>${userName}</span>
+      <button class="btn-minimize">–</button>
+      <button class="btn-close">✖</button>
+    </div>
+    <div class="chat-messages"></div>
+    <div class="chat-input">
+      <textarea placeholder="Ton message..."></textarea>
+      <button class="btn-send">Envoyer</button>
+    </div>
+  `;
+  document.body.appendChild(chatBox);
+  centerElement(chatBox);
+  makeDraggable(chatBox);
+
+  openChats[userName] = chatBox;
+
+  // Bouton fermer
+  chatBox.querySelector('.btn-close').onclick = () => {
+    chatBox.remove();
+    delete openChats[userName];
+  };
+
+  // Bouton réduire
+  chatBox.querySelector('.btn-minimize').onclick = () => {
+    chatBox.classList.toggle('minimized');
+  };
+
+  // Bouton envoyer
+  chatBox.querySelector('.btn-send').onclick = () => {
+    const textarea = chatBox.querySelector('textarea');
+    const msg = textarea.value.trim();
+    if (!msg) return;
+
+    const messagesDiv = chatBox.querySelector('.chat-messages');
+    messagesDiv.innerHTML += `<div class="msg">${msg}</div>`;
+    textarea.value = '';
+
+    // Sauvegarde locale
+    localStorage.setItem(`chat-${userName}`, messagesDiv.innerHTML);
+
+    // Ajouter mini profil s’il n’existe pas
+    if (!document.querySelector(`.mini[data-user="${userName}"]`)) {
+      const imgSrc = card.querySelector('img').src;
+      const mini = document.createElement('img');
+      mini.src = imgSrc;
+      mini.alt = userName;
+      mini.className = 'mini';
+      mini.dataset.user = userName;
+      document.body.appendChild(mini);
+      makeDraggable(mini);
+
+      mini.onclick = () => {
+        if (!openChats[userName]) openChat(card);
       };
+    }
+  };
 
-      makeDraggable(chatBox);
+  // Charger messages précédents
+  const previous = localStorage.getItem(`chat-${userName}`);
+  if (previous) chatBox.querySelector('.chat-messages').innerHTML = previous;
+}
+
+// Centrer un élément à l’ouverture
+function centerElement(el) {
+  el.style.position = 'fixed';
+  el.style.top = '50%';
+  el.style.left = '50%';
+  el.style.transform = 'translate(-50%, -50%)';
+  el.style.zIndex = 1000;
+}
+
+// Rendre un élément déplaçable (souris + tactile)
+function makeDraggable(el) {
+  let isDragging = false, startX, startY;
+
+  const move = (clientX, clientY) => {
+    const dx = clientX - startX;
+    const dy = clientY - startY;
+    el.style.left = (el.offsetLeft + dx) + 'px';
+    el.style.top = (el.offsetTop + dy) + 'px';
+    startX = clientX;
+    startY = clientY;
+  };
+
+  el.addEventListener('mousedown', e => {
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+  });
+  window.addEventListener('mousemove', e => {
+    if (isDragging) move(e.clientX, e.clientY);
+  });
+  window.addEventListener('mouseup', () => isDragging = false);
+
+  // Tactile
+  el.addEventListener('touchstart', e => {
+    isDragging = true;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  });
+  window.addEventListener('touchmove', e => {
+    if (isDragging) move(e.touches[0].clientX, e.touches[0].clientY);
+  });
+  window.addEventListener('touchend', () => isDragging = false);
     }
 
-    function sendMessage(name) {
-      const input = document.getElementById("input-" + name);
-      const msg = input.value.trim();
-      if (!msg) return;
-
-      const p = document.createElement("p");
-      p.textContent = msg;
-      p.style.background = "#ff66cc";
-      p.style.padding = "5px";
-      p.style.borderRadius = "5px";
-      p.style.margin = "2px 0";
-      document.getElementById("msgs-" + name).appendChild(p);
-
-      input.value = "";
-      const messages = document.getElementById("msgs-" + name);
-      messages.scrollTop = messages.scrollHeight;
-      localStorage.setItem(profiles[name].storageKey, messages.innerHTML);
-
-      profiles[name].mini.style.display = "block";
-      makeDraggable(profiles[name].mini);
+    // Toggle like (animation cœur)
+    function toggleLike(btn) {
+      if(btn.classList.contains('liked')) {
+        btn.classList.remove('liked');
+        btn.textContent = '💖';
+      } else {
+        btn.classList.add('liked');
+        btn.textContent = '❤️';
+      }
     }
 
-    function makeDraggable(el) {
-      let isDragging = false, offsetX, offsetY;
-      el.addEventListener("mousedown", (e) => {
-        isDragging = true;
-        offsetX = e.offsetX;
-        offsetY = e.offsetY;
-      });
-      document.addEventListener("mousemove", (e) => {
-        if (!isDragging) return;
-        el.style.left = (e.pageX - offsetX) + "px";
-        el.style.top = (e.pageY - offsetY) + "px";
-      });
-      document.addEventListener("mouseup", () => isDragging = false);
+    // Toggle favoris (étoile)
+    function toggleFavorite(btn) {
+      btn.classList.toggle('active');
     }
   </script>
-
 </body>
 </html>
