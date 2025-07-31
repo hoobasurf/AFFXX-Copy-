@@ -2,8 +2,8 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Affinix - Ville Planète</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap" rel="stylesheet">
+  <title>Affinix - Multivers Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
@@ -16,18 +16,20 @@
     .carousel {
       display: flex;
       justify-content: center;
-      gap: 20px;
-      padding: 60px 20px;
+      align-items: center;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
+      padding: 60px 0;
+      gap: 30px;
     }
 
     .card {
-      min-width: 270px;
+      min-width: 280px;
+      max-width: 280px;
       background: rgba(255, 255, 255, 0.08);
       border: 2px solid #ff66cc;
       border-radius: 20px;
-      padding: 15px;
+      padding: 20px;
       scroll-snap-align: center;
       backdrop-filter: blur(10px);
       color: white;
@@ -37,21 +39,26 @@
 
     .card img {
       width: 100%;
-      height: 200px;
+      height: 250px;
       object-fit: cover;
       border-radius: 15px;
       margin-bottom: 10px;
     }
 
-    .card button {
-      margin: 5px 4px;
-      padding: 8px 12px;
+    .card h3 {
+      margin: 10px 0;
+      font-size: 20px;
+    }
+
+    .card .actions button {
+      margin: 5px;
+      padding: 8px 14px;
       border: none;
-      border-radius: 5px;
       background: #ff66cc;
       color: white;
+      border-radius: 50px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 16px;
     }
 
     .miniProfile {
@@ -123,7 +130,7 @@
       padding: 5px;
       border-radius: 5px;
       border: none;
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .chat-input-area button {
@@ -133,48 +140,50 @@
       color: white;
       border: none;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
 
-  <!-- ✅ Carrousel avec 2 profils -->
   <div class="carousel">
     <div class="card">
-      <img src="https://randomuser.me/api/portraits/women/81.jpg" alt="Alice">
-      <h3>Alice</h3>
-      <button onclick="openChat('alice')">💬</button>
-      <button>💖</button>
-      <button>⭐</button>
+      <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Elena">
+      <h3>Elena</h3>
+      <div class="actions">
+        <button onclick="openChat('elena')">💬 Message</button>
+        <button>💖</button>
+        <button>⭐</button>
+      </div>
     </div>
     <div class="card">
-      <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Bob">
-      <h3>Bob</h3>
-      <button onclick="openChat('bob')">💬</button>
-      <button>💖</button>
-      <button>⭐</button>
+      <img src="https://randomuser.me/api/portraits/men/72.jpg" alt="Léo">
+      <h3>Léo</h3>
+      <div class="actions">
+        <button onclick="openChat('leo')">💬 Message</button>
+        <button>💖</button>
+        <button>⭐</button>
+      </div>
     </div>
   </div>
 
-  <!-- Mini-profils -->
-  <div class="miniProfile" id="mini-alice">
-    <img src="https://randomuser.me/api/portraits/women/81.jpg" />
+  <div class="miniProfile" id="mini-elena">
+    <img src="https://randomuser.me/api/portraits/women/68.jpg" />
   </div>
 
-  <div class="miniProfile" id="mini-bob">
-    <img src="https://randomuser.me/api/portraits/men/45.jpg" />
+  <div class="miniProfile" id="mini-leo">
+    <img src="https://randomuser.me/api/portraits/men/72.jpg" />
   </div>
 
   <script>
     const profiles = {
-      alice: {
-        mini: document.getElementById("mini-alice"),
-        storageKey: "chatAlice"
+      elena: {
+        mini: document.getElementById("mini-elena"),
+        storageKey: "chatElena"
       },
-      bob: {
-        mini: document.getElementById("mini-bob"),
-        storageKey: "chatBob"
+      leo: {
+        mini: document.getElementById("mini-leo"),
+        storageKey: "chatLeo"
       }
     };
 
@@ -202,19 +211,20 @@
       `;
       document.body.appendChild(chatBox);
 
+      // Historique
       const msgs = chatBox.querySelector(`#msgs-${name}`);
       msgs.innerHTML = localStorage.getItem(profile.storageKey) || "";
 
-      makeDraggable(chatBox);
-
+      // Actions
       chatBox.querySelector(".chat-close").onclick = () => chatBox.remove();
-
       chatBox.querySelector(".chat-minimize").onclick = () => {
         const area = chatBox.querySelector(".chat-input-area");
         const msgs = chatBox.querySelector(".chat-messages");
         area.style.display = area.style.display === "none" ? "flex" : "none";
         msgs.style.display = msgs.style.display === "none" ? "block" : "none";
       };
+
+      makeDraggable(chatBox);
     }
 
     function sendMessage(name) {
@@ -233,48 +243,27 @@
       input.value = "";
       const messages = document.getElementById("msgs-" + name);
       messages.scrollTop = messages.scrollHeight;
-
       localStorage.setItem(profiles[name].storageKey, messages.innerHTML);
 
-      // Afficher mini profil après premier message
       profiles[name].mini.style.display = "block";
       makeDraggable(profiles[name].mini);
     }
 
     function makeDraggable(el) {
       let isDragging = false, offsetX, offsetY;
-
       el.addEventListener("mousedown", (e) => {
         isDragging = true;
         offsetX = e.offsetX;
         offsetY = e.offsetY;
       });
-
       document.addEventListener("mousemove", (e) => {
         if (!isDragging) return;
         el.style.left = (e.pageX - offsetX) + "px";
         el.style.top = (e.pageY - offsetY) + "px";
       });
-
       document.addEventListener("mouseup", () => isDragging = false);
-
-      // Tactile
-      el.addEventListener("touchstart", (e) => {
-        isDragging = true;
-        const t = e.touches[0];
-        offsetX = t.clientX - el.getBoundingClientRect().left;
-        offsetY = t.clientY - el.getBoundingClientRect().top;
-      });
-
-      document.addEventListener("touchmove", (e) => {
-        if (!isDragging) return;
-        const t = e.touches[0];
-        el.style.left = (t.clientX - offsetX) + "px";
-        el.style.top = (t.clientY - offsetY) + "px";
-      });
-
-      document.addEventListener("touchend", () => isDragging = false);
     }
   </script>
+
 </body>
 </html>
