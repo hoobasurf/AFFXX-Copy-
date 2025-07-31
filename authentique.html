@@ -194,99 +194,98 @@
   </div>
 
   <!-- ✅ Script -->
-  <script>
-    const carousel = document.getElementById('carousel');
-    const chatModal = document.getElementById('chatModal');
-    const chatBody = document.getElementById('chatBody');
-    const sendMessageBtn = document.getElementById('sendMessageBtn');
-    const chatUserName = document.getElementById('chatUserName');
-    const leftMiniProfiles = document.getElementById('leftMiniProfiles');
-    const closeBtn = document.getElementById('closeBtn');
-    const minimizeBtn = document.getElementById('minimizeBtn');
+ <script>
+  const carousel = document.getElementById('carousel');
+  const chatModal = document.getElementById('chatModal');
+  const chatBody = document.getElementById('chatBody');
+  const sendMessageBtn = document.getElementById('sendMessageBtn');
+  const chatUserName = document.getElementById('chatUserName');
+  const leftMiniProfiles = document.getElementById('leftMiniProfiles');
+  const closeBtn = document.getElementById('closeBtn');
+  const minimizeBtn = document.getElementById('minimizeBtn');
 
-    let currentUser = null;
+  let currentUser = null;
+  let currentUserImg = null;
 
-    carousel.addEventListener('click', e => {
-      if(e.target.classList.contains('btn-chat')) {
-        const card = e.target.closest('.card');
-        openChat(card);
-        e.stopPropagation();
+  carousel.addEventListener('click', e => {
+    if (e.target.classList.contains('btn-chat')) {
+      const card = e.target.closest('.card');
+      openChat(card);
+      e.stopPropagation();
+    }
+  });
+
+  function openChat(card) {
+    currentUser = card.dataset.name;
+    currentUserImg = card.querySelector('img').src;
+
+    chatUserName.textContent = "Avec " + currentUser;
+    chatModal.classList.add('active');
+  }
+
+  sendMessageBtn.addEventListener('click', () => {
+    const textarea = chatModal.querySelector('textarea');
+    const message = textarea.value.trim();
+    if (message === '') return;
+
+    const msgP = document.createElement('p');
+    msgP.textContent = message;
+    chatBody.appendChild(msgP);
+    textarea.value = '';
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    // Fermer le chat
+    chatModal.classList.remove('active');
+
+    // Ajouter mini-profil
+    addMiniProfile(currentUser, currentUserImg);
+  });
+
+  function addMiniProfile(userName, imgSrc) {
+    const mini = document.createElement('img');
+    mini.src = imgSrc;
+    mini.alt = userName;
+
+    // Déplacement
+    let isDragging = false, offsetX = 0, offsetY = 0;
+    mini.addEventListener('mousedown', e => {
+      isDragging = true;
+      offsetX = e.offsetX;
+      offsetY = e.offsetY;
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (isDragging) {
+        mini.style.position = 'fixed';
+        mini.style.left = (e.pageX - offsetX) + 'px';
+        mini.style.top = (e.pageY - offsetY) + 'px';
       }
     });
 
-    function openChat(card) {
-      currentUser = card.dataset.name;
-      chatUserName.textContent = "Avec " + currentUser;
-      chatModal.classList.add('active');
+    document.addEventListener('mouseup', () => isDragging = false);
+
+    leftMiniProfiles.prepend(mini);
+
+    setTimeout(() => {
+      mini.remove();
+    }, 10000);
+  }
+
+  closeBtn.addEventListener('click', () => {
+    chatModal.classList.remove('active');
+  });
+
+  minimizeBtn.addEventListener('click', () => {
+    chatModal.classList.toggle('minimized');
+    if (chatModal.classList.contains('minimized')) {
+      chatBody.style.display = 'none';
+      chatModal.querySelector('.chat-footer').style.display = 'none';
+    } else {
+      chatBody.style.display = '';
+      chatModal.querySelector('.chat-footer').style.display = '';
     }
-
-    sendMessageBtn.addEventListener('click', () => {
-      const textarea = chatModal.querySelector('textarea');
-      const message = textarea.value.trim();
-      if(message === '') return;
-
-      const msgP = document.createElement('p');
-      msgP.textContent = message;
-      chatBody.appendChild(msgP);
-      textarea.value = '';
-      chatBody.scrollTop = chatBody.scrollHeight;
-
-      // Fermer le chat
-      chatModal.classList.remove('active');
-
-      // Ajouter mini-profil
-      addMiniProfile(currentUser);
-    });
-
-    function addMiniProfile(userName) {
-      const card = [...carousel.querySelectorAll('.card')].find(c => c.dataset.name === userName);
-      if(!card) return;
-      const imgSrc = card.querySelector('img').src;
-
-      const mini = document.createElement('img');
-      mini.src = imgSrc;
-      mini.alt = userName;
-
-      // Déplacement
-      let isDragging = false, offsetX = 0, offsetY = 0;
-      mini.addEventListener('mousedown', e => {
-        isDragging = true;
-        offsetX = e.offsetX;
-        offsetY = e.offsetY;
-      });
-
-      document.addEventListener('mousemove', e => {
-        if(isDragging) {
-          mini.style.position = 'fixed';
-          mini.style.left = (e.pageX - offsetX) + 'px';
-          mini.style.top = (e.pageY - offsetY) + 'px';
-        }
-      });
-
-      document.addEventListener('mouseup', () => isDragging = false);
-
-      leftMiniProfiles.prepend(mini);
-
-      setTimeout(() => {
-        mini.remove();
-      }, 10000);
-    }
-
-    closeBtn.addEventListener('click', () => {
-      chatModal.classList.remove('active');
-    });
-
-    minimizeBtn.addEventListener('click', () => {
-      chatModal.classList.toggle('minimized');
-      if (chatModal.classList.contains('minimized')) {
-        chatBody.style.display = 'none';
-        chatModal.querySelector('.chat-footer').style.display = 'none';
-      } else {
-        chatBody.style.display = '';
-        chatModal.querySelector('.chat-footer').style.display = '';
-      }
-    });
-  </script>
+  });
+</script>
 
 </body>
 </html>
