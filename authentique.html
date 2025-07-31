@@ -383,138 +383,85 @@
     });
 
 <script>
-let openChats = {}; // Suivi des chats ouverts par user
+    const carousel = document.getElementById('carousel');
+    const chatModal = document.getElementById('chatModal');
+    const chatBody = document.getElementById('chatBody');
+    const chatUserName = document.getElementById('chatUserName');
+    const sendMessageBtn = document.getElementById('sendMessageBtn');
+    const closeBtn = document.getElementById('closeBtn');
+    const minimizeBtn = document.getElementById('minimizeBtn');
+    const leftMiniProfiles = document.getElementById('leftMiniProfiles');
 
-function openChat(card) {
-  const userName = card.dataset.name;
-  if (openChats[userName]) return; // Empêcher double ouverture
+    let currentUser = null;
+    let currentUserImg = null;
 
-  // Créer fenêtre chat
-  const chatBox = document.createElement('div');
-  chatBox.className = 'chat-box';
-  chatBox.innerHTML = `
-    <div class="chat-header">
-      <span>${userName}</span>
-      <button class="btn-minimize">–</button>
-      <button class="btn-close">✖</button>
-    </div>
-    <div class="chat-messages"></div>
-    <div class="chat-input">
-      <textarea placeholder="Ton message..."></textarea>
-      <button class="btn-send">Envoyer</button>
-    </div>
-  `;
-  document.body.appendChild(chatBox);
-  centerElement(chatBox);
-  makeDraggable(chatBox);
+    carousel.addEventListener('click', e => {
+      if (e.target.classList.contains('btn-chat')) {
+        const card = e.target.closest('.card');
+        openChat(card);
+        e.stopPropagation();
+      }
+    });
 
-  openChats[userName] = chatBox;
+    function openChat(card) {
+      currentUser = card.dataset.name;
+      currentUserImg = card.querySelector('img').src;
+      chatUserName.textContent = "Avec " + currentUser;
+      chatModal.classList.add('active');
+    }
 
-  // Bouton fermer
-  chatBox.querySelector('.btn-close').onclick = () => {
-    chatBox.remove();
-    delete openChats[userName];
-  };
+    sendMessageBtn.addEventListener('click', () => {
+      const textarea = chatModal.querySelector('textarea');
+      const message = textarea.value.trim();
+      if (!message) return;
 
-  // Bouton réduire
-  chatBox.querySelector('.btn-minimize').onclick = () => {
-    chatBox.classList.toggle('minimized');
-  };
+      const msgP = document.createElement('p');
+      msgP.textContent = message;
+      chatBody.appendChild(msgP);
+      chatBody.scrollTop = chatBody.scrollHeight;
+      textarea.value = '';
 
-  // Bouton envoyer
-  chatBox.querySelector('.btn-send').onclick = () => {
-    const textarea = chatBox.querySelector('textarea');
-    const msg = textarea.value.trim();
-    if (!msg) return;
+      chatModal.classList.remove('active');
+      addMiniProfile(currentUser, currentUserImg);
+    });
 
-    const messagesDiv = chatBox.querySelector('.chat-messages');
-    messagesDiv.innerHTML += `<div class="msg">${msg}</div>`;
-    textarea.value = '';
-
-    // Sauvegarde locale
-    localStorage.setItem(`chat-${userName}`, messagesDiv.innerHTML);
-
-    // Ajouter mini profil s’il n’existe pas
-    if (!document.querySelector(`.mini[data-user="${userName}"]`)) {
-      const imgSrc = card.querySelector('img').src;
+    function addMiniProfile(userName, imgSrc) {
       const mini = document.createElement('img');
       mini.src = imgSrc;
       mini.alt = userName;
-      mini.className = 'mini';
-      mini.dataset.user = userName;
-      document.body.appendChild(mini);
-      makeDraggable(mini);
 
-      mini.onclick = () => {
-        if (!openChats[userName]) openChat(card);
-      };
-    }
-  };
+      // Déplacement
+      let isDragging = false, offsetX = 0, offsetY = 0;
+      mini.addEventListener('mousedown', e => {
+        isDragging = true;
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+      });
 
-  // Charger messages précédents
-  const previous = localStorage.getItem(`chat-${userName}`);
-  if (previous) chatBox.querySelector('.chat-messages').innerHTML = previous;
-}
+      document.addEventListener('mousemove', e => {
+        if (isDragging) {
+          mini.style.position = 'fixed';
+          mini.style.left = (e.pageX - offsetX) + 'px';
+          mini.style.top = (e.pageY - offsetY) + 'px';
+        }
+      });
 
-// Centrer un élément à l’ouverture
-function centerElement(el) {
-  el.style.position = 'fixed';
-  el.style.top = '50%';
-  el.style.left = '50%';
-  el.style.transform = 'translate(-50%, -50%)';
-  el.style.zIndex = 1000;
-}
+      document.addEventListener('mouseup', () => isDragging = false);
 
-// Rendre un élément déplaçable (souris + tactile)
-function makeDraggable(el) {
-  let isDragging = false, startX, startY;
-
-  const move = (clientX, clientY) => {
-    const dx = clientX - startX;
-    const dy = clientY - startY;
-    el.style.left = (el.offsetLeft + dx) + 'px';
-    el.style.top = (el.offsetTop + dy) + 'px';
-    startX = clientX;
-    startY = clientY;
-  };
-
-  el.addEventListener('mousedown', e => {
-    isDragging = true;
-    startX = e.clientX;
-    startY = e.clientY;
-  });
-  window.addEventListener('mousemove', e => {
-    if (isDragging) move(e.clientX, e.clientY);
-  });
-  window.addEventListener('mouseup', () => isDragging = false);
-
-  // Tactile
-  el.addEventListener('touchstart', e => {
-    isDragging = true;
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-  });
-  window.addEventListener('touchmove', e => {
-    if (isDragging) move(e.touches[0].clientX, e.touches[0].clientY);
-  });
-  window.addEventListener('touchend', () => isDragging = false);
+      leftMiniProfiles.prepend(mini);
+      setTimeout(() => mini.remove(), 10000);
     }
 
-    // Toggle like (animation cœur)
-    function toggleLike(btn) {
-      if(btn.classList.contains('liked')) {
-        btn.classList.remove('liked');
-        btn.textContent = '💖';
-      } else {
-        btn.classList.add('liked');
-        btn.textContent = '❤️';
-      }
-    }
+    closeBtn.addEventListener('click', () => {
+      chatModal.classList.remove('active');
+    });
 
-    // Toggle favoris (étoile)
-    function toggleFavorite(btn) {
-      btn.classList.toggle('ative');
-    }
+    minimizeBtn.addEventListener('click', () => {
+      chatModal.classList.toggle('minimized');
+      const isMinimized = chatModal.classList.contains('minimized');
+      chatBody.style.display = isMinimized ? 'none' : '';
+      chatModal.querySelector('.chat-footer').style.display = isMinimized ? 'none' : '';
+    });
   </script>
 </body>
 </html>
