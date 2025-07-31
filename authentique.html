@@ -572,5 +572,239 @@ function makeDraggable(el) {
       btn.classList.toggle('ative');
     }
   </script>
+  const chatWindows = [];
+    const miniProfilesContainer = document.createElement("div");
+    miniProfilesContainer.style.position = "fixed";
+    miniProfilesContainer.style.left = "10px";
+    miniProfilesContainer.style.top = "50%";
+    miniProfilesContainer.style.transform = "translateY(-50%)";
+    miniProfilesContainer.style.zIndex = "9999";
+    document.body.appendChild(miniProfilesContainer);
+
+    function openChat(card) {
+      const name = card.dataset.name;
+      const imgSrc = card.querySelector('img')?.src || '';
+      const existing = chatWindows.find(c => c.dataset.user === name);
+      if (existing) return;
+
+      const chat = document.createElement('div');
+      chat.className = 'chat-modal';
+      chat.dataset.user = name;
+      chat.innerHTML = `
+        <div class="chat-header">
+          ${name}
+          <div>
+            <button class="minimize">–</button>
+            <button class="close">×</button>
+          </div>
+        </div>
+        <div class="chat-body"></div>
+        <div class="chat-footer">
+          <textarea rows="1"></textarea>
+          <button class="send">Envoyer</button>
+        </div>
+      `;
+
+      document.body.appendChild(chat);
+      chat.style.left = '50%';
+      chat.style.top = '50%';
+      chat.style.transform = 'translate(-50%, -50%)';
+      makeDraggable(chat);
+      chatWindows.push(chat);
+
+      chat.querySelector('.close').onclick = () => {
+        chat.remove();
+        const i = chatWindows.indexOf(chat);
+        if (i > -1) chatWindows.splice(i, 1);
+      };
+
+      chat.querySelector('.minimize').onclick = () => {
+        const body = chat.querySelector('.chat-body');
+        const footer = chat.querySelector('.chat-footer');
+        body.style.display = body.style.display === 'none' ? 'block' : 'none';
+        footer.style.display = footer.style.display === 'none' ? 'flex' : 'none';
+      };
+
+      chat.querySelector('.send').onclick = () => {
+        const textarea = chat.querySelector('textarea');
+        const message = textarea.value.trim();
+        if (!message) return;
+        const bubble = document.createElement('div');
+        bubble.textContent = message;
+        bubble.style.fontSize = '12px';
+        chat.querySelector('.chat-body').appendChild(bubble);
+        textarea.value = '';
+
+        // Ajouter mini profil s'il n'existe pas encore
+        const exists = [...miniProfilesContainer.querySelectorAll('img')]
+          .some(img => img.alt === name);
+        if (!exists) {
+          const img = document.createElement('img');
+          img.src = imgSrc;
+          img.alt = name;
+          img.style.width = '40px';
+          img.style.height = '40px';
+          img.style.borderRadius = '50%';
+          img.style.marginBottom = '10px';
+          img.style.cursor = 'pointer';
+          makeDraggable(img);
+          img.onclick = () => openChat(card);
+          miniProfilesContainer.prepend(img);
+        }
+
+        chat.querySelector('.chat-body').scrollTop = chat.querySelector('.chat-body').scrollHeight;
+      };
+    }
+
+    function makeDraggable(el) {
+      let isDragging = false;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      el.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - el.getBoundingClientRect().left;
+        offsetY = e.clientY - el.getBoundingClientRect().top;
+        el.style.cursor = 'grabbing';
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        el.style.left = e.clientX - offsetX + 'px';
+        el.style.top = e.clientY - offsetY + 'px';
+        el.style.transform = 'none';
+      });
+
+      document.addEventListener('mouseup', () => {
+        isDragging = false;
+        el.style.cursor = 'grab';
+      });
+    }
+
+    // Activer bouton 💬 des cartes
+    document.addEventListener('click', e => {
+      if (e.target.classList.contains('btn-chat')) {
+        const card = e.target.closest('.card');
+        if (card) openChat(card);
+      }
+    });
+  </script>
+const chatWindows = [];
+    const miniProfilesContainer = document.createElement("div");
+    miniProfilesContainer.style.position = "fixed";
+    miniProfilesContainer.style.left = "10px";
+    miniProfilesContainer.style.top = "50%";
+    miniProfilesContainer.style.transform = "translateY(-50%)";
+    miniProfilesContainer.style.zIndex = "9999";
+    document.body.appendChild(miniProfilesContainer);
+
+    function openChat(card) {
+      const name = card.dataset.name;
+      const imgSrc = card.querySelector('img')?.src || '';
+      const existing = chatWindows.find(c => c.dataset.user === name);
+      if (existing) return;
+
+      const chat = document.createElement('div');
+      chat.className = 'chat-modal';
+      chat.dataset.user = name;
+      chat.innerHTML = `
+        <div class="chat-header">
+          ${name}
+          <div>
+            <button class="minimize">–</button>
+            <button class="close">×</button>
+          </div>
+        </div>
+        <div class="chat-body"></div>
+        <div class="chat-footer">
+          <textarea rows="1"></textarea>
+          <button class="send">Envoyer</button>
+        </div>
+      `;
+
+      document.body.appendChild(chat);
+      chat.style.left = '50%';
+      chat.style.top = '50%';
+      chat.style.transform = 'translate(-50%, -50%)';
+      makeDraggable(chat);
+      chatWindows.push(chat);
+
+      chat.querySelector('.close').onclick = () => {
+        chat.remove();
+        const i = chatWindows.indexOf(chat);
+        if (i > -1) chatWindows.splice(i, 1);
+      };
+
+      chat.querySelector('.minimize').onclick = () => {
+        const body = chat.querySelector('.chat-body');
+        const footer = chat.querySelector('.chat-footer');
+        body.style.display = body.style.display === 'none' ? 'block' : 'none';
+        footer.style.display = footer.style.display === 'none' ? 'flex' : 'none';
+      };
+
+      chat.querySelector('.send').onclick = () => {
+        const textarea = chat.querySelector('textarea');
+        const message = textarea.value.trim();
+        if (!message) return;
+        const bubble = document.createElement('div');
+        bubble.textContent = message;
+        bubble.style.fontSize = '12px';
+        chat.querySelector('.chat-body').appendChild(bubble);
+        textarea.value = '';
+
+        // Ajouter mini profil s'il n'existe pas encore
+        const exists = [...miniProfilesContainer.querySelectorAll('img')]
+          .some(img => img.alt === name);
+        if (!exists) {
+          const img = document.createElement('img');
+          img.src = imgSrc;
+          img.alt = name;
+          img.style.width = '40px';
+          img.style.height = '40px';
+          img.style.borderRadius = '50%';
+          img.style.marginBottom = '10px';
+          img.style.cursor = 'pointer';
+          makeDraggable(img);
+          img.onclick = () => openChat(card);
+          miniProfilesContainer.prepend(img);
+        }
+
+        chat.querySelector('.chat-body').scrollTop = chat.querySelector('.chat-body').scrollHeight;
+      };
+    }
+
+    function makeDraggable(el) {
+      let isDragging = false;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      el.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - el.getBoundingClientRect().left;
+        offsetY = e.clientY - el.getBoundingClientRect().top;
+        el.style.cursor = 'grabbing';
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        el.style.left = e.clientX - offsetX + 'px';
+        el.style.top = e.clientY - offsetY + 'px';
+        el.style.transform = 'none';
+      });
+
+      document.addEventListener('mouseup', () => {
+        isDragging = false;
+        el.style.cursor = 'grab';
+      });
+    }
+
+    // Activer bouton 💬 des cartes
+    document.addEventListener('click', e => {
+      if (e.target.classList.contains('btn-chat')) {
+        const card = e.target.closest('.card');
+        if (card) openChat(card);
+      }
+    });
+  </script>
 </body>
 </html>
