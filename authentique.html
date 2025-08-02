@@ -8,58 +8,46 @@
   <!-- Ton style existant ici (fond galaxie, carte centrée, etc.) -->
 
   <style>
-    /* Ajout pour les fenêtres de chat */
-    .chat-modal {
-      position: fixed;
-      width: 300px;
-      height: 350px;
-      background: #fff;
-      border: 2px solid #000;
-      z-index: 9999;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-      padding: 10px;
-      border-radius: 10px;
-    }
-
-    .chat-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .chat-body {
-      height: 200px;
-      overflow-y: auto;
-      background: #f9f9f9;
-      padding: 5px;
-      border-radius: 5px;
-      margin-bottom: 10px;
-      font-size: 12px;
-    }
-
-    .chat-footer {
-      display: flex;
-      gap: 5px;
-    }
-
-    .chat-footer textarea {
-      flex: 1;
-      resize: none;
-      padding: 5px;
-      font-size: 12px;
-    }
-
-    .chat-footer button {
-      padding: 5px 10px;
-      background: #ff66cc;
-      border: none;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-  </style>
+    <style>
+.chat-modal {
+  position: fixed;
+  width: 280px;
+  height: 300px;
+  background: white;
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.4);
+  z-index: 10000;
+}
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+.chat-body {
+  height: 180px;
+  overflow-y: auto;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+.chat-footer {
+  display: flex;
+  gap: 5px;
+}
+.chat-footer textarea {
+  flex: 1;
+  resize: none;
+  font-size: 12px;
+}
+.chat-footer button {
+  background: #ff66cc;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+}
+</style>
 </head>
 <body>
 
