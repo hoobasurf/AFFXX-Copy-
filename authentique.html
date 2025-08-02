@@ -6,6 +6,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
+    <style>
+.chat-modal {
+  position: fixed;
+  width: 300px;
+  height: 350px;
+  background: #fff;
+  border: 2px solid #000;
+  z-index: 9999;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.chat-body {
+  height: 200px;
+  overflow-y: auto;
+  background: #f9f9f9;
+  padding: 5px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
+.chat-footer {
+  display: flex;
+  gap: 5px;
+}
+
+.chat-footer textarea {
+  flex: 1;
+  resize: none;
+  padding: 5px;
+  font-size: 12px;
+}
+
+.chat-footer button {
+  padding: 5px 10px;
+  background: #ff66cc;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+</style>
 
 .chat-box {
   background: rgba(255, 255, 255, 0.15);
