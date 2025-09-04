@@ -3,22 +3,107 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chat Cartes</title>
-
-  <!-- Ton style existant ici (fond galaxie, carte centrée, etc.) -->
+  <title>Authentique</title>
 
   <style>
-    /* Ajout pour les fenêtres de chat */
+    /* 🌌 Fond futuriste */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: url("img/fond-futuriste.jpg") no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    /* 📌 Grille de profils */
+    .profiles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      justify-items: center;
+      padding: 60px 20px;
+    }
+
+    .profile {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      cursor: pointer;
+    }
+
+    /* 🌀 Anneaux animés */
+    .profile .ring {
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      width: 160px;
+      height: 160px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 50%;
+      animation: sway 4s ease-in-out infinite;
+    }
+
+    .profile.fille .ring {
+      background-image: url("img/anneau-rose.gif");
+    }
+    .profile.garcon .ring {
+      background-image: url("img/anneau-profil.gif");
+    }
+
+    /* Avatar visible dans le trou de l’anneau */
+    .profile img.avatar {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      object-fit: cover;
+      position: relative;
+      z-index: 2;
+    }
+
+    @keyframes sway {
+      0%,100% { transform: rotate(0deg); }
+      50% { transform: rotate(2deg); }
+    }
+
+    /* 🔹 Boutons d’action */
+    .actions {
+      position: absolute;
+      bottom: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+    }
+
+    .actions div {
+      background: rgba(0,0,0,0.6);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .actions div:hover { background: rgba(255,255,255,0.3); }
+
+    /* 💬 Chat popup */
     .chat-modal {
       position: fixed;
       width: 300px;
       height: 350px;
-      background: #fff;
-      border: 2px solid #000;
+      background: #111;
+      color: white;
+      border: 2px solid #ff66cc;
       z-index: 9999;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.8);
       padding: 10px;
       border-radius: 10px;
+      display: none;
     }
 
     .chat-header {
@@ -30,9 +115,9 @@
     }
 
     .chat-body {
-      height: 200px;
+      height: 220px;
       overflow-y: auto;
-      background: #f9f9f9;
+      background: rgba(255,255,255,0.05);
       padding: 5px;
       border-radius: 5px;
       margin-bottom: 10px;
@@ -63,137 +148,83 @@
 </head>
 <body>
 
-  <!-- Exemple de carte -->
-  <div class="card girl" data-name="Clara, 27" data-age="27" data-lieu="Nice" data-desc="Adoratrice de yoga et méditation." data-gallery="40,42,44" data-msg="false">
-    <img src="https://i.pravatar.cc/150?img=40" alt="Clara">
-    <div class="name">Clara</div>
-    <div class="btns">
-      <div class="btn-chat" title="Chat">💬</div>
-      <div class="btn-like" title="Like">💖</div>
-      <div class="btn-fav" title="Favoris">⭐️</div>
+  <!-- 🔹 Profils -->
+  <div class="profiles">
+    <div class="profile fille" data-name="Clara, 27">
+      <div class="ring"></div>
+      <img src="https://i.pravatar.cc/150?img=40" class="avatar" alt="Clara">
+      <div class="actions">
+        <div class="btn-chat">💬</div>
+        <div>⭐</div>
+        <div>💖</div>
+      </div>
+    </div>
+
+    <div class="profile garcon" data-name="Lucas, 30">
+      <div class="ring"></div>
+      <img src="https://i.pravatar.cc/150?img=41" class="avatar" alt="Lucas">
+      <div class="actions">
+        <div class="btn-chat">💬</div>
+        <div>⭐</div>
+        <div>💖</div>
+      </div>
+    </div>
+
+    <div class="profile fille" data-name="Emma, 25">
+      <div class="ring"></div>
+      <img src="https://i.pravatar.cc/150?img=42" class="avatar" alt="Emma">
+      <div class="actions">
+        <div class="btn-chat">💬</div>
+        <div>⭐</div>
+        <div>💖</div>
+      </div>
     </div>
   </div>
 
-  <!-- Ton script avec interaction -->
+  <!-- 💬 Fenêtre de chat -->
+  <div id="chatBox" class="chat-modal">
+    <div class="chat-header">
+      <span id="chatUser">Chat</span>
+      <button id="closeChat">×</button>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-footer">
+      <textarea id="chatInput" rows="1"></textarea>
+      <button id="sendMsg">Envoyer</button>
+    </div>
+  </div>
+
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const chatWindows = [];
-      const miniProfilesContainer = document.createElement("div");
-      miniProfilesContainer.style.position = "fixed";
-      miniProfilesContainer.style.left = "10px";
-      miniProfilesContainer.style.top = "50%";
-      miniProfilesContainer.style.transform = "translateY(-50%)";
-      miniProfilesContainer.style.zIndex = "9999";
-      document.body.appendChild(miniProfilesContainer);
+    const chatBox = document.getElementById("chatBox");
+    const chatUser = document.getElementById("chatUser");
+    const chatBody = document.getElementById("chatBody");
+    const chatInput = document.getElementById("chatInput");
+    const sendMsg = document.getElementById("sendMsg");
+    const closeChat = document.getElementById("closeChat");
 
-      function openChat(card) {
-        const name = card.dataset.name;
-        const imgSrc = card.querySelector('img')?.src || '';
-        const existing = chatWindows.find(c => c.dataset.user === name);
-        if (existing) return;
-
-        const chat = document.createElement('div');
-        chat.className = 'chat-modal';
-        chat.dataset.user = name;
-        chat.innerHTML = `
-          <div class="chat-header">
-            ${name}
-            <div>
-              <button class="minimize">–</button>
-              <button class="close">×</button>
-            </div>
-          </div>
-          <div class="chat-body"></div>
-          <div class="chat-footer">
-            <textarea rows="1"></textarea>
-            <button class="send">Envoyer</button>
-          </div>
-        `;
-
-        document.body.appendChild(chat);
-        chat.style.left = '50%';
-        chat.style.top = '50%';
-        chat.style.transform = 'translate(-50%, -50%)';
-        makeDraggable(chat);
-        chatWindows.push(chat);
-
-        chat.querySelector('.close').onclick = () => {
-          chat.remove();
-          const i = chatWindows.indexOf(chat);
-          if (i > -1) chatWindows.splice(i, 1);
-        };
-
-        chat.querySelector('.minimize').onclick = () => {
-          const body = chat.querySelector('.chat-body');
-          const footer = chat.querySelector('.chat-footer');
-          body.style.display = body.style.display === 'none' ? 'block' : 'none';
-          footer.style.display = footer.style.display === 'none' ? 'flex' : 'none';
-        };
-
-        chat.querySelector('.send').onclick = () => {
-          const textarea = chat.querySelector('textarea');
-          const message = textarea.value.trim();
-          if (!message) return;
-          const bubble = document.createElement('div');
-          bubble.textContent = message;
-          bubble.style.fontSize = '12px';
-          chat.querySelector('.chat-body').appendChild(bubble);
-          textarea.value = '';
-
-          // Ajouter mini profil s'il n'existe pas encore
-          const exists = [...miniProfilesContainer.querySelectorAll('img')]
-            .some(img => img.alt === name);
-          if (!exists) {
-            const img = document.createElement('img');
-            img.src = imgSrc;
-            img.alt = name;
-            img.style.width = '40px';
-            img.style.height = '40px';
-            img.style.borderRadius = '50%';
-            img.style.marginBottom = '10px';
-            img.style.cursor = 'pointer';
-            makeDraggable(img);
-            img.onclick = () => openChat(card);
-            miniProfilesContainer.prepend(img);
-          }
-
-          chat.querySelector('.chat-body').scrollTop = chat.querySelector('.chat-body').scrollHeight;
-        };
-      }
-
-      function makeDraggable(el) {
-        let isDragging = false;
-        let offsetX = 0;
-        let offsetY = 0;
-
-        el.addEventListener('mousedown', (e) => {
-          isDragging = true;
-          offsetX = e.clientX - el.getBoundingClientRect().left;
-          offsetY = e.clientY - el.getBoundingClientRect().top;
-          el.style.cursor = 'grabbing';
-        });
-
-        document.addEventListener('mousemove', (e) => {
-          if (!isDragging) return;
-          el.style.left = e.clientX - offsetX + 'px';
-          el.style.top = e.clientY - offsetY + 'px';
-          el.style.transform = 'none';
-        });
-
-        document.addEventListener('mouseup', () => {
-          isDragging = false;
-          el.style.cursor = 'grab';
-        });
-      }
-
-      document.addEventListener('click', e => {
-        if (e.target.classList.contains('btn-chat')) {
-          const card = e.target.closest('.card');
-          if (card) openChat(card);
-        }
+    document.querySelectorAll(".btn-chat").forEach(btn => {
+      btn.addEventListener("click", e => {
+        const profile = e.target.closest(".profile");
+        chatUser.textContent = profile.dataset.name;
+        chatBox.style.display = "block";
+        chatBox.style.left = "50%";
+        chatBox.style.top = "50%";
+        chatBox.style.transform = "translate(-50%, -50%)";
+        chatBody.innerHTML = "";
       });
     });
-  </script>
 
+    closeChat.onclick = () => chatBox.style.display = "none";
+
+    sendMsg.onclick = () => {
+      const msg = chatInput.value.trim();
+      if (!msg) return;
+      const div = document.createElement("div");
+      div.textContent = msg;
+      chatBody.appendChild(div);
+      chatInput.value = "";
+      chatBody.scrollTop = chatBody.scrollHeight;
+    };
+  </script>
 </body>
 </html>
