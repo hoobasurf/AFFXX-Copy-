@@ -111,7 +111,7 @@
 
     /* ✅ Fenêtre message plein écran */
     .message-screen {
-      display: none;
+      display: none; /* cachée par défaut */
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
@@ -212,50 +212,48 @@ document.addEventListener('DOMContentLoaded', () => {
   const messageScreen = document.getElementById('messageScreen');
   const closeMessage = document.getElementById('closeMessage');
 
-  // Ouvrir quand on clique sur 💬
+  // Ouvrir la fenêtre message quand on clique sur 💬
   document.addEventListener('click', e => {
     if (e.target.classList.contains('btn-chat')) {
       messageScreen.style.display = 'flex';
     }
   });
 
-  // Fermer quand on clique sur retour
+  // Fermer la fenêtre message et revenir à la page des profils
   closeMessage.addEventListener('click', () => {
     messageScreen.style.display = 'none';
   });
-
-  /* ====== Fenêtre message plein écran ====== */
-document.addEventListener('DOMContentLoaded', () => {
 
   function openFullChat(card) {
     const name = card.dataset.name;
     const imgSrc = card.querySelector('img')?.src || '';
 
-    // Créer modal si pas déjà existant
-    let fullChat = document.getElementById('fullScreenChat');
-    if (fullChat) fullChat.remove();
+    let existing = document.getElementById('fullScreenChat');
+    if (existing) existing.remove();
 
-    fullChat = document.createElement('div');
+    const fullChat = document.createElement('div');
     fullChat.id = 'fullScreenChat';
-    fullChat.style.position = 'fixed';
-    fullChat.style.top = '0';
-    fullChat.style.left = '0';
-    fullChat.style.width = '100%';
-    fullChat.style.height = '100%';
-    fullChat.style.background = 'rgba(0,0,0,0.7)';
-    fullChat.style.backdropFilter = 'blur(12px)';
-    fullChat.style.display = 'flex';
-    fullChat.style.flexDirection = 'column';
-    fullChat.style.justifyContent = 'space-between';
-    fullChat.style.zIndex = '10000';
-    fullChat.style.padding = '20px';
-    
+    Object.assign(fullChat.style, {
+      position: 'fixed',
+      top: '0', left: '0',
+      width: '100%',
+      height: '100%',
+      background: 'rgba(0,0,0,0.7)',
+      backdropFilter: 'blur(12px)',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      zIndex: '10000',
+      padding: '20px',
+      color: 'white'
+    });
+
     fullChat.innerHTML = `
       <div style="display:flex; align-items:center; gap:10px;">
         <img src="${imgSrc}" style="width:50px; height:50px; border-radius:50%; border:2px solid #ff66cc;">
-        <div style="color:white; font-size:1.2em;">${name}</div>
+        <div style="font-size:1.2em;">${name}</div>
       </div>
-      <div id="fullChatBody" style="flex:1; overflow-y:auto; margin:15px 0; color:white;"></div>
+      <div id="fullChatBody" style="flex:1; overflow-y:auto; margin:15px 0;"></div>
       <div style="display:flex; gap:10px;">
         <textarea id="fullChatInput" rows="2" style="flex:1; border-radius:8px; border:none; padding:8px; resize:none; background: rgba(255,255,255,0.1); color:white; font-family:'Orbitron';"></textarea>
         <button id="fullChatSend" style="padding:8px 16px; background:#ff66cc; border:none; border-radius:8px; color:white; cursor:pointer;">Envoyer</button>
@@ -272,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('fullChatInput');
 
     document.getElementById('fullChatClose').onclick = () => fullChat.remove();
-    
+
     document.getElementById('fullChatSend').onclick = () => {
       const text = input.value.trim();
       if (!text) return;
@@ -293,8 +291,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
-</body>
-</html>
-
 </body>
 </html>
