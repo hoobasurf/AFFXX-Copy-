@@ -2,229 +2,535 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
+  <title>Connexion Authentique Sérieuse</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Authentique</title>
-
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
-    /* 🌌 Fond futuriste */
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: url("img/fond-futuriste.jpg") no-repeat center center fixed;
-      background-size: cover;
-      color: white;
-      overflow-x: hidden;
-    }
+    <style>
+.chat-modal {
+  position: fixed;
+  width: 300px;
+  height: 350px;
+  background: #fff;
+  border: 2px solid #000;
+  z-index: 9999;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  padding: 10px;
+  border-radius: 10px;
+}
 
-    /* 📌 Grille de profils */
-    .profiles {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 40px;
-      justify-items: center;
-      padding: 60px 20px;
-    }
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
 
-    .profile {
+.chat-body {
+  height: 200px;
+  overflow-y: auto;
+  background: #f9f9f9;
+  padding: 5px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
+.chat-footer {
+  display: flex;
+  gap: 5px;
+}
+
+.chat-footer textarea {
+  flex: 1;
+  resize: none;
+  padding: 5px;
+  font-size: 12px;
+}
+
+.chat-footer button {
+  padding: 5px 10px;
+  background: #ff66cc;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+</style>
+
+.chat-box {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  width: 280px;
+  padding: 10px;
+  color: #fff;
+  font-family: inherit;
+  box-shadow: 0 0 12px rgba(255, 0, 255, 0.5);
+}
+.chat-box.minimized .chat-messages,
+.chat-box.minimized .chat-input {
+  display: none;
+}
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.chat-header button {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+}
+.chat-messages {
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 10px 0;
+}
+.chat-input textarea {
+  width: 100%;
+  height: 50px;
+  resize: none;
+}
+.chat-input button {
+  width: 100%;
+  margin-top: 5px;
+}
+.mini {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  position: fixed;
+  top: 10%;
+  left: 10%;
+  cursor: pointer;
+  border: 2px solid #ff00cc;
+  z-index: 999;
+}
+
+    * { box-sizing: border-box; margin:0; padding:0; }
+    html, body {
+      height:100%; width:100%;
+      font-family: 'Orbitron', sans-serif;
+      background: url('planete-magique.jpg') no-repeat center center/cover;
+      overflow: hidden; color: white;
+    }
+    body::before {
+      content:""; position:fixed; top:0; left:0;
+      width:100%; height:100%;
+      background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%);
+      z-index:1; pointer-events:none;
+      animation: floatStars 60s linear infinite;
+    }
+    @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
+    .header {
+      position: relative; z-index:2;
+      padding: 20px;
+    }
+    .btn-back {
+      position: absolute; top:20px; left:20px;
+      color: #ff66cc; font-size:1.5em;
+      cursor:pointer; text-decoration:none;
+      transition: transform .2s;
+    }
+    .btn-back:hover { transform: scale(1.2); }
+    .carousel-container {
+      z-index:2;
       position: relative;
-      width: 140px;
-      height: 140px;
+      width:100%; height:calc(100% - 60px);
+      overflow: hidden;
+      display: flex;
+      align-items:center;
+    }
+    .carousel {
+      display:flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      gap:40px;
+      padding:40px;
+    }
+    .carousel::-webkit-scrollbar { display:none; }
+    .card {
+      scroll-snap-align: center;
+      flex: 0 0 150px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 16px;
+      padding: 15px;
+      text-align: center;
+      transition: transform .3s, box-shadow .3s;
       cursor: pointer;
+      position: relative;
     }
-
-    /* 🌀 Anneaux animés */
-    .profile .ring {
-      position: absolute;
-      top: -10px;
-      left: -10px;
-      width: 160px;
-      height: 160px;
-      background-size: cover;
-      background-position: center;
-      border-radius: 50%;
-      animation: sway 4s ease-in-out infinite;
-    }
-
-    .profile.fille .ring {
-      background-image: url("img/anneau-rose.gif");
-    }
-    .profile.garcon .ring {
-      background-image: url("img/anneau-profil.gif");
-    }
-
-    /* Avatar visible dans le trou de l’anneau */
-    .profile img.avatar {
-      width: 140px;
-      height: 140px;
+    .card img {
+      width: 90px;
+      height: 90px;
       border-radius: 50%;
       object-fit: cover;
-      position: relative;
-      z-index: 2;
+      margin-bottom: 10px;
+      border: 3px solid;
     }
-
-    @keyframes sway {
-      0%,100% { transform: rotate(0deg); }
-      50% { transform: rotate(2deg); }
-    }
-
-    /* 🔹 Boutons d’action */
-    .actions {
-      position: absolute;
-      bottom: -35px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 10px;
-    }
-
-    .actions div {
-      background: rgba(0,0,0,0.6);
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
+    .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
+    .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
+    .name { font-size:1.1em; margin-bottom:5px;}
+    .btns {
+      display:flex;
       justify-content: center;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.2s;
+      gap: 8px;
+      margin-top: 6px;
     }
-    .actions div:hover { background: rgba(255,255,255,0.3); }
-
-    /* 💬 Chat popup */
-    .chat-modal {
+    .btn-like, .btn-chat, .btn-fav {
+      width:30px; height:30px;
+      border-radius:50%;
+      background-color:rgba(255,255,255,0.1);
+      border:1px solid #ff66cc;
+      color:#ff66cc;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1em;
+      cursor:pointer;
+      transition: transform .2s, background-color .3s, color .3s;
+      user-select:none;
+    }
+    .btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
+    /* Bouton favoris en jaune quand actif */
+    .btn-fav.active {
+      background-color: #ffea00;
+      border-color: #ffea00;
+      color: #333;
+      transform: scale(1.3);
+    }
+    .card.center {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px #ff00ff;
+    }
+    /* Mini‑profil gauche après message */
+    .left-mini-profiles {
       position: fixed;
-      width: 300px;
-      height: 350px;
-      background: #111;
-      color: white;
-      border: 2px solid #ff66cc;
-      z-index: 9999;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.8);
-      padding: 10px;
-      border-radius: 10px;
-      display: none;
-    }
-
-    .chat-header {
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: bold;
-      margin-bottom: 10px;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 5;
     }
-
-    .chat-body {
-      height: 220px;
-      overflow-y: auto;
+    .left-mini-profiles img {
+      width:50px; height:50px;
+      border-radius:50%;
+      border:2px solid #ff66cc;
+      object-fit:cover;
+      cursor:pointer;
+      box-shadow:0 0 8px #ff66cc;
+      transition:transform .2s;
+    }
+    .left-mini-profiles img:hover { transform: scale(1.2); }
+    .modal, .chat-modal, .photo-zoom {
+      display:none; position:fixed;
+      top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.8);
+      align-items:center; justify-content:center;
+      z-index:10;
+    }
+    .modal.active, .chat-modal.active, .photo-zoom.active { display:flex; }
+    .modal-content {
+      background: rgba(0,0,0,0.7);
+      padding:20px; border-radius:12px;
+      width:90%; max-width:400px;
+      text-align:center; position:relative;
+      max-height:90vh; overflow-y:auto;
+    }
+    .modal-content h2 { margin-bottom:10px; color:#ff66cc;}
+    .modal-content p { margin-bottom:8px; color:#ddd; font-size:0.95em;}
+    .modal-close {
+      position:absolute; top:10px; right:10px;
+      font-size:1.3em; color:#ff66cc;
+      cursor:pointer;
+    }
+    .photo-gallery { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin-top:10px;}
+    .photo-gallery img { width:60px; height:60px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid #ff66cc;}
+    .photo-zoom img { max-width:90vw; max-height:90vh; border-radius:10px; border:3px solid #ff66cc;}
+    .chat-box {
       background: rgba(255,255,255,0.05);
-      padding: 5px;
-      border-radius: 5px;
-      margin-bottom: 10px;
-      font-size: 12px;
+      border: 1px solid #ff66cc;
+      border-radius:12px;
+      padding:15px;
+      width:90%;
+      max-width:400px;
+      position: relative;
     }
+    .chat-box textarea {
+      width:100%; height:80px; border-radius:8px; border:none;
+      padding:8px; font-family:'Orbitron'; background:rgba(255,255,255,0.1); color:white; resize:none;
+    }
+    .chat-box button {
+      margin-top:10px; padding:8px 16px;
+      background:#ff66cc; border:none; color:white; border-radius:8px; cursor:pointer;
+    }
+    .chat-modal {
+  position: fixed;
+  width: 300px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid #fff;
+  border-radius: 10px;
+  padding: 10px;
+  backdrop-filter: blur(10px);
+  color: white;
+  z-index: 10000;
+}
 
-    .chat-footer {
-      display: flex;
-      gap: 5px;
-    }
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+}
 
-    .chat-footer textarea {
-      flex: 1;
-      resize: none;
-      padding: 5px;
-      font-size: 12px;
-    }
+.chat-header button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  margin-left: 5px;
+}
 
-    .chat-footer button {
-      padding: 5px 10px;
-      background: #ff66cc;
-      border: none;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-  </style>
+.chat-body {
+  height: 150px;
+  overflow-y: auto;
+  font-size: 12px;
+  margin: 10px 0;
+}
+
+.chat-footer {
+  display: flex;
+  gap: 5px;
+}
+
+.chat-footer textarea {
+  flex: 1;
+  resize: none;
+  border: none;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.chat-footer button {
+  background: #ff66cc;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+</style>
 </head>
 <body>
 
-  <!-- 🔹 Profils -->
-  <div class="profiles">
-    <div class="profile fille" data-name="Clara, 27">
-      <div class="ring"></div>
-      <img src="https://i.pravatar.cc/150?img=40" class="avatar" alt="Clara">
-      <div class="actions">
-        <div class="btn-chat">💬</div>
-        <div>⭐</div>
-        <div>💖</div>
-      </div>
-    </div>
+  <div class="header">
+    <a href="page2.html" class="btn-back">&larr; Retour</a>
+  </div>
 
-    <div class="profile garcon" data-name="Lucas, 30">
-      <div class="ring"></div>
-      <img src="https://i.pravatar.cc/150?img=41" class="avatar" alt="Lucas">
-      <div class="actions">
-        <div class="btn-chat">💬</div>
-        <div>⭐</div>
-        <div>💖</div>
-      </div>
-    </div>
+  <div class="left-mini-profiles" id="leftMiniProfiles">
+    <!-- Mini-profil s’affiche ici après message -->
+  </div>
 
-    <div class="profile fille" data-name="Emma, 25">
-      <div class="ring"></div>
-      <img src="https://i.pravatar.cc/150?img=42" class="avatar" alt="Emma">
-      <div class="actions">
-        <div class="btn-chat">💬</div>
-        <div>⭐</div>
-        <div>💖</div>
+  <div class="carousel-container fade-in">
+    <div class="carousel" id="carousel">
+      <div class="card girl" data-name="Sophie, 28" data-age="28" data-lieu="Paris" data-desc="Passionnée par l’astronomie et les romans SF." data-gallery="47,49,51" data-msg="false">
+        <img src="https://i.pravatar.cc/150?img=47" alt="Sophie">
+        <div class="name">Sophie</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div>
+          <div class="btn-like" title="Like">💖</div>
+          <div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
+      </div>
+      <div class="card boy" data-name="Lucas, 31" data-age="31" data-lieu="Lyon" data-desc="Fan de jeux coopératifs et nature." data-gallery="12,14,16" data-msg="false">
+        <img src="https://i.pravatar.cc/150?img=12" alt="Lucas">
+        <div class="name">Lucas</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div>
+          <div class="btn-like" title="Like">💖</div>
+          <div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
+      </div>
+      <div class="card girl" data-name="Emma, 25" data-age="25" data-lieu="Marseille" data-desc="Amoureuse de la musique électronique et du voyage." data-gallery="35,37,39" data-msg="true">
+        <img src="https://i.pravatar.cc/150?img=35" alt="Emma">
+        <div class="name">Emma</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div>
+          <div class="btn-like" title="Like">💖</div>
+          <div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
+      </div>
+      <div class="card boy" data-name="Alex, 29" data-age="29" data-lieu="Toulouse" data-desc="Gamer et passionné par la technologie." data-gallery="21,23,25" data-msg="false">
+        <img src="https://i.pravatar.cc/150?img=21" alt="Alex">
+        <div class="name">Alex</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div>
+          <div class="btn-like" title="Like">💖</div>
+          <div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
+      </div>
+      <div class="card girl" data-name="Clara, 27" data-age="27" data-lieu="Nice" data-desc="Adoratrice de yoga et méditation." data-gallery="40,42,44" data-msg="false">
+        <img src="https://i.pravatar.cc/150?img=40" alt="Clara">
+        <div class="name">Clara</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div>
+          <div class="btn-like" title="Like">💖</div>
+          <div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- 💬 Fenêtre de chat -->
-  <div id="chatBox" class="chat-modal">
-    <div class="chat-header">
-      <span id="chatUser">Chat</span>
-      <button id="closeChat">×</button>
-    </div>
-    <div class="chat-body" id="chatBody"></div>
-    <div class="chat-footer">
-      <textarea id="chatInput" rows="1"></textarea>
-      <button id="sendMsg">Envoyer</button>
+  <!-- Modal détails -->
+  <div class="modal" id="modalDetails">
+    <div class="modal-content">
+      <span class="modal-close" id="modalClose">&times;</span>
+      <h2 id="modalName"></h2>
+      <p><strong>Âge:</strong> <span id="modalAge"></span></p>
+      <p><strong>Lieu:</strong> <span id="modalLieu"></span></p>
+      <p id="modalDesc"></p>
+      <div class="photo-gallery" id="photoGallery"></div>
     </div>
   </div>
 
-  <script>
-    const chatBox = document.getElementById("chatBox");
-    const chatUser = document.getElementById("chatUser");
-    const chatBody = document.getElementById("chatBody");
-    const chatInput = document.getElementById("chatInput");
-    const sendMsg = document.getElementById("sendMsg");
-    const closeChat = document.getElementById("closeChat");
+  <!-- Zoom photo -->
+  <div class="photo-zoom" id="photoZoom">
+    <img src="" alt="Photo zoom" id="zoomedPhoto" />
+  </div>
 
-    document.querySelectorAll(".btn-chat").forEach(btn => {
-      btn.addEventListener("click", e => {
-        const profile = e.target.closest(".profile");
-        chatUser.textContent = profile.dataset.name;
-        chatBox.style.display = "block";
-        chatBox.style.left = "50%";
-        chatBox.style.top = "50%";
-        chatBox.style.transform = "translate(-50%, -50%)";
-        chatBody.innerHTML = "";
-      });
+  <!-- Chat modal -->
+  <div class="chat-modal" id="chatModal">
+    <div class="chat-box">
+      <textarea placeholder="Écris un message..."></textarea>
+      <button id="sendMessage">Envoyer</button>
+    </div>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const chatWindows = [];
+  const miniProfilesContainer = document.createElement("div");
+  miniProfilesContainer.style.position = "fixed";
+  miniProfilesContainer.style.left = "10px";
+  miniProfilesContainer.style.top = "50%";
+  miniProfilesContainer.style.transform = "translateY(-50%)";
+  miniProfilesContainer.style.zIndex = "9999";
+  document.body.appendChild(miniProfilesContainer);
+
+  function openChat(card) {
+    const name = card.dataset.name;
+    const imgSrc = card.querySelector('img')?.src || '';
+    const existing = chatWindows.find(c => c.dataset.user === name);
+    if (existing) return;
+
+    const chat = document.createElement('div');
+    chat.className = 'chat-modal';
+    chat.dataset.user = name;
+    chat.innerHTML = `
+      <div class="chat-header">
+        ${name}
+        <div>
+          <button class="minimize">–</button>
+          <button class="close">×</button>
+        </div>
+      </div>
+      <div class="chat-body"></div>
+      <div class="chat-footer">
+        <textarea rows="1"></textarea>
+        <button class="send">Envoyer</button>
+      </div>
+    `;
+
+    document.body.appendChild(chat);
+    chat.style.left = '50%';
+    chat.style.top = '50%';
+    chat.style.transform = 'translate(-50%, -50%)';
+    makeDraggable(chat);
+    chatWindows.push(chat);
+
+    chat.querySelector('.close').onclick = () => {
+      chat.remove();
+      const i = chatWindows.indexOf(chat);
+      if (i > -1) chatWindows.splice(i, 1);
+    };
+
+    chat.querySelector('.minimize').onclick = () => {
+      const body = chat.querySelector('.chat-body');
+      const footer = chat.querySelector('.chat-footer');
+      body.style.display = body.style.display === 'none' ? 'block' : 'none';
+      footer.style.display = footer.style.display === 'none' ? 'flex' : 'none';
+    };
+
+    chat.querySelector('.send').onclick = () => {
+      const textarea = chat.querySelector('textarea');
+      const message = textarea.value.trim();
+      if (!message) return;
+      const bubble = document.createElement('div');
+      bubble.textContent = message;
+      bubble.style.fontSize = '12px';
+      chat.querySelector('.chat-body').appendChild(bubble);
+      textarea.value = '';
+
+      const exists = [...miniProfilesContainer.querySelectorAll('img')]
+        .some(img => img.alt === name);
+      if (!exists) {
+        const img = document.createElement('img');
+        img.src = imgSrc;
+        img.alt = name;
+        img.style.width = '40px';
+        img.style.height = '40px';
+        img.style.borderRadius = '50%';
+        img.style.marginBottom = '10px';
+        img.style.cursor = 'pointer';
+        makeDraggable(img);
+        img.onclick = () => openChat(card);
+        miniProfilesContainer.prepend(img);
+      }
+
+      chat.querySelector('.chat-body').scrollTop = chat.querySelector('.chat-body').scrollHeight;
+    };
+  }
+
+  function makeDraggable(el) {
+    let isDragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    el.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      offsetX = e.clientX - el.getBoundingClientRect().left;
+      offsetY = e.clientY - el.getBoundingClientRect().top;
+      el.style.cursor = 'grabbing';
     });
 
-    closeChat.onclick = () => chatBox.style.display = "none";
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      el.style.left = e.clientX - offsetX + 'px';
+      el.style.top = e.clientY - offsetY + 'px';
+      el.style.transform = 'none';
+    });
 
-    sendMsg.onclick = () => {
-      const msg = chatInput.value.trim();
-      if (!msg) return;
-      const div = document.createElement("div");
-      div.textContent = msg;
-      chatBody.appendChild(div);
-      chatInput.value = "";
-      chatBody.scrollTop = chatBody.scrollHeight;
-    };
-  </script>
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+      el.style.cursor = 'grab';
+    });
+  }
+
+  // ✅ Ici le clic bouton 💬 est bien déclenché après que tout soit prêt
+  document.addEventListener('click', e => {
+    if (e.target.classList.contains('btn-chat')) {
+      const card = e.target.closest('.card');
+      if (card) openChat(card);
+    }
+  });
+});
+</script>
 </body>
 </html>
+  
