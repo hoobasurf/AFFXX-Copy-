@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
+/* ====== Ton style existant (inchangé) + petites additions pour 3 cartes ====== */
 
 .chat-box {
   background: rgba(255, 255, 255, 0.15);
@@ -59,165 +60,183 @@
   z-index: 999;
 }
 
-    * { box-sizing: border-box; margin:0; padding:0; }
-    html, body {
-      height:100%; width:100%;
-      font-family: 'Orbitron', sans-serif;
-      background: url('planete-magique.jpg') no-repeat center center/cover;
-      overflow: hidden; color: white;
-    }
-    body::before {
-      content:""; position:fixed; top:0; left:0;
-      width:100%; height:100%;
-      background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%);
-      z-index:1; pointer-events:none;
-      animation: floatStars 60s linear infinite;
-    }
-    @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
-    .header {
-      position: relative; z-index:2;
-      padding: 20px;
-    }
-    .btn-back {
-      position: absolute; top:20px; left:20px;
-      color: #ff66cc; font-size:1.5em;
-      cursor:pointer; text-decoration:none;
-      transition: transform .2s;
-    }
-    .btn-back:hover { transform: scale(1.2); }
-    .carousel-container {
-      z-index:2;
-      position: relative;
-      width:100%; height:calc(100% - 60px);
-      overflow: hidden;
-      display: flex;
-      align-items:center;
-    }
-    .carousel {
-      display:flex;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      gap:40px;
-      padding:40px;
-    }
-    .carousel::-webkit-scrollbar { display:none; }
-    .card {
-      scroll-snap-align: center;
-      flex: 0 0 150px;
-      background: rgba(0,0,0,0.5);
-      border-radius: 16px;
-      padding: 15px;
-      text-align: center;
-      transition: transform .3s, box-shadow .3s;
-      cursor: pointer;
-      position: relative;
-    }
-    .card img {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-bottom: 10px;
-      border: 3px solid;
-    }
-    .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
-    .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
-    .name { font-size:1.1em; margin-bottom:5px;}
-    .btns {
-      display:flex;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 6px;
-    }
-    .btn-like, .btn-chat, .btn-fav {
-      width:30px; height:30px;
-      border-radius:50%;
-      background-color:rgba(255,255,255,0.1);
-      border:1px solid #ff66cc;
-      color:#ff66cc;
-      display:flex; align-items:center; justify-content:center;
-      font-size:1em;
-      cursor:pointer;
-      transition: transform .2s, background-color .3s, color .3s;
-      user-select:none;
-    }
-    .btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
-    /* Bouton favoris en jaune quand actif */
-    .btn-fav.active {
-      background-color: #ffea00;
-      border-color: #ffea00;
-      color: #333;
-      transform: scale(1.3);
-    }
-    .card.center {
-      transform: scale(1.1);
-      box-shadow: 0 0 20px #ff00ff;
-    }
-    /* Mini‑profil gauche après message */
-    .left-mini-profiles {
-      position: fixed;
-      top: 50%;
-      left: 10px;
-      transform: translateY(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      z-index: 5;
-    }
-    .left-mini-profiles img {
-      width:50px; height:50px;
-      border-radius:50%;
-      border:2px solid #ff66cc;
-      object-fit:cover;
-      cursor:pointer;
-      box-shadow:0 0 8px #ff66cc;
-      transition:transform .2s;
-    }
-    .left-mini-profiles img:hover { transform: scale(1.2); }
-    .modal, .chat-modal, .photo-zoom {
-      display:none; position:fixed;
-      top:0; left:0; width:100%; height:100%;
-      background: rgba(0,0,0,0.8);
-      align-items:center; justify-content:center;
-      z-index:10;
-    }
-    .modal.active, .chat-modal.active, .photo-zoom.active { display:flex; }
-    .modal-content {
-      background: rgba(0,0,0,0.7);
-      padding:20px; border-radius:12px;
-      width:90%; max-width:400px;
-      text-align:center; position:relative;
-      max-height:90vh; overflow-y:auto;
-    }
-    .modal-content h2 { margin-bottom:10px; color:#ff66cc;}
-    .modal-content p { margin-bottom:8px; color:#ddd; font-size:0.95em;}
-    .modal-close {
-      position:absolute; top:10px; right:10px;
-      font-size:1.3em; color:#ff66cc;
-      cursor:pointer;
-    }
-    .photo-gallery { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin-top:10px;}
-    .photo-gallery img { width:60px; height:60px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid #ff66cc;}
-    .photo-zoom img { max-width:90vw; max-height:90vh; border-radius:10px; border:3px solid #ff66cc;}
-    .chat-box {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid #ff66cc;
-      border-radius:12px;
-      padding:15px;
-      width:90%;
-      max-width:400px;
-      position: relative;
-    }
-    .chat-box textarea {
-      width:100%; height:80px; border-radius:8px; border:none;
-      padding:8px; font-family:'Orbitron'; background:rgba(255,255,255,0.1); color:white; resize:none;
-    }
-    .chat-box button {
-      margin-top:10px; padding:8px 16px;
-      background:#ff66cc; border:none; color:white; border-radius:8px; cursor:pointer;
-    }
-    .chat-modal {
+* { box-sizing: border-box; margin:0; padding:0; }
+html, body {
+  height:100%; width:100%;
+  font-family: 'Orbitron', sans-serif;
+  background: url('planete-magique.jpg') no-repeat center center/cover;
+  overflow: hidden; color: white;
+}
+body::before {
+  content:""; position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%);
+  z-index:1; pointer-events:none;
+  animation: floatStars 60s linear infinite;
+}
+@keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
+.header {
+  position: relative; z-index:2;
+  padding: 20px;
+}
+.btn-back {
+  position: absolute; top:20px; left:20px;
+  color: #ff66cc; font-size:1.5em;
+  cursor:pointer; text-decoration:none;
+  transition: transform .2s;
+}
+.btn-back:hover { transform: scale(1.2); }
+
+/* >>> Ajout de variables pour calculer 3 cartes visibles */
+:root{
+  --pad: 40px;   /* padding horizontal du carrousel */
+  --gap: 40px;   /* espace entre cartes */
+}
+
+.carousel-container {
+  z-index:2;
+  position: relative;
+  width:100%; height:calc(100% - 60px);
+  overflow: hidden;
+  display: flex;
+  align-items:center;
+}
+.carousel {
+  display:flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  gap: var(--gap);
+  padding: var(--pad);
+  scroll-behavior: smooth;
+}
+.carousel::-webkit-scrollbar { display:none; }
+
+/* >>> largeur carte = 3 par vue (on clamp pour rester joli selon l’écran) */
+.card {
+  scroll-snap-align: center;
+  flex: 0 0 clamp(140px, calc((100% - (2*var(--pad)) - (2*var(--gap))) / 3), 220px);
+  background: rgba(0,0,0,0.5);
+  border-radius: 16px;
+  padding: 15px;
+  text-align: center;
+  transition: transform .3s, box-shadow .3s;
+  cursor: pointer;
+  position: relative;
+}
+.card img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+  border: 3px solid;
+}
+.girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
+.boy img  { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
+
+.name { font-size:1.1em; margin-bottom:5px;}
+.btns {
+  display:flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.btn-like, .btn-chat, .btn-fav {
+  width:30px; height:30px;
+  border-radius:50%;
+  background-color:rgba(255,255,255,0.1);
+  border:1px solid #ff66cc;
+  color:#ff66cc;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1em;
+  cursor:pointer;
+  transition: transform .2s, background-color .3s, color .3s;
+  user-select:none;
+}
+.btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
+/* Bouton favoris en jaune quand actif */
+.btn-fav.active {
+  background-color: #ffea00;
+  border-color: #ffea00;
+  color: #333;
+  transform: scale(1.3);
+}
+
+/* >>> zoom automatique de la carte la plus centrée */
+.card.center {
+  transform: scale(1.12);
+  box-shadow: 0 0 20px #ff00ff;
+}
+
+/* Mini-profil gauche après message */
+.left-mini-profiles {
+  position: fixed;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 5;
+}
+.left-mini-profiles img {
+  width:50px; height:50px;
+  border-radius:50%;
+  border:2px solid #ff66cc;
+  object-fit:cover;
+  cursor:pointer;
+  box-shadow:0 0 8px #ff66cc;
+  transition:transform .2s;
+}
+.left-mini-profiles img:hover { transform: scale(1.2); }
+
+.modal, .chat-modal, .photo-zoom {
+  display:none; position:fixed;
+  top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.8);
+  align-items:center; justify-content:center;
+  z-index:10;
+}
+.modal.active, .chat-modal.active, .photo-zoom.active { display:flex; }
+.modal-content {
+  background: rgba(0,0,0,0.7);
+  padding:20px; border-radius:12px;
+  width:90%; max-width:400px;
+  text-align:center; position:relative;
+  max-height:90vh; overflow-y:auto;
+}
+.modal-content h2 { margin-bottom:10px; color:#ff66cc;}
+.modal-content p { margin-bottom:8px; color:#ddd; font-size:0.95em;}
+.modal-close {
+  position:absolute; top:10px; right:10px;
+  font-size:1.3em; color:#ff66cc;
+  cursor:pointer;
+}
+.photo-gallery { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin-top:10px;}
+.photo-gallery img { width:60px; height:60px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid #ff66cc;}
+.photo-zoom img { max-width:90vw; max-height:90vh; border-radius:10px; border:3px solid #ff66cc;}
+
+.chat-box {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid #ff66cc;
+  border-radius:12px;
+  padding:15px;
+  width:90%;
+  max-width:400px;
+  position: relative;
+}
+.chat-box textarea {
+  width:100%; height:80px; border-radius:8px; border:none;
+  padding:8px; font-family:'Orbitron'; background:rgba(255,255,255,0.1); color:white; resize:none;
+}
+.chat-box button {
+  margin-top:10px; padding:8px 16px;
+  background:#ff66cc; border:none; color:white; border-radius:8px; cursor:pointer;
+}
+
+/* Fenêtre chat flottante */
+.chat-modal {
   position: fixed;
   width: 300px;
   background: rgba(0, 0, 0, 0.8);
@@ -228,14 +247,12 @@
   color: white;
   z-index: 10000;
 }
-
 .chat-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
 }
-
 .chat-header button {
   background: none;
   border: none;
@@ -244,19 +261,16 @@
   cursor: pointer;
   margin-left: 5px;
 }
-
 .chat-body {
   height: 150px;
   overflow-y: auto;
   font-size: 12px;
   margin: 10px 0;
 }
-
 .chat-footer {
   display: flex;
   gap: 5px;
 }
-
 .chat-footer textarea {
   flex: 1;
   resize: none;
@@ -264,7 +278,6 @@
   padding: 5px;
   border-radius: 5px;
 }
-
 .chat-footer button {
   background: #ff66cc;
   border: none;
@@ -273,7 +286,13 @@
   border-radius: 5px;
   cursor: pointer;
 }
-</style>
+
+/* >>> Optimiser l’affichage 3 cartes sur petits écrans */
+@media (max-width: 480px){
+  :root{ --pad: 20px; --gap: 16px; }
+  .card img { width: 76px; height: 76px; }
+}
+  </style>
 </head>
 <body>
 
@@ -362,6 +381,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  /* ====== Chat & mini-profils (ton code inchangé) ====== */
   const chatWindows = [];
   const miniProfilesContainer = document.createElement("div");
   miniProfilesContainer.style.position = "fixed";
@@ -470,15 +490,47 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ✅ Ici le clic bouton 💬 est bien déclenché après que tout soit prêt
   document.addEventListener('click', e => {
     if (e.target.classList.contains('btn-chat')) {
       const card = e.target.closest('.card');
       if (card) openChat(card);
     }
   });
+
+  /* ====== 3 cartes & zoom de la carte centrée ====== */
+  const carousel = document.getElementById('carousel');
+  const cards = Array.from(carousel.querySelectorAll('.card'));
+  let ticking = false;
+
+  function updateCenterCard(){
+    const wrap = carousel.getBoundingClientRect();
+    const centerX = wrap.left + wrap.width/2;
+    let best = null, bestDist = Infinity;
+
+    cards.forEach(card => {
+      const r = card.getBoundingClientRect();
+      const cx = r.left + r.width/2;
+      const d = Math.abs(cx - centerX);
+      if (d < bestDist) { bestDist = d; best = card; }
+    });
+
+    cards.forEach(card => card.classList.toggle('center', card === best));
+  }
+
+  function onScroll(){
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      updateCenterCard();
+      ticking = false;
+    });
+  }
+
+  carousel.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', updateCenterCard);
+  // init
+  updateCenterCard();
 });
 </script>
 </body>
 </html>
-  
