@@ -223,6 +223,74 @@ document.addEventListener('DOMContentLoaded', () => {
   closeMessage.addEventListener('click', () => {
     messageScreen.style.display = 'none';
   });
+
+  /* ====== Fenêtre message plein écran ====== */
+document.addEventListener('DOMContentLoaded', () => {
+
+  function openFullChat(card) {
+    const name = card.dataset.name;
+    const imgSrc = card.querySelector('img')?.src || '';
+
+    // Créer modal si pas déjà existant
+    let fullChat = document.getElementById('fullScreenChat');
+    if (fullChat) fullChat.remove();
+
+    fullChat = document.createElement('div');
+    fullChat.id = 'fullScreenChat';
+    fullChat.style.position = 'fixed';
+    fullChat.style.top = '0';
+    fullChat.style.left = '0';
+    fullChat.style.width = '100%';
+    fullChat.style.height = '100%';
+    fullChat.style.background = 'rgba(0,0,0,0.7)';
+    fullChat.style.backdropFilter = 'blur(12px)';
+    fullChat.style.display = 'flex';
+    fullChat.style.flexDirection = 'column';
+    fullChat.style.justifyContent = 'space-between';
+    fullChat.style.zIndex = '10000';
+    fullChat.style.padding = '20px';
+    
+    fullChat.innerHTML = `
+      <div style="display:flex; align-items:center; gap:10px;">
+        <img src="${imgSrc}" style="width:50px; height:50px; border-radius:50%; border:2px solid #ff66cc;">
+        <div style="color:white; font-size:1.2em;">${name}</div>
+      </div>
+      <div id="fullChatBody" style="flex:1; overflow-y:auto; margin:15px 0; color:white;"></div>
+      <div style="display:flex; gap:10px;">
+        <textarea id="fullChatInput" rows="2" style="flex:1; border-radius:8px; border:none; padding:8px; resize:none; background: rgba(255,255,255,0.1); color:white; font-family:'Orbitron';"></textarea>
+        <button id="fullChatSend" style="padding:8px 16px; background:#ff66cc; border:none; border-radius:8px; color:white; cursor:pointer;">Envoyer</button>
+      </div>
+      <button id="fullChatClose" style="
+        position:absolute; bottom:20px; left:20px; 
+        padding:10px 16px; background:#ff66cc; border:none; border-radius:8px; color:white; cursor:pointer;
+      ">Retour</button>
+    `;
+
+    document.body.appendChild(fullChat);
+
+    const chatBody = document.getElementById('fullChatBody');
+    const input = document.getElementById('fullChatInput');
+
+    document.getElementById('fullChatClose').onclick = () => fullChat.remove();
+    
+    document.getElementById('fullChatSend').onclick = () => {
+      const text = input.value.trim();
+      if (!text) return;
+      const msg = document.createElement('div');
+      msg.style.marginBottom = '8px';
+      msg.innerHTML = `<strong style="color:#ff66cc">${name}:</strong> ${text}`;
+      chatBody.appendChild(msg);
+      input.value = '';
+      chatBody.scrollTop = chatBody.scrollHeight;
+    };
+  }
+
+  document.addEventListener('click', e => {
+    if (e.target.classList.contains('btn-chat')) {
+      const card = e.target.closest('.card');
+      if (card) openFullChat(card);
+    }
+  });
 });
 </script>
 </body>
