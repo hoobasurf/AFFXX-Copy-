@@ -109,73 +109,17 @@
       box-shadow: 0 0 20px #ff00ff;
     }
 
-    /* ✅ Mini-profil librement déplaçable */
+    /* ✅ Mini-profils flottants */
     .mini-profile {
       position: absolute;
-      width:50px; height:50px;
-      border-radius:50%;
-      border:2px solid #ff66cc;
-      box-shadow:0 0 8px #ff66cc;
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      border: 2px solid #ff66cc;
+      box-shadow: 0 0 8px #ff66cc;
       cursor: grab;
       z-index: 5000;
     }
-
-    /* ✅ Fenêtre de chat plein écran */
-    .full-chat {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(12px);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      z-index: 10000;
-      padding: 20px;
-      color: white;
-    }
-    .full-chat-header {
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .full-chat-body {
-      flex:1;
-      overflow-y:auto;
-      margin:15px 0;
-    }
-    .full-chat-footer {
-      display:flex;
-      gap:10px;
-    }
-    .full-chat-footer textarea {
-      flex:1;
-      border-radius:8px;
-      border:none;
-      padding:8px;
-      resize:none;
-      background: rgba(255,255,255,0.1);
-      color:white;
-      font-family:'Orbitron';
-    }
-    .full-chat-footer button {
-      padding:8px 16px;
-      background:#ff66cc;
-      border:none;
-      border-radius:8px;
-      color:white;
-      cursor:pointer;
-    }
-    .full-chat-close {
-      position:absolute;
-      bottom:20px; left:20px;
-      padding:10px 16px;
-      background:#ff66cc;
-      border:none;
-      border-radius:8px;
-      color:white;
-      cursor:pointer;
-    }
+    .mini-profile:active { cursor: grabbing; }
   </style>
 </head>
 <body>
@@ -218,75 +162,80 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  let positions = JSON.parse(localStorage.getItem("miniProfilePositions") || "{}");
+  let chats = JSON.parse(localStorage.getItem("chatMessages") || "{}");
 
-  // Récupérer l'historique et les positions
-  let chats = JSON.parse(localStorage.getItem("chats") || "{}");
-  let positions = JSON.parse(localStorage.getItem("positions") || "{}");
-
-  function saveChats() {
-    localStorage.setItem("chats", JSON.stringify(chats));
-  }
   function savePositions() {
-    localStorage.setItem("positions", JSON.stringify(positions));
+    localStorage.setItem("miniProfilePositions", JSON.stringify(positions));
+  }
+  function saveChats() {
+    localStorage.setItem("chatMessages", JSON.stringify(chats));
   }
 
   function openChat(card) {
     const name = card.dataset.name;
-    const imgSrc = card.querySelector("img").src;
+    const imgSrc = card.querySelector("img")?.src || "";
 
-    // Supprime une ancienne fenêtre avant d'en créer une nouvelle
-    let existing = document.getElementById("chat-" + name);
+    let existing = document.getElementById("fullScreenChat");
     if (existing) existing.remove();
 
-    const chat = document.createElement("div");
-    chat.className = "full-chat";
-    chat.id = "chat-" + name;
-    chat.innerHTML = `
-      <div class="full-chat-header">
+    const fullChat = document.createElement("div");
+    fullChat.id = "fullScreenChat";
+    Object.assign(fullChat.style, {
+      position: "fixed", top: "0", left: "0", width: "100%", height: "100%",
+      background: "rgba(0,0,0,0.7)", backdropFilter: "blur(12px)",
+      display: "flex", flexDirection: "column", justifyContent: "space-between",
+      zIndex: "10000", padding: "20px", color: "white"
+    });
+
+    fullChat.innerHTML = `
+      <div style="display:flex; align-items:center; gap:10px;">
         <img src="${imgSrc}" style="width:50px; height:50px; border-radius:50%; border:2px solid #ff66cc;">
         <div style="font-size:1.2em;">${name}</div>
       </div>
-      <div class="full-chat-body" id="chatBody-${name}"></div>
-      <div class="full-chat-footer">
-        <textarea id="chatInput-${name}" rows="2"></textarea>
-        <button id="chatSend-${name}">Envoyer</button>
+      <div id="fullChatBody" style="flex:1; overflow-y:auto; margin:15px 0;"></div>
+      <div style="display:flex; gap:10px;">
+        <textarea id="fullChatInput" rows="2" style="flex:1; border-radius:8px; border:none; padding:8px; resize:none; background: rgba(255,255,255,0.1); color:white; font-family:'Orbitron';"></textarea>
+        <button id="fullChatSend" style="padding:8px 16px; background:#ff66cc; border:none; border-radius:8px; color:white; cursor:pointer;">Envoyer</button>
       </div>
-      <button class="full-chat-close" id="chatClose-${name}">Retour</button>
+      <button id="fullChatClose" style="
+        position:absolute; bottom:20px; left:20px;
+        padding:10px 16px; background:#ff66cc; border:none; border-radius:8px; color:white; cursor:pointer;
+      ">Retour</button>
     `;
-    document.body.appendChild(chat);
 
-    const chatBody = document.getElementById("chatBody-" + name);
-    const input = document.getElementById("chatInput-" + name);
+    document.body.appendChild(fullChat);
 
-    // Charger historique
+    const chatBody = document.getElementById("fullChatBody");
     if (chats[name]) {
       chats[name].forEach(msg => {
         const div = document.createElement("div");
-        div.textContent = msg;
+        div.style.marginBottom = "8px";
+        div.innerHTML = `<strong style="color:#ff66cc">${name}:</strong> ${msg}`;
         chatBody.appendChild(div);
       });
     }
 
-    document.getElementById("chatSend-" + name).onclick = () => {
+    const input = document.getElementById("fullChatInput");
+    document.getElementById("fullChatClose").onclick = () => fullChat.remove();
+
+    document.getElementById("fullChatSend").onclick = () => {
       const text = input.value.trim();
       if (!text) return;
-      if (!chats[name]) chats[name] = [];
+      chats[name] = chats[name] || [];
       chats[name].push(text);
       saveChats();
-      const div = document.createElement("div");
-      div.textContent = text;
-      chatBody.appendChild(div);
+      const msg = document.createElement("div");
+      msg.style.marginBottom = "8px";
+      msg.innerHTML = `<strong style="color:#ff66cc">${name}:</strong> ${text}`;
+      chatBody.appendChild(msg);
       input.value = "";
       chatBody.scrollTop = chatBody.scrollHeight;
 
-      // Créer mini-profil si pas encore existant
-      if (!document.querySelector(`[data-mini='${name}']`)) {
+      // ✅ créer mini-profil s’il n’existe pas
+      if (!document.querySelector(`.mini-profile[data-mini="${name}"]`)) {
         createMiniProfile(name, imgSrc);
       }
-    };
-
-    document.getElementById("chatClose-" + name).onclick = () => {
-      chat.remove();
     };
   }
 
@@ -296,7 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
     mini.className = "mini-profile";
     mini.dataset.mini = name;
 
-    // Position par défaut ou sauvegardée
     if (positions[name]) {
       mini.style.left = positions[name].x + "px";
       mini.style.top = positions[name].y + "px";
@@ -307,47 +255,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.body.appendChild(mini);
 
-    // Ouvrir le chat en cliquant
-    mini.onclick = () => {
+    mini.addEventListener("click", () => {
       const card = [...document.querySelectorAll(".card")].find(c => c.dataset.name === name);
       if (card) openChat(card);
-    };
+    });
 
-    // Déplacement
+    // ✅ drag instantané corrigé
     let isDragging = false, offsetX = 0, offsetY = 0;
+
     mini.addEventListener("mousedown", e => {
       isDragging = true;
-      offsetX = e.clientX - mini.offsetLeft;
-      offsetY = e.clientY - mini.offsetTop;
-    });
-    document.addEventListener("mousemove", e => {
-      if (!isDragging) return;
-      mini.style.left = e.clientX - offsetX + "px";
-      mini.style.top = e.clientY - offsetY + "px";
-    });
-    document.addEventListener("mouseup", () => {
-      if (isDragging) {
-        positions[name] = { x: mini.offsetLeft, y: mini.offsetTop };
-        savePositions();
+      mini.style.cursor = "grabbing";
+      offsetX = e.clientX - mini.getBoundingClientRect().left;
+      offsetY = e.clientY - mini.getBoundingClientRect().top;
+
+      function moveAt(ev) {
+        mini.style.left = ev.pageX - offsetX + "px";
+        mini.style.top = ev.pageY - offsetY + "px";
       }
-      isDragging = false;
+
+      function onMouseMove(ev) {
+        if (isDragging) moveAt(ev);
+      }
+
+      document.addEventListener("mousemove", onMouseMove);
+
+      document.addEventListener("mouseup", () => {
+        if (isDragging) {
+          isDragging = false;
+          mini.style.cursor = "grab";
+          positions[name] = { x: mini.offsetLeft, y: mini.offsetTop };
+          savePositions();
+        }
+        document.removeEventListener("mousemove", onMouseMove);
+      }, { once: true });
     });
   }
 
-  // Réafficher les mini-profils sauvegardés
-  Object.keys(positions).forEach(name => {
-    const imgSrc = document.querySelector(`.card[data-name='${name}'] img`)?.src;
-    if (imgSrc) createMiniProfile(name, imgSrc);
-  });
+  // ✅ restaurer mini-profils sauvegardés
+  for (let n in positions) {
+    const card = [...document.querySelectorAll(".card")].find(c => c.dataset.name === n);
+    if (card) {
+      const imgSrc = card.querySelector("img").src;
+      createMiniProfile(n, imgSrc);
+    }
+  }
 
-  // Ouvrir chat via bouton 💬
+  // ouvrir chat
   document.addEventListener("click", e => {
     if (e.target.classList.contains("btn-chat")) {
       const card = e.target.closest(".card");
       if (card) openChat(card);
     }
   });
-
 });
 </script>
 </body>
