@@ -12,7 +12,6 @@
       background: black;
     }
 
-    /* Fond animé */
     body::before {
       content: "";
       position: absolute;
@@ -97,29 +96,68 @@
       filter: blur(8px);
     }
 
-    .btn:hover {
-      transform: scale(1.08);
-    }
+    .btn:hover { transform: scale(1.08); }
+    @keyframes neonPulse { 0%,100%{opacity:0.4}50%{opacity:0.9} }
 
-    @keyframes neonPulse {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 0.9; }
-    }
+    /* Icônes des salles choisies */
+    .chosen-icons { display:flex; gap:10px; margin-top:15px; }
+    .chosen-icons img { width:50px; height:50px; filter: drop-shadow(0 0 5px #ff66cc); border-radius:12px; }
 
-    @media (max-width: 600px) {
-      .btn {
-        font-size: 1em;
-        padding: 12px 20px;
-      }
-    }
+    @media (max-width: 600px) { .btn { font-size:1em; padding:12px 20px; } }
   </style>
 </head>
 <body>
   <div class="light-overlay"></div>
-  <div class="content">
-    <a href="authentique.html" class="btn">Connexion Authentique sérieuse</a>
-    <a href="amicale.html" class="btn">Connexion Sincère amicale</a>
-    <a href="fun.html" class="btn">Connexion Fun</a>
+  <div class="content" id="content">
+    <a href="#" class="btn" data-room="serieux">Connexion Authentique sérieuse</a>
+    <a href="#" class="btn" data-room="amical">Connexion Sincère amicale</a>
+    <a href="#" class="btn" data-room="fun">Connexion Fun</a>
+    <div class="chosen-icons" id="chosenIcons"></div>
   </div>
+
+  <script type="module">
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { app } from "./firebase.js";
+
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const content = document.getElementById("content");
+    const chosenIcons = document.getElementById("chosenIcons");
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+
+      const snapshot = await get(ref(db, 'users/' + user.uid + '/chosenRooms'));
+      const rooms = snapshot.val() || [];
+
+      // Affiche seulement les boutons correspondant aux salles choisies
+      const buttons = content.querySelectorAll('.btn');
+      buttons.forEach(btn => {
+        if (!rooms.includes(btn.dataset.room)) btn.style.display = 'none';
+      });
+
+      // Affiche les icônes des salles choisies
+      chosenIcons.innerHTML = '';
+      rooms.forEach(room => {
+        let src = '';
+        if(room==='serieux') src='serieux.png';
+        if(room==='amical') src='amical.png';
+        if(room==='fun') src='fun.png';
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = room;
+        chosenIcons.appendChild(img);
+      });
+
+      // Ajouter navigation au clic
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          window.location.href = btn.dataset.room + '.html';
+        });
+      });
+    });
+  </script>
 </body>
 </html>
