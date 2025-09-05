@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Connexion Authentique Sérieuse</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin:0; padding:0; }
@@ -43,19 +43,24 @@
       display: flex;
       align-items:center;
     }
+
+    /* variables pour 3 cartes visibles */
+    :root{ --pad: 40px; --gap: 40px; }
+
     .carousel {
       display:flex;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
-      gap:40px;
-      padding:40px;
+      gap: var(--gap);
+      padding: var(--pad);
+      scroll-behavior: smooth;
     }
     .carousel::-webkit-scrollbar { display:none; }
 
     .card {
       scroll-snap-align: center;
-      flex: 0 0 150px;
+      flex: 0 0 clamp(140px, calc((100% - (2*var(--pad)) - (2*var(--gap))) / 3), 220px);
       background: rgba(0,0,0,0.5);
       border-radius: 16px;
       padding: 15px;
@@ -73,16 +78,11 @@
       border: 3px solid;
     }
     .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
-    .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
+    .boy img  { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
 
     .name { font-size:1.1em; margin-bottom:5px;}
+    .btns { display:flex; justify-content:center; gap:8px; margin-top:6px; }
 
-    .btns {
-      display:flex;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 6px;
-    }
     .btn-like, .btn-chat, .btn-fav {
       width:30px; height:30px;
       border-radius:50%;
@@ -96,68 +96,80 @@
       user-select:none;
     }
     .btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
-
     .btn-fav.active {
-      background-color: #ffea00;
-      border-color: #ffea00;
-      color: #333;
-      transform: scale(1.3);
+      background-color: #ffea00; border-color: #ffea00; color:#333; transform: scale(1.3);
     }
 
-    .card.center {
-      transform: scale(1.1);
-      box-shadow: 0 0 20px #ff00ff;
-    }
+    .card.center { transform: scale(1.12); box-shadow: 0 0 20px #ff00ff; }
 
-    /* ✅ Fenêtre message plein écran */
-    .message-screen {
-      display: none; /* cachée par défaut */
+    /* colonne mini-profiles (gauche) */
+    .left-mini-profiles {
+      position: fixed; top: 50%; left: 10px; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 12px; z-index: 5;
+    }
+    .left-mini-profiles img {
+      width:50px; height:50px; border-radius:50%;
+      border:2px solid #ff66cc; object-fit:cover; cursor:pointer;
+      box-shadow:0 0 8px #ff66cc; transition:transform .2s;
+    }
+    .left-mini-profiles img:hover { transform: scale(1.2); }
+
+    /* modal / full screen chat */
+    .full-chat {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(8px);
-      z-index: 9999;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(10px);
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      z-index: 10000;
+    }
+    .full-chat .header {
+      display:flex; align-items:center; gap:12px;
+      padding: 14px; padding-top: 22px;
+    }
+    .full-chat .header img { width:56px; height:56px; border-radius:50%; border:2px solid #ff66cc; object-fit:cover; }
+    .full-chat .chat-body {
+      flex:1; overflow:auto; padding: 16px; padding-bottom: 120px; /* garde espace pour footer + bouton */
+    }
+    .bubble {
+      background: rgba(255,255,255,0.06);
+      padding: 8px 12px; border-radius: 10px; margin-bottom: 8px;
+      max-width: 85%; color: #fff; font-size: 14px;
+    }
+    .bubble.me { background: linear-gradient(90deg,#ff66cc,#9933ff); color:#111; align-self: flex-end; }
+
+    .full-chat .footer {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      padding: 12px; display:flex; gap:8px;
       align-items: center;
+      background: linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0.2));
+      padding-bottom: calc(env(safe-area-inset-bottom, 12px) + 12px);
     }
-    .message-box {
-      background: rgba(255,255,255,0.1);
-      border: 1px solid #ff66cc;
-      border-radius: 12px;
-      padding: 20px;
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
-      color: white;
+    .full-chat textarea {
+      flex:1; min-height:44px; max-height:120px; resize:none;
+      border-radius: 10px; padding:8px 10px; border:none; outline:none;
+      font-size:16px; /* empêche zoom iOS */
+      background: rgba(255,255,255,0.06); color: #fff; font-family:'Orbitron';
     }
-    .message-box h2 { margin-bottom: 10px; color: #ff66cc; }
-    .message-box textarea {
-      width: 100%;
-      height: 120px;
-      border-radius: 8px;
-      border: none;
-      padding: 10px;
-      font-family: 'Orbitron', sans-serif;
-      background: rgba(255,255,255,0.15);
-      color: white;
-      resize: none;
-      outline: none;
+    .full-chat .send-btn {
+      background: #ff66cc; border:none; color:white; padding:10px 14px; border-radius:10px; cursor:pointer;
     }
-    .message-return {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background: #ff66cc;
-      border: none;
-      border-radius: 20px;
-      color: white;
-      font-size: 1em;
-      cursor: pointer;
-      transition: transform .2s;
+
+    /* petit bouton rose bas-centre "Retour" */
+    .full-chat .back-center {
+      position: fixed; left:50%; transform: translateX(-50%);
+      bottom: 14px; padding:10px 16px; background:#ff66cc; color:#111; border-radius:20px;
+      border:none; z-index:10001; cursor:pointer;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     }
-    .message-return:hover { transform: scale(1.1); }
+
+    /* modal close style mobile */
+    @media (max-width:480px){
+      :root{ --pad: 20px; --gap: 16px; }
+      .card img { width:76px; height:76px; }
+    }
   </style>
 </head>
 <body>
@@ -166,9 +178,11 @@
     <a href="page2.html" class="btn-back">&larr; Retour</a>
   </div>
 
+  <div class="left-mini-profiles" id="leftMiniProfiles"></div>
+
   <div class="carousel-container fade-in">
     <div class="carousel" id="carousel">
-      <div class="card girl" data-name="Sophie, 28">
+      <div class="card girl" data-name="Sophie, 28" data-img="https://i.pravatar.cc/150?img=47">
         <img src="https://i.pravatar.cc/150?img=47" alt="Sophie">
         <div class="name">Sophie</div>
         <div class="btns">
@@ -177,7 +191,8 @@
           <div class="btn-fav" title="Favoris">⭐️</div>
         </div>
       </div>
-      <div class="card boy" data-name="Lucas, 31">
+
+      <div class="card boy" data-name="Lucas, 31" data-img="https://i.pravatar.cc/150?img=12">
         <img src="https://i.pravatar.cc/150?img=12" alt="Lucas">
         <div class="name">Lucas</div>
         <div class="btns">
@@ -186,9 +201,30 @@
           <div class="btn-fav" title="Favoris">⭐️</div>
         </div>
       </div>
-      <div class="card girl" data-name="Emma, 25">
+
+      <div class="card girl" data-name="Emma, 25" data-img="https://i.pravatar.cc/150?img=35">
         <img src="https://i.pravatar.cc/150?img=35" alt="Emma">
         <div class="name">Emma</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div>
+          <div class="btn-like" title="Like">💖</div>
+          <div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
+      </div>
+
+      <div class="card boy" data-name="Alex, 29" data-img="https://i.pravatar.cc/150?img=21">
+        <img src="https://i.pravatar.cc/150?img=21" alt="Alex">
+        <div class="name">Alex</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div>
+          <div class="btn-like" title="Like">💖</div>
+          <div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
+      </div>
+
+      <div class="card girl" data-name="Clara, 27" data-img="https://i.pravatar.cc/150?img=40">
+        <img src="https://i.pravatar.cc/150?img=40" alt="Clara">
+        <div class="name">Clara</div>
         <div class="btns">
           <div class="btn-chat" title="Chat">💬</div>
           <div class="btn-like" title="Like">💖</div>
@@ -198,98 +234,147 @@
     </div>
   </div>
 
-  <!-- ✅ Fenêtre plein écran message -->
-  <div class="message-screen" id="messageScreen">
-    <div class="message-box">
-      <h2>Écrire un message</h2>
-      <textarea placeholder="Ton message..."></textarea>
-      <button class="message-return" id="closeMessage">Retour</button>
-    </div>
-  </div>
-
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const messageScreen = document.getElementById('messageScreen');
-  const closeMessage = document.getElementById('closeMessage');
+  /* -------- mini-profiles container (gauche) -------- */
+  const miniProfilesContainer = document.getElementById('leftMiniProfiles');
 
-  // Ouvrir la fenêtre message quand on clique sur 💬
-  document.addEventListener('click', e => {
-    if (e.target.classList.contains('btn-chat')) {
-      messageScreen.style.display = 'flex';
-    }
-  });
-
-  // Fermer la fenêtre message et revenir à la page des profils
-  closeMessage.addEventListener('click', () => {
-    messageScreen.style.display = 'none';
-  });
-
-  function openFullChat(card) {
-    const name = card.dataset.name;
-    const imgSrc = card.querySelector('img')?.src || '';
-
-    let existing = document.getElementById('fullScreenChat');
-    if (existing) existing.remove();
-
-    const fullChat = document.createElement('div');
-    fullChat.id = 'fullScreenChat';
-    Object.assign(fullChat.style, {
-      position: 'fixed',
-      top: '0', left: '0',
-      width: '100%',
-      height: '100%',
-      background: 'rgba(0,0,0,0.7)',
-      backdropFilter: 'blur(12px)',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      zIndex: '10000',
-      padding: '20px',
-      color: 'white'
+  function makeDraggable(el) {
+    let isDragging = false, offsetX = 0, offsetY = 0;
+    el.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      offsetX = e.clientX - el.getBoundingClientRect().left;
+      offsetY = e.clientY - el.getBoundingClientRect().top;
+      el.style.cursor = 'grabbing';
     });
-
-    fullChat.innerHTML = `
-      <div style="display:flex; align-items:center; gap:10px;">
-        <img src="${imgSrc}" style="width:50px; height:50px; border-radius:50%; border:2px solid #ff66cc;">
-        <div style="font-size:1.2em;">${name}</div>
-      </div>
-      <div id="fullChatBody" style="flex:1; overflow-y:auto; margin:15px 0;"></div>
-      <div style="display:flex; gap:10px;">
-        <textarea id="fullChatInput" rows="2" style="flex:1; border-radius:8px; border:none; padding:8px; resize:none; background: rgba(255,255,255,0.1); color:white; font-family:'Orbitron';"></textarea>
-        <button id="fullChatSend" style="padding:8px 16px; background:#ff66cc; border:none; border-radius:8px; color:white; cursor:pointer;">Envoyer</button>
-      </div>
-      <button id="fullChatClose" style="
-        position:absolute; bottom:20px; left:20px; 
-        padding:10px 16px; background:#ff66cc; border:none; border-radius:8px; color:white; cursor:pointer;
-      ">Retour</button>
-    `;
-
-    document.body.appendChild(fullChat);
-
-    const chatBody = document.getElementById('fullChatBody');
-    const input = document.getElementById('fullChatInput');
-
-    document.getElementById('fullChatClose').onclick = () => fullChat.remove();
-
-    document.getElementById('fullChatSend').onclick = () => {
-      const text = input.value.trim();
-      if (!text) return;
-      const msg = document.createElement('div');
-      msg.style.marginBottom = '8px';
-      msg.innerHTML = `<strong style="color:#ff66cc">${name}:</strong> ${text}`;
-      chatBody.appendChild(msg);
-      input.value = '';
-      chatBody.scrollTop = chatBody.scrollHeight;
-    };
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      el.style.position = 'fixed';
+      el.style.left = (e.clientX - offsetX) + 'px';
+      el.style.top = (e.clientY - offsetY) + 'px';
+      el.style.transform = 'none';
+    });
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+      el.style.cursor = 'pointer';
+    });
   }
 
+  /* -------- full screen chat builder -------- */
+  function openFullChat(card) {
+    const name = card.dataset.name || '';
+    const imgSrc = card.dataset.img || card.querySelector('img')?.src || '';
+
+    // remove existing
+    const existing = document.getElementById('fullScreenChat');
+    if (existing) existing.remove();
+
+    // create full chat container
+    const fullChat = document.createElement('div');
+    fullChat.id = 'fullScreenChat';
+    fullChat.className = 'full-chat';
+    fullChat.innerHTML = `
+      <div class="header" role="banner">
+        <img src="${imgSrc}" alt="${name}">
+        <div style="font-size:1.1em;">${name}</div>
+      </div>
+      <div class="chat-body" id="fullChatBody" role="log" aria-live="polite"></div>
+
+      <div class="footer">
+        <textarea id="fullChatInput" placeholder="Écris ton message..." rows="2"></textarea>
+        <button class="send-btn" id="fullChatSend">Envoyer</button>
+      </div>
+
+      <button class="back-center" id="fullChatClose">Retour</button>
+    `;
+    document.body.appendChild(fullChat);
+
+    const chatBody = fullChat.querySelector('#fullChatBody');
+    const input = fullChat.querySelector('#fullChatInput');
+    const send = fullChat.querySelector('#fullChatSend');
+    const close = fullChat.querySelector('#fullChatClose');
+
+    // ensure input font-size is 16 to prevent iOS zoom
+    input.style.fontSize = '16px';
+
+    // restore previous messages? (optional) — here starts empty
+
+    // send message -> append bubble + add mini-profile left
+    send.addEventListener('click', () => {
+      const text = input.value.trim();
+      if (!text) return;
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble me';
+      bubble.textContent = text;
+      chatBody.appendChild(bubble);
+      input.value = '';
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      // add mini-profile to left column if not already there
+      const exists = [...miniProfilesContainer.querySelectorAll('img')].some(i => i.alt === name);
+      if (!exists) {
+        const img = document.createElement('img');
+        img.src = imgSrc;
+        img.alt = name;
+        img.style.width = '40px';
+        img.style.height = '40px';
+        img.style.borderRadius = '50%';
+        img.style.marginBottom = '10px';
+        img.style.cursor = 'pointer';
+        makeDraggable(img);
+        img.addEventListener('click', () => {
+          // reopen same full chat when clicking left mini-profile
+          openFullChat(card);
+        });
+        miniProfilesContainer.prepend(img);
+      }
+    });
+
+    // pressing Enter sends (Shift+Enter => newline)
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        send.click();
+      }
+    });
+
+    // close button
+    close.addEventListener('click', () => fullChat.remove());
+
+    // keep send visible if keyboard pushes content: scroll chat-body to bottom on focus
+    input.addEventListener('focus', () => setTimeout(()=> { chatBody.scrollTop = chatBody.scrollHeight; }, 300));
+  }
+
+  /* -------- carousel center detection (zoom center card) -------- */
+  const carousel = document.getElementById('carousel');
+  const cards = Array.from(carousel.querySelectorAll('.card'));
+  let ticking = false;
+  function updateCenterCard(){
+    const wrap = carousel.getBoundingClientRect();
+    const centerX = wrap.left + wrap.width/2;
+    let best = null, bestDist = Infinity;
+    cards.forEach(card => {
+      const r = card.getBoundingClientRect();
+      const cx = r.left + r.width/2;
+      const d = Math.abs(cx - centerX);
+      if (d < bestDist) { bestDist = d; best = card; }
+    });
+    cards.forEach(card => card.classList.toggle('center', card === best));
+  }
+  function onScroll(){ if (ticking) return; ticking = true; requestAnimationFrame(()=>{ updateCenterCard(); ticking=false; }); }
+  carousel.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', updateCenterCard);
+  updateCenterCard();
+
+  /* -------- handle click on chat button -> open full chat (no small modal) -------- */
   document.addEventListener('click', e => {
     if (e.target.classList.contains('btn-chat')) {
       const card = e.target.closest('.card');
       if (card) openFullChat(card);
     }
   });
-});
+
+}); /* DOMContentLoaded */
 </script>
 </body>
 </html>
