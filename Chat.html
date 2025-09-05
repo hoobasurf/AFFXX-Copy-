@@ -109,7 +109,9 @@ async function loadUsers() {
 
 // Ouvre un chat privé avec un autre utilisateur
 function openChatWith(otherUid) {
-  chatId = [currentUser.uid, otherUid].sort().join("_");
+  // Tri les UIDs pour une structure unique
+  const uids = [currentUser.uid, otherUid].sort();
+  chatId = `${uids[0]}/${uids[1]}`;
   chatRef = ref(db, 'chats/' + chatId + '/messages');
   messagesDiv.innerHTML = '';
   msgInput.disabled = false;
@@ -132,6 +134,7 @@ sendBtn.addEventListener('click', () => {
   push(chatRef, { text, sender:currentUser.uid, timestamp:Date.now() });
   msgInput.value = '';
 });
+
 msgInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendBtn.click(); });
 
 </script>
