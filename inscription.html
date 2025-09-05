@@ -105,12 +105,17 @@
       set(ref(db, 'users/' + uid), {
         email: email,
         joinedAt: new Date().toISOString()
+      }).then(() => {
+        console.log("Utilisateur enregistré dans la DB :", email);
+      }).catch((err) => {
+        console.error("Erreur DB :", err);
       });
     }
 
     // 🔹 Vérifie si l'utilisateur est déjà connecté (anti-boucle)
     onAuthStateChanged(auth, (user) => {
       if (user && window.location.pathname.endsWith("inscription.html")) {
+        console.log("Utilisateur déjà connecté :", user.email);
         formContainer.classList.add("fade-out");
         setTimeout(() => {
           window.location.href = "chat.html";
