@@ -108,7 +108,7 @@
         console.log("Utilisateur déjà connecté :", user.email);
         formContainer.classList.add("fade-out");
         setTimeout(() => {
-          window.location.href = "/page2.html"; // redirection sûre
+          window.location.href = "page2.html";
         }, 800);
       }
     });
@@ -123,7 +123,12 @@
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         console.log("Inscription réussie :", userCredential.user.email);
-        window.location.href = "/page2.html"; // redirection sûre
+
+        // Ajoute effet fondu avant redirection
+        formContainer.classList.add("fade-out");
+        setTimeout(() => {
+          window.location.href = "page2.html";
+        }, 800);
       } catch (error) {
         console.error("Erreur inscription :", error);
         alert("Erreur : " + error.message);
