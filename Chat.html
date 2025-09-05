@@ -7,202 +7,133 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
     body {
-      margin:0;
-      padding:0;
-      height:100vh;
-      width:100vw;
-      font-family:'Orbitron', sans-serif;
-      display:flex;
-      flex-direction:column;
-      background: url('/ville.jpg') no-repeat center center/cover;
-      background-size: cover;
+      margin:0; padding:0; height:100vh; width:100vw;
+      font-family:'Orbitron',sans-serif;
+      display:flex; flex-direction:column;
+      background:url('/ville.jpg') no-repeat center center/cover;
+      background-size:cover;
     }
 
     #usersList {
-      padding: 20px;
-      max-height: 150px;
-      overflow-y: auto;
-      background: rgba(0,0,0,0.3);
-      border:2px solid rgba(0,0,0,0.5);
-      border-radius:15px;
-      margin: 10px;
-      color:white;
+      padding:20px; max-height:150px; overflow-y:auto;
+      background: rgba(0,0,0,0.3); border:2px solid rgba(0,0,0,0.5);
+      border-radius:15px; margin:10px; color:white;
     }
 
     #usersList button {
-      display:block;
-      margin:5px 0;
-      padding:8px 12px;
-      background:#ff6aab;
-      border:none;
-      border-radius:8px;
-      color:white;
-      cursor:pointer;
-      width:100%;
-      text-align:left;
+      display:block; margin:5px 0; padding:8px 12px;
+      background:#ff6aab; border:none; border-radius:8px;
+      color:white; cursor:pointer; width:100%; text-align:left;
     }
 
     #chatContainer {
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      padding: 20px;
-      overflow-y:auto;
-      backdrop-filter: blur(3px);
-      background: rgba(0,0,0,0.3);
-      margin: 10px;
-      border-radius:15px;
-      border:2px solid rgba(0,0,0,0.5);
+      flex:1; display:flex; flex-direction:column; padding:20px;
+      overflow-y:auto; backdrop-filter: blur(3px);
+      background: rgba(0,0,0,0.3); margin:10px;
+      border-radius:15px; border:2px solid rgba(0,0,0,0.5);
     }
 
-    #messages {
-      flex:1;
-      overflow-y:auto;
-    }
+    #messages { flex:1; overflow-y:auto; }
 
     .message {
-      margin: 5px 0;
-      padding: 8px 12px;
-      border-radius:10px;
-      max-width: 80%;
-      word-wrap: break-word;
+      margin:5px 0; padding:8px 12px; border-radius:10px;
+      max-width:80%; word-wrap:break-word;
     }
 
-    .me {
-      background: #ff6aab;
-      color:white;
-      align-self:flex-end;
-      box-shadow: 0 0 5px #ff6aab, 0 0 15px #d600d6;
-    }
+    .me { background:#ff6aab; color:white; align-self:flex-end;
+          box-shadow:0 0 5px #ff6aab,0 0 15px #d600d6; }
 
-    .other {
-      background: rgba(255,255,255,0.2);
-      color:white;
-      align-self:flex-start;
-    }
+    .other { background: rgba(255,255,255,0.2); color:white; align-self:flex-start; }
 
-    #inputContainer {
-      display:flex;
-      margin:10px;
-    }
+    #inputContainer { display:flex; margin:10px; }
 
     #msgInput {
-      flex:1;
-      padding:12px;
-      border-radius:8px;
-      border:none;
-      outline:none;
-      font-size:16px;
+      flex:1; padding:12px; border-radius:8px; border:none;
+      outline:none; font-size:16px;
     }
 
     #sendBtn {
-      padding:12px 20px;
-      margin-left:10px;
-      border:none;
-      border-radius:8px;
-      background:#ff6aab;
-      color:white;
-      font-size:16px;
-      cursor:pointer;
-      box-shadow: 0 0 5px #ff6aab, 0 0 15px #d600d6;
+      padding:12px 20px; margin-left:10px; border:none; border-radius:8px;
+      background:#ff6aab; color:white; font-size:16px; cursor:pointer;
+      box-shadow:0 0 5px #ff6aab,0 0 15px #d600d6;
     }
   </style>
 </head>
 <body>
 
 <div id="usersList">Chargement des utilisateurs...</div>
-
-<div id="chatContainer">
-  <div id="messages"></div>
-</div>
-
+<div id="chatContainer"><div id="messages"></div></div>
 <div id="inputContainer">
   <input type="text" id="msgInput" placeholder="Écrire un message..." disabled>
   <button id="sendBtn" disabled>Envoyer</button>
 </div>
 
 <script type="module">
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-  import { getDatabase, ref, push, onChildAdded, get, child } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-  import { app } from "./firebase.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getDatabase, ref, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { app } from "./firebase.js";
 
-  const auth = getAuth(app);
-  const db = getDatabase(app);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-  const usersListDiv = document.getElementById('usersList');
-  const messagesDiv = document.getElementById('messages');
-  const msgInput = document.getElementById('msgInput');
-  const sendBtn = document.getElementById('sendBtn');
+const usersListDiv = document.getElementById('usersList');
+const messagesDiv = document.getElementById('messages');
+const msgInput = document.getElementById('msgInput');
+const sendBtn = document.getElementById('sendBtn');
 
-  let currentUser = null;
-  let chatId = null;
-  let chatRef = null;
+let currentUser = null;
+let chatId = null;
+let chatRef = null;
 
-  // 🔹 Vérifie si l'utilisateur est connecté
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      window.location.href = "inscription.html";
-    } else {
-      currentUser = user;
-      loadUsers();
+// Vérifie si l'utilisateur est connecté
+onAuthStateChanged(auth, async (user) => {
+  if(!user) { window.location.href = "inscription.html"; }
+  else { currentUser = user; loadUsers(); }
+});
+
+// Charge les autres utilisateurs
+async function loadUsers() {
+  const usersSnapshot = await get(ref(db, 'users'));
+  const usersData = usersSnapshot.val() || {};
+  usersListDiv.innerHTML = '';
+  Object.keys(usersData).forEach(uid => {
+    if(uid !== currentUser.uid){
+      const btn = document.createElement('button');
+      btn.textContent = usersData[uid].email;
+      btn.onclick = () => openChatWith(uid);
+      usersListDiv.appendChild(btn);
     }
   });
+  if(usersListDiv.innerHTML === '') usersListDiv.textContent = 'Aucun autre utilisateur inscrit';
+}
 
-  // 🔹 Charge la liste des utilisateurs
-  async function loadUsers() {
-    const usersSnapshot = await get(ref(db, 'users'));
-    const usersData = usersSnapshot.val() || {};
-    usersListDiv.innerHTML = '';
+// Ouvre un chat privé avec un autre utilisateur
+function openChatWith(otherUid) {
+  chatId = [currentUser.uid, otherUid].sort().join("_");
+  chatRef = ref(db, 'chats/' + chatId + '/messages');
+  messagesDiv.innerHTML = '';
+  msgInput.disabled = false;
+  sendBtn.disabled = false;
 
-    Object.keys(usersData).forEach(uid => {
-      if (uid !== currentUser.uid) { // n'affiche pas soi-même
-        const btn = document.createElement('button');
-        btn.textContent = usersData[uid].email;
-        btn.onclick = () => openChatWith(uid);
-        usersListDiv.appendChild(btn);
-      }
-    });
-
-    if (usersListDiv.innerHTML === '') {
-      usersListDiv.textContent = 'Aucun autre utilisateur inscrit';
-    }
-  }
-
-  // 🔹 Ouvre un chat privé avec un autre utilisateur
-  function openChatWith(otherUid) {
-    chatId = [currentUser.uid, otherUid].sort().join("_"); // unique chatId à 2
-    chatRef = ref(db, 'chats/' + chatId + '/messages');
-    messagesDiv.innerHTML = '';
-    msgInput.disabled = false;
-    sendBtn.disabled = false;
-
-    // 🔹 Écoute les messages en temps réel
-    onChildAdded(chatRef, (snapshot) => {
-      const msg = snapshot.val();
-      const div = document.createElement('div');
-      div.classList.add('message', msg.sender === currentUser.uid ? 'me' : 'other');
-      div.textContent = msg.text;
-      messagesDiv.appendChild(div);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    });
-  }
-
-  // 🔹 Envoie un message
-  sendBtn.addEventListener('click', () => {
-    const text = msgInput.value.trim();
-    if (!text || !chatRef) return;
-    push(chatRef, {
-      text,
-      sender: currentUser.uid,
-      timestamp: Date.now()
-    });
-    msgInput.value = '';
+  onChildAdded(chatRef, (snapshot) => {
+    const msg = snapshot.val();
+    const div = document.createElement('div');
+    div.classList.add('message', msg.sender === currentUser.uid ? 'me' : 'other');
+    div.textContent = msg.text;
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
   });
+}
 
-  msgInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendBtn.click();
-  });
+// Envoie un message
+sendBtn.addEventListener('click', () => {
+  const text = msgInput.value.trim();
+  if(!text || !chatRef) return;
+  push(chatRef, { text, sender:currentUser.uid, timestamp:Date.now() });
+  msgInput.value = '';
+});
+msgInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendBtn.click(); });
+
 </script>
-
 </body>
 </html>
