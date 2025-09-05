@@ -13,6 +13,9 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 .header { position: relative; z-index:2; padding: 20px; }
 .btn-back { position: absolute; top:20px; left:20px; color: #ff66cc; font-size:1.5em; cursor:pointer; text-decoration:none; transition: transform .2s; }
 .btn-back:hover { transform: scale(1.2); }
+/* Titre futuriste */
+.page-title { position: absolute; top:50%; left:60px; transform: translateY(-50%); font-family: 'Orbitron', sans-serif; font-size:1.5em; color: #ff66cc; text-shadow: 0 0 8px #ff66cc, 0 0 16px #ff66cc; pointer-events: none; }
+
 .carousel-container { z-index:2; position: relative; width:100%; height:calc(100% - 60px); overflow: hidden; display: flex; align-items:center; }
 .carousel { display:flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; gap:40px; padding:40px; }
 .carousel::-webkit-scrollbar { display:none; }
@@ -37,6 +40,7 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 
 <div class="header">
   <a href="page2.html" class="btn-back">&larr; Retour</a>
+  <div class="page-title">Page Sérieuse</div>
 </div>
 
 <div class="carousel-container fade-in">
@@ -76,8 +80,8 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   let positions = JSON.parse(localStorage.getItem("miniProfilePositions")||"{}");
-  let chats = JSON.parse(localStorage.getItem("chatMessages")||"{}"); // messages envoyés par moi
-  let incoming = JSON.parse(localStorage.getItem("incomingMessages")||"{}"); // messages reçus par le profil
+  let chats = JSON.parse(localStorage.getItem("chatMessages")||"{}"); // messages envoyés
+  let incoming = JSON.parse(localStorage.getItem("incomingMessages")||"{}"); // messages reçus
   let likes = JSON.parse(localStorage.getItem("likes")||"{}");
   let favorites = JSON.parse(localStorage.getItem("favorites")||"[]");
   let currentUser = "Lucas";
@@ -135,13 +139,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // mini-profils init
   for(let n in positions){ const card=[...document.querySelectorAll(".card")].find(c=>c.dataset.name===n); if(card) createMiniProfile(n, card.querySelector("img").src); }
 
-  // chat click
   document.addEventListener("click", e=>{ if(e.target.classList.contains("btn-chat")){ const card=e.target.closest(".card"); if(card) openChat(card.dataset.name); } });
 
-  // like
   document.querySelectorAll(".btn-like").forEach(btn=>{
     const card=btn.closest(".card"); const name=card.dataset.name;
     if(likes[name]) btn.classList.add("active");
@@ -154,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // favoris
   document.querySelectorAll(".btn-fav").forEach(btn=>{
     const card=btn.closest(".card"); const name=card.dataset.name;
     if(favorites.includes(name)) btn.classList.add("active");
@@ -165,7 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // bouton favoris en bas
   document.getElementById("btnFavorites").addEventListener("click", ()=>{
     let html=favorites.map(favName=>{
       const card=[...document.querySelectorAll(".card")].find(c=>c.dataset.name===favName); if(!card) return "";
