@@ -84,12 +84,6 @@ body::before {
 }
 .btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
 
-.btn-fav.active {
-  background-color: #ffea00; border-color: #ffea00;
-  color: #333; transform: scale(1.3);
-}
-
-/* ❤️ Like actif */
 .btn-like.active {
   background-color: #ff66cc;
   border-color: #ff66cc;
@@ -127,9 +121,14 @@ body::before {
   0%, 100% { box-shadow: 0 0 8px #ff66cc; border-color: #ff66cc; }
   50% { box-shadow: 0 0 20px #ff66cc; border-color: #ffea00; }
 }
+.mini-profile.new-message { animation: neonBlink 1s infinite; }
 
-.mini-profile.new-message {
-  animation: neonBlink 1s infinite;
+/* Bouton Favoris en bas centré */
+#btnFavorites {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: #ffea00; border:none; border-radius:12px; color:#333;
+  padding:10px 20px; font-size:1.2em; cursor:pointer; z-index:1000;
+  box-shadow: 0 0 12px #ffea00; animation: neonBlink 2s infinite alternate;
 }
 </style>
 </head>
@@ -171,16 +170,21 @@ body::before {
   </div>
 </div>
 
+<!-- Bouton Favoris jaune -->
+<button id="btnFavorites">Favoris</button>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   let positions = JSON.parse(localStorage.getItem("miniProfilePositions") || "{}");
   let chats = JSON.parse(localStorage.getItem("chatMessages") || "{}");
   let likes = JSON.parse(localStorage.getItem("likes") || "{}");
+  let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
   let currentUser = "Lucas";
 
   function savePositions(){ localStorage.setItem("miniProfilePositions", JSON.stringify(positions)); }
   function saveChats(){ localStorage.setItem("chatMessages", JSON.stringify(chats)); }
   function saveLikes(){ localStorage.setItem("likes", JSON.stringify(likes)); }
+  function saveFavorites(){ localStorage.setItem("favorites", JSON.stringify(favorites)); }
 
   function createMiniProfile(name, imgSrc){
     if(document.querySelector(`.mini-profile[data-mini="${name}"]`)) return;
@@ -192,13 +196,14 @@ document.addEventListener('DOMContentLoaded', () => {
     wrapper.appendChild(mini); wrapper.appendChild(close); document.body.appendChild(wrapper);
     if(positions[name]){ wrapper.style.left=positions[name].x+"px"; wrapper.style.top=positions[name].y+"px"; }
     else { wrapper.style.left="20px"; wrapper.style.top="20px"; }
+
     mini.addEventListener("click", ()=>{
-      mini.classList.remove("new-message"); // ✅ arrêt du clignotement à l'ouverture
+      mini.classList.remove("new-message");
       openChat(name);
     });
     close.addEventListener("click", e=>{
       e.stopPropagation(); delete positions[name]; delete chats[name]; delete likes[name];
-      savePositions(); saveChats(); saveLikes(); wrapper.remove();
+      favorites = favorites.filter(f => f !== name); savePositions(); saveChats(); saveLikes(); saveFavorites(); wrapper.remove();
     });
     let offsetX=0, offsetY=0;
     wrapper.addEventListener("touchstart", e=>{
@@ -260,16 +265,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btn.addEventListener("click", ()=>{
       const isActive=btn.classList.toggle("active"); likes[name]=isActive; saveLikes();
-
       if(isActive){
-        // Moi je vois
         chats[name]=chats[name]||[];
         chats[name].push(`💌 Vous avez liké ${name.split(',')[0]} !`);
         saveChats();
-
-        // La personne likée reçoit un message
         createMiniProfile(name, card.querySelector("img").src);
-        chats[name]=chats[name]||[];
         chats[name].push(`💌 ${currentUser} vous a liké !`);
         saveChats();
         const miniProfile=document.querySelector(`.mini-profile[data-mini="${name}"]`);
@@ -277,6 +277,39 @@ document.addEventListener('DOMContentLoaded', () => {
         miniProfile.addEventListener("click", ()=>miniProfile.classList.remove("new-message"));
       }
     });
+  });
+
+  // Gestion Favoris
+  document.querySelectorAll(".btn-fav").forEach(btn=>{
+    const card=btn.closest(".card"); const name=card.dataset.name;
+    if(favorites.includes(name)) btn.classList.add("active");
+    btn.addEventListener("click", ()=>{
+      if(favorites.includes(name)){
+        favorites=favorites.filter(f=>f!==name); btn.classList.remove("active");
+      } else {
+        favorites.push(name); btn.classList.add("active");
+      }
+      saveFavorites();
+    });
+  });
+
+  document.getElementById("btnFavorites").addEventListener("click", ()=>{
+    let html = favorites.map(favName=>{
+      const card = [...document.querySelectorAll(".card")].find(c=>c.dataset.name===favName);
+      if(!card) return "";
+      const img = card.querySelector("img").src;
+      return `<div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                <img src="${img}" style="width:50px; height:50px; border-radius:50%; border:2px solid #ff66cc;">
+                <span>${favName}</span>
+              </div>`;
+    }).join("");
+    let existing=document.getElementById("favoritesView");
+    if(existing) existing.remove();
+    const favView = document.createElement("div"); favView.id="favoritesView";
+    Object.assign(favView.style,{position:"fixed",top:"0",left:"0",width:"100%",height:"100%",background:"rgba(0,0,0,0.8)",zIndex:"10000",padding:"20px",color:"white",overflowY:"auto"});
+    favView.innerHTML=`<h2>Favoris</h2>${html}<button id="closeFav" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); padding:10px 20px; border:none; border-radius:12px; background:#ffea00; color:#333; cursor:pointer;">Fermer</button>`;
+    document.body.appendChild(favView);
+    document.getElementById("closeFav").onclick=()=>favView.remove();
   });
 });
 </script>
