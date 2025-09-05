@@ -22,12 +22,13 @@
 
     /* Fenêtre transparente avec contour noir */
     .form-container {
-      background: rgba(0, 0, 0, 0.3); /* semi-transparent */
+      background: rgba(0, 0, 0, 0.3);
       padding: 40px;
       border-radius: 15px;
       text-align: center;
-      border: 2px solid rgba(0,0,0,0.5); /* contour noir léger */
+      border: 2px solid rgba(0,0,0,0.5);
       box-shadow: 0 0 20px rgba(255, 0, 255, 0.2);
+      transition: opacity 0.8s ease, transform 0.8s ease;
     }
 
     /* Titre “Inscription” avec contour noir */
@@ -75,10 +76,16 @@
     button:hover {
       box-shadow: 0 0 15px #ff6aab, 0 0 25px #d600d6;
     }
+
+    /* Effet disparition pour utilisateurs déjà connectés */
+    .fade-out {
+      opacity: 0;
+      transform: scale(0.8);
+    }
   </style>
 </head>
 <body>
-  <div class="form-container">
+  <div id="formContainer" class="form-container">
     <h1>Inscription</h1>
     <form id="signupForm">
       <input type="email" id="email" placeholder="Email" required>
@@ -88,24 +95,41 @@
   </div>
 
   <script type="module">
-    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
-
+    const formContainer = document.getElementById("formContainer");
     const form = document.getElementById("signupForm");
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
 
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          window.location.href = "page2.html"; // redirection après inscription
-        })
-        .catch((error) => {
-          alert("Erreur : " + error.message);
-        });
+    // 🔹 Vérifie si l'utilisateur est déjà connecté
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("Utilisateur déjà connecté :", user.email);
+        // Effet de disparition
+        formContainer.classList.add("fade-out");
+        setTimeout(() => {
+          window.location.href = "page2.html";
+        }, 800); // correspond à la durée de l'animation CSS
+      }
+    });
+
+    // 🔹 Formulaire d'inscription
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault(); // Empêche le rechargement
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        console.log("Inscription réussie :", userCredential.user.email);
+        // Redirection après inscription
+        window.location.href = "page2.html";
+      } catch (error) {
+        console.error("Erreur inscription :", error);
+        alert("Erreur : " + error.message);
+      }
     });
   </script>
 </body>
