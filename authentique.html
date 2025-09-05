@@ -176,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let positions = JSON.parse(localStorage.getItem("miniProfilePositions") || "{}");
   let chats = JSON.parse(localStorage.getItem("chatMessages") || "{}");
   let likes = JSON.parse(localStorage.getItem("likes") || "{}");
+  let currentUser = "Lucas"; // <-- Nom de l'utilisateur connecté
 
   function savePositions() { localStorage.setItem("miniProfilePositions", JSON.stringify(positions)); }
   function saveChats() { localStorage.setItem("chatMessages", JSON.stringify(chats)); }
@@ -245,8 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
         createMiniProfile(name, imgSrc);
       }
 
-      // Clignotement mini-profil pour nouveau message
-      let miniProfile = document.querySelector(`.mini-profile[data-mini="${name}"]`);
+      const miniProfile = document.querySelector(`.mini-profile[data-mini="${name}"]`);
       if (miniProfile && chats[name].length > 1) {
         miniProfile.classList.add("new-message");
         miniProfile.addEventListener("click", () => miniProfile.classList.remove("new-message"));
@@ -297,7 +297,6 @@ document.addEventListener('DOMContentLoaded', () => {
       wrapper.remove();
     });
 
-    // Déplacement tactile
     let offsetX = 0, offsetY = 0;
     wrapper.addEventListener("touchstart", e => {
       const touch = e.touches[0];
@@ -315,7 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Restaurer mini-profils
   for (let n in positions) {
     const card = [...document.querySelectorAll(".card")].find(c => c.dataset.name === n);
     if (card) {
@@ -324,7 +322,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Clic sur chat
   document.addEventListener("click", e => {
     if (e.target.classList.contains("btn-chat")) {
       const card = e.target.closest(".card");
@@ -345,20 +342,21 @@ document.addEventListener('DOMContentLoaded', () => {
       saveLikes();
 
       if (isActive) {
+        // Message côté utilisateur
         chats[name] = chats[name] || [];
-        chats[name].push("💌 " + name.split(',')[0] + ", vous a liké ! Voulez-vous voir son profil ?");
+        chats[name].push(`💌 Vous avez liké ${name.split(',')[0]} !`);
         saveChats();
 
-        if (!document.querySelector(`.mini-profile[data-mini="${name}"]`)) {
-          const imgSrc = card.querySelector("img").src;
-          createMiniProfile(name, imgSrc);
-        }
+        // Notification côté personne likée
+        const miniProfile = document.querySelector(`.mini-profile[data-mini="${name}"]`);
+        if (!miniProfile) createMiniProfile(name, card.querySelector("img").src);
 
-        let miniProfile = document.querySelector(`.mini-profile[data-mini="${name}"]`);
-        if (miniProfile) {
-          miniProfile.classList.add("new-message");
-          miniProfile.addEventListener("click", () => miniProfile.classList.remove("new-message"));
-        }
+        const newMini = document.querySelector(`.mini-profile[data-mini="${name}"]`);
+        chats[name] = chats[name] || [];
+        chats[name].push(`💌 ${currentUser} vous a liké !`);
+        saveChats();
+        newMini.classList.add("new-message");
+        newMini.addEventListener("click", () => newMini.classList.remove("new-message"));
       }
     });
   });
