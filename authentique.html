@@ -89,6 +89,14 @@
       color: #333; transform: scale(1.3);
     }
 
+    /* ❤️ Like actif */
+    .btn-like.active {
+      background-color: #ff66cc;
+      border-color: #ff66cc;
+      color: white;
+      box-shadow: 0 0 12px #ff66cc;
+    }
+
     /* ✅ Mini-profils flottants */
     .mini-profile {
       position: absolute;
@@ -167,13 +175,11 @@
 document.addEventListener('DOMContentLoaded', () => {
   let positions = JSON.parse(localStorage.getItem("miniProfilePositions") || "{}");
   let chats = JSON.parse(localStorage.getItem("chatMessages") || "{}");
+  let likes = JSON.parse(localStorage.getItem("likes") || "{}");
 
-  function savePositions() {
-    localStorage.setItem("miniProfilePositions", JSON.stringify(positions));
-  }
-  function saveChats() {
-    localStorage.setItem("chatMessages", JSON.stringify(chats));
-  }
+  function savePositions() { localStorage.setItem("miniProfilePositions", JSON.stringify(positions)); }
+  function saveChats() { localStorage.setItem("chatMessages", JSON.stringify(chats)); }
+  function saveLikes() { localStorage.setItem("likes", JSON.stringify(likes)); }
 
   function openChat(card) {
     const name = card.dataset.name;
@@ -198,9 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <div id="fullChatBody" style="flex:1; overflow-y:auto; margin:15px 0;"></div>
       <div style="display:flex; gap:10px; margin-bottom:50px;">
-  <textarea id="fullChatInput" rows="2" style="flex:1; border-radius:8px; border:none; padding:8px; resize:none; background: rgba(255,255,255,0.1); color:white; font-family:'Orbitron';"></textarea>
-  <button id="fullChatSend" style="padding:8px 16px; background:#ff66cc; border:none; border-radius:8px; color:white; cursor:pointer;">Envoyer</button>
-</div>
+        <textarea id="fullChatInput" rows="2" style="flex:1; border-radius:8px; border:none; padding:8px; resize:none; background: rgba(255,255,255,0.1); color:white; font-family:'Orbitron';"></textarea>
+        <button id="fullChatSend" style="padding:8px 16px; background:#ff66cc; border:none; border-radius:8px; color:white; cursor:pointer;">Envoyer</button>
+      </div>
       <button id="fullChatClose" style="
         position:absolute; bottom:20px; left:50%; transform: translateX(-50%);
         padding:10px 16px; background:#ff66cc; border:none; border-radius:8px; color:white; cursor:pointer;
@@ -239,13 +245,11 @@ document.addEventListener('DOMContentLoaded', () => {
         createMiniProfile(name, imgSrc);
       }
 
-      // ✨ Clignotement néon pour nouveaux messages
+      // Clignotement mini-profil pour nouveau message
       let miniProfile = document.querySelector(`.mini-profile[data-mini="${name}"]`);
       if (miniProfile && chats[name].length > 1) {
         miniProfile.classList.add("new-message");
-        miniProfile.addEventListener("click", () => {
-          miniProfile.classList.remove("new-message");
-        });
+        miniProfile.addEventListener("click", () => miniProfile.classList.remove("new-message"));
       }
     };
   }
@@ -286,32 +290,32 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation();
       delete positions[name];
       delete chats[name];
+      delete likes[name];
       savePositions();
       saveChats();
+      saveLikes();
       wrapper.remove();
     });
 
-    // ✅ Déplacement tactile
+    // Déplacement tactile
     let offsetX = 0, offsetY = 0;
-
     wrapper.addEventListener("touchstart", e => {
       const touch = e.touches[0];
       offsetX = touch.clientX - wrapper.getBoundingClientRect().left;
       offsetY = touch.clientY - wrapper.getBoundingClientRect().top;
     });
-
     wrapper.addEventListener("touchmove", e => {
       const touch = e.touches[0];
       wrapper.style.left = (touch.clientX - offsetX) + "px";
       wrapper.style.top = (touch.clientY - offsetY) + "px";
     });
-
     wrapper.addEventListener("touchend", () => {
       positions[name] = { x: wrapper.offsetLeft, y: wrapper.offsetTop };
       savePositions();
     });
   }
 
+  // Restaurer mini-profils
   for (let n in positions) {
     const card = [...document.querySelectorAll(".card")].find(c => c.dataset.name === n);
     if (card) {
@@ -320,12 +324,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Clic sur chat
   document.addEventListener("click", e => {
     if (e.target.classList.contains("btn-chat")) {
       const card = e.target.closest(".card");
       if (card) openChat(card);
     }
   });
+
+  // Gestion bouton Like
+  document.querySelectorAll(".btn-like").forEach(btn => {
+    const card = btn.closest(".card");
+    const name = card.dataset.name;
+
+    if (likes[name]) btn.classList.add("active");
+
+    btn.addEventListener("click", () => {
+      const isActive = btn.classList.toggle("active");
+      likes[name] = isActive;
+      saveLikes();
+
+      if (isActive) {
+        chats[name] = chats[name] || [];
+        chats[name].push("💌 " + name.split(',')[0] + ", vous a liké ! Voulez-vous voir son profil ?");
+        saveChats();
+
+        if (!document.querySelector(`.mini-profile[data-mini="${name}"]`)) {
+          const imgSrc = card.querySelector("img").src;
+          createMiniProfile(name, imgSrc);
+        }
+
+        let miniProfile = document.querySelector(`.mini-profile[data-mini="${name}"]`);
+        if (miniProfile) {
+          miniProfile.classList.add("new-message");
+          miniProfile.addEventListener("click", () => miniProfile.classList.remove("new-message"));
+        }
+      }
+    });
+  });
+
 });
 </script>
 </body>
