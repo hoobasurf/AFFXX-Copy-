@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscription</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Fond violet-rose dégradé */
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #8e2de2, #ff6aab);
+      font-family: 'Arial', sans-serif;
+    }
+
+    /* Fenêtre transparente */
+    .form-container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    /* Titre neon */
+    h1 {
+      color: #ff6aab;
+      text-shadow: 0 0 5px #ff6aab, 0 0 10px #ff6aab;
+      margin-bottom: 30px;
+    }
+
+    /* Input style */
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input::placeholder {
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* Bouton neon */
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #ff6aab;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 0 5px #ff6aab, 0 0 10px #ff6aab;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      box-shadow: 0 0 15px #ff6aab, 0 0 25px #ff6aab;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h1>Inscription</h1>
+    <form id="signupForm">
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Mot de passe" required>
+      <button type="submit">S’inscrire</button>
+    </form>
+  </div>
+
+  <script type="module">
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { app } from "./firebase.js";
+
+    const auth = getAuth(app);
+
+    const form = document.getElementById("signupForm");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(() => {
+          window.location.href = "page2.html"; // redirection après inscription
+        })
+        .catch((error) => {
+          alert("Erreur : " + error.message);
+        });
+    });
+  </script>
+</body>
+</html>
