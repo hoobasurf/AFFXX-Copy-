@@ -23,10 +23,7 @@
     }
     @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
 
-    .header {
-      position: relative; z-index:2;
-      padding: 20px;
-    }
+    .header { position: relative; z-index:2; padding: 20px; }
     .btn-back {
       position: absolute; top:20px; left:20px;
       color: #ff66cc; font-size:1.5em;
@@ -65,48 +62,31 @@
       position: relative;
     }
     .card img {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-bottom: 10px;
-      border: 3px solid;
+      width: 90px; height: 90px;
+      border-radius: 50%; object-fit: cover;
+      margin-bottom: 10px; border: 3px solid;
     }
     .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
     .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
 
     .name { font-size:1.1em; margin-bottom:5px;}
+    .btns { display:flex; justify-content: center; gap: 8px; margin-top: 6px; }
 
-    .btns {
-      display:flex;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 6px;
-    }
     .btn-like, .btn-chat, .btn-fav {
       width:30px; height:30px;
       border-radius:50%;
       background-color:rgba(255,255,255,0.1);
-      border:1px solid #ff66cc;
-      color:#ff66cc;
+      border:1px solid #ff66cc; color:#ff66cc;
       display:flex; align-items:center; justify-content:center;
-      font-size:1em;
-      cursor:pointer;
+      font-size:1em; cursor:pointer;
       transition: transform .2s, background-color .3s, color .3s;
       user-select:none;
     }
     .btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
 
     .btn-fav.active {
-      background-color: #ffea00;
-      border-color: #ffea00;
-      color: #333;
-      transform: scale(1.3);
-    }
-
-    .card.center {
-      transform: scale(1.1);
-      box-shadow: 0 0 20px #ff00ff;
+      background-color: #ffea00; border-color: #ffea00;
+      color: #333; transform: scale(1.3);
     }
 
     /* ✅ Mini-profils flottants */
@@ -116,10 +96,23 @@
       border-radius: 50%;
       border: 2px solid #ff66cc;
       box-shadow: 0 0 8px #ff66cc;
-      cursor: grab;
       z-index: 5000;
+      touch-action: none;
     }
-    .mini-profile:active { cursor: grabbing; }
+
+    /* ❌ petit bouton suppression */
+    .close-btn {
+      position: absolute;
+      bottom: -5px; right: -5px;
+      background: #ff66cc;
+      border-radius: 50%;
+      width: 16px; height: 16px;
+      display:flex; align-items:center; justify-content:center;
+      font-size: 12px; color:white;
+      border: 1px solid white;
+      cursor: pointer;
+      z-index: 5100;
+    }
   </style>
 </head>
 <body>
@@ -232,7 +225,6 @@ document.addEventListener('DOMContentLoaded', () => {
       input.value = "";
       chatBody.scrollTop = chatBody.scrollHeight;
 
-      // ✅ créer mini-profil s’il n’existe pas
       if (!document.querySelector(`.mini-profile[data-mini="${name}"]`)) {
         createMiniProfile(name, imgSrc);
       }
@@ -240,59 +232,67 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function createMiniProfile(name, imgSrc) {
+    const wrapper = document.createElement("div");
+    wrapper.style.position = "absolute";
+    wrapper.style.width = "60px";
+    wrapper.style.height = "60px";
+    wrapper.dataset.mini = name;
+
     const mini = document.createElement("img");
     mini.src = imgSrc;
     mini.className = "mini-profile";
-    mini.dataset.mini = name;
+
+    const close = document.createElement("div");
+    close.className = "close-btn";
+    close.textContent = "×";
+
+    wrapper.appendChild(mini);
+    wrapper.appendChild(close);
+    document.body.appendChild(wrapper);
 
     if (positions[name]) {
-      mini.style.left = positions[name].x + "px";
-      mini.style.top = positions[name].y + "px";
+      wrapper.style.left = positions[name].x + "px";
+      wrapper.style.top = positions[name].y + "px";
     } else {
-      mini.style.left = "20px";
-      mini.style.top = "20px";
+      wrapper.style.left = "20px";
+      wrapper.style.top = "20px";
     }
-
-    document.body.appendChild(mini);
 
     mini.addEventListener("click", () => {
       const card = [...document.querySelectorAll(".card")].find(c => c.dataset.name === name);
       if (card) openChat(card);
     });
 
-    // ✅ drag instantané corrigé
-    let isDragging = false, offsetX = 0, offsetY = 0;
+    close.addEventListener("click", e => {
+      e.stopPropagation();
+      delete positions[name];
+      delete chats[name];
+      savePositions();
+      saveChats();
+      wrapper.remove();
+    });
 
-    mini.addEventListener("mousedown", e => {
-      isDragging = true;
-      mini.style.cursor = "grabbing";
-      offsetX = e.clientX - mini.getBoundingClientRect().left;
-      offsetY = e.clientY - mini.getBoundingClientRect().top;
+    // ✅ Déplacement tactile
+    let offsetX = 0, offsetY = 0;
 
-      function moveAt(ev) {
-        mini.style.left = ev.pageX - offsetX + "px";
-        mini.style.top = ev.pageY - offsetY + "px";
-      }
+    wrapper.addEventListener("touchstart", e => {
+      const touch = e.touches[0];
+      offsetX = touch.clientX - wrapper.getBoundingClientRect().left;
+      offsetY = touch.clientY - wrapper.getBoundingClientRect().top;
+    });
 
-      function onMouseMove(ev) {
-        if (isDragging) moveAt(ev);
-      }
+    wrapper.addEventListener("touchmove", e => {
+      const touch = e.touches[0];
+      wrapper.style.left = (touch.clientX - offsetX) + "px";
+      wrapper.style.top = (touch.clientY - offsetY) + "px";
+    });
 
-      document.addEventListener("mousemove", onMouseMove);
-
-      document.addEventListener("mouseup", () => {
-        if (isDragging) {
-          isDragging = false;
-          mini.style.cursor = "grab";
-          positions[name] = { x: mini.offsetLeft, y: mini.offsetTop };
-          savePositions();
-        }
-        document.removeEventListener("mousemove", onMouseMove);
-      }, { once: true });
+    wrapper.addEventListener("touchend", () => {
+      positions[name] = { x: wrapper.offsetLeft, y: wrapper.offsetTop };
+      savePositions();
     });
   }
 
-  // ✅ restaurer mini-profils sauvegardés
   for (let n in positions) {
     const card = [...document.querySelectorAll(".card")].find(c => c.dataset.name === n);
     if (card) {
@@ -301,7 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ouvrir chat
   document.addEventListener("click", e => {
     if (e.target.classList.contains("btn-chat")) {
       const card = e.target.closest(".card");
