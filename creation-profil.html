@@ -1,135 +1,143 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Création de Profil</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
-<style>
-body {
-  margin:0; padding:0; font-family:'Orbitron',sans-serif;
-  background:url('ville.jpg') no-repeat center center/cover;
-  display:flex; justify-content:center; align-items:center; height:100vh;
-}
-.form-container {
-  background: rgba(255,0,255,0.1);
-  border:2px solid #ff66cc;
-  border-radius:20px;
-  padding:30px;
-  width:90%;
-  max-width:500px;
-  color:white;
-  box-shadow:0 0 20px #ff66cc;
-}
-.form-container h1 {
-  text-align:center;
-  margin-bottom:20px;
-  text-shadow: 0 0 5px black, 0 0 10px #ff66cc;
-}
-input, textarea {
-  width:100%; margin-bottom:15px; padding:10px; border-radius:8px;
-  border:none; background:rgba(255,255,255,0.1); color:white; font-size:16px;
-  outline:none;
-}
-textarea { resize:none; }
-label { display:block; margin-bottom:5px; }
-.room-option { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-.room-option input { width:auto; }
-img.preview { width:70px; height:70px; object-fit:cover; border-radius:10px; border:2px solid #ff66cc; margin-right:5px; }
-button { width:100%; padding:12px; border:none; border-radius:10px; background:#ff66cc; color:white; font-size:18px; cursor:pointer; transition:0.3s; }
-button:hover { box-shadow:0 0 15px #ff66cc,0 0 25px #d600d6; }
-.room-logos img { width:30px; height:30px; margin-right:5px; }
-</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Création du Profil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      margin: 0; padding: 0;
+      height: 100vh; display: flex; justify-content: center; align-items: center;
+      font-family: 'Orbitron', sans-serif;
+      background: url("planete-romantique.jpg") no-repeat center center/cover;
+      color: white;
+    }
+    .container {
+      background: rgba(0,0,0,0.5);
+      padding: 25px;
+      border-radius: 15px;
+      width: 90%; max-width: 400px;
+      box-shadow: 0 0 20px #ff66cc;
+      text-align: center;
+    }
+    h1 {
+      color: #ff66cc;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #ff66cc;
+    }
+    label { display: block; text-align: left; margin-top: 15px; font-size: 0.9em; }
+    input, textarea, select {
+      width: 100%; padding: 10px; margin-top: 5px;
+      border: none; border-radius: 8px;
+      background: rgba(255,255,255,0.15); color: white;
+      font-family: 'Orbitron'; font-size: 0.9em;
+    }
+    textarea { resize: none; }
+    .rooms { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+    .rooms label { display: flex; align-items: center; gap: 5px; }
+    .preview { display:flex; flex-wrap: wrap; gap:10px; margin-top:10px; }
+    .preview img { width:60px; height:60px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc; }
+    button {
+      margin-top: 20px; padding: 12px; width: 100%;
+      border: none; border-radius: 8px;
+      background: #ff66cc; color: white; font-size: 1em; cursor: pointer;
+      box-shadow: 0 0 10px #ff66cc;
+    }
+    button:hover { box-shadow: 0 0 20px #ff66cc; }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Mon Profil</h1>
+    <form id="profileForm">
+      <label>Âge :
+        <input type="number" id="age" required>
+      </label>
+      <label>Lieu :
+        <input type="text" id="location" placeholder="Votre ville" required>
+      </label>
+      <label>Description :
+        <textarea id="description" rows="3" placeholder="Parlez un peu de vous..." required></textarea>
+      </label>
 
-<div class="form-container">
-<h1>Création de Profil</h1>
+      <label>Photos (max 5) :
+        <input type="file" id="photos" accept="image/*" multiple>
+      </label>
+      <div class="preview" id="preview"></div>
 
-<form id="profileForm">
-  <label>Photos (max 5) :</label>
-  <input type="file" id="photos" multiple accept="image/*">
+      <label>Salles souhaitées :</label>
+      <div class="rooms">
+        <label><input type="checkbox" name="rooms" value="serieux"> Sérieux</label>
+        <label><input type="checkbox" name="rooms" value="amical"> Amitié</label>
+        <label><input type="checkbox" name="rooms" value="fun"> Fun</label>
+      </div>
 
-  <div id="previewContainer" style="display:flex; margin-bottom:15px;"></div>
-
-  <label>Description :</label>
-  <textarea id="description" rows="3" placeholder="Parlez de vous..."></textarea>
-
-  <label>Âge :</label>
-  <input type="number" id="age" min="12" max="120">
-
-  <label>Lieu :</label>
-  <input type="text" id="location" placeholder="Votre ville">
-
-  <label>Salles souhaitées :</label>
-  <div class="room-option">
-    <input type="checkbox" value="serieux" class="roomCheckbox"> Sérieux
-    <img src="icons/serieux.png" alt="Sérieux">
-  </div>
-  <div class="room-option">
-    <input type="checkbox" value="amitie" class="roomCheckbox"> Amitié
-    <img src="icons/amitie.png" alt="Amitié">
-  </div>
-  <div class="room-option">
-    <input type="checkbox" value="fun" class="roomCheckbox"> Fun
-    <img src="icons/fun.png" alt="Fun">
+      <button type="submit">Enregistrer</button>
+    </form>
   </div>
 
-  <button type="submit">Enregistrer Profil</button>
-</form>
-</div>
+  <script type="module">
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+    import { app } from "./firebase.js";
 
-<script type="module">
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-import { app } from "./firebase.js";
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
 
-const auth = getAuth(app);
-const db = getDatabase(app);
+    const form = document.getElementById("profileForm");
+    const photosInput = document.getElementById("photos");
+    const preview = document.getElementById("preview");
+    let photoFiles = [];
 
-const form = document.getElementById('profileForm');
-const photosInput = document.getElementById('photos');
-const previewContainer = document.getElementById('previewContainer');
-let selectedFiles = [];
+    // Prévisualisation des photos
+    photosInput.addEventListener("change", () => {
+      preview.innerHTML = "";
+      photoFiles = Array.from(photosInput.files).slice(0,5); // max 5
+      photoFiles.forEach(file => {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        preview.appendChild(img);
+      });
+    });
 
-// Prévisualisation photos
-photosInput.addEventListener('change', (e)=>{
-  selectedFiles = Array.from(e.target.files).slice(0,5);
-  previewContainer.innerHTML = '';
-  selectedFiles.forEach(f=>{
-    const img = document.createElement('img');
-    img.src = URL.createObjectURL(f);
-    img.className = 'preview';
-    previewContainer.appendChild(img);
-  });
-});
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const user = auth.currentUser;
+      if (!user) return alert("Non connecté");
 
-// Formulaire
-form.addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const user = auth.currentUser;
-  if(!user){ alert("Vous devez être connecté"); return; }
+      const age = document.getElementById("age").value;
+      const location = document.getElementById("location").value.trim();
+      const description = document.getElementById("description").value.trim();
+      const selectedRooms = [];
+      document.querySelectorAll("input[name='rooms']:checked").forEach(cb => selectedRooms.push(cb.value));
 
-  const selectedRooms = Array.from(document.querySelectorAll('.roomCheckbox'))
-                            .filter(cb=>cb.checked).map(cb=>cb.value);
+      // Upload photos dans Firebase Storage
+      const photoURLs = [];
+      for (let i = 0; i < photoFiles.length; i++) {
+        const file = photoFiles[i];
+        const fileRef = sRef(storage, "users/" + user.uid + "/photo" + i);
+        await uploadBytes(fileRef, file);
+        const url = await getDownloadURL(fileRef);
+        photoURLs.push(url);
+      }
 
-  const profileData = {
-    photos: selectedFiles.map(f=>f.name),
-    description: document.getElementById('description').value,
-    age: document.getElementById('age').value,
-    location: document.getElementById('location').value,
-    rooms: selectedRooms
-  };
+      // Sauvegarde profil dans DB
+      await set(ref(db, "users/" + user.uid), {
+        email: user.email,
+        age,
+        location,
+        description,
+        photos: photoURLs,
+        chosenRooms: selectedRooms,
+        joinedAt: new Date().toISOString()
+      });
 
-  try {
-    await set(ref(db, 'users/' + user.uid + '/profile'), profileData);
-    alert("Profil enregistré !");
-    window.location.href = 'page2.html';
-  } catch(err){
-    console.error("Erreur DB :", err);
-    alert("Erreur lors de l'enregistrement du profil");
-  }
-});
-</script>
+      alert("Profil enregistré !");
+      window.location.href = "page2.html";
+    });
+  </script>
 </body>
 </html>
