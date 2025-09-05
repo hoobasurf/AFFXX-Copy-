@@ -6,7 +6,6 @@
   <title>Inscription</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
   <style>
-    /* Fond ville */
     body {
       margin: 0;
       padding: 0;
@@ -20,7 +19,6 @@
       overflow: hidden;
     }
 
-    /* Fenêtre transparente avec contour noir */
     .form-container {
       background: rgba(0, 0, 0, 0.3);
       padding: 40px;
@@ -31,7 +29,6 @@
       transition: opacity 0.8s ease, transform 0.8s ease;
     }
 
-    /* Titre “Inscription” avec contour noir */
     h1 {
       color: #ff6aab;
       text-shadow:
@@ -77,7 +74,6 @@
       box-shadow: 0 0 15px #ff6aab, 0 0 25px #d600d6;
     }
 
-    /* Effet disparition pour utilisateurs déjà connectés */
     .fade-out {
       opacity: 0;
       transform: scale(0.8);
@@ -96,11 +92,21 @@
 
   <script type="module">
     import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
+    const db = getDatabase(app);
     const formContainer = document.getElementById("formContainer");
     const form = document.getElementById("signupForm");
+
+    // 🔹 Fonction pour enregistrer l’utilisateur dans Realtime Database
+    function saveUser(uid, email) {
+      set(ref(db, 'users/' + uid), {
+        email: email,
+        joinedAt: new Date().toISOString()
+      });
+    }
 
     // 🔹 Vérifie si l'utilisateur est déjà connecté
     onAuthStateChanged(auth, (user) => {
@@ -123,6 +129,9 @@
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         console.log("Inscription réussie :", userCredential.user.email);
+
+        // Enregistre l’utilisateur dans Realtime Database
+        saveUser(userCredential.user.uid, userCredential.user.email);
 
         // Ajoute effet fondu avant redirection
         formContainer.classList.add("fade-out");
