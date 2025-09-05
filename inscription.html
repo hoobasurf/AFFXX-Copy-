@@ -106,17 +106,16 @@
     onAuthStateChanged(auth, (user) => {
       if (user) {
         console.log("Utilisateur déjà connecté :", user.email);
-        // Effet de disparition
         formContainer.classList.add("fade-out");
         setTimeout(() => {
-          window.location.href = "page2.html";
-        }, 800); // correspond à la durée de l'animation CSS
+          window.location.href = "/page2.html"; // redirection sûre
+        }, 800);
       }
     });
 
     // 🔹 Formulaire d'inscription
     form.addEventListener("submit", async (e) => {
-      e.preventDefault(); // Empêche le rechargement
+      e.preventDefault();
 
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
@@ -124,8 +123,7 @@
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         console.log("Inscription réussie :", userCredential.user.email);
-        // Redirection après inscription
-        window.location.href = "page2.html";
+        window.location.href = "/page2.html"; // redirection sûre
       } catch (error) {
         console.error("Erreur inscription :", error);
         alert("Erreur : " + error.message);
