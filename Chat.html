@@ -17,6 +17,31 @@
       background: url('/ville.jpg') no-repeat center center/cover;
       background-size: cover;
     }
+
+    #usersList {
+      padding: 20px;
+      max-height: 150px;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.3);
+      border:2px solid rgba(0,0,0,0.5);
+      border-radius:15px;
+      margin: 10px;
+      color:white;
+    }
+
+    #usersList button {
+      display:block;
+      margin:5px 0;
+      padding:8px 12px;
+      background:#ff6aab;
+      border:none;
+      border-radius:8px;
+      color:white;
+      cursor:pointer;
+      width:100%;
+      text-align:left;
+    }
+
     #chatContainer {
       flex:1;
       display:flex;
@@ -25,14 +50,16 @@
       overflow-y:auto;
       backdrop-filter: blur(3px);
       background: rgba(0,0,0,0.3);
-      margin: 20px;
+      margin: 10px;
       border-radius:15px;
       border:2px solid rgba(0,0,0,0.5);
     }
+
     #messages {
       flex:1;
       overflow-y:auto;
     }
+
     .message {
       margin: 5px 0;
       padding: 8px 12px;
@@ -40,21 +67,25 @@
       max-width: 80%;
       word-wrap: break-word;
     }
+
     .me {
       background: #ff6aab;
       color:white;
       align-self:flex-end;
       box-shadow: 0 0 5px #ff6aab, 0 0 15px #d600d6;
     }
+
     .other {
       background: rgba(255,255,255,0.2);
       color:white;
       align-self:flex-start;
     }
+
     #inputContainer {
       display:flex;
-      margin:20px;
+      margin:10px;
     }
+
     #msgInput {
       flex:1;
       padding:12px;
@@ -63,6 +94,7 @@
       outline:none;
       font-size:16px;
     }
+
     #sendBtn {
       padding:12px 20px;
       margin-left:10px;
@@ -78,75 +110,98 @@
 </head>
 <body>
 
+<div id="usersList">Chargement des utilisateurs...</div>
+
 <div id="chatContainer">
   <div id="messages"></div>
 </div>
 
 <div id="inputContainer">
-  <input type="text" id="msgInput" placeholder="Écrire un message...">
-  <button id="sendBtn">Envoyer</button>
+  <input type="text" id="msgInput" placeholder="Écrire un message..." disabled>
+  <button id="sendBtn" disabled>Envoyer</button>
 </div>
 
 <script type="module">
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-  import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+  import { getDatabase, ref, push, onChildAdded, get, child } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
   import { app } from "./firebase.js";
 
   const auth = getAuth(app);
   const db = getDatabase(app);
 
+  const usersListDiv = document.getElementById('usersList');
   const messagesDiv = document.getElementById('messages');
   const msgInput = document.getElementById('msgInput');
   const sendBtn = document.getElementById('sendBtn');
 
   let currentUser = null;
-  let chatId = null; // chat unique entre 2 utilisateurs
+  let chatId = null;
+  let chatRef = null;
 
-  // 🔹 Vérifie si utilisateur connecté
-  onAuthStateChanged(auth, (user) => {
+  // 🔹 Vérifie si l'utilisateur est connecté
+  onAuthStateChanged(auth, async (user) => {
     if (!user) {
-      window.location.href = "inscription.html"; // redirige si pas connecté
+      window.location.href = "inscription.html";
     } else {
       currentUser = user;
-      // 🔹 Ici, tu peux générer le chatId dynamique selon les deux utilisateurs
-      // Exemple simple pour test : chat entre user.uid et un uid fixe "otherUserUid"
-      const otherUserUid = prompt("UID de l'autre utilisateur pour ce chat :");
-      chatId = [currentUser.uid, otherUserUid].sort().join("_"); // ordre fixe pour unique chatId
-      initChat();
+      loadUsers();
     }
   });
 
-  function initChat() {
-    const chatRef = ref(db, 'chats/' + chatId + '/messages');
+  // 🔹 Charge la liste des utilisateurs
+  async function loadUsers() {
+    const usersSnapshot = await get(ref(db, 'users'));
+    const usersData = usersSnapshot.val() || {};
+    usersListDiv.innerHTML = '';
 
-    // Écoute les messages en temps réel
+    Object.keys(usersData).forEach(uid => {
+      if (uid !== currentUser.uid) { // n'affiche pas soi-même
+        const btn = document.createElement('button');
+        btn.textContent = usersData[uid].email;
+        btn.onclick = () => openChatWith(uid);
+        usersListDiv.appendChild(btn);
+      }
+    });
+
+    if (usersListDiv.innerHTML === '') {
+      usersListDiv.textContent = 'Aucun autre utilisateur inscrit';
+    }
+  }
+
+  // 🔹 Ouvre un chat privé avec un autre utilisateur
+  function openChatWith(otherUid) {
+    chatId = [currentUser.uid, otherUid].sort().join("_"); // unique chatId à 2
+    chatRef = ref(db, 'chats/' + chatId + '/messages');
+    messagesDiv.innerHTML = '';
+    msgInput.disabled = false;
+    sendBtn.disabled = false;
+
+    // 🔹 Écoute les messages en temps réel
     onChildAdded(chatRef, (snapshot) => {
       const msg = snapshot.val();
       const div = document.createElement('div');
-      div.classList.add('message');
-      div.classList.add(msg.sender === currentUser.uid ? 'me' : 'other');
+      div.classList.add('message', msg.sender === currentUser.uid ? 'me' : 'other');
       div.textContent = msg.text;
       messagesDiv.appendChild(div);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     });
-
-    // Envoyer message
-    sendBtn.addEventListener('click', () => {
-      const text = msgInput.value.trim();
-      if (!text) return;
-      push(chatRef, {
-        text,
-        sender: currentUser.uid,
-        timestamp: Date.now()
-      });
-      msgInput.value = '';
-    });
-
-    // Envoi avec touche Enter
-    msgInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendBtn.click();
-    });
   }
+
+  // 🔹 Envoie un message
+  sendBtn.addEventListener('click', () => {
+    const text = msgInput.value.trim();
+    if (!text || !chatRef) return;
+    push(chatRef, {
+      text,
+      sender: currentUser.uid,
+      timestamp: Date.now()
+    });
+    msgInput.value = '';
+  });
+
+  msgInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendBtn.click();
+  });
 </script>
 
 </body>
