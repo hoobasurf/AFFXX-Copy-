@@ -108,10 +108,9 @@
       });
     }
 
-    // 🔹 Vérifie si l'utilisateur est déjà connecté
+    // 🔹 Vérifie si l'utilisateur est déjà connecté (anti-boucle)
     onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log("Utilisateur déjà connecté :", user.email);
+      if (user && window.location.pathname.endsWith("inscription.html")) {
         formContainer.classList.add("fade-out");
         setTimeout(() => {
           window.location.href = "chat.html";
