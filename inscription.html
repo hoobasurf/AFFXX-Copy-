@@ -91,62 +91,59 @@
   </div>
 
   <script type="module">
-    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-    import { app } from "./firebase.js";
+  import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+  import { app } from "./firebase.js";
 
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const formContainer = document.getElementById("formContainer");
-    const form = document.getElementById("signupForm");
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+  const formContainer = document.getElementById("formContainer");
+  const form = document.getElementById("signupForm");
 
-    // 🔹 Fonction pour enregistrer l’utilisateur dans Realtime Database
-    function saveUser(uid, email) {
-      set(ref(db, 'users/' + uid), {
-        email: email,
-        joinedAt: new Date().toISOString()
-      }).then(() => {
-        console.log("Utilisateur enregistré dans la DB :", email);
-      }).catch((err) => {
-        console.error("Erreur DB :", err);
-      });
+  // 🔹 Fonction pour enregistrer l’utilisateur dans Realtime Database
+  function saveUser(uid, email){
+    set(ref(db, 'users/' + uid), {
+      email: email,
+      joinedAt: new Date().toISOString()
+    }).then(()=>console.log("Utilisateur enregistré :", email))
+      .catch(err=>console.error("Erreur DB :", err));
+  }
+
+  // 🔹 Si utilisateur déjà connecté → redirection directe
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("Utilisateur déjà connecté :", user.email);
+      formContainer.classList.add("fade-out");
+      setTimeout(() => {
+        window.location.href = "page2.html"; // ← direct
+      }, 800);
     }
+  });
 
-    // 🔹 Vérifie si l'utilisateur est déjà connecté (anti-boucle)
-    onAuthStateChanged(auth, (user) => {
-      if (user && window.location.pathname.endsWith("inscription.html")) {
-        console.log("Utilisateur déjà connecté :", user.email);
-        formContainer.classList.add("fade-out");
-        setTimeout(() => {
-          window.location.href = "chat.html";
-        }, 800);
-      }
-    });
+  // 🔹 Formulaire d'inscription
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-    // 🔹 Formulaire d'inscription
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log("Inscription réussie :", userCredential.user.email);
 
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        console.log("Inscription réussie :", userCredential.user.email);
+      // Enregistre l’utilisateur dans Realtime Database
+      saveUser(userCredential.user.uid, userCredential.user.email);
 
-        // Enregistre l’utilisateur dans Realtime Database
-        saveUser(userCredential.user.uid, userCredential.user.email);
-
-        // Ajoute effet fondu avant redirection
-        formContainer.classList.add("fade-out");
-        setTimeout(() => {
-          window.location.href = "chat.html";
-        }, 800);
-      } catch (error) {
-        console.error("Erreur inscription :", error);
-        alert("Erreur : " + error.message);
-      }
-    });
-  </script>
+      // Effet fondu avant redirection
+      formContainer.classList.add("fade-out");
+      setTimeout(() => {
+        window.location.href = "page2.html"; // ← direct
+      }, 800);
+    } catch (error) {
+      console.error("Erreur inscription :", error);
+      alert("Erreur : " + error.message);
+    }
+  });
+</script>
 </body>
 </html>
