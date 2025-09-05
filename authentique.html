@@ -113,6 +113,16 @@
       cursor: pointer;
       z-index: 5100;
     }
+
+    /* ✨ Clignotement néon pour nouveaux messages */
+    @keyframes neonBlink {
+      0%, 100% { box-shadow: 0 0 8px #ff66cc; border-color: #ff66cc; }
+      50% { box-shadow: 0 0 20px #ff66cc; border-color: #ffea00; }
+    }
+
+    .mini-profile.new-message {
+      animation: neonBlink 1s infinite;
+    }
   </style>
 </head>
 <body>
@@ -227,6 +237,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!document.querySelector(`.mini-profile[data-mini="${name}"]`)) {
         createMiniProfile(name, imgSrc);
+      }
+
+      // ✨ Clignotement néon pour nouveaux messages
+      let miniProfile = document.querySelector(`.mini-profile[data-mini="${name}"]`);
+      if (miniProfile && chats[name].length > 1) {
+        miniProfile.classList.add("new-message");
+        miniProfile.addEventListener("click", () => {
+          miniProfile.classList.remove("new-message");
+        });
       }
     };
   }
