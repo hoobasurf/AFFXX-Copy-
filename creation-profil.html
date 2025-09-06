@@ -27,15 +27,13 @@
       text-shadow: 0 0 10px #ff66cc;
     }
     label { display: block; text-align: left; margin-top: 15px; font-size: 0.9em; }
-    input, textarea, select {
+    input, textarea {
       width: 100%; padding: 10px; margin-top: 5px;
       border: none; border-radius: 8px;
       background: rgba(255,255,255,0.15); color: white;
       font-family: 'Orbitron'; font-size: 0.9em;
     }
     textarea { resize: none; }
-    .rooms { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
-    .rooms label { display: flex; align-items: center; gap: 5px; }
     .preview { display:flex; flex-wrap: wrap; gap:10px; margin-top:10px; }
     .preview img { width:60px; height:60px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc; }
     button {
@@ -66,20 +64,13 @@
       </label>
       <div class="preview" id="preview"></div>
 
-      <label>Salles souhaitées :</label>
-      <div class="rooms">
-        <label><input type="checkbox" name="rooms" value="serieux"> Sérieux</label>
-        <label><input type="checkbox" name="rooms" value="amical"> Amitié</label>
-        <label><input type="checkbox" name="rooms" value="fun"> Fun</label>
-      </div>
-
       <button type="submit">Enregistrer</button>
     </form>
   </div>
 
   <script type="module">
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
     import { app } from "./firebase.js";
 
@@ -92,6 +83,14 @@
     const preview = document.getElementById("preview");
     let photoFiles = [];
 
+    // Vérifier si utilisateur connecté
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        alert("Vous devez être connecté !");
+        window.location.href = "inscription.html";
+      }
+    });
+
     // Prévisualisation des photos
     photosInput.addEventListener("change", () => {
       preview.innerHTML = "";
@@ -103,6 +102,7 @@
       });
     });
 
+    // Soumission du formulaire
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const user = auth.currentUser;
@@ -111,8 +111,6 @@
       const age = document.getElementById("age").value;
       const location = document.getElementById("location").value.trim();
       const description = document.getElementById("description").value.trim();
-      const selectedRooms = [];
-      document.querySelectorAll("input[name='rooms']:checked").forEach(cb => selectedRooms.push(cb.value));
 
       // Upload photos dans Firebase Storage
       const photoURLs = [];
@@ -124,15 +122,13 @@
         photoURLs.push(url);
       }
 
-      // Sauvegarde profil dans DB
-      await set(ref(db, "users/" + user.uid), {
-        email: user.email,
+      // Mise à jour du profil dans DB (ne modifie pas les salles)
+      await update(ref(db, "users/" + user.uid), {
         age,
         location,
         description,
         photos: photoURLs,
-        chosenRooms: selectedRooms,
-        joinedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString()
       });
 
       alert("Profil enregistré !");
