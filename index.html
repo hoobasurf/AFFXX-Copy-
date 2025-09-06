@@ -1,236 +1,98 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Affinix Intro</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      width: 100vw;
-      background: url('/fond-galactique.jpg') no-repeat center center/cover;
-      font-family: 'Orbitron', sans-serif;
-      overflow: hidden;
-    }
-
-    #video-vortex {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      object-fit: cover;
-      opacity: 0;
-      transition: opacity 1.5s ease-in;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    #container {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      margin-top: 12vh;
-    }
-
-    #logo {
-      width: 320px;
-      max-width: 90vw;
-      filter:
-        drop-shadow(0 0 5px #8a2be2)
-        drop-shadow(0 0 15px #d354f7);
-      animation: zoomFade 2s ease-out forwards;
-      opacity: 0;
-      transform: scale(2);
-      transition: transform 1.2s ease-in-out, opacity 1s ease-in-out;
-    }
-
-    #phrase, #phrase2 {
-      margin-top: 40px;
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      background: linear-gradient(90deg, #ff00ff, #ff66cc, #cc33ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow:
-        -1px -1px 0 #000,
-        1px -1px 0 #000,
-        -1px 1px 0 #000,
-        1px 1px 0 #000,
-        0 0 10px #ff66cc,
-        0 0 20px #d600d6;
-      opacity: 0;
-    }
-
-    @keyframes zoomFade {
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    @keyframes fadeZoomIn {
-      from { opacity: 0; transform: scale(0.3); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    @keyframes zoomBig {
-      from { transform: scale(1); opacity: 1; }
-      to { transform: scale(25); opacity: 0; }
-    }
-
-    @keyframes shrinkAndFade {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(0.01); }
-    }
-
-    @keyframes logoToCenter {
-      0% { transform: scale(1) translate(0, 0); opacity: 1; }
-      100% {
-        transform: scale(0.05) translate(calc(-50vw + 50%), calc(-50vh + 50%));
-        opacity: 0;
-      }
-    }
-
-    .flash-light {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(200,160,255,0.5) 100%);
-      z-index: 999;
-      animation: flash 0.8s ease-out forwards;
-      opacity: 0;
-      display: none;
-    }
-
-    .final-explosion {
-      background: white;
-      z-index: 1000;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      opacity: 0;
-      animation: explosion 1.2s ease-out forwards;
-    }
-
-    @keyframes flash {
-      0% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-
-    @keyframes explosion {
-      0% { opacity: 0; }
-      50% { opacity: 0.9; }
-      100% { opacity: 1; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Authentique</title>
+<style>
+  body { background:#111; color:white; font-family:Arial, sans-serif; }
+  .card { display:inline-block; margin:10px; padding:10px; background:#222; border-radius:12px; text-align:center; }
+  .card img { width:120px; height:120px; border-radius:50%; }
+</style>
 </head>
 <body>
 
-<video id="video-vortex" src="/vortex.mov" autoplay muted loop></video>
+<h1>Liste Authentique</h1>
 
-<div id="container">
-  <img id="logo" src="/AAFFXX.png" alt="Logo Néon AFFINIX" />
-  <div id="phrase">Prépare-toi au voyage</div>
-  <div id="phrase2">Avec une Connexion interdimensionnelle…</div>
+<div class="card" data-name="Alice">
+  <img src="alice.jpg" alt="Alice">
+  <div>Alice</div>
 </div>
 
-<div id="flash" class="flash-light"></div>
-<div id="explosion" class="final-explosion" style="display: none;"></div>
+<div class="card" data-name="Bob">
+  <img src="bob.jpg" alt="Bob">
+  <div>Bob</div>
+</div>
 
 <script>
-  const logo = document.getElementById('logo');
-  const phrase = document.getElementById('phrase');
-  const phrase2 = document.getElementById('phrase2');
-  const vortex = document.getElementById('video-vortex');
-  const flash = document.getElementById('flash');
-  const explosion = document.getElementById('explosion');
+function openChat(name){
+  alert("Ouvrir chat avec " + name);
+}
 
-  // Logo entre
-  logo.style.animation = 'zoomFade 2s ease-out forwards';
+// ======= OUVRIR PROFIL EN CLIQUANT SUR LA PHOTO =======
+document.querySelectorAll(".card img").forEach(img => {
+  img.style.cursor = "pointer";
+  img.addEventListener("click", () => {
+    const card = img.closest(".card");
+    if (!card) return;
+    const name = card.dataset.name;
 
-  // Phrase 1
-  setTimeout(() => {
-    phrase.style.animation = 'fadeZoomIn 1s forwards ease-out';
-  }, 2000);
+    let existingModal = document.getElementById("profileModal");
+    if (existingModal) existingModal.remove();
 
-  // Phrase 1 disparaît
-  setTimeout(() => {
-    phrase.style.animation = 'zoomBig 2s forwards ease-in';
-  }, 3500);
+    const modal = document.createElement("div");
+    modal.id = "profileModal";
+    Object.assign(modal.style, {
+      position: "fixed",
+      top: "0",
+      left: "0",
+      width: "100%",
+      height: "100%",
+      background: "rgba(0,0,0,0.8)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 20000
+    });
 
-  // Vortex visible
-  setTimeout(() => {
-    vortex.style.opacity = '0.5';
-  }, 4800);
+    const content = document.createElement("div");
+    Object.assign(content.style, {
+      background: "rgba(0,0,0,0.9)",
+      padding: "20px",
+      borderRadius: "16px",
+      textAlign: "center",
+      color: "white",
+      maxWidth: "300px",
+      animation: "zoomIn 0.3s ease"
+    });
 
-  // Phrase 2 apparaît
-  setTimeout(() => {
-    phrase2.style.animation = 'fadeZoomIn 1.2s forwards ease-out';
-  }, 5500);
+    content.innerHTML = `
+      <img src="${img.src}" style="width:150px;height:150px;border-radius:50%;border:3px solid #ff66cc;margin-bottom:10px;">
+      <div style="font-size:1.2em;margin-bottom:5px;">${name}</div>
+      <button id="openChatBtn" style="padding:8px 16px;margin-top:10px;background:#ff66cc;border:none;border-radius:8px;color:white;cursor:pointer;">Chat</button>
+      <button id="closeProfileBtn" style="padding:5px 10px;margin-top:10px;margin-left:10px;background:#333;border:none;border-radius:8px;color:white;cursor:pointer;">Fermer</button>
+    `;
 
-  // Phrase 2 rétrécit et disparaît
-  setTimeout(() => {
-    phrase2.style.animation = 'shrinkAndFade 1.3s forwards ease-in';
-  }, 7000);
+    modal.appendChild(content);
+    document.body.appendChild(modal);
 
-  // Logo aspiré dans le vortex
-  setTimeout(() => {
-    logo.style.animation = 'logoToCenter 1.2s forwards ease-in';
-  }, 7600);
-
-  // Flash + explosion blanche
-  setTimeout(() => {
-    flash.style.display = 'block';
-  }, 8500);
-
-  setTimeout(() => {
-    explosion.style.display = 'block';
-  }, 8900);
-
-  // Redirection
-  setTimeout(() => {
-    window.location.href = "inscription.html";
-  }, 10100);
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script>
-// ===== CONFIG FIREBASE =====
-const firebaseConfig = {
-  apiKey: "VOTRE_API_KEY",
-  authDomain: "VOTRE_AUTH_DOMAIN",
-  projectId: "VOTRE_PROJECT_ID",
-  storageBucket: "VOTRE_STORAGE_BUCKET",
-  messagingSenderId: "VOTRE_SENDER_ID",
-  appId: "VOTRE_APP_ID"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// ===== CLIQUE SUR L'ÉCRAN =====
-document.body.addEventListener('click', async () => {
-  const user = auth.currentUser;
-
-  if (user) {
-    // L'utilisateur est connecté, vérifier si enregistré dans Firestore
-    const doc = await db.collection('users').doc(user.uid).get();
-    if (doc.exists) {
-      window.location.href = "page2.html"; // déjà enregistré
-    } else {
-      window.location.href = "inscription.html"; // pas encore enregistré
-    }
-  } else {
-    // utilisateur pas connecté
-    window.location.href = "inscription.html";
-  }
+    document.getElementById("closeProfileBtn").onclick = () => modal.remove();
+    document.getElementById("openChatBtn").onclick = () => { 
+      modal.remove(); 
+      openChat(name); 
+    };
+  });
 });
+
+// Animation zoom
+const style = document.createElement('style');
+style.innerHTML = `
+@keyframes zoomIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}`;
+document.head.appendChild(style);
 </script>
-</script>
-<script type="module" src="firebase.js"></script>
+
 </body>
 </html>
