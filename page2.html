@@ -15,11 +15,13 @@
     h1 { text-align: center; margin-bottom: 30px; }
     .info { max-width: 400px; margin: auto; }
     .info div { margin-bottom: 15px; }
+    #loading { text-align: center; font-size: 1.2em; margin-bottom: 20px; }
   </style>
 </head>
 <body>
   <h1>Bienvenue sur Page 2</h1>
-  <div class="info">
+  <div id="loading">Chargement…</div>
+  <div class="info" style="display:none;">
     <div><strong>Email :</strong> <span id="email"></span></div>
     <div><strong>Salles choisies :</strong> <span id="rooms"></span></div>
   </div>
@@ -34,6 +36,8 @@
 
     const emailSpan = document.getElementById("email");
     const roomsSpan = document.getElementById("rooms");
+    const loadingDiv = document.getElementById("loading");
+    const infoDiv = document.querySelector(".info");
 
     onAuthStateChanged(auth, async user => {
       if (!user) {
@@ -42,15 +46,26 @@
         return;
       }
 
-      emailSpan.textContent = user.email;
-
-      // Récupérer les salles depuis la DB
-      const snap = await get(ref(db, `users/${user.uid}/rooms`));
-      if (snap.exists()) {
-        roomsSpan.textContent = snap.val().join(", ");
-      } else {
-        roomsSpan.textContent = "Aucune salle sélectionnée";
+      // Récupération des données
+      try {
+        const snap = await get(ref(db, `users/${user.uid}`));
+        if (snap.exists()) {
+          const data = snap.val();
+          emailSpan.textContent = data.email || user.email;
+          roomsSpan.textContent = data.rooms ? data.rooms.join(", ") : "Aucune salle sélectionnée";
+        } else {
+          emailSpan.textContent = user.email;
+          roomsSpan.textContent = "Aucune salle sélectionnée";
+        }
+      } catch (err) {
+        console.error("Erreur récupération DB :", err);
+        emailSpan.textContent = user.email;
+        roomsSpan.textContent = "Impossible de charger les salles";
       }
+
+      // Afficher les infos et cacher le chargement
+      loadingDiv.style.display = "none";
+      infoDiv.style.display = "block";
     });
   </script>
 </body>
