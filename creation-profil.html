@@ -6,15 +6,8 @@
   <title>Création du Profil</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
-    body {
-      margin:0; padding:0; height:100vh; display:flex; justify-content:center; align-items:center;
-      font-family:'Orbitron', sans-serif;
-      background:url("planete-romantique.jpg") no-repeat center center/cover; color:white;
-    }
-    .container {
-      background: rgba(0,0,0,0.5); padding:25px; border-radius:15px; width:90%; max-width:400px;
-      text-align:center; box-shadow:0 0 20px #ff66cc;
-    }
+    body { margin:0; padding:0; height:100vh; display:flex; justify-content:center; align-items:center; font-family:'Orbitron', sans-serif; background:url("planete-romantique.jpg") no-repeat center center/cover; color:white; }
+    .container { background: rgba(0,0,0,0.5); padding:25px; border-radius:15px; width:90%; max-width:400px; text-align:center; box-shadow:0 0 20px #ff66cc; }
     h1 { color:#ff66cc; margin-bottom:20px; text-shadow:0 0 10px #ff66cc; }
     label { display:block; text-align:left; margin-top:15px; font-size:0.9em; }
     input, textarea { width:100%; padding:10px; margin-top:5px; border:none; border-radius:8px; background:rgba(255,255,255,0.15); color:white; font-family:'Orbitron'; font-size:0.9em; }
@@ -29,40 +22,28 @@
   <div class="container">
     <h1>Mon Profil</h1>
     <form id="profileForm">
-      <label>Pseudo :
-        <input type="text" id="pseudo" placeholder="Votre pseudo" required>
-      </label>
-      <label>Âge :
-        <input type="number" id="age" required>
-      </label>
-      <label>Lieu :
-        <input type="text" id="location" placeholder="Votre ville" required>
-      </label>
-      <label>Description :
-        <textarea id="description" rows="3" placeholder="Parlez un peu de vous..." required></textarea>
-      </label>
-      <label>Photos (max 5) :
-        <input type="file" id="photos" accept="image/*" multiple>
-      </label>
+      <label>Pseudo : <input type="text" id="pseudo" placeholder="Votre pseudo" required></label>
+      <label>Âge : <input type="number" id="age" required></label>
+      <label>Lieu : <input type="text" id="location" placeholder="Votre ville" required></label>
+      <label>Description : <textarea id="description" rows="3" placeholder="Parlez un peu de vous..." required></textarea></label>
+      <label>Photos (max 5) : <input type="file" id="photos" accept="image/*" multiple></label>
       <div class="preview" id="preview"></div>
       <button type="submit">Enregistrer</button>
     </form>
   </div>
 
   <script type="module">
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
     import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
     const db = getDatabase(app);
-
     const form = document.getElementById("profileForm");
     const photosInput = document.getElementById("photos");
     const preview = document.getElementById("preview");
     let photoFiles = [];
 
-    // Prévisualisation photos
     photosInput.addEventListener("change", () => {
       preview.innerHTML = "";
       photoFiles = Array.from(photosInput.files).slice(0,5);
@@ -73,7 +54,6 @@
       });
     });
 
-    // Fonction pour convertir les fichiers en Base64
     async function convertPhotosToBase64(files) {
       const results = [];
       for (let i = 0; i < files.length; i++) {
@@ -100,29 +80,15 @@
       const description = document.getElementById("description").value.trim();
 
       let photoBase64 = [];
-      try {
-        photoBase64 = await convertPhotosToBase64(photoFiles);
-      } catch (err) {
-        console.error("Erreur conversion photos :", err);
-        alert("Erreur avec les photos, réessayez");
-        return;
-      }
+      try { photoBase64 = await convertPhotosToBase64(photoFiles); } 
+      catch { alert("Erreur avec les photos"); return; }
 
-      // Mise à jour DB (sans toucher aux salles)
       try {
         await update(ref(db, "users/" + user.uid), {
-          pseudo,
-          age,
-          location,
-          description,
-          photos: photoBase64
+          pseudo, age, location, description, photos: photoBase64
         });
-        // Redirection après enregistrement
         window.location.href = "page2.html";
-      } catch (err) {
-        console.error("Erreur update DB :", err);
-        alert("Impossible de sauvegarder le profil");
-      }
+      } catch(err) { alert("Impossible de sauvegarder le profil"); }
     });
   </script>
 </body>
