@@ -15,6 +15,7 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      flex-direction: column;
     }
 
     .container {
@@ -81,15 +82,6 @@
       box-shadow: 0 0 20px #ff66cc;
     }
 
-    /* Conteneur boutons salles */
-    .room-buttons {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-
     /* ✅ Lightbox pour zoom photo */
     .lightbox {
       display: none;
@@ -137,6 +129,47 @@
       border-radius: 8px;
       border: 2px solid #ff66cc;
     }
+
+    /* === BOUTONS SALLES FLASHY === */
+    .room-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .room-buttons button {
+      width: 130px;
+      padding: 14px;
+      font-weight: bold;
+      border-radius: 16px;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(45deg, #ff66cc, #6600ff, #00ffff);
+      background-size: 400% 400%;
+      animation: gradientBG 6s ease infinite, glow 2s ease-in-out infinite;
+      box-shadow: 0 0 15px #ff66cc;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .room-buttons button:hover {
+      transform: scale(1.15) rotate(-3deg);
+      box-shadow: 0 0 30px #fff, 0 0 20px #ff66cc;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 15px #ff66cc, 0 0 25px #6600ff; }
+      50% { box-shadow: 0 0 25px #00ffff, 0 0 35px #ff66cc; }
+    }
   </style>
 </head>
 <body>
@@ -152,9 +185,6 @@
 
     <div class="photos" id="photosContainer"></div>
 
-    <!-- Conteneur boutons dynamiques -->
-    <div class="room-buttons" id="roomButtons"></div>
-
     <button id="editBtn">Modifier</button>
 
     <div class="edit-section" id="editSection">
@@ -163,9 +193,15 @@
       <div class="preview" id="preview"></div>
       <button id="saveBtn">Enregistrer</button>
     </div>
+
+    <!-- BOUTONS SALLES -->
+    <div class="room-buttons">
+      <button id="serieuxBtn">Sérieux</button>
+      <button id="amicalBtn">Amical</button>
+      <button id="funBtn">Fun</button>
+    </div>
   </div>
 
-  <!-- ✅ Lightbox -->
   <div class="lightbox" id="lightbox">
     <img id="lightboxImg" src="" alt="Zoom photo">
   </div>
@@ -184,7 +220,6 @@
     const descSpan = document.getElementById("description");
     const roomsSpan = document.getElementById("rooms");
     const photosContainer = document.getElementById("photosContainer");
-    const roomButtonsDiv = document.getElementById("roomButtons");
 
     const editBtn = document.getElementById("editBtn");
     const editSection = document.getElementById("editSection");
@@ -195,6 +230,10 @@
 
     const lightbox = document.getElementById("lightbox");
     const lightboxImg = document.getElementById("lightboxImg");
+
+    const serieuxBtn = document.getElementById("serieuxBtn");
+    const amicalBtn = document.getElementById("amicalBtn");
+    const funBtn = document.getElementById("funBtn");
 
     let currentUserId = null;
     let currentPhotos = [];
@@ -218,8 +257,12 @@
         currentPhotos = data.photos || [];
         displayPhotos(currentPhotos);
 
-        // ✅ Crée les boutons selon les choix de l'utilisateur
-        createRoomButtons(data.rooms);
+        // Affichage des boutons selon choix inscrit
+        if (data.rooms) {
+          serieuxBtn.style.display = data.rooms.includes("Sérieux") ? "inline-block" : "none";
+          amicalBtn.style.display = data.rooms.includes("Amical") ? "inline-block" : "none";
+          funBtn.style.display = data.rooms.includes("Fun") ? "inline-block" : "none";
+        }
       }
     });
 
@@ -240,7 +283,6 @@
       lightbox.style.display = "none";
     });
 
-    // Mode édition
     editBtn.addEventListener("click", () => {
       editSection.style.display = editSection.style.display === "none" ? "block" : "none";
       newDesc.value = descSpan.textContent;
@@ -303,32 +345,10 @@
       });
     }
 
-    // ✅ Fonction pour créer boutons salles dynamiquement
-    function createRoomButtons(rooms) {
-      roomButtonsDiv.innerHTML = ""; // vide avant création
-      if (!rooms) return;
-
-      rooms.forEach(room => {
-        const btn = document.createElement("button");
-        btn.textContent = room;
-
-        switch(room.toLowerCase()) {
-          case "sérieux":
-          case "authentique":
-            btn.addEventListener("click", () => window.location.href = "authentique.html");
-            break;
-          case "amical":
-            btn.addEventListener("click", () => window.location.href = "amicale.html");
-            break;
-          case "fun":
-            btn.addEventListener("click", () => window.location.href = "fun.html");
-            break;
-        }
-
-        roomButtonsDiv.appendChild(btn);
-      });
-    }
-
+    // REDIRECTION SALLES
+    serieuxBtn.addEventListener("click", () => window.location.href = "authentique.html");
+    amicalBtn.addEventListener("click", () => window.location.href = "amicale.html");
+    funBtn.addEventListener("click", () => window.location.href = "fun.html");
   </script>
 </body>
 </html>
