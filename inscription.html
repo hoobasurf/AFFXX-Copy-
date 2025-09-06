@@ -31,29 +31,41 @@
 
     h1 {
       color: #ff6aab;
-      text-shadow:
-        -2px -2px 0 #000,
-         2px -2px 0 #000,
-        -2px  2px 0 #000,
-         2px  2px 0 #000,
-         0 0 10px #ff6aab;
+      text-shadow: -2px -2px 0 #000,
+                   2px -2px 0 #000,
+                  -2px  2px 0 #000,
+                   2px  2px 0 #000,
+                   0 0 10px #ff6aab;
       margin-bottom: 30px;
     }
 
-    input {
+    input, label {
       width: 100%;
-      padding: 12px;
       margin: 10px 0;
+      color: white;
+      font-size: 16px;
+    }
+
+    input[type="email"], input[type="password"] {
+      padding: 12px;
       border: none;
       border-radius: 8px;
       background: rgba(255,255,255,0.2);
-      color: white;
-      font-size: 16px;
       outline: none;
     }
 
     input::placeholder {
       color: rgba(255,255,255,0.7);
+    }
+
+    .rooms {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .rooms label {
+      display: block;
+      margin: 5px 0;
     }
 
     button {
@@ -86,64 +98,77 @@
     <form id="signupForm">
       <input type="email" id="email" placeholder="Email" required>
       <input type="password" id="password" placeholder="Mot de passe" required>
+
+      <!-- ✅ Choix des salles -->
+      <div class="rooms">
+        <label><input type="checkbox" name="rooms" value="serieux"> Connexion Authentique sérieuse</label>
+        <label><input type="checkbox" name="rooms" value="amical"> Connexion Sincère amicale</label>
+        <label><input type="checkbox" name="rooms" value="fun"> Connexion Fun</label>
+      </div>
+
       <button type="submit">S’inscrire</button>
     </form>
   </div>
 
   <script type="module">
-  import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-  import { app } from "./firebase.js";
+    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { app } from "./firebase.js";
 
-  const auth = getAuth(app);
-  const db = getDatabase(app);
-  const formContainer = document.getElementById("formContainer");
-  const form = document.getElementById("signupForm");
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const formContainer = document.getElementById("formContainer");
+    const form = document.getElementById("signupForm");
 
-  // 🔹 Fonction pour enregistrer l’utilisateur dans Realtime Database
-  function saveUser(uid, email){
-    set(ref(db, 'users/' + uid), {
-      email: email,
-      joinedAt: new Date().toISOString()
-    }).then(()=>console.log("Utilisateur enregistré :", email))
-      .catch(err=>console.error("Erreur DB :", err));
-  }
-
-  // 🔹 Si utilisateur déjà connecté → redirection directe
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("Utilisateur déjà connecté :", user.email);
-      formContainer.classList.add("fade-out");
-      setTimeout(() => {
-        window.location.href = "page2.html"; // ← direct
-      }, 800);
+    // 🔹 Fonction pour enregistrer l’utilisateur dans Realtime Database
+    function saveUser(uid, email, rooms){
+      set(ref(db, 'users/' + uid), {
+        email: email,
+        joinedAt: new Date().toISOString(),
+        rooms: rooms // ✅ enregistre les salles choisies
+      }).then(()=>console.log("Utilisateur enregistré :", email, rooms))
+        .catch(err=>console.error("Erreur DB :", err));
     }
-  });
 
-  // 🔹 Formulaire d'inscription
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+    // 🔹 Si utilisateur déjà connecté → redirection directe
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("Utilisateur déjà connecté :", user.email);
+        formContainer.classList.add("fade-out");
+        setTimeout(() => {
+          window.location.href = "page2.html"; 
+        }, 800);
+      }
+    });
 
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
+    // 🔹 Formulaire d'inscription
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("Inscription réussie :", userCredential.user.email);
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
 
-      // Enregistre l’utilisateur dans Realtime Database
-      saveUser(userCredential.user.uid, userCredential.user.email);
+      // ✅ Récupérer les salles cochées
+      const selectedRooms = Array.from(document.querySelectorAll('input[name="rooms"]:checked'))
+                                 .map(cb => cb.value);
 
-      // Effet fondu avant redirection
-      formContainer.classList.add("fade-out");
-      setTimeout(() => {
-        window.location.href = "creation-profil.html"; // ← direct
-      }, 800);
-    } catch (error) {
-      console.error("Erreur inscription :", error);
-      alert("Erreur : " + error.message);
-    }
-  });
-</script>
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        console.log("Inscription réussie :", userCredential.user.email);
+
+        // ✅ Enregistre l’utilisateur dans Realtime Database avec les salles
+        saveUser(userCredential.user.uid, userCredential.user.email, selectedRooms);
+
+        // Effet fondu avant redirection
+        formContainer.classList.add("fade-out");
+        setTimeout(() => {
+          window.location.href = "creation-profil.html"; 
+        }, 800);
+      } catch (error) {
+        console.error("Erreur inscription :", error);
+        alert("Erreur : " + error.message);
+      }
+    });
+  </script>
 </body>
 </html>
