@@ -6,8 +6,15 @@
   <title>Création du Profil</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
-    body { margin:0; padding:0; height:100vh; display:flex; justify-content:center; align-items:center; font-family:'Orbitron', sans-serif; background:url("planete-romantique.jpg") no-repeat center center/cover; color:white; }
-    .container { background: rgba(0,0,0,0.5); padding:25px; border-radius:15px; width:90%; max-width:400px; text-align:center; box-shadow:0 0 20px #ff66cc; }
+    body {
+      margin:0; padding:0; height:100vh; display:flex; justify-content:center; align-items:center;
+      font-family:'Orbitron', sans-serif;
+      background:url("planete-romantique.jpg") no-repeat center center/cover; color:white;
+    }
+    .container {
+      background: rgba(0,0,0,0.5); padding:25px; border-radius:15px; width:90%; max-width:400px;
+      text-align:center; box-shadow:0 0 20px #ff66cc;
+    }
     h1 { color:#ff66cc; margin-bottom:20px; text-shadow:0 0 10px #ff66cc; }
     label { display:block; text-align:left; margin-top:15px; font-size:0.9em; }
     input, textarea { width:100%; padding:10px; margin-top:5px; border:none; border-radius:8px; background:rgba(255,255,255,0.15); color:white; font-family:'Orbitron'; font-size:0.9em; }
@@ -58,13 +65,29 @@
     // Prévisualisation photos
     photosInput.addEventListener("change", () => {
       preview.innerHTML = "";
-      photoFiles = Array.from(photosInput.files).slice(0,5); // max 5
+      photoFiles = Array.from(photosInput.files).slice(0,5);
       photoFiles.forEach(file => {
         const img = document.createElement("img");
         img.src = URL.createObjectURL(file);
         preview.appendChild(img);
       });
     });
+
+    // Fonction pour convertir les fichiers en Base64
+    async function convertPhotosToBase64(files) {
+      const results = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = err => reject(err);
+          reader.readAsDataURL(file);
+        });
+        results.push(base64);
+      }
+      return results;
+    }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -76,29 +99,30 @@
       const location = document.getElementById("location").value.trim();
       const description = document.getElementById("description").value.trim();
 
-      // Convertir photos en Base64
-      const photoBase64 = [];
-      for (let i = 0; i < photoFiles.length; i++) {
-        const file = photoFiles[i];
-        const base64 = await new Promise(resolve => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.readAsDataURL(file);
-        });
-        photoBase64.push(base64);
+      let photoBase64 = [];
+      try {
+        photoBase64 = await convertPhotosToBase64(photoFiles);
+      } catch (err) {
+        console.error("Erreur conversion photos :", err);
+        alert("Erreur avec les photos, réessayez");
+        return;
       }
 
-      // Update DB sans toucher aux salles ni email
-      await update(ref(db, "users/" + user.uid), {
-        pseudo,
-        age,
-        location,
-        description,
-        photos: photoBase64
-      });
-
-      // Redirection vers page2
-      window.location.href = "page2.html";
+      // Mise à jour DB (sans toucher aux salles)
+      try {
+        await update(ref(db, "users/" + user.uid), {
+          pseudo,
+          age,
+          location,
+          description,
+          photos: photoBase64
+        });
+        // Redirection après enregistrement
+        window.location.href = "page2.html";
+      } catch (err) {
+        console.error("Erreur update DB :", err);
+        alert("Impossible de sauvegarder le profil");
+      }
     });
   </script>
 </body>
