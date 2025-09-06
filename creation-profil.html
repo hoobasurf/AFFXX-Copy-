@@ -43,6 +43,7 @@
       box-shadow: 0 0 10px #ff66cc;
     }
     button:hover { box-shadow: 0 0 20px #ff66cc; }
+    .msg { margin-top: 15px; color: #ff66cc; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -65,6 +66,7 @@
       <div class="preview" id="preview"></div>
 
       <button type="submit">Enregistrer</button>
+      <div id="message" class="msg"></div>
     </form>
   </div>
 
@@ -81,9 +83,10 @@
     const form = document.getElementById("profileForm");
     const photosInput = document.getElementById("photos");
     const preview = document.getElementById("preview");
+    const messageDiv = document.getElementById("message");
     let photoFiles = [];
 
-    // Vérifier si utilisateur connecté
+    // Vérification utilisateur connecté
     onAuthStateChanged(auth, user => {
       if (!user) {
         alert("Vous devez être connecté !");
@@ -91,10 +94,10 @@
       }
     });
 
-    // Prévisualisation des photos
+    // Prévisualisation photos
     photosInput.addEventListener("change", () => {
       preview.innerHTML = "";
-      photoFiles = Array.from(photosInput.files).slice(0,5); // max 5
+      photoFiles = Array.from(photosInput.files).slice(0,5);
       photoFiles.forEach(file => {
         const img = document.createElement("img");
         img.src = URL.createObjectURL(file);
@@ -102,7 +105,7 @@
       });
     });
 
-    // Soumission du formulaire
+    // Soumission formulaire
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const user = auth.currentUser;
@@ -112,18 +115,18 @@
       const location = document.getElementById("location").value.trim();
       const description = document.getElementById("description").value.trim();
 
-      // Upload photos dans Firebase Storage
+      // Upload photos
       const photoURLs = [];
       for (let i = 0; i < photoFiles.length; i++) {
         const file = photoFiles[i];
-        const fileRef = sRef(storage, "users/" + user.uid + "/photo" + i);
+        const fileRef = sRef(storage, `users/${user.uid}/photo${i}`);
         await uploadBytes(fileRef, file);
         const url = await getDownloadURL(fileRef);
         photoURLs.push(url);
       }
 
-      // Mise à jour du profil dans DB (ne modifie pas les salles)
-      await update(ref(db, "users/" + user.uid), {
+      // Mise à jour DB (ne touche pas aux salles)
+      await update(ref(db, `users/${user.uid}`), {
         age,
         location,
         description,
@@ -131,8 +134,11 @@
         updatedAt: new Date().toISOString()
       });
 
-      alert("Profil enregistré !");
-      window.location.href = "page2.html";
+      // Message et redirection
+      messageDiv.textContent = "Profil enregistré ! Redirection…";
+      setTimeout(() => {
+        window.location.href = "page2.html";
+      }, 1500);
     });
   </script>
 </body>
