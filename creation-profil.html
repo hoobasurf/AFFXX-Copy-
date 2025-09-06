@@ -1,163 +1,198 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Création du Profil</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
-  <style>
-    body {
-      margin: 0; padding: 0;
-      height: 100vh; display: flex; justify-content: center; align-items: center;
-      font-family: 'Orbitron', sans-serif;
-      background: url("planete-romantique.jpg") no-repeat center center/cover;
-      color: white;
-    }
-    .container {
-      background: rgba(0,0,0,0.5);
-      padding: 25px;
-      border-radius: 15px;
-      width: 90%; max-width: 400px;
-      box-shadow: 0 0 20px #ff66cc;
-      text-align: center;
-    }
-    h1 {
-      color: #ff66cc;
-      margin-bottom: 20px;
-      text-shadow: 0 0 10px #ff66cc;
-    }
-    label { display: block; text-align: left; margin-top: 15px; font-size: 0.9em; }
-    input, textarea {
-      width: 100%; padding: 10px; margin-top: 5px;
-      border: none; border-radius: 8px;
-      background: rgba(255,255,255,0.15); color: white;
-      font-family: 'Orbitron'; font-size: 0.9em;
-    }
-    textarea { resize: none; }
-    .preview { display:flex; flex-wrap: wrap; gap:10px; margin-top:10px; justify-content:center; }
-    .preview img { 
-      width:60px; height:60px; object-fit:cover; border-radius:8px; 
-      border:2px solid #ff66cc; cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .preview img:hover { transform: scale(1.1); }
-    button {
-      margin-top: 20px; padding: 12px; width: 100%;
-      border: none; border-radius: 8px;
-      background: #ff66cc; color: white; font-size: 1em; cursor: pointer;
-      box-shadow: 0 0 10px #ff66cc;
-    }
-    button:hover { box-shadow: 0 0 20px #ff66cc; }
-
-    /* Lightbox pour zoom */
-    #lightbox {
-      position: fixed; top:0; left:0; width:100%; height:100%;
-      background: rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center;
-      z-index:1000;
-    }
-    #lightbox img {
-      max-width: 90%; max-height: 90%; border-radius:10px; box-shadow:0 0 25px #ff66cc;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon Profil</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
+<style>
+body {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  background: url("planete-magique.jpg") no-repeat center center/cover;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+.container {
+  background: rgba(0,0,0,0.6);
+  padding: 25px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 0 20px #ff66cc;
+  text-align: center;
+}
+h1 {
+  color: #ff66cc;
+  text-shadow: 0 0 10px #ff66cc;
+  margin-bottom: 20px;
+}
+.info { margin-bottom: 20px; text-align: left; }
+.info div { margin: 8px 0; }
+.photos { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 15px 0; }
+.photos img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 2px solid #ff66cc; cursor: pointer; transition: transform 0.2s; }
+.photos img:hover { transform: scale(1.1); }
+button { margin-top: 15px; padding: 12px; width: 100%; border: none; border-radius: 8px; background: #ff66cc; color: white; font-size: 1em; cursor: pointer; box-shadow: 0 0 10px #ff66cc; }
+button:hover { box-shadow: 0 0 20px #ff66cc; }
+.edit-section { margin-top: 20px; display: none; }
+textarea, input[type="file"] { width: 100%; margin: 10px 0; padding: 10px; border-radius: 8px; border: none; font-family: 'Orbitron'; }
+.preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.preview img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 2px solid #ff66cc; }
+.lightbox { display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
+.lightbox img { max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 0 25px #ff66cc; }
+.room-btns { display:flex; justify-content:space-around; margin-top: 15px; flex-wrap: wrap; gap:10px; }
+.room-btns button { width: 30%; border: 2px solid #ff66cc; background: transparent; color: #ff66cc; font-weight: bold; animation: neon 1.5s ease-in-out infinite alternate; cursor: pointer; }
+@keyframes neon { 0% { box-shadow: 0 0 5px #ff66cc, 0 0 10px #ff66cc; } 100% { box-shadow: 0 0 20px #ff66cc, 0 0 40px #ff66cc; } }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Mon Profil</h1>
-    <form id="profileForm">
-      <label>Pseudo :
-        <input type="text" id="pseudo" placeholder="Votre pseudo" required>
-      </label>
-      <label>Âge :
-        <input type="number" id="age" required>
-      </label>
-      <label>Lieu :
-        <input type="text" id="location" placeholder="Votre ville" required>
-      </label>
-      <label>Description :
-        <textarea id="description" rows="3" placeholder="Parlez un peu de vous..." required></textarea>
-      </label>
-
-      <label>Photos (max 5) :
-        <input type="file" id="photos" accept="image/*" multiple>
-      </label>
-      <div class="preview" id="preview"></div>
-
-      <button type="submit">Enregistrer</button>
-    </form>
+<div class="container">
+  <h1>Mon Profil</h1>
+  <div class="info">
+    <div><strong>Pseudo :</strong> <span id="pseudo">Chargement...</span></div>
+    <div><strong>Âge :</strong> <span id="age">Chargement...</span></div>
+    <div><strong>Lieu :</strong> <span id="location">Chargement...</span></div>
+    <div><strong>Description :</strong> <span id="description">Chargement...</span></div>
+    <div><strong>Salles :</strong> <span id="rooms">Chargement...</span></div>
   </div>
 
-  <!-- Lightbox -->
-  <div id="lightbox"><img src="" alt="preview"></div>
+  <div class="photos" id="photosContainer"></div>
+  <button id="editBtn">Modifier</button>
 
-  <script type="module">
-    import { getAuth } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-    import { app } from "./firebase.js";
+  <div class="edit-section" id="editSection">
+    <textarea id="newDescription" rows="3" placeholder="Nouvelle description"></textarea>
+    <input type="file" id="newPhotos" accept="image/*" multiple>
+    <div class="preview" id="preview"></div>
+    <button id="saveBtn">Enregistrer</button>
+  </div>
 
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+  <div class="room-btns" id="roomBtns"></div>
+</div>
 
-    const form = document.getElementById("profileForm");
-    const photosInput = document.getElementById("photos");
-    const preview = document.getElementById("preview");
-    const lightbox = document.getElementById("lightbox");
-    const lightboxImg = lightbox.querySelector("img");
-    let photoFiles = [];
+<div class="lightbox" id="lightbox"><img id="lightboxImg" src="" alt="Zoom photo"></div>
 
-    // Prévisualisation des photos + limite 5
-    photosInput.addEventListener("change", () => {
-      let files = Array.from(photosInput.files);
-      if (files.length > 5) {
-        alert("Vous ne pouvez sélectionner que 5 photos maximum !");
-        files = files.slice(0, 5);
-      }
-      photoFiles = files;
-      preview.innerHTML = "";
-      photoFiles.forEach(file => {
-        const img = document.createElement("img");
-        img.src = URL.createObjectURL(file);
-        img.addEventListener("click", () => {
-          lightboxImg.src = img.src;
-          lightbox.style.display = "flex";
-        });
-        preview.appendChild(img);
-      });
+<script type="module">
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { app } from "./firebase.js";
+
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+const pseudoSpan = document.getElementById("pseudo");
+const ageSpan = document.getElementById("age");
+const locationSpan = document.getElementById("location");
+const descSpan = document.getElementById("description");
+const roomsSpan = document.getElementById("rooms");
+const photosContainer = document.getElementById("photosContainer");
+
+const editBtn = document.getElementById("editBtn");
+const editSection = document.getElementById("editSection");
+const newDesc = document.getElementById("newDescription");
+const newPhotos = document.getElementById("newPhotos");
+const preview = document.getElementById("preview");
+const saveBtn = document.getElementById("saveBtn");
+
+const roomBtnsDiv = document.getElementById("roomBtns");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
+
+let currentUserId = null;
+let currentPhotos = [];
+let userRooms = [];
+
+onAuthStateChanged(auth, async user => {
+  if(!user){ window.location.href="inscription.html"; return; }
+  currentUserId = user.uid;
+
+  const snap = await get(ref(db,"users/"+currentUserId));
+  if(snap.exists()){
+    const data = snap.val();
+    pseudoSpan.textContent = data.pseudo || "Non renseigné";
+    ageSpan.textContent = data.age || "Non renseigné";
+    locationSpan.textContent = data.location || "Non renseigné";
+    descSpan.textContent = data.description || "Non renseignée";
+    userRooms = data.rooms || [];
+    roomsSpan.textContent = userRooms.join(", ") || "Aucune";
+    currentPhotos = data.photos || [];
+    displayPhotos(currentPhotos);
+    displayRoomButtons(userRooms);
+  }
+});
+
+function displayPhotos(photos){
+  photosContainer.innerHTML="";
+  photos.forEach(url=>{
+    const img=document.createElement("img");
+    img.src=url;
+    img.addEventListener("click",()=>{ lightboxImg.src=url; lightbox.style.display="flex"; });
+    photosContainer.appendChild(img);
+  });
+}
+
+lightbox.addEventListener("click",()=>{ lightbox.style.display="none"; });
+
+editBtn.addEventListener("click",()=>{
+  editSection.style.display = editSection.style.display==="none"?"block":"none";
+  newDesc.value = descSpan.textContent!=="Non renseignée"?descSpan.textContent:"";
+});
+
+newPhotos.addEventListener("change",()=>{
+  let files = Array.from(newPhotos.files);
+  if(files.length>5){ alert("Maximum 5 photos !"); files=files.slice(0,5); }
+  const dt=new DataTransfer(); files.forEach(f=>dt.items.add(f)); newPhotos.files=dt.files;
+  preview.innerHTML=""; files.forEach(f=>{ const img=document.createElement("img"); img.src=URL.createObjectURL(f); preview.appendChild(img); });
+});
+
+saveBtn.addEventListener("click",()=>{
+  const desc = newDesc.value.trim();
+  const files = Array.from(newPhotos.files);
+
+  if(files.length>0){
+    const updatedPhotos = currentPhotos.slice();
+    let loadedCount=0;
+    files.forEach(file=>{
+      const reader = new FileReader();
+      reader.onload = e => {
+        updatedPhotos.push(e.target.result);
+        loadedCount++;
+        if(loadedCount===files.length) updateProfile(desc, updatedPhotos);
+      };
+      reader.readAsDataURL(file);
     });
+  } else {
+    updateProfile(desc, currentPhotos);
+  }
+});
 
-    // Fermer le zoom
-    lightbox.addEventListener("click", () => {
-      lightbox.style.display = "none";
-    });
+function updateProfile(desc, photos){
+  update(ref(db,"users/"+currentUserId),{ description: desc, photos: photos })
+  .then(()=>{
+    descSpan.textContent = desc;
+    currentPhotos = photos;
+    displayPhotos(currentPhotos);
+    preview.innerHTML="";
+    newPhotos.value="";
+    editSection.style.display="none";
+    alert("Profil mis à jour !");
+  })
+  .catch(err=>{ console.error(err); alert("Erreur lors de la mise à jour !"); });
+}
 
-    // Sauvegarde profil
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const user = auth.currentUser;
-      if (!user) return alert("Non connecté");
-
-      const pseudo = document.getElementById("pseudo").value.trim();
-      const age = document.getElementById("age").value.trim();
-      const location = document.getElementById("location").value.trim();
-      const description = document.getElementById("description").value.trim();
-
-      // Convertir photos en base64
-      const photoBase64 = await Promise.all(photoFiles.map(file => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-      }));
-
-      await set(ref(db, "users/" + user.uid + "/profile"), {
-        pseudo, age, location, description,
-        photos: photoBase64
-      });
-
-      alert("Profil enregistré !");
-      window.location.href = "page2.html";
-    });
-  </script>
+function displayRoomButtons(rooms){
+  roomBtnsDiv.innerHTML="";
+  rooms.forEach(r=>{
+    const btn=document.createElement("button");
+    btn.textContent=r.charAt(0).toUpperCase()+r.slice(1);
+    if(r==="serieux") btn.onclick=()=>window.location.href="authentique.html";
+    if(r==="amical") btn.onclick=()=>window.location.href="amicale.html";
+    if(r==="fun") btn.onclick=()=>window.location.href="fun.html";
+    roomBtnsDiv.appendChild(btn);
+  });
+}
+</script>
 </body>
 </html>
