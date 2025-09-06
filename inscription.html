@@ -52,7 +52,7 @@
       font-size: 16px;
     }
 
-    input[type="email"], input[type="password"] {
+    input[type="email"], input[type="password"], input[type="file"] {
       padding: 12px;
       border: none;
       border-radius: 8px;
@@ -72,6 +72,22 @@
     .rooms label {
       display: block;
       margin: 5px 0;
+    }
+
+    .preview {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .preview img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #ff66cc;
     }
 
     button {
@@ -106,6 +122,11 @@
         <label><input type="checkbox" name="rooms" value="fun"> Fun</label>
       </div>
 
+      <!-- 🔹 Ajout du champ photo -->
+      <label>Photos (max 5) :</label>
+      <input type="file" id="photos" accept="image/*" multiple>
+      <div class="preview" id="preview"></div>
+
       <button type="submit">S’inscrire</button>
     </form>
   </div>
@@ -119,6 +140,31 @@
     const db = getDatabase(app);
     const formContainer = document.getElementById("formContainer");
     const form = document.getElementById("signupForm");
+    const photosInput = document.getElementById("photos");
+    const preview = document.getElementById("preview");
+
+    // 🔹 Gestion des photos max 5
+    photosInput.addEventListener("change", () => {
+      let files = Array.from(photosInput.files);
+
+      if (files.length > 5) {
+        alert("Vous pouvez sélectionner au maximum 5 photos !");
+        files = files.slice(0, 5);
+      }
+
+      // forcer input à garder seulement 5 fichiers
+      const dataTransfer = new DataTransfer();
+      files.forEach(file => dataTransfer.items.add(file));
+      photosInput.files = dataTransfer.files;
+
+      // preview
+      preview.innerHTML = "";
+      files.forEach(file => {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        preview.appendChild(img);
+      });
+    });
 
     function saveUser(uid, email, rooms){
       set(ref(db, 'users/' + uid), {
