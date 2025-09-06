@@ -6,159 +6,167 @@
 <title>Mon Profil</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
-  body {
-    margin: 0;
-    font-family: 'Orbitron', sans-serif;
-    background: url("planete-magique.jpg") no-repeat center center/cover;
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-  }
+body {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  background: url("planete-magique.jpg") no-repeat center center/cover;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
 
-  .container {
-    background: rgba(0,0,0,0.6);
-    padding: 25px;
-    border-radius: 15px;
-    width: 90%;
-    max-width: 500px;
-    box-shadow: 0 0 20px #ff66cc;
-    text-align: center;
-  }
+.container {
+  background: rgba(0,0,0,0.6);
+  padding: 25px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 0 20px #ff66cc;
+  text-align: center;
+}
 
-  h1 {
-    color: #ff66cc;
-    text-shadow: 0 0 10px #ff66cc;
-    margin-bottom: 20px;
-  }
+h1 {
+  color: #ff66cc;
+  text-shadow: 0 0 10px #ff66cc;
+  margin-bottom: 20px;
+}
 
-  .info { margin-bottom: 20px; text-align: left; }
-  .info div { margin: 8px 0; }
+.info {
+  margin-bottom: 20px;
+  text-align: left;
+}
 
-  .photos {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    margin: 15px 0;
-  }
+.info div {
+  margin: 8px 0;
+}
 
-  .photos img {
-    width: 70px;
-    height: 70px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid #ff66cc;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
+.photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 15px 0;
+}
 
-  .photos img:hover { transform: scale(1.1); }
+.photos img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #ff66cc;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
 
-  button {
-    margin-top: 15px;
-    padding: 12px;
-    width: 100%;
-    border: none;
-    border-radius: 8px;
-    background: #ff66cc;
-    color: white;
-    font-size: 1em;
-    cursor: pointer;
-    box-shadow: 0 0 10px #ff66cc;
-  }
+.photos img:hover {
+  transform: scale(1.1);
+}
 
-  button:hover { box-shadow: 0 0 20px #ff66cc; }
+button {
+  margin-top: 15px;
+  padding: 12px;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  background: #ff66cc;
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  box-shadow: 0 0 10px #ff66cc;
+}
 
-  /* 🔹 Boutons Salles Neon */
-  .room-btn {
-    margin: 5px 0;
-    padding: 12px;
-    width: 100%;
-    border: 2px solid #ff66cc;
-    border-radius: 10px;
-    background: rgba(255,0,255,0.05);
-    color: #ff66cc;
-    font-size: 1.1em;
-    font-weight: bold;
-    cursor: pointer;
-    text-shadow: 0 0 5px #ff66cc;
-    animation: neonBlink 1.5s infinite alternate;
-    transition: 0.3s;
-  }
+button:hover {
+  box-shadow: 0 0 20px #ff66cc;
+}
 
-  .room-btn:hover {
-    background: rgba(255,0,255,0.2);
-    box-shadow: 0 0 15px #ff66cc, 0 0 25px #ff66cc;
-  }
+/* Lightbox pour zoom photo */
+.lightbox {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.9);
+  justify-content: center;
+  align-items: center;
+}
 
-  @keyframes neonBlink {
-    0% { text-shadow: 0 0 5px #ff66cc, 0 0 10px #ff66cc, 0 0 20px #ff66cc; }
-    50% { text-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc, 0 0 30px #ff66cc; }
-    100% { text-shadow: 0 0 5px #ff66cc, 0 0 10px #ff66cc, 0 0 20px #ff66cc; }
-  }
+.lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+  box-shadow: 0 0 25px #ff66cc;
+}
 
-  /* 🔹 Section édition */
-  .edit-section {
-    margin-top: 20px;
-    display: none;
-  }
+.edit-section {
+  margin-top: 20px;
+  display: none;
+}
 
-  textarea, input[type="file"] {
-    width: 100%;
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    font-family: 'Orbitron';
-  }
+textarea, input[type="file"] {
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  font-family: 'Orbitron';
+}
 
-  .preview {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 10px;
-    justify-content: center;
-  }
+.preview {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
 
-  .preview img {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid #ff66cc;
-  }
+.preview img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #ff66cc;
+}
 
-  .lightbox {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9);
-    justify-content: center;
-    align-items: center;
-  }
+/* Boutons salles néon */
+.room-btn {
+  margin-top: 10px;
+  padding: 10px 15px;
+  margin-right: 10px;
+  font-size: 1em;
+  color: #ff66cc;
+  background: rgba(0,0,0,0.3);
+  border: 2px solid #ff66cc;
+  border-radius: 10px;
+  cursor: pointer;
+  text-transform: uppercase;
+  animation: neonBlink 1.5s infinite alternate;
+}
 
-  .lightbox img {
-    max-width: 90%;
-    max-height: 90%;
-    border-radius: 10px;
-    box-shadow: 0 0 25px #ff66cc;
-  }
+.room-btn:hover {
+  box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc;
+}
+
+@keyframes neonBlink {
+  0% { box-shadow: 0 0 5px #ff66cc, 0 0 10px #ff66cc; }
+  50% { box-shadow: 0 0 15px #ff66cc, 0 0 30px #ff66cc; }
+  100% { box-shadow: 0 0 5px #ff66cc, 0 0 10px #ff66cc; }
+}
 </style>
 </head>
 <body>
 <div class="container">
   <h1>Mon Profil</h1>
   <div class="info">
-    <div><strong>Pseudo :</strong> <span id="pseudo"></span></div>
-    <div><strong>Âge :</strong> <span id="age"></span></div>
-    <div><strong>Lieu :</strong> <span id="location"></span></div>
-    <div><strong>Description :</strong> <span id="description"></span></div>
+    <div><strong>Pseudo :</strong> <span id="pseudo">Chargement...</span></div>
+    <div><strong>Âge :</strong> <span id="age">Chargement...</span></div>
+    <div><strong>Lieu :</strong> <span id="location">Chargement...</span></div>
+    <div><strong>Description :</strong> <span id="description">Chargement...</span></div>
     <div><strong>Salles :</strong> <span id="rooms"></span></div>
   </div>
+
+  <div id="roomButtons"></div>
 
   <div class="photos" id="photosContainer"></div>
 
@@ -170,10 +178,6 @@
     <div class="preview" id="preview"></div>
     <button id="saveBtn">Enregistrer</button>
   </div>
-
-  <button class="room-btn" id="serieuxBtn">Sérieux</button>
-  <button class="room-btn" id="amicalBtn">Amical</button>
-  <button class="room-btn" id="funBtn">Fun</button>
 </div>
 
 <div class="lightbox" id="lightbox">
@@ -181,125 +185,150 @@
 </div>
 
 <script type="module">
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-  import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-  import { app } from "./firebase.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { app } from "./firebase.js";
 
-  const auth = getAuth(app);
-  const db = getDatabase(app);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-  const pseudoSpan = document.getElementById("pseudo");
-  const ageSpan = document.getElementById("age");
-  const locationSpan = document.getElementById("location");
-  const descSpan = document.getElementById("description");
-  const roomsSpan = document.getElementById("rooms");
-  const photosContainer = document.getElementById("photosContainer");
+const pseudoSpan = document.getElementById("pseudo");
+const ageSpan = document.getElementById("age");
+const locationSpan = document.getElementById("location");
+const descSpan = document.getElementById("description");
+const roomsSpan = document.getElementById("rooms");
+const photosContainer = document.getElementById("photosContainer");
+const roomButtons = document.getElementById("roomButtons");
 
-  const editBtn = document.getElementById("editBtn");
-  const editSection = document.getElementById("editSection");
-  const newDesc = document.getElementById("newDescription");
-  const newPhotos = document.getElementById("newPhotos");
-  const preview = document.getElementById("preview");
-  const saveBtn = document.getElementById("saveBtn");
+const editBtn = document.getElementById("editBtn");
+const editSection = document.getElementById("editSection");
+const newDesc = document.getElementById("newDescription");
+const newPhotos = document.getElementById("newPhotos");
+const preview = document.getElementById("preview");
+const saveBtn = document.getElementById("saveBtn");
 
-  const lightbox = document.getElementById("lightbox");
-  const lightboxImg = document.getElementById("lightboxImg");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
 
-  let currentUserId = null;
-  let currentPhotos = [];
+let currentUserId = null;
+let currentPhotos = [];
+let userRooms = [];
 
-  onAuthStateChanged(auth, async user => {
-    if (!user) {
-      alert("Vous devez être connecté !");
-      window.location.href = "inscription.html";
-      return;
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    alert("Vous devez être connecté !");
+    window.location.href = "inscription.html";
+    return;
+  }
+  currentUserId = user.uid;
+
+  const snap = await get(ref(db, "users/" + user.uid));
+  if (snap.exists()) {
+    const data = snap.val();
+    pseudoSpan.textContent = data.pseudo || "Non renseigné";
+    ageSpan.textContent = data.age || "Non renseigné";
+    locationSpan.textContent = data.location || "Non renseigné";
+    descSpan.textContent = data.description || "Non renseignée";
+    userRooms = data.rooms || [];
+    // Filtrer salles valides
+    const availableRooms = ["serieux","amical","fun"];
+    userRooms = userRooms.filter(r => availableRooms.includes(r));
+    roomsSpan.textContent = userRooms.join(", ");
+    displayRoomButtons(userRooms);
+
+    currentPhotos = data.photos || [];
+    displayPhotos(currentPhotos);
+  }
+});
+
+function displayPhotos(photos) {
+  photosContainer.innerHTML = "";
+  photos.forEach(url => {
+    const img = document.createElement("img");
+    img.src = url;
+    img.addEventListener("click", () => {
+      lightboxImg.src = url;
+      lightbox.style.display = "flex";
+    });
+    photosContainer.appendChild(img);
+  });
+}
+
+function displayRoomButtons(rooms) {
+  roomButtons.innerHTML = "";
+  rooms.forEach(room => {
+    const btn = document.createElement("button");
+    btn.className = "room-btn";
+    btn.textContent = room.toUpperCase();
+    if(room === "serieux") btn.onclick = () => window.location.href = "authentique.html";
+    if(room === "amical") btn.onclick = () => window.location.href = "amicale.html";
+    if(room === "fun") btn.onclick = () => window.location.href = "fun.html";
+    roomButtons.appendChild(btn);
+  });
+}
+
+// Lightbox
+lightbox.addEventListener("click", () => { lightbox.style.display = "none"; });
+
+// Mode édition
+editBtn.addEventListener("click", () => {
+  editSection.style.display = editSection.style.display === "none" ? "block" : "none";
+  newDesc.value = descSpan.textContent;
+});
+
+// Limite 5 photos
+newPhotos.addEventListener("change", () => {
+  let files = Array.from(newPhotos.files);
+  if (files.length > 5) files = files.slice(0,5);
+  const dt = new DataTransfer();
+  files.forEach(file => dt.items.add(file));
+  newPhotos.files = dt.files;
+
+  preview.innerHTML = "";
+  files.forEach(file => {
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    preview.appendChild(img);
+  });
+});
+
+// Sauvegarde
+saveBtn.addEventListener("click", async () => {
+  const desc = newDesc.value.trim();
+  let updatedPhotos = currentPhotos;
+
+  if(newPhotos.files.length > 0){
+    updatedPhotos = [];
+    for(let i=0;i<newPhotos.files.length;i++){
+      const reader = new FileReader();
+      reader.onload = (e)=>{
+        updatedPhotos.push(e.target.result);
+        if(updatedPhotos.length === newPhotos.files.length){
+          updateProfile(desc, updatedPhotos);
+        }
+      };
+      reader.readAsDataURL(newPhotos.files[i]);
     }
-    currentUserId = user.uid;
+  }else{
+    updateProfile(desc, updatedPhotos);
+  }
+});
 
-    const snap = await get(ref(db, "users/" + user.uid));
-    if (snap.exists()) {
-      const data = snap.val();
-      pseudoSpan.textContent = data.pseudo || "";
-      ageSpan.textContent = data.age || "";
-      locationSpan.textContent = data.location || "";
-      descSpan.textContent = data.description || "";
-      roomsSpan.textContent = data.rooms ? data.rooms.join(", ") : "";
-      currentPhotos = data.photos || [];
+function updateProfile(desc, photos){
+  update(ref(db, "users/" + currentUserId), { description: desc, photos: photos })
+    .then(()=>{
+      descSpan.textContent = desc;
+      currentPhotos = photos;
       displayPhotos(currentPhotos);
-    }
-  });
-
-  function displayPhotos(photos) {
-    photosContainer.innerHTML = "";
-    photos.forEach(url => {
-      const img = document.createElement("img");
-      img.src = url;
-      img.addEventListener("click", () => {
-        lightboxImg.src = url;
-        lightbox.style.display = "flex";
-      });
-      photosContainer.appendChild(img);
+      preview.innerHTML = "";
+      newPhotos.value = "";
+      alert("Profil mis à jour !");
+      editSection.style.display = "none";
+    }).catch(err=>{
+      console.error("Erreur mise à jour :", err);
+      alert("Erreur lors de la mise à jour !");
     });
-  }
-
-  lightbox.addEventListener("click", () => { lightbox.style.display = "none"; });
-
-  // Mode édition
-  editBtn.addEventListener("click", () => {
-    editSection.style.display = editSection.style.display === "none" ? "block" : "none";
-    newDesc.value = descSpan.textContent;
-  });
-
-  newPhotos.addEventListener("change", () => {
-    let files = Array.from(newPhotos.files);
-    if (files.length > 5) { files = files.slice(0,5); alert("Max 5 photos"); }
-    const dt = new DataTransfer(); files.forEach(f=>dt.items.add(f));
-    newPhotos.files = dt.files;
-    preview.innerHTML = "";
-    files.forEach(file=>{
-      const img = document.createElement("img");
-      img.src = URL.createObjectURL(file);
-      preview.appendChild(img);
-    });
-  });
-
-  saveBtn.addEventListener("click", () => {
-    const desc = newDesc.value.trim();
-    let updatedPhotos = currentPhotos;
-
-    if (newPhotos.files.length > 0) {
-      updatedPhotos = [];
-      let loaded = 0;
-      for (let i=0;i<newPhotos.files.length;i++){
-        const reader = new FileReader();
-        reader.onload = e => {
-          updatedPhotos.push(e.target.result);
-          loaded++;
-          if(loaded===newPhotos.files.length){ updateProfile(desc, updatedPhotos); }
-        };
-        reader.readAsDataURL(newPhotos.files[i]);
-      }
-    } else { updateProfile(desc, updatedPhotos); }
-  });
-
-  function updateProfile(desc, photos){
-    update(ref(db, "users/"+currentUserId), { description: desc, photos: photos })
-      .then(()=> {
-        descSpan.textContent = desc;
-        currentPhotos = photos;
-        displayPhotos(currentPhotos);
-        preview.innerHTML = "";
-        newPhotos.value = "";
-        editSection.style.display = "none";
-        alert("Profil mis à jour !");
-      }).catch(err=>{ console.error(err); alert("Erreur lors de la mise à jour"); });
-  }
-
-  // Boutons salles
-  document.getElementById("serieuxBtn").addEventListener("click",()=>window.location.href="authentique.html");
-  document.getElementById("amicalBtn").addEventListener("click",()=>window.location.href="amicale.html");
-  document.getElementById("funBtn").addEventListener("click",()=>window.location.href="fun.html");
-
+}
 </script>
 </body>
 </html>
