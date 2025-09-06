@@ -81,6 +81,15 @@
       box-shadow: 0 0 20px #ff66cc;
     }
 
+    /* Conteneur boutons salles */
+    .room-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
     /* ✅ Lightbox pour zoom photo */
     .lightbox {
       display: none;
@@ -143,6 +152,9 @@
 
     <div class="photos" id="photosContainer"></div>
 
+    <!-- Conteneur boutons dynamiques -->
+    <div class="room-buttons" id="roomButtons"></div>
+
     <button id="editBtn">Modifier</button>
 
     <div class="edit-section" id="editSection">
@@ -172,6 +184,7 @@
     const descSpan = document.getElementById("description");
     const roomsSpan = document.getElementById("rooms");
     const photosContainer = document.getElementById("photosContainer");
+    const roomButtonsDiv = document.getElementById("roomButtons");
 
     const editBtn = document.getElementById("editBtn");
     const editSection = document.getElementById("editSection");
@@ -204,6 +217,9 @@
         roomsSpan.textContent = data.rooms ? data.rooms.join(", ") : "";
         currentPhotos = data.photos || [];
         displayPhotos(currentPhotos);
+
+        // ✅ Crée les boutons selon les choix de l'utilisateur
+        createRoomButtons(data.rooms);
       }
     });
 
@@ -220,7 +236,6 @@
       });
     }
 
-    // Fermer lightbox au clic
     lightbox.addEventListener("click", () => {
       lightbox.style.display = "none";
     });
@@ -231,7 +246,6 @@
       newDesc.value = descSpan.textContent;
     });
 
-    // Limite 5 photos
     newPhotos.addEventListener("change", () => {
       let files = Array.from(newPhotos.files);
       if (files.length > 5) {
@@ -250,7 +264,6 @@
       });
     });
 
-    // Sauvegarde
     saveBtn.addEventListener("click", async () => {
       const desc = newDesc.value.trim();
       let updatedPhotos = currentPhotos;
@@ -289,6 +302,33 @@
         alert("Erreur lors de la mise à jour !");
       });
     }
+
+    // ✅ Fonction pour créer boutons salles dynamiquement
+    function createRoomButtons(rooms) {
+      roomButtonsDiv.innerHTML = ""; // vide avant création
+      if (!rooms) return;
+
+      rooms.forEach(room => {
+        const btn = document.createElement("button");
+        btn.textContent = room;
+
+        switch(room.toLowerCase()) {
+          case "sérieux":
+          case "authentique":
+            btn.addEventListener("click", () => window.location.href = "authentique.html");
+            break;
+          case "amical":
+            btn.addEventListener("click", () => window.location.href = "amicale.html");
+            break;
+          case "fun":
+            btn.addEventListener("click", () => window.location.href = "fun.html");
+            break;
+        }
+
+        roomButtonsDiv.appendChild(btn);
+      });
+    }
+
   </script>
 </body>
 </html>
