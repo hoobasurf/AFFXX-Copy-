@@ -124,16 +124,16 @@
         photoURLs.push(url);
       }
 
-      // Sauvegarde profil dans DB
-      await set(ref(db, "users/" + user.uid), {
-        email: user.email,
-        age,
-        location,
-        description,
-        photos: photoURLs,
-        chosenRooms: selectedRooms,
-        joinedAt: new Date().toISOString()
-      });
+     // Sauvegarde profil dans DB
+await set(ref(db, "users/" + user.uid), {
+  email: user.email,
+  age,
+  location,
+  description,
+  photos: photoURLs,
+  rooms: selectedRooms,   // ✅ ICI on enregistre dans "rooms"
+  joinedAt: new Date().toISOString()
+});
 
       alert("Profil enregistré !");
       window.location.href = "page2.html";
