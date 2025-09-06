@@ -194,6 +194,42 @@
   setTimeout(() => {
     window.location.href = "inscription.html";
   }, 10100);
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+// ===== CONFIG FIREBASE =====
+const firebaseConfig = {
+  apiKey: "VOTRE_API_KEY",
+  authDomain: "VOTRE_AUTH_DOMAIN",
+  projectId: "VOTRE_PROJECT_ID",
+  storageBucket: "VOTRE_STORAGE_BUCKET",
+  messagingSenderId: "VOTRE_SENDER_ID",
+  appId: "VOTRE_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ===== CLIQUE SUR L'ÉCRAN =====
+document.body.addEventListener('click', async () => {
+  const user = auth.currentUser;
+
+  if (user) {
+    // L'utilisateur est connecté, vérifier si enregistré dans Firestore
+    const doc = await db.collection('users').doc(user.uid).get();
+    if (doc.exists) {
+      window.location.href = "page2.html"; // déjà enregistré
+    } else {
+      window.location.href = "inscription.html"; // pas encore enregistré
+    }
+  } else {
+    // utilisateur pas connecté
+    window.location.href = "inscription.html";
+  }
+});
+</script>
 </script>
 <script type="module" src="firebase.js"></script>
 </body>
