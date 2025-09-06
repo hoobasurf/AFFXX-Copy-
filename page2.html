@@ -14,101 +14,148 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
     }
+
     .container {
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0,0,0,0.6);
       padding: 25px;
       border-radius: 15px;
-      box-shadow: 0 0 20px #ff66cc;
-      max-width: 500px;
       width: 90%;
+      max-width: 500px;
+      box-shadow: 0 0 20px #ff66cc;
       text-align: center;
-      backdrop-filter: blur(8px);
-      animation: glow 2s infinite alternate;
     }
-    @keyframes glow {
-      from { box-shadow: 0 0 10px #ff66cc; }
-      to   { box-shadow: 0 0 25px #ff66cc, 0 0 40px #ff3399; }
-    }
+
     h1 {
       color: #ff66cc;
-      text-shadow: 0 0 10px #ff66cc, 0 0 20px #ff3399;
+      text-shadow: 0 0 10px #ff66cc;
       margin-bottom: 20px;
     }
+
+    .info {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .info div {
+      margin: 8px 0;
+    }
+
     .photos {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
       justify-content: center;
-      margin-bottom: 15px;
+      margin: 15px 0;
     }
+
     .photos img {
-      width: 80px;
-      height: 80px;
-      border-radius: 8px;
+      width: 70px;
+      height: 70px;
       object-fit: cover;
+      border-radius: 8px;
       border: 2px solid #ff66cc;
+      cursor: pointer;
+      transition: transform 0.2s;
     }
-    .info {
-      text-align: left;
-      margin: 10px 0;
+
+    .photos img:hover {
+      transform: scale(1.1);
     }
-    .info strong {
-      color: #ff66cc;
-    }
-    textarea {
+
+    button {
+      margin-top: 15px;
+      padding: 12px;
       width: 100%;
+      border: none;
+      border-radius: 8px;
+      background: #ff66cc;
+      color: white;
+      font-size: 1em;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ff66cc;
+    }
+
+    button:hover {
+      box-shadow: 0 0 20px #ff66cc;
+    }
+
+    /* ✅ Lightbox pour zoom photo */
+    .lightbox {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 10px;
+      box-shadow: 0 0 25px #ff66cc;
+    }
+
+    .edit-section {
+      margin-top: 20px;
+      display: none;
+    }
+
+    textarea, input[type="file"] {
+      width: 100%;
+      margin: 10px 0;
       padding: 10px;
       border-radius: 8px;
       border: none;
-      margin-top: 8px;
-      background: rgba(255,255,255,0.1);
-      color: white;
       font-family: 'Orbitron';
-      resize: none;
     }
-    input[type="file"] {
+
+    .preview {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
       margin-top: 10px;
-      color: white;
     }
-    button {
-      margin-top: 20px;
-      padding: 12px 20px;
-      border: none;
+
+    .preview img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
       border-radius: 8px;
-      font-size: 1em;
-      font-family: 'Orbitron';
-      cursor: pointer;
-      background: black;
-      color: #ff66cc;
       border: 2px solid #ff66cc;
-      box-shadow: 0 0 10px #ff66cc;
-      animation: pulse 1.5s infinite alternate;
-    }
-    @keyframes pulse {
-      from { box-shadow: 0 0 10px #ff66cc; }
-      to { box-shadow: 0 0 20px #ff3399; }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Mon Profil</h1>
-    <div class="photos" id="photoGallery"></div>
-
-    <div class="info"><strong>Pseudo :</strong> <span id="pseudo"></span></div>
-    <div class="info"><strong>Âge :</strong> <span id="age"></span></div>
-    <div class="info"><strong>Lieu :</strong> <span id="location"></span></div>
     <div class="info">
-      <strong>Description :</strong>
-      <p id="descriptionText"></p>
-      <textarea id="descriptionInput" style="display:none;"></textarea>
+      <div><strong>Pseudo :</strong> <span id="pseudo"></span></div>
+      <div><strong>Âge :</strong> <span id="age"></span></div>
+      <div><strong>Lieu :</strong> <span id="location"></span></div>
+      <div><strong>Description :</strong> <span id="description"></span></div>
+      <div><strong>Salles :</strong> <span id="rooms"></span></div>
     </div>
 
-    <input type="file" id="photosInput" accept="image/*" multiple style="display:none;">
-    
+    <div class="photos" id="photosContainer"></div>
+
     <button id="editBtn">Modifier</button>
+
+    <div class="edit-section" id="editSection">
+      <textarea id="newDescription" rows="3" placeholder="Nouvelle description"></textarea>
+      <input type="file" id="newPhotos" accept="image/*" multiple>
+      <div class="preview" id="preview"></div>
+      <button id="saveBtn">Enregistrer</button>
+    </div>
+  </div>
+
+  <!-- ✅ Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <img id="lightboxImg" src="" alt="Zoom photo">
   </div>
 
   <script type="module">
@@ -122,80 +169,126 @@
     const pseudoSpan = document.getElementById("pseudo");
     const ageSpan = document.getElementById("age");
     const locationSpan = document.getElementById("location");
-    const descriptionText = document.getElementById("descriptionText");
-    const descriptionInput = document.getElementById("descriptionInput");
-    const photoGallery = document.getElementById("photoGallery");
-    const photosInput = document.getElementById("photosInput");
+    const descSpan = document.getElementById("description");
+    const roomsSpan = document.getElementById("rooms");
+    const photosContainer = document.getElementById("photosContainer");
+
     const editBtn = document.getElementById("editBtn");
+    const editSection = document.getElementById("editSection");
+    const newDesc = document.getElementById("newDescription");
+    const newPhotos = document.getElementById("newPhotos");
+    const preview = document.getElementById("preview");
+    const saveBtn = document.getElementById("saveBtn");
 
-    let currentUserData = null;
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightboxImg");
 
-    onAuthStateChanged(auth, async (user) => {
+    let currentUserId = null;
+    let currentPhotos = [];
+
+    onAuthStateChanged(auth, async user => {
       if (!user) {
+        alert("Vous devez être connecté !");
         window.location.href = "inscription.html";
         return;
       }
+      currentUserId = user.uid;
 
       const snap = await get(ref(db, "users/" + user.uid));
       if (snap.exists()) {
-        currentUserData = snap.val();
-        pseudoSpan.textContent = currentUserData.pseudo || "";
-        ageSpan.textContent = currentUserData.age || "";
-        locationSpan.textContent = currentUserData.location || "";
-        descriptionText.textContent = currentUserData.description || "";
-        if (currentUserData.photos) {
-          photoGallery.innerHTML = "";
-          currentUserData.photos.forEach(url => {
-            const img = document.createElement("img");
-            img.src = url;
-            photoGallery.appendChild(img);
-          });
-        }
+        const data = snap.val();
+        pseudoSpan.textContent = data.pseudo || "";
+        ageSpan.textContent = data.age || "";
+        locationSpan.textContent = data.location || "";
+        descSpan.textContent = data.description || "";
+        roomsSpan.textContent = data.rooms ? data.rooms.join(", ") : "";
+        currentPhotos = data.photos || [];
+        displayPhotos(currentPhotos);
       }
     });
 
-    let editing = false;
-    editBtn.addEventListener("click", async () => {
-      if (!editing) {
-        // Activer mode édition
-        descriptionInput.style.display = "block";
-        descriptionInput.value = descriptionText.textContent;
-        descriptionText.style.display = "none";
-        photosInput.style.display = "block";
-        editBtn.textContent = "Enregistrer";
-        editing = true;
-      } else {
-        // Vérifier la limite des photos
-        const newPhotosFiles = Array.from(photosInput.files).slice(0,5);
-        if (newPhotosFiles.length > 5) {
-          alert("Vous pouvez télécharger au maximum 5 photos !");
-          return;
-        }
-
-        const newDescription = descriptionInput.value;
-        const newPhotos = newPhotosFiles.map(file => URL.createObjectURL(file));
-
-        const updates = { description: newDescription };
-        if (newPhotos.length > 0) updates.photos = newPhotos;
-
-        await update(ref(db, "users/" + auth.currentUser.uid), updates);
-
-        // Mise à jour affichage
-        descriptionText.textContent = newDescription;
-        descriptionText.style.display = "block";
-        descriptionInput.style.display = "none";
-        photosInput.style.display = "none";
-        photoGallery.innerHTML = "";
-        (updates.photos || currentUserData.photos || []).forEach(url => {
-          const img = document.createElement("img");
-          img.src = url;
-          photoGallery.appendChild(img);
+    function displayPhotos(photos) {
+      photosContainer.innerHTML = "";
+      photos.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.addEventListener("click", () => {
+          lightboxImg.src = url;
+          lightbox.style.display = "flex";
         });
+        photosContainer.appendChild(img);
+      });
+    }
 
-        editBtn.textContent = "Modifier";
-        editing = false;
+    // Fermer lightbox au clic
+    lightbox.addEventListener("click", () => {
+      lightbox.style.display = "none";
+    });
+
+    // Mode édition
+    editBtn.addEventListener("click", () => {
+      editSection.style.display = editSection.style.display === "none" ? "block" : "none";
+      newDesc.value = descSpan.textContent;
+    });
+
+    // Limite 5 photos
+    newPhotos.addEventListener("change", () => {
+      let files = Array.from(newPhotos.files);
+      if (files.length > 5) {
+        alert("Vous pouvez sélectionner au maximum 5 photos !");
+        files = files.slice(0, 5);
+      }
+      const dt = new DataTransfer();
+      files.forEach(file => dt.items.add(file));
+      newPhotos.files = dt.files;
+
+      preview.innerHTML = "";
+      files.forEach(file => {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        preview.appendChild(img);
+      });
+    });
+
+    // Sauvegarde
+    saveBtn.addEventListener("click", async () => {
+      const desc = newDesc.value.trim();
+      let updatedPhotos = currentPhotos;
+
+      if (newPhotos.files.length > 0) {
+        updatedPhotos = [];
+        for (let i = 0; i < newPhotos.files.length; i++) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            updatedPhotos.push(e.target.result);
+            if (updatedPhotos.length === newPhotos.files.length) {
+              updateProfile(desc, updatedPhotos);
+            }
+          };
+          reader.readAsDataURL(newPhotos.files[i]);
+        }
+      } else {
+        updateProfile(desc, updatedPhotos);
       }
     });
+
+    function updateProfile(desc, photos) {
+      update(ref(db, "users/" + currentUserId), {
+        description: desc,
+        photos: photos
+      }).then(() => {
+        descSpan.textContent = desc;
+        currentPhotos = photos;
+        displayPhotos(currentPhotos);
+        preview.innerHTML = "";
+        newPhotos.value = "";
+        alert("Profil mis à jour !");
+        editSection.style.display = "none";
+      }).catch(err => {
+        console.error("Erreur mise à jour :", err);
+        alert("Erreur lors de la mise à jour !");
+      });
+    }
   </script>
 </body>
 </html>
