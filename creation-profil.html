@@ -34,8 +34,6 @@
       font-family: 'Orbitron'; font-size: 0.9em;
     }
     textarea { resize: none; }
-    .preview { display:flex; flex-wrap: wrap; gap:10px; margin-top:10px; }
-    .preview img { width:60px; height:60px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc; }
     button {
       margin-top: 20px; padding: 12px; width: 100%;
       border: none; border-radius: 8px;
@@ -43,7 +41,6 @@
       box-shadow: 0 0 10px #ff66cc;
     }
     button:hover { box-shadow: 0 0 20px #ff66cc; }
-    .msg { margin-top: 15px; color: #ff66cc; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -59,82 +56,54 @@
       <label>Description :
         <textarea id="description" rows="3" placeholder="Parlez un peu de vous..." required></textarea>
       </label>
-
-      <label>Photos (max 5) :
-        <input type="file" id="photos" accept="image/*" multiple>
-      </label>
-      <div class="preview" id="preview"></div>
-
       <button type="submit">Enregistrer</button>
-      <div id="message" class="msg"></div>
     </form>
   </div>
 
   <script type="module">
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
     const db = getDatabase(app);
-    const storage = getStorage(app);
-
     const form = document.getElementById("profileForm");
-    const photosInput = document.getElementById("photos");
-    const preview = document.getElementById("preview");
-    const messageDiv = document.getElementById("message");
-    let photoFiles = [];
 
-    // Vérification utilisateur connecté
-    onAuthStateChanged(auth, user => {
+    onAuthStateChanged(auth, async user => {
       if (!user) {
-        alert("Vous devez être connecté !");
+        alert("Non connecté !");
         window.location.href = "inscription.html";
+      } else {
+        // Optionnel : récupérer l’existant pour pré-remplir si besoin
+        const snap = await get(ref(db, "users/" + user.uid));
+        if (snap.exists()) {
+          const data = snap.val();
+          if (data.age) document.getElementById("age").value = data.age;
+          if (data.location) document.getElementById("location").value = data.location;
+          if (data.description) document.getElementById("description").value = data.description;
+        }
       }
     });
 
-    // Prévisualisation photos
-    photosInput.addEventListener("change", () => {
-      preview.innerHTML = "";
-      photoFiles = Array.from(photosInput.files).slice(0,5);
-      photoFiles.forEach(file => {
-        const img = document.createElement("img");
-        img.src = URL.createObjectURL(file);
-        preview.appendChild(img);
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const user = auth.currentUser;
+      if (!user) return alert("Non connecté");
+
+      const age = document.getElementById("age").value;
+      const location = document.getElementById("location").value.trim();
+      const description = document.getElementById("description").value.trim();
+
+      // On met à jour seulement les champs du profil, pas les salles ni email
+      await update(ref(db, "users/" + user.uid), {
+        age,
+        location,
+        description
       });
+
+      // Redirection vers page2
+      window.location.href = "page2.html";
     });
-
-    // Soumission formulaire
- form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const user = auth.currentUser;
-  if (!user) return alert("Non connecté");
-
-  const age = document.getElementById("age").value;
-  const location = document.getElementById("location").value.trim();
-  const description = document.getElementById("description").value.trim();
-  const selectedRooms = []; 
-  document.querySelectorAll("input[name='rooms']:checked").forEach(cb => selectedRooms.push(cb.value));
-
-  // ⚡ Supprime la partie upload des photos
-  // const photoURLs = [];
-  // for (let i = 0; i < photoFiles.length; i++) { ... }
-
-  // Sauvegarde profil dans DB
-  await set(ref(db, "users/" + user.uid), {
-    email: user.email,
-    age,
-    location,
-    description,
-    chosenRooms: selectedRooms,
-    joinedAt: new Date().toISOString()
-  });
-
-  // Message + redirection
-  alert("Profil enregistré !");
-  window.location.href = "page2.html";
-});
   </script>
 </body>
 </html>
