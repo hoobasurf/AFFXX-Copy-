@@ -3,82 +3,164 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Création Profil</title>
+<title>Créer Profil</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
 body {
-  margin: 0; font-family: 'Orbitron', sans-serif;
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
   background: url("planete-magique.jpg") no-repeat center center/cover;
-  display:flex; justify-content:center; align-items:center; min-height:100vh; color:white;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 .container {
-  background: rgba(0,0,0,0.6); padding:25px; border-radius:15px; width:90%; max-width:500px; text-align:center;
+  background: rgba(0,0,0,0.6);
+  padding: 25px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 0 20px #ff66cc;
+  text-align: center;
 }
-h1 { color:#ff66cc; text-shadow:0 0 10px #ff66cc; margin-bottom:20px; }
-input, textarea { width:100%; margin:10px 0; padding:10px; border-radius:8px; border:none; }
-button { width:100%; padding:12px; border:none; border-radius:8px; background:#ff66cc; color:white; font-size:1em; cursor:pointer; }
-button:hover { box-shadow:0 0 20px #ff66cc; }
+h1 {
+  color: #ff66cc;
+  text-shadow: 0 0 10px #ff66cc;
+  margin-bottom: 20px;
+}
+input, textarea {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: none;
+  font-family: 'Orbitron';
+}
+input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.7); }
+textarea { resize: none; }
+button {
+  margin-top: 15px;
+  padding: 12px;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  background: #ff66cc;
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  box-shadow: 0 0 10px #ff66cc;
+  transition: 0.3s;
+}
+button:hover { box-shadow: 0 0 20px #ff66cc; }
+.rooms {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 15px;
+}
+.rooms label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+.preview img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #ff66cc;
+}
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>Création Profil</h1>
+  <h1>Créer Profil</h1>
   <form id="profileForm">
     <input type="text" id="pseudo" placeholder="Pseudo" required>
     <input type="number" id="age" placeholder="Âge" required>
     <input type="text" id="location" placeholder="Lieu" required>
     <textarea id="description" rows="3" placeholder="Description"></textarea>
+
+    <div class="rooms">
+      <label><input type="checkbox" name="rooms" value="serieux"> Sérieux</label>
+      <label><input type="checkbox" name="rooms" value="amical"> Amical</label>
+      <label><input type="checkbox" name="rooms" value="fun"> Fun</label>
+    </div>
+
+    <label>Photos (max 5) :</label>
+    <input type="file" id="photos" accept="image/*" multiple>
+    <div class="preview" id="preview"></div>
+
     <button type="submit">Enregistrer Profil</button>
   </form>
 </div>
 
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, get, update, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-const pseudoInput = document.getElementById("pseudo");
-const ageInput = document.getElementById("age");
-const locationInput = document.getElementById("location");
-const descInput = document.getElementById("description");
 const form = document.getElementById("profileForm");
+const photosInput = document.getElementById("photos");
+const preview = document.getElementById("preview");
 
-let currentUserId = null;
-let userRooms = [];
+let currentPhotos = [];
 
-onAuthStateChanged(auth, async user=>{
-  if(!user) { window.location.href="inscription.html"; return; }
-  currentUserId = user.uid;
+photosInput.addEventListener("change", () => {
+  let files = Array.from(photosInput.files).slice(0,5);
+  const dt = new DataTransfer();
+  files.forEach(file => dt.items.add(file));
+  photosInput.files = dt.files;
 
-  const snap = await get(ref(db,"users/"+currentUserId));
-  if(snap.exists()){
-    const data = snap.val();
-    pseudoInput.value = data.pseudo || "";
-    ageInput.value = data.age || "";
-    locationInput.value = data.location || "";
-    descInput.value = data.description || "";
-    userRooms = data.rooms || [];
-  }
+  preview.innerHTML = "";
+  files.forEach(file => {
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    preview.appendChild(img);
+  });
+  currentPhotos = files;
+});
+
+onAuthStateChanged(auth, (user)=>{
+  if(!user) { window.location.href = "inscription.html"; return; }
 });
 
 form.addEventListener("submit", async e=>{
   e.preventDefault();
-  const pseudo = pseudoInput.value.trim();
-  const age = ageInput.value.trim();
-  const location = locationInput.value.trim();
-  const description = descInput.value.trim();
+  const user = auth.currentUser;
+  if(!user) return;
 
-  if(!currentUserId) return;
+  const pseudo = document.getElementById("pseudo").value;
+  const age = document.getElementById("age").value;
+  const location = document.getElementById("location").value;
+  const description = document.getElementById("description").value;
+  const rooms = Array.from(document.querySelectorAll('input[name="rooms"]:checked')).map(cb=>cb.value);
 
-  await update(ref(db,"users/"+currentUserId),{
-    pseudo, age, location, description
+  // Convertir photos en base64
+  const photoPromises = currentPhotos.map(file=>{
+    return new Promise(res=>{
+      const reader = new FileReader();
+      reader.onload = e=>res(e.target.result);
+      reader.readAsDataURL(file);
+    });
   });
+  const photoUrls = await Promise.all(photoPromises);
 
-  alert("Profil enregistré !");
-  window.location.href = "page2.html";
+  set(ref(db, "users/"+user.uid), {
+    pseudo, age, location, description, rooms, photos: photoUrls
+  }).then(()=> window.location.href="page2.html")
+    .catch(err=>alert("Erreur: "+err.message));
 });
 </script>
 </body>
