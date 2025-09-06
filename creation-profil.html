@@ -30,18 +30,27 @@ h1 {
   text-shadow: 0 0 10px #ff66cc;
   margin-bottom: 20px;
 }
+label {
+  display: block;
+  text-align: left;
+  margin-top: 12px;
+  margin-bottom: 5px;
+  color: #ffccff;
+  font-size: 0.9em;
+}
 input, textarea {
   width: 100%;
   padding: 12px;
-  margin: 8px 0;
   border-radius: 8px;
-  border: none;
+  border: 2px solid #ff66cc;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
   font-family: 'Orbitron';
 }
-input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.7); }
+input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.6); }
 textarea { resize: none; }
 button {
-  margin-top: 15px;
+  margin-top: 20px;
   padding: 12px;
   width: 100%;
   border: none;
@@ -63,6 +72,8 @@ button:hover { box-shadow: 0 0 20px #ff66cc; }
   display: flex;
   align-items: center;
   gap: 5px;
+  margin: 0;
+  color: #fff;
 }
 .preview {
   display: flex;
@@ -84,84 +95,31 @@ button:hover { box-shadow: 0 0 20px #ff66cc; }
 <div class="container">
   <h1>Créer Profil</h1>
   <form id="profileForm">
-    <input type="text" id="pseudo" placeholder="Pseudo" required>
-    <input type="number" id="age" placeholder="Âge" required>
-    <input type="text" id="location" placeholder="Lieu" required>
-    <textarea id="description" rows="3" placeholder="Description"></textarea>
+    <label for="pseudo">Pseudo :</label>
+    <input type="text" id="pseudo" placeholder="Entrez votre pseudo" required>
 
+    <label for="age">Âge :</label>
+    <input type="number" id="age" placeholder="Entrez votre âge" required>
+
+    <label for="location">Lieu :</label>
+    <input type="text" id="location" placeholder="Entrez votre ville" required>
+
+    <label for="description">Description :</label>
+    <textarea id="description" rows="3" placeholder="Décrivez-vous..."></textarea>
+
+    <label>Salles :</label>
     <div class="rooms">
       <label><input type="checkbox" name="rooms" value="serieux"> Sérieux</label>
       <label><input type="checkbox" name="rooms" value="amical"> Amical</label>
       <label><input type="checkbox" name="rooms" value="fun"> Fun</label>
     </div>
 
-    <label>Photos (max 5) :</label>
+    <label for="photos">Photos (max 5) :</label>
     <input type="file" id="photos" accept="image/*" multiple>
     <div class="preview" id="preview"></div>
 
     <button type="submit">Enregistrer Profil</button>
   </form>
 </div>
-
-<script type="module">
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-import { app } from "./firebase.js";
-
-const auth = getAuth(app);
-const db = getDatabase(app);
-
-const form = document.getElementById("profileForm");
-const photosInput = document.getElementById("photos");
-const preview = document.getElementById("preview");
-
-let currentPhotos = [];
-
-photosInput.addEventListener("change", () => {
-  let files = Array.from(photosInput.files).slice(0,5);
-  const dt = new DataTransfer();
-  files.forEach(file => dt.items.add(file));
-  photosInput.files = dt.files;
-
-  preview.innerHTML = "";
-  files.forEach(file => {
-    const img = document.createElement("img");
-    img.src = URL.createObjectURL(file);
-    preview.appendChild(img);
-  });
-  currentPhotos = files;
-});
-
-onAuthStateChanged(auth, (user)=>{
-  if(!user) { window.location.href = "inscription.html"; return; }
-});
-
-form.addEventListener("submit", async e=>{
-  e.preventDefault();
-  const user = auth.currentUser;
-  if(!user) return;
-
-  const pseudo = document.getElementById("pseudo").value;
-  const age = document.getElementById("age").value;
-  const location = document.getElementById("location").value;
-  const description = document.getElementById("description").value;
-  const rooms = Array.from(document.querySelectorAll('input[name="rooms"]:checked')).map(cb=>cb.value);
-
-  // Convertir photos en base64
-  const photoPromises = currentPhotos.map(file=>{
-    return new Promise(res=>{
-      const reader = new FileReader();
-      reader.onload = e=>res(e.target.result);
-      reader.readAsDataURL(file);
-    });
-  });
-  const photoUrls = await Promise.all(photoPromises);
-
-  set(ref(db, "users/"+user.uid), {
-    pseudo, age, location, description, rooms, photos: photoUrls
-  }).then(()=> window.location.href="page2.html")
-    .catch(err=>alert("Erreur: "+err.message));
-});
-</script>
 </body>
 </html>
