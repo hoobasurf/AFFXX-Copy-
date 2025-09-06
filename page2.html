@@ -6,74 +6,19 @@
 <title>Mon Profil</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
-body {
-  margin:0;
-  font-family:'Orbitron',sans-serif;
-  background:url("planete-magique.jpg") no-repeat center center/cover;
-  color:#fff;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-}
-.container {
-  background: rgba(0,0,0,0.6);
-  padding:25px;
-  border-radius:15px;
-  width:90%;
-  max-width:500px;
-  text-align:center;
-  box-shadow:0 0 20px #ff66cc;
-}
-h1 {
-  color:#ff66cc;
-  text-shadow:0 0 10px #ff66cc;
-  margin-bottom:20px;
-}
-.info {
-  margin-bottom:20px;
-  text-align:left;
-}
-.info div {
-  margin:8px 0;
-}
-.photos {
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  justify-content:center;
-  margin:15px 0;
-}
-.photos img {
-  width:70px;
-  height:70px;
-  object-fit:cover;
-  border-radius:8px;
-  border:2px solid #ff66cc;
-  cursor:pointer;
-  transition:transform 0.2s;
-}
-.photos img:hover { transform: scale(1.1);}
-button { margin-top:15px; padding:12px; width:100%; border:none; border-radius:8px; background:#ff66cc; color:white; font-size:1em; cursor:pointer; box-shadow:0 0 10px #ff66cc;}
-button:hover { box-shadow:0 0 20px #ff66cc;}
-.edit-section { margin-top:20px; display:none;}
-textarea { width:100%; margin:10px 0; padding:10px; border-radius:8px; border:none;}
-.preview { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;}
-.preview img { width:60px; height:60px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc;}
-.room-btns { display:flex; justify-content:space-around; margin-top:15px; flex-wrap:wrap; gap:10px;}
-.room-btns button {
-  width:30%;
-  border:2px solid #ff66cc;
-  background:transparent;
-  color:#ff66cc;
-  font-weight:bold;
-  animation: neon 1.5s ease-in-out infinite alternate;
-  cursor:pointer;
-}
-@keyframes neon {
-  0% { box-shadow:0 0 5px #ff66cc,0 0 10px #ff66cc;}
-  100% { box-shadow:0 0 20px #ff66cc,0 0 40px #ff66cc;}
-}
+body { margin:0; font-family:'Orbitron'; background:url("planete-magique.jpg") no-repeat center/cover; color:#fff; display:flex; justify-content:center; align-items:center; min-height:100vh;}
+.container { background:rgba(0,0,0,0.6); padding:25px; border-radius:15px; width:90%; max-width:500px; box-shadow:0 0 20px #ff66cc; text-align:center;}
+h1 { color:#ff66cc; text-shadow:0 0 10px #ff66cc; margin-bottom:20px;}
+.info div { margin:10px 0; }
+.photos { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:10px 0; }
+.photos img { width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc; cursor:pointer; }
+button { margin:10px 0; padding:12px; width:100%; border:none; border-radius:8px; background:#ff66cc; color:white; font-size:1em; cursor:pointer; box-shadow:0 0 10px #ff66cc; transition:.3s; }
+button:hover { box-shadow:0 0 20px #ff66cc; }
+.room-btns { display:flex; justify-content:space-around; margin-top:15px; }
+.room-btns button { flex:1; margin:0 5px; border:2px solid #ff66cc; background:transparent; color:#ff66cc; font-weight:bold; font-size:1em; animation: glow 1.5s infinite alternate; }
+@keyframes glow { 0% { box-shadow:0 0 5px #ff66cc; } 100% { box-shadow:0 0 20px #ff66cc; } }
+.lightbox { display:none; position:fixed; z-index:1000; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center; }
+.lightbox img { max-width:90%; max-height:90%; border-radius:10px; box-shadow:0 0 25px #ff66cc; }
 </style>
 </head>
 <body>
@@ -90,15 +35,14 @@ textarea { width:100%; margin:10px 0; padding:10px; border-radius:8px; border:no
   <div class="photos" id="photosContainer"></div>
   <button id="editBtn">Modifier</button>
 
-  <div class="edit-section" id="editSection">
-    <textarea id="newDescription" rows="3" placeholder="Nouvelle description"></textarea>
-    <input type="file" id="newPhotos" accept="image/*" multiple>
-    <div class="preview" id="preview"></div>
-    <button id="saveBtn">Enregistrer</button>
+  <div class="room-btns">
+    <button id="serieuxBtn" onclick="location.href='authentique.html'">Sérieux</button>
+    <button id="amicalBtn" onclick="location.href='amicale.html'">Amical</button>
+    <button id="funBtn" onclick="location.href='fun.html'">Fun</button>
   </div>
-
-  <div class="room-btns" id="roomBtns"></div>
 </div>
+
+<div class="lightbox" id="lightbox"><img id="lightboxImg"></div>
 
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
@@ -114,23 +58,17 @@ const locationSpan = document.getElementById("location");
 const descSpan = document.getElementById("description");
 const roomsSpan = document.getElementById("rooms");
 const photosContainer = document.getElementById("photosContainer");
-
 const editBtn = document.getElementById("editBtn");
-const editSection = document.getElementById("editSection");
-const newDesc = document.getElementById("newDescription");
-const newPhotos = document.getElementById("newPhotos");
-const preview = document.getElementById("preview");
-const saveBtn = document.getElementById("saveBtn");
-const roomBtnsDiv = document.getElementById("roomBtns");
+
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
 
 let currentUserId = null;
 let currentPhotos = [];
-let userRooms = [];
 
 onAuthStateChanged(auth, async user=>{
-  if(!user){ window.location.href="inscription.html"; return; }
+  if(!user) { window.location.href="inscription.html"; return; }
   currentUserId = user.uid;
-
   const snap = await get(ref(db,"users/"+currentUserId));
   if(snap.exists()){
     const data = snap.val();
@@ -138,81 +76,40 @@ onAuthStateChanged(auth, async user=>{
     ageSpan.textContent = data.age || "Non renseigné";
     locationSpan.textContent = data.location || "Non renseigné";
     descSpan.textContent = data.description || "Non renseignée";
-    userRooms = data.rooms || [];
-    roomsSpan.textContent = userRooms.join(", ") || "Aucune";
+    roomsSpan.textContent = data.rooms ? data.rooms.join(", ") : "";
     currentPhotos = data.photos || [];
     displayPhotos(currentPhotos);
-    displayRoomButtons(userRooms);
+    // Afficher seulement les boutons correspondant aux salles choisies
+    document.getElementById("serieuxBtn").style.display = data.rooms.includes("serieux") ? "inline-block" : "none";
+    document.getElementById("amicalBtn").style.display = data.rooms.includes("amical") ? "inline-block" : "none";
+    document.getElementById("funBtn").style.display = data.rooms.includes("fun") ? "inline-block" : "none";
   }
 });
 
 function displayPhotos(photos){
-  photosContainer.innerHTML="";
+  photosContainer.innerHTML = "";
   photos.forEach(url=>{
-    const img=document.createElement("img");
-    img.src=url;
+    const img = document.createElement("img");
+    img.src = url;
+    img.addEventListener("click",()=>{
+      lightboxImg.src = url;
+      lightbox.style.display="flex";
+    });
     photosContainer.appendChild(img);
   });
 }
 
-editBtn.addEventListener("click",()=>{ 
-  editSection.style.display = editSection.style.display==="none"?"block":"none"; 
-  newDesc.value = descSpan.textContent!=="Non renseignée"?descSpan.textContent:""; 
-});
+lightbox.addEventListener("click",()=>{ lightbox.style.display="none"; });
 
-newPhotos.addEventListener("change",()=>{
-  let files = Array.from(newPhotos.files);
-  if(files.length>5){ alert("Maximum 5 photos !"); files=files.slice(0,5); }
-  const dt=new DataTransfer(); files.forEach(f=>dt.items.add(f)); newPhotos.files=dt.files;
-  preview.innerHTML=""; files.forEach(f=>{ const img=document.createElement("img"); img.src=URL.createObjectURL(f); preview.appendChild(img); });
-});
-
-saveBtn.addEventListener("click",()=>{
-  const desc = newDesc.value.trim();
-  const files = Array.from(newPhotos.files);
-
-  if(files.length>0){
-    const updatedPhotos = currentPhotos.slice();
-    let loadedCount=0;
-    files.forEach(file=>{
-      const reader = new FileReader();
-      reader.onload = e => {
-        updatedPhotos.push(e.target.result);
-        loadedCount++;
-        if(loadedCount===files.length) updateProfile(desc, updatedPhotos);
-      };
-      reader.readAsDataURL(file);
+editBtn.addEventListener("click",()=>{
+  const newDesc = prompt("Nouvelle description :", descSpan.textContent);
+  if(newDesc!==null){
+    update(ref(db,"users/"+currentUserId), { description:newDesc }).then(()=>{
+      descSpan.textContent = newDesc;
+      alert("Profil mis à jour !");
     });
-  } else {
-    updateProfile(desc, currentPhotos);
   }
 });
-
-function updateProfile(desc, photos){
-  update(ref(db,"users/"+currentUserId),{ description: desc, photos: photos })
-  .then(()=>{
-    descSpan.textContent = desc;
-    currentPhotos = photos;
-    displayPhotos(currentPhotos);
-    preview.innerHTML="";
-    newPhotos.value="";
-    editSection.style.display="none";
-    alert("Profil mis à jour !");
-  })
-  .catch(err=>{ console.error(err); alert("Erreur lors de la mise à jour !"); });
-}
-
-function displayRoomButtons(rooms){
-  roomBtnsDiv.innerHTML="";
-  rooms.forEach(r=>{
-    const btn=document.createElement("button");
-    btn.textContent=r.charAt(0).toUpperCase()+r.slice(1);
-    if(r==="serieux") btn.onclick=()=>window.location.href="authentique.html";
-    if(r==="amical") btn.onclick=()=>window.location.href="amicale.html";
-    if(r==="fun") btn.onclick=()=>window.location.href="fun.html";
-    roomBtnsDiv.appendChild(btn);
-  });
-}
 </script>
 </body>
 </html>
