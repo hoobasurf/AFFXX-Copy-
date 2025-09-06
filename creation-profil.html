@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Créer Profil</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Création du Profil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
     body {
       margin: 0;
       padding: 0;
       height: 100vh;
-      width: 100vw;
-      background: url("planete-magique.jpg") no-repeat center center/cover;
+      background: url("ville.jpg") no-repeat center center/cover;
       font-family: 'Orbitron', sans-serif;
       display: flex;
       justify-content: center;
@@ -19,18 +18,19 @@
     }
 
     .form-container {
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0,0,0,0.6);
       padding: 30px;
       border-radius: 15px;
-      text-align: center;
       width: 90%;
       max-width: 450px;
-      box-shadow: 0 0 25px #ff66cc;
+      box-shadow: 0 0 20px #ff66cc;
+      color: white;
+      text-align: center;
     }
 
     h1 {
-      color: #ff6aab;
-      text-shadow: 0 0 15px #ff6aab, 0 0 30px #d600d6;
+      color: #ff66cc;
+      text-shadow: 0 0 10px #ff66cc;
       margin-bottom: 20px;
     }
 
@@ -38,36 +38,27 @@
       width: 100%;
       margin: 10px 0;
       padding: 12px;
-      border-radius: 8px;
       border: none;
-      outline: none;
-      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
       color: white;
-      font-size: 16px;
+      font-family: 'Orbitron';
     }
 
     input::placeholder, textarea::placeholder {
       color: rgba(255,255,255,0.6);
     }
 
-    textarea {
-      resize: none;
-    }
-
-    label {
-      display: block;
-      margin-top: 15px;
-      margin-bottom: 5px;
-      color: #ff66cc;
-      text-shadow: 0 0 10px #ff66cc;
+    input[type="file"] {
+      background: none;
     }
 
     .preview {
       display: flex;
       gap: 10px;
-      margin-top: 10px;
       flex-wrap: wrap;
       justify-content: center;
+      margin-top: 10px;
     }
 
     .preview img {
@@ -79,38 +70,37 @@
     }
 
     button {
-      width: 100%;
+      margin-top: 15px;
       padding: 12px;
-      margin-top: 20px;
+      width: 100%;
       border: none;
       border-radius: 8px;
-      background-color: #ff6aab;
+      background: #ff66cc;
       color: white;
-      font-size: 18px;
+      font-size: 1em;
       cursor: pointer;
-      box-shadow: 0 0 15px #ff6aab, 0 0 30px #d600d6;
-      transition: 0.3s;
+      box-shadow: 0 0 10px #ff66cc;
     }
 
     button:hover {
-      box-shadow: 0 0 25px #ff6aab, 0 0 40px #d600d6;
+      box-shadow: 0 0 20px #ff66cc;
     }
   </style>
 </head>
 <body>
   <div class="form-container">
-    <h1>Créer Profil</h1>
+    <h1>Création du Profil</h1>
     <form id="profileForm">
-      <input type="text" id="pseudo" placeholder="Pseudo" required />
-      <input type="number" id="age" placeholder="Âge" required />
-      <input type="text" id="location" placeholder="Lieu" required />
+      <input type="text" id="pseudo" placeholder="Pseudo" required>
+      <input type="number" id="age" placeholder="Âge" required>
+      <input type="text" id="location" placeholder="Lieu" required>
       <textarea id="description" rows="3" placeholder="Description"></textarea>
 
-      <label for="photos">Photos (max 5) :</label>
-      <input type="file" id="photos" accept="image/*" multiple />
+      <label>Photos (max 5) :</label>
+      <input type="file" id="photos" accept="image/*" multiple>
       <div class="preview" id="preview"></div>
 
-      <button type="submit">Enregistrer Profil</button>
+      <button type="submit">Enregistrer</button>
     </form>
   </div>
 
@@ -126,22 +116,15 @@
     const photosInput = document.getElementById("photos");
     const preview = document.getElementById("preview");
 
-    let currentUserId = null;
-
-    // ✅ Vérifier si connecté
-    onAuthStateChanged(auth, user => {
-      if (!user) {
-        window.location.href = "inscription.html";
-      } else {
-        currentUserId = user.uid;
-      }
-    });
-
-    // ✅ Prévisualisation des photos
+    // Limiter à 5 photos
     photosInput.addEventListener("change", () => {
-      let files = Array.from(photosInput.files).slice(0, 5);
+      let files = Array.from(photosInput.files);
+      if (files.length > 5) {
+        alert("Vous pouvez sélectionner au maximum 5 photos !");
+        files = files.slice(0, 5);
+      }
       const dt = new DataTransfer();
-      files.forEach(file => dt.items.add(file));
+      files.forEach(f => dt.items.add(f));
       photosInput.files = dt.files;
 
       preview.innerHTML = "";
@@ -152,8 +135,7 @@
       });
     });
 
-    // ✅ Enregistrer profil
-    form.addEventListener("submit", async (e) => {
+    form.addEventListener("submit", (e) => {
       e.preventDefault();
 
       const pseudo = document.getElementById("pseudo").value.trim();
@@ -161,41 +143,40 @@
       const location = document.getElementById("location").value.trim();
       const description = document.getElementById("description").value.trim();
 
-      let photosData = [];
-      if (photosInput.files.length > 0) {
-        for (let i = 0; i < photosInput.files.length; i++) {
-          const file = photosInput.files[i];
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            photosData.push(e.target.result);
+      onAuthStateChanged(auth, (user) => {
+        if (!user) return alert("Non connecté !");
+        const userRef = ref(db, "users/" + user.uid);
 
-            if (photosData.length === photosInput.files.length) {
-              saveProfile(pseudo, age, location, description, photosData);
-            }
-          };
-          reader.readAsDataURL(file);
+        let photos = [];
+        if (photosInput.files.length > 0) {
+          let loaded = 0;
+          Array.from(photosInput.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              photos.push(ev.target.result);
+              loaded++;
+              if (loaded === photosInput.files.length) {
+                saveProfile(userRef, { pseudo, age, location, description, photos });
+              }
+            };
+            reader.readAsDataURL(file);
+          });
+        } else {
+          saveProfile(userRef, { pseudo, age, location, description });
         }
-      } else {
-        saveProfile(pseudo, age, location, description, []);
-      }
+      });
     });
 
-    function saveProfile(pseudo, age, location, description, photos) {
-      update(ref(db, "users/" + currentUserId), {
-        pseudo,
-        age,
-        location,
-        description,
-        photos
-      })
-      .then(() => {
-        alert("Profil enregistré avec succès !");
-        window.location.href = "page2.html";  // ✅ Redirection vers Mon Profil
-      })
-      .catch(err => {
-        console.error("Erreur :", err);
-        alert("Erreur lors de l’enregistrement !");
-      });
+    function saveProfile(userRef, data) {
+      update(userRef, data)
+        .then(() => {
+          alert("Profil enregistré !");
+          window.location.href = "page2.html"; // ✅ redirection corrigée
+        })
+        .catch(err => {
+          console.error("Erreur :", err);
+          alert("Erreur lors de l'enregistrement");
+        });
     }
   </script>
 </body>
