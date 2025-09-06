@@ -9,36 +9,82 @@
     body {
       margin:0; padding:0;
       font-family:'Orbitron', sans-serif;
-      background:url("planete-magique.jpg") no-repeat center center/cover;
+      background: url("planete-magique.jpg") no-repeat center center/cover;
       color:white; display:flex; justify-content:center; align-items:center; height:100vh;
     }
     .container {
-      text-align:center; background:rgba(0,0,0,0.5); padding:30px; border-radius:15px;
-      box-shadow:0 0 20px #ff66cc; max-width:450px; width:90%;
+      background: rgba(0,0,0,0.25);
+      padding:30px;
+      border-radius:20px;
+      box-shadow: 0 0 30px #ff66cc, 0 0 60px rgba(255,102,204,0.5);
+      max-width:450px; width:90%;
+      text-align:center;
+      animation: glowPulse 2s infinite alternate;
     }
-    h1 { color:#ff66cc; text-shadow:0 0 10px #ff66cc; margin-bottom:20px; }
-    .pseudo { font-size:1.2em; margin-bottom:15px; }
+
+    @keyframes glowPulse {
+      0% { box-shadow:0 0 20px #ff66cc, 0 0 40px rgba(255,102,204,0.3); }
+      100% { box-shadow:0 0 35px #ff66cc, 0 0 70px rgba(255,102,204,0.5); }
+    }
+
+    h1 {
+      color:#ff66cc;
+      text-shadow: 0 0 10px #ff66cc;
+      margin-bottom:20px;
+    }
+
     .photos { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:20px; }
-    .photos img { width:60px; height:60px; border-radius:8px; object-fit:cover; border:2px solid #ff66cc; }
+    .photos img { width:80px; height:80px; border-radius:10px; object-fit:cover; border:2px solid #ff66cc; box-shadow:0 0 10px #ff66cc; }
+
+    .info { margin-bottom:20px; text-align:left; }
+    .info div { margin-bottom:10px; font-size:1em; line-height:1.4em; }
+
     .rooms { display:flex; gap:15px; justify-content:center; margin-top:10px; }
     .rooms button {
-      padding:15px 25px; border:none; border-radius:10px; background:#ff66cc; color:white;
+      padding:12px 20px; border:none; border-radius:10px; background:#ff66cc; color:white;
       font-size:1em; cursor:pointer; box-shadow:0 0 10px #ff66cc; transition:0.3s;
     }
     .rooms button:hover { box-shadow:0 0 20px #ff66cc; }
-    .rooms button:disabled { opacity:0.5; cursor:default; }
+    .rooms button:disabled { opacity:0.4; cursor:default; }
+
+    /* Bouton Mon Profil */
+    #myProfile {
+      margin-top:20px;
+      padding:15px 30px;
+      font-size:1.1em;
+      font-weight:bold;
+      color:#ff66cc;
+      background:transparent;
+      border:2px solid #000;
+      border-radius:12px;
+      text-shadow:0 0 10px #ff66cc;
+      box-shadow: 0 0 10px #ff66cc;
+      cursor:pointer;
+      animation: neonBlink 1.5s infinite alternate;
+    }
+    @keyframes neonBlink {
+      0% { box-shadow: 0 0 5px #ff66cc, 0 0 10px #ff66cc, 0 0 20px #ff66cc; }
+      100% { box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc, 0 0 30px #ff66cc; }
+    }
+
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Bienvenue !</h1>
-    <div class="pseudo" id="pseudo"></div>
+    <h1>Mon Profil</h1>
     <div class="photos" id="photos"></div>
+    <div class="info">
+      <div><strong>Pseudo :</strong> <span id="pseudo"></span></div>
+      <div><strong>Âge :</strong> <span id="age"></span></div>
+      <div><strong>Lieu :</strong> <span id="location"></span></div>
+      <div><strong>Description :</strong> <span id="description"></span></div>
+    </div>
     <div class="rooms">
       <button id="serieux">Sérieux</button>
       <button id="amical">Amitié</button>
       <button id="fun">Fun</button>
     </div>
+    <button id="myProfile">Mon profil</button>
   </div>
 
   <script type="module">
@@ -49,7 +95,10 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const pseudoDiv = document.getElementById("pseudo");
+    const pseudoSpan = document.getElementById("pseudo");
+    const ageSpan = document.getElementById("age");
+    const locationSpan = document.getElementById("location");
+    const descriptionSpan = document.getElementById("description");
     const photosDiv = document.getElementById("photos");
 
     const buttons = {
@@ -59,21 +108,22 @@
     };
 
     onAuthStateChanged(auth, async user => {
-      if (!user) {
+      if(!user) {
         window.location.href = "inscription.html";
         return;
       }
 
       try {
         const snap = await get(ref(db, `users/${user.uid}`));
-        if (snap.exists()) {
+        if(snap.exists()) {
           const data = snap.val();
 
-          // Afficher pseudo
-          if (data.pseudo) pseudoDiv.textContent = "Pseudo : " + data.pseudo;
+          pseudoSpan.textContent = data.pseudo || "";
+          ageSpan.textContent = data.age || "";
+          locationSpan.textContent = data.location || "";
+          descriptionSpan.textContent = data.description || "";
 
-          // Afficher photos
-          if (data.photos && data.photos.length > 0) {
+          if(data.photos && data.photos.length > 0) {
             photosDiv.innerHTML = "";
             data.photos.forEach(p => {
               const img = document.createElement("img");
@@ -82,24 +132,25 @@
             });
           }
 
-          // Boutons des salles
           const rooms = data.rooms || [];
           Object.keys(buttons).forEach(key => {
-            if (!rooms.includes(key)) {
+            if(!rooms.includes(key)) {
               buttons[key].disabled = true;
             } else {
               buttons[key].addEventListener("click", () => {
-                if (key === "serieux") window.location.href = "authentique.html";
-                if (key === "amical") window.location.href = "amicale.html";
-                if (key === "fun") window.location.href = "fun.html";
+                if(key === "serieux") window.location.href = "authentique.html";
+                if(key === "amical") window.location.href = "amicale.html";
+                if(key === "fun") window.location.href = "fun.html";
               });
             }
           });
-
         }
-      } catch(err) {
-        console.error("Erreur récupération DB :", err);
-      }
+      } catch(err) { console.error(err); }
+    });
+
+    // Bouton Mon profil (peut rediriger vers creation-profil.html)
+    document.getElementById("myProfile").addEventListener("click", () => {
+      window.location.href = "creation-profil.html";
     });
   </script>
 </body>
