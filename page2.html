@@ -129,7 +129,7 @@
     onAuthStateChanged(auth, async (user) => {
       if (!user) return;
 
-      const snapshot = await get(ref(db, 'users/' + user.uid + '/chosenRooms'));
+      const snapshot = await get(ref(db, 'users/' + user.uid + '/Rooms'));
       const rooms = snapshot.val() || [];
 
       // Affiche seulement les boutons correspondant aux salles choisies
