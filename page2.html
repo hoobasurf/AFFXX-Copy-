@@ -116,48 +116,53 @@
   </div>
 
   <script type="module">
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-    import { app } from "./firebase.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+  import { app } from "./firebase.js";
 
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
 
-    const content = document.getElementById("content");
-    const chosenIcons = document.getElementById("chosenIcons");
+  const content = document.getElementById("content");
+  const chosenIcons = document.getElementById("chosenIcons");
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
 
-      const snapshot = await get(ref(db, 'users/' + user.uid + '/Rooms'));
-      const rooms = snapshot.val() || [];
+    // ✅ On lit maintenant "rooms" (comme dans ta DB)
+    const snapshot = await get(ref(db, 'users/' + user.uid + '/rooms'));
+    const rooms = snapshot.val() || [];
 
-      // Affiche seulement les boutons correspondant aux salles choisies
-      const buttons = content.querySelectorAll('.btn');
-      buttons.forEach(btn => {
-        if (!rooms.includes(btn.dataset.room)) btn.style.display = 'none';
-      });
+    // ✅ Masquer les boutons non choisis
+    const buttons = content.querySelectorAll('.btn');
+    buttons.forEach(btn => {
+      if (!rooms.includes(btn.dataset.room)) {
+        btn.style.display = 'none';
+      }
+    });
 
-      // Affiche les icônes des salles choisies
-      chosenIcons.innerHTML = '';
-      rooms.forEach(room => {
-        let src = '';
-        if(room==='serieux') src='serieux.png';
-        if(room==='amical') src='amical.png';
-        if(room==='fun') src='fun.png';
+    // ✅ Afficher uniquement les icônes des salles choisies
+    chosenIcons.innerHTML = '';
+    rooms.forEach(room => {
+      let src = '';
+      if(room==='serieux') src='serieux.png';
+      if(room==='amical') src='amical.png';
+      if(room==='fun') src='fun.png';
+      if(src){
         const img = document.createElement('img');
         img.src = src;
         img.alt = room;
         chosenIcons.appendChild(img);
-      });
+      }
+    });
 
-      // Ajouter navigation au clic
-      buttons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          window.location.href = btn.dataset.room + '.html';
-        });
+    // ✅ Navigation
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        window.location.href = btn.dataset.room + '.html';
       });
     });
-  </script>
+  });
+</script>
 </body>
 </html>
