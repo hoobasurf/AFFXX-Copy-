@@ -63,18 +63,6 @@ button {
   transition: 0.3s;
 }
 button:hover { box-shadow: 0 0 20px #ff66cc; }
-.rooms {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 15px;
-}
-.rooms label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin: 0;
-  color: #fff;
-}
 .preview {
   display: flex;
   flex-wrap: wrap;
@@ -106,13 +94,6 @@ button:hover { box-shadow: 0 0 20px #ff66cc; }
 
     <label for="description">Description :</label>
     <textarea id="description" rows="3" placeholder="Décrivez-vous..."></textarea>
-
-    <label>Salles :</label>
-    <div class="rooms">
-      <label><input type="checkbox" name="rooms" value="serieux"> Sérieux</label>
-      <label><input type="checkbox" name="rooms" value="amical"> Amical</label>
-      <label><input type="checkbox" name="rooms" value="fun"> Fun</label>
-    </div>
 
     <label for="photos">Photos (max 5) :</label>
     <input type="file" id="photos" accept="image/*" multiple>
