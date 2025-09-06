@@ -1,106 +1,202 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Créer Profil</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
-<style>
-body {
-  margin: 0;
-  font-family: 'Orbitron', sans-serif;
-  background: url("planete-magique.jpg") no-repeat center center/cover;
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-.container {
-  background: rgba(0,0,0,0.6);
-  padding: 25px;
-  border-radius: 15px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 0 20px #ff66cc;
-  text-align: center;
-}
-h1 {
-  color: #ff66cc;
-  text-shadow: 0 0 10px #ff66cc;
-  margin-bottom: 20px;
-}
-label {
-  display: block;
-  text-align: left;
-  margin-top: 12px;
-  margin-bottom: 5px;
-  color: #ffccff;
-  font-size: 0.9em;
-}
-input, textarea {
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  border: 2px solid #ff66cc;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  font-family: 'Orbitron';
-}
-input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.6); }
-textarea { resize: none; }
-button {
-  margin-top: 20px;
-  padding: 12px;
-  width: 100%;
-  border: none;
-  border-radius: 8px;
-  background: #ff66cc;
-  color: white;
-  font-size: 1em;
-  cursor: pointer;
-  box-shadow: 0 0 10px #ff66cc;
-  transition: 0.3s;
-}
-button:hover { box-shadow: 0 0 20px #ff66cc; }
-.preview {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 10px;
-}
-.preview img {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 2px solid #ff66cc;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Créer Profil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      background: url("planete-magique.jpg") no-repeat center center/cover;
+      font-family: 'Orbitron', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .form-container {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      width: 90%;
+      max-width: 450px;
+      box-shadow: 0 0 25px #ff66cc;
+    }
+
+    h1 {
+      color: #ff6aab;
+      text-shadow: 0 0 15px #ff6aab, 0 0 30px #d600d6;
+      margin-bottom: 20px;
+    }
+
+    input, textarea {
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 16px;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+
+    textarea {
+      resize: none;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      color: #ff66cc;
+      text-shadow: 0 0 10px #ff66cc;
+    }
+
+    .preview {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .preview img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #ff66cc;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #ff6aab;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 0 15px #ff6aab, 0 0 30px #d600d6;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      box-shadow: 0 0 25px #ff6aab, 0 0 40px #d600d6;
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-  <h1>Créer Profil</h1>
-  <form id="profileForm">
-    <label for="pseudo">Pseudo :</label>
-    <input type="text" id="pseudo" placeholder="Entrez votre pseudo" required>
+  <div class="form-container">
+    <h1>Créer Profil</h1>
+    <form id="profileForm">
+      <input type="text" id="pseudo" placeholder="Pseudo" required />
+      <input type="number" id="age" placeholder="Âge" required />
+      <input type="text" id="location" placeholder="Lieu" required />
+      <textarea id="description" rows="3" placeholder="Description"></textarea>
 
-    <label for="age">Âge :</label>
-    <input type="number" id="age" placeholder="Entrez votre âge" required>
+      <label for="photos">Photos (max 5) :</label>
+      <input type="file" id="photos" accept="image/*" multiple />
+      <div class="preview" id="preview"></div>
 
-    <label for="location">Lieu :</label>
-    <input type="text" id="location" placeholder="Entrez votre ville" required>
+      <button type="submit">Enregistrer Profil</button>
+    </form>
+  </div>
 
-    <label for="description">Description :</label>
-    <textarea id="description" rows="3" placeholder="Décrivez-vous..."></textarea>
+  <script type="module">
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { app } from "./firebase.js";
 
-    <label for="photos">Photos (max 5) :</label>
-    <input type="file" id="photos" accept="image/*" multiple>
-    <div class="preview" id="preview"></div>
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-    <button type="submit">Enregistrer Profil</button>
-  </form>
-</div>
+    const form = document.getElementById("profileForm");
+    const photosInput = document.getElementById("photos");
+    const preview = document.getElementById("preview");
+
+    let currentUserId = null;
+
+    // ✅ Vérifier si connecté
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        window.location.href = "inscription.html";
+      } else {
+        currentUserId = user.uid;
+      }
+    });
+
+    // ✅ Prévisualisation des photos
+    photosInput.addEventListener("change", () => {
+      let files = Array.from(photosInput.files).slice(0, 5);
+      const dt = new DataTransfer();
+      files.forEach(file => dt.items.add(file));
+      photosInput.files = dt.files;
+
+      preview.innerHTML = "";
+      files.forEach(file => {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        preview.appendChild(img);
+      });
+    });
+
+    // ✅ Enregistrer profil
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const pseudo = document.getElementById("pseudo").value.trim();
+      const age = document.getElementById("age").value.trim();
+      const location = document.getElementById("location").value.trim();
+      const description = document.getElementById("description").value.trim();
+
+      let photosData = [];
+      if (photosInput.files.length > 0) {
+        for (let i = 0; i < photosInput.files.length; i++) {
+          const file = photosInput.files[i];
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            photosData.push(e.target.result);
+
+            if (photosData.length === photosInput.files.length) {
+              saveProfile(pseudo, age, location, description, photosData);
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      } else {
+        saveProfile(pseudo, age, location, description, []);
+      }
+    });
+
+    function saveProfile(pseudo, age, location, description, photos) {
+      update(ref(db, "users/" + currentUserId), {
+        pseudo,
+        age,
+        location,
+        description,
+        photos
+      })
+      .then(() => {
+        alert("Profil enregistré avec succès !");
+        window.location.href = "page2.html";  // ✅ Redirection vers Mon Profil
+      })
+      .catch(err => {
+        console.error("Erreur :", err);
+        alert("Erreur lors de l’enregistrement !");
+      });
+    }
+  </script>
 </body>
 </html>
