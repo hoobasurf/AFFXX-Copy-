@@ -6,13 +6,53 @@
 <title>Mon Profil</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
-body { margin:0; font-family:'Orbitron',sans-serif; background:url("planete-magique.jpg") no-repeat center center/cover; color:#fff; display:flex; justify-content:center; align-items:center; min-height:100vh;}
-.container { background: rgba(0,0,0,0.6); padding:25px; border-radius:15px; width:90%; max-width:500px; text-align:center; box-shadow:0 0 20px #ff66cc;}
-h1 { color:#ff66cc; text-shadow:0 0 10px #ff66cc; margin-bottom:20px;}
-.info { margin-bottom:20px; text-align:left;}
-.info div { margin:8px 0; }
-.photos { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:15px 0;}
-.photos img { width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc; cursor:pointer; transition:transform 0.2s;}
+body {
+  margin:0;
+  font-family:'Orbitron',sans-serif;
+  background:url("planete-magique.jpg") no-repeat center center/cover;
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+.container {
+  background: rgba(0,0,0,0.6);
+  padding:25px;
+  border-radius:15px;
+  width:90%;
+  max-width:500px;
+  text-align:center;
+  box-shadow:0 0 20px #ff66cc;
+}
+h1 {
+  color:#ff66cc;
+  text-shadow:0 0 10px #ff66cc;
+  margin-bottom:20px;
+}
+.info {
+  margin-bottom:20px;
+  text-align:left;
+}
+.info div {
+  margin:8px 0;
+}
+.photos {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+  margin:15px 0;
+}
+.photos img {
+  width:70px;
+  height:70px;
+  object-fit:cover;
+  border-radius:8px;
+  border:2px solid #ff66cc;
+  cursor:pointer;
+  transition:transform 0.2s;
+}
 .photos img:hover { transform: scale(1.1);}
 button { margin-top:15px; padding:12px; width:100%; border:none; border-radius:8px; background:#ff66cc; color:white; font-size:1em; cursor:pointer; box-shadow:0 0 10px #ff66cc;}
 button:hover { box-shadow:0 0 20px #ff66cc;}
@@ -21,8 +61,19 @@ textarea { width:100%; margin:10px 0; padding:10px; border-radius:8px; border:no
 .preview { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;}
 .preview img { width:60px; height:60px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc;}
 .room-btns { display:flex; justify-content:space-around; margin-top:15px; flex-wrap:wrap; gap:10px;}
-.room-btns button { width:30%; border:2px solid #ff66cc; background:transparent; color:#ff66cc; font-weight:bold; animation: neon 1.5s ease-in-out infinite alternate; cursor:pointer;}
-@keyframes neon { 0% { box-shadow:0 0 5px #ff66cc,0 0 10px #ff66cc;} 100% { box-shadow:0 0 20px #ff66cc,0 0 40px #ff66cc;} }
+.room-btns button {
+  width:30%;
+  border:2px solid #ff66cc;
+  background:transparent;
+  color:#ff66cc;
+  font-weight:bold;
+  animation: neon 1.5s ease-in-out infinite alternate;
+  cursor:pointer;
+}
+@keyframes neon {
+  0% { box-shadow:0 0 5px #ff66cc,0 0 10px #ff66cc;}
+  100% { box-shadow:0 0 20px #ff66cc,0 0 40px #ff66cc;}
+}
 </style>
 </head>
 <body>
@@ -104,7 +155,10 @@ function displayPhotos(photos){
   });
 }
 
-editBtn.addEventListener("click",()=>{ editSection.style.display = editSection.style.display==="none"?"block":"none"; newDesc.value = descSpan.textContent!=="Non renseignée"?descSpan.textContent:""; });
+editBtn.addEventListener("click",()=>{ 
+  editSection.style.display = editSection.style.display==="none"?"block":"none"; 
+  newDesc.value = descSpan.textContent!=="Non renseignée"?descSpan.textContent:""; 
+});
 
 newPhotos.addEventListener("change",()=>{
   let files = Array.from(newPhotos.files);
