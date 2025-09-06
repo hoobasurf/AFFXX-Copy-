@@ -1,319 +1,264 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mon Profil</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      background: url("planete-magique.jpg") no-repeat center center/cover;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon Profil</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
+<style>
+body {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  background: url("planete-magique.jpg") no-repeat center center/cover;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+.container {
+  background: rgba(0,0,0,0.6);
+  padding: 25px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 0 20px #ff66cc;
+  text-align: center;
+}
+h1 { color: #ff66cc; text-shadow:0 0 10px #ff66cc; margin-bottom:20px; }
+.info { margin-bottom: 20px; text-align: left; }
+.info div { margin: 8px 0; }
+.photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 15px 0;
+}
+.photos img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #ff66cc;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.photos img:hover { transform: scale(1.1); }
+button { 
+  margin-top: 15px; 
+  padding: 12px; 
+  width: 100%; 
+  border: none; 
+  border-radius: 8px; 
+  font-size: 1em; 
+  cursor: pointer; 
+  box-shadow: 0 0 10px #ff66cc; 
+  transition: 0.3s; 
+}
+button:hover { box-shadow:0 0 20px #ff66cc; }
 
-    .container {
-      background: rgba(0,0,0,0.6);
-      padding: 25px;
-      border-radius: 15px;
-      width: 90%;
-      max-width: 500px;
-      box-shadow: 0 0 20px #ff66cc;
-      text-align: center;
-    }
+#editBtn { background:#ff66cc; color:white; }
+.edit-section { margin-top:20px; display:none; }
+textarea, input[type="file"] {
+  width:100%;
+  margin:10px 0;
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  font-family:'Orbitron';
+}
+.preview { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+.preview img { width:60px; height:60px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc; }
 
-    h1 {
-      color: #ff66cc;
-      text-shadow: 0 0 10px #ff66cc;
-      margin-bottom: 20px;
-    }
+.lightbox {
+  display:none;
+  position:fixed;
+  z-index:1000;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.9);
+  justify-content:center;
+  align-items:center;
+}
+.lightbox img { max-width:90%; max-height:90%; border-radius:10px; box-shadow:0 0 25px #ff66cc; }
 
-    .info {
-      margin-bottom: 20px;
-      text-align: left;
-    }
+/* 🔹 Boutons salles */
+.rooms-btns {
+  display:flex;
+  justify-content:space-between;
+  margin-top:20px;
+  gap:10px;
+}
+.rooms-btns button {
+  flex:1;
+  padding:12px;
+  border-radius:8px;
+  border:none;
+  font-weight:bold;
+}
+.rooms-btns .serieux { background:#ff0066; color:white; box-shadow:0 0 10px #ff66cc; }
+.rooms-btns .amical { background:#00ccff; color:white; box-shadow:0 0 10px #66f; }
+.rooms-btns .fun { background:#ffcc00; color:black; box-shadow:0 0 10px #ff0; }
+.rooms-btns button:hover { transform:scale(1.05); }
 
-    .info div {
-      margin: 8px 0;
-    }
-
-    .photos {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin: 15px 0;
-    }
-
-    .photos img {
-      width: 70px;
-      height: 70px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 2px solid #ff66cc;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-
-    .photos img:hover {
-      transform: scale(1.1);
-    }
-
-    button {
-      margin-top: 15px;
-      padding: 12px;
-      width: 100%;
-      border: none;
-      border-radius: 8px;
-      font-size: 1em;
-      cursor: pointer;
-      box-shadow: 0 0 10px #ff66cc;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px #ff66cc;
-    }
-
-    /* Boutons des salles */
-    .room-btn {
-      margin: 10px 5px 0 5px;
-      width: 30%;
-      font-weight: bold;
-    }
-
-    #serieuxBtn { background:#ff4444; color:white; }
-    #amicalBtn { background:#44ff44; color:black; }
-    #funBtn { background:#4444ff; color:white; }
-
-    /* ✅ Lightbox pour zoom photo */
-    .lightbox {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9);
-      justify-content: center;
-      align-items: center;
-    }
-
-    .lightbox img {
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 10px;
-      box-shadow: 0 0 25px #ff66cc;
-    }
-
-    .edit-section {
-      margin-top: 20px;
-      display: none;
-    }
-
-    textarea, input[type="file"] {
-      width: 100%;
-      margin: 10px 0;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      font-family: 'Orbitron';
-    }
-
-    .preview {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
-
-    .preview img {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 2px solid #ff66cc;
-    }
-  </style>
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Mon Profil</h1>
-    <div class="info">
-      <div><strong>Pseudo :</strong> <span id="pseudo"></span></div>
-      <div><strong>Âge :</strong> <span id="age"></span></div>
-      <div><strong>Lieu :</strong> <span id="location"></span></div>
-      <div><strong>Description :</strong> <span id="description"></span></div>
-      <div><strong>Salles :</strong> <span id="rooms"></span></div>
-    </div>
-
-    <div class="photos" id="photosContainer"></div>
-
-    <!-- Boutons pour les salles -->
-    <button class="room-btn" id="serieuxBtn">Sérieux</button>
-    <button class="room-btn" id="amicalBtn">Amical</button>
-    <button class="room-btn" id="funBtn">Fun</button>
-
-    <button id="editBtn">Modifier</button>
-
-    <div class="edit-section" id="editSection">
-      <textarea id="newDescription" rows="3" placeholder="Nouvelle description"></textarea>
-      <input type="file" id="newPhotos" accept="image/*" multiple>
-      <div class="preview" id="preview"></div>
-      <button id="saveBtn">Enregistrer</button>
-    </div>
+<div class="container">
+  <h1>Mon Profil</h1>
+  <div class="info">
+    <div><strong>Pseudo :</strong> <span id="pseudo"></span></div>
+    <div><strong>Âge :</strong> <span id="age"></span></div>
+    <div><strong>Lieu :</strong> <span id="location"></span></div>
+    <div><strong>Description :</strong> <span id="description"></span></div>
   </div>
 
-  <!-- ✅ Lightbox -->
-  <div class="lightbox" id="lightbox">
-    <img id="lightboxImg" src="" alt="Zoom photo">
+  <div class="photos" id="photosContainer"></div>
+
+  <button id="editBtn">Modifier</button>
+  <div class="edit-section" id="editSection">
+    <textarea id="newDescription" rows="3" placeholder="Nouvelle description"></textarea>
+    <input type="file" id="newPhotos" accept="image/*" multiple>
+    <div class="preview" id="preview"></div>
+    <button id="saveBtn">Enregistrer</button>
   </div>
 
-  <script type="module">
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-    import { app } from "./firebase.js";
+  <!-- 🔹 Boutons Salles selon choix inscription -->
+  <div class="rooms-btns" id="roomsButtons"></div>
+</div>
 
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+<div class="lightbox" id="lightbox">
+  <img id="lightboxImg" src="" alt="Zoom photo">
+</div>
 
-    const pseudoSpan = document.getElementById("pseudo");
-    const ageSpan = document.getElementById("age");
-    const locationSpan = document.getElementById("location");
-    const descSpan = document.getElementById("description");
-    const roomsSpan = document.getElementById("rooms");
-    const photosContainer = document.getElementById("photosContainer");
+<script type="module">
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { app } from "./firebase.js";
 
-    const editBtn = document.getElementById("editBtn");
-    const editSection = document.getElementById("editSection");
-    const newDesc = document.getElementById("newDescription");
-    const newPhotos = document.getElementById("newPhotos");
-    const preview = document.getElementById("preview");
-    const saveBtn = document.getElementById("saveBtn");
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-    const lightbox = document.getElementById("lightbox");
-    const lightboxImg = document.getElementById("lightboxImg");
+const pseudoSpan = document.getElementById("pseudo");
+const ageSpan = document.getElementById("age");
+const locationSpan = document.getElementById("location");
+const descSpan = document.getElementById("description");
+const photosContainer = document.getElementById("photosContainer");
 
-    const serieuxBtn = document.getElementById("serieuxBtn");
-    const amicalBtn = document.getElementById("amicalBtn");
-    const funBtn = document.getElementById("funBtn");
+const editBtn = document.getElementById("editBtn");
+const editSection = document.getElementById("editSection");
+const newDesc = document.getElementById("newDescription");
+const newPhotos = document.getElementById("newPhotos");
+const preview = document.getElementById("preview");
+const saveBtn = document.getElementById("saveBtn");
 
-    let currentUserId = null;
-    let currentPhotos = [];
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
 
-    onAuthStateChanged(auth, async user => {
-      if (!user) {
-        alert("Vous devez être connecté !");
-        window.location.href = "inscription.html";
-        return;
-      }
-      currentUserId = user.uid;
+const roomsButtonsDiv = document.getElementById("roomsButtons");
 
-      const snap = await get(ref(db, "users/" + user.uid));
-      if (snap.exists()) {
-        const data = snap.val();
-        pseudoSpan.textContent = data.pseudo || "";
-        ageSpan.textContent = data.age || "";
-        locationSpan.textContent = data.location || "";
-        descSpan.textContent = data.description || "";
-        roomsSpan.textContent = data.rooms ? data.rooms.join(", ") : "";
-        currentPhotos = data.photos || [];
-        displayPhotos(currentPhotos);
-      }
+let currentUserId = null;
+let currentPhotos = [];
+let userRooms = [];
 
-      // Redirections des boutons
-      serieuxBtn.onclick = () => window.location.href = "authentique.html";
-      amicalBtn.onclick = () => window.location.href = "amicale.html";
-      funBtn.onclick = () => window.location.href = "fun.html";
+onAuthStateChanged(auth, async user => {
+  if(!user){
+    alert("Vous devez être connecté !");
+    window.location.href = "inscription.html";
+    return;
+  }
+  currentUserId = user.uid;
+
+  const snap = await get(ref(db, "users/" + user.uid));
+  if(snap.exists()){
+    const data = snap.val();
+    pseudoSpan.textContent = data.pseudo || "";
+    ageSpan.textContent = data.age || "";
+    locationSpan.textContent = data.location || "";
+    descSpan.textContent = data.description || "";
+    currentPhotos = data.photos || [];
+    displayPhotos(currentPhotos);
+
+    // 🔹 Boutons salles selon inscription
+    userRooms = data.rooms || [];
+    renderRoomsButtons(userRooms);
+  }
+});
+
+function displayPhotos(photos){
+  photosContainer.innerHTML="";
+  photos.forEach(url=>{
+    const img = document.createElement("img");
+    img.src = url;
+    img.addEventListener("click", ()=>{
+      lightboxImg.src = url;
+      lightbox.style.display="flex";
     });
+    photosContainer.appendChild(img);
+  });
+}
 
-    function displayPhotos(photos) {
-      photosContainer.innerHTML = "";
-      photos.forEach(url => {
-        const img = document.createElement("img");
-        img.src = url;
-        img.addEventListener("click", () => {
-          lightboxImg.src = url;
-          lightbox.style.display = "flex";
-        });
-        photosContainer.appendChild(img);
-      });
-    }
+lightbox.addEventListener("click", ()=>{ lightbox.style.display="none"; });
 
-    // Fermer lightbox au clic
-    lightbox.addEventListener("click", () => {
-      lightbox.style.display = "none";
-    });
+editBtn.addEventListener("click", ()=>{
+  editSection.style.display = editSection.style.display==="none"?"block":"none";
+  newDesc.value = descSpan.textContent;
+});
 
-    // Mode édition
-    editBtn.addEventListener("click", () => {
-      editSection.style.display = editSection.style.display === "none" ? "block" : "none";
-      newDesc.value = descSpan.textContent;
-    });
+// 🔹 Enregistrer
+saveBtn.addEventListener("click", ()=>{
+  const desc = newDesc.value.trim();
+  const files = Array.from(newPhotos.files);
 
-    // Limite 5 photos
-    newPhotos.addEventListener("change", () => {
-      let files = Array.from(newPhotos.files);
-      if (files.length > 5) {
-        alert("Vous pouvez sélectionner au maximum 5 photos !");
-        files = files.slice(0, 5);
-      }
-      const dt = new DataTransfer();
-      files.forEach(file => dt.items.add(file));
-      newPhotos.files = dt.files;
-
-      preview.innerHTML = "";
-      files.forEach(file => {
-        const img = document.createElement("img");
-        img.src = URL.createObjectURL(file);
-        preview.appendChild(img);
-      });
-    });
-
-    // Sauvegarde
-    saveBtn.addEventListener("click", async () => {
-      const desc = newDesc.value.trim();
-      let updatedPhotos = currentPhotos;
-
-      if (newPhotos.files.length > 0) {
-        updatedPhotos = [];
-        for (let i = 0; i < newPhotos.files.length; i++) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            updatedPhotos.push(e.target.result);
-            if (updatedPhotos.length === newPhotos.files.length) {
-              updateProfile(desc, updatedPhotos);
-            }
-          };
-          reader.readAsDataURL(newPhotos.files[i]);
+  if(files.length > 0){
+    let updatedPhotos = [];
+    let loaded = 0;
+    files.forEach(file=>{
+      const reader = new FileReader();
+      reader.onload=(e)=>{
+        updatedPhotos.push(e.target.result);
+        loaded++;
+        if(loaded === files.length){
+          updateProfile(desc, updatedPhotos);
         }
-      } else {
-        updateProfile(desc, updatedPhotos);
-      }
+      };
+      reader.readAsDataURL(file);
     });
+  } else {
+    updateProfile(desc, currentPhotos);
+  }
+});
 
-    function updateProfile(desc, photos) {
-      update(ref(db, "users/" + currentUserId), {
-        description: desc,
-        photos: photos
-      }).then(() => {
-        descSpan.textContent = desc;
-        currentPhotos = photos;
-        displayPhotos(currentPhotos);
-        preview.innerHTML = "";
-        newPhotos.value = "";
-        alert("Profil mis à jour !");
-        editSection.style.display = "none";
-      }).catch(err => {
-        console.error("Erreur mise à jour :", err);
-        alert("Erreur lors de la mise à jour !");
-      });
-    }
-  </script>
+function updateProfile(desc, photos){
+  update(ref(db, "users/"+currentUserId), {
+    description: desc,
+    photos: photos
+  }).then(()=>{
+    descSpan.textContent=desc;
+    currentPhotos = photos;
+    displayPhotos(currentPhotos);
+    preview.innerHTML="";
+    newPhotos.value="";
+    alert("Profil mis à jour !");
+    editSection.style.display="none";
+  }).catch(err=>{
+    console.error(err);
+    alert("Erreur lors de la mise à jour !");
+  });
+}
+
+// 🔹 Création boutons salles
+function renderRoomsButtons(rooms){
+  roomsButtonsDiv.innerHTML="";
+  rooms.forEach(r=>{
+    const btn = document.createElement("button");
+    if(r==="serieux"){ btn.textContent="Sérieux"; btn.className="serieux"; btn.onclick=()=>window.location.href="authentique.html"; }
+    if(r==="amical"){ btn.textContent="Amical"; btn.className="amical"; btn.onclick=()=>window.location.href="amicale.html"; }
+    if(r==="fun"){ btn.textContent="Fun"; btn.className="fun"; btn.onclick=()=>window.location.href="fun.html"; }
+    roomsButtonsDiv.appendChild(btn);
+  });
+}
+</script>
 </body>
 </html>
