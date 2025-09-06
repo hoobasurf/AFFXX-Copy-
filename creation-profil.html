@@ -106,40 +106,35 @@
     });
 
     // Soumission formulaire
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const user = auth.currentUser;
-      if (!user) return alert("Non connecté");
+ form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const user = auth.currentUser;
+  if (!user) return alert("Non connecté");
 
-      const age = document.getElementById("age").value;
-      const location = document.getElementById("location").value.trim();
-      const description = document.getElementById("description").value.trim();
+  const age = document.getElementById("age").value;
+  const location = document.getElementById("location").value.trim();
+  const description = document.getElementById("description").value.trim();
+  const selectedRooms = []; 
+  document.querySelectorAll("input[name='rooms']:checked").forEach(cb => selectedRooms.push(cb.value));
 
-      // Upload photos
-      const photoURLs = [];
-      for (let i = 0; i < photoFiles.length; i++) {
-        const file = photoFiles[i];
-        const fileRef = sRef(storage, `users/${user.uid}/photo${i}`);
-        await uploadBytes(fileRef, file);
-        const url = await getDownloadURL(fileRef);
-        photoURLs.push(url);
-      }
+  // ⚡ Supprime la partie upload des photos
+  // const photoURLs = [];
+  // for (let i = 0; i < photoFiles.length; i++) { ... }
 
-      // Mise à jour DB (ne touche pas aux salles)
-      await update(ref(db, `users/${user.uid}`), {
-        age,
-        location,
-        description,
-        photos: photoURLs,
-        updatedAt: new Date().toISOString()
-      });
+  // Sauvegarde profil dans DB
+  await set(ref(db, "users/" + user.uid), {
+    email: user.email,
+    age,
+    location,
+    description,
+    chosenRooms: selectedRooms,
+    joinedAt: new Date().toISOString()
+  });
 
-      // Message et redirection
-      messageDiv.textContent = "Profil enregistré ! Redirection…";
-      setTimeout(() => {
-        window.location.href = "page2.html";
-      }, 1500);
-    });
+  // Message + redirection
+  alert("Profil enregistré !");
+  window.location.href = "page2.html";
+});
   </script>
 </body>
 </html>
