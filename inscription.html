@@ -129,7 +129,7 @@
         .catch(err=>console.error("Erreur DB :", err));
     }
 
-    // Si utilisateur déjà connecté → redirection avec fade-out
+    // Redirection si déjà connecté
     onAuthStateChanged(auth, (user) => {
       if (user) {
         formContainer.classList.add("fade-out");
@@ -141,7 +141,6 @@
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
       const selectedRooms = Array.from(document.querySelectorAll('input[name="rooms"]:checked'))
