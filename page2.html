@@ -1,168 +1,57 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Affinix • Connexions</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page 2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
-    html, body {
-      margin: 0; padding: 0;
-      height: 100%; overflow: hidden;
-      font-family: 'Segoe UI', sans-serif;
-      background: black;
+    body {
+      margin: 0; padding: 20px;
+      font-family: 'Orbitron', sans-serif;
+      background: #111;
+      color: #ff66cc;
     }
-
-    body::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height:100%;
-      background: url("planete-magique.jpg") no-repeat center center/cover;
-      z-index: 0;
-      animation: moveGlow 60s ease-in-out infinite alternate;
-      filter: brightness(1.1) saturate(1.2);
-    }
-
-    @keyframes moveGlow {
-      0% { transform: scale(1) translate(0, 0); }
-      50% { transform: scale(1.02) translate(-10px, 5px); }
-      100% { transform: scale(1) translate(8px, -6px); }
-    }
-
-    .light-overlay {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: radial-gradient(circle at center, rgba(255,0,255,0.07), transparent 70%);
-      animation: pulse 6s ease-in-out infinite;
-      z-index: 1; pointer-events: none;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.1; }
-      50% { opacity: 0.3; }
-    }
-
-    .content {
-      position: relative;
-      z-index: 2;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 25px;
-      padding: 20px;
-    }
-
-    .btn {
-      padding: 14px 28px;
-      border: none;
-      border-radius: 40px;
-      background: rgba(255, 255, 255, 0.05);
-      color: #fff;
-      font-size: 1.2em;
-      backdrop-filter: blur(5px);
-      position: relative;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      transition: all 0.4s ease;
-      animation: fadeZoomIn 1.2s ease forwards;
-      opacity: 0;
-    }
-
-    .btn:nth-child(1) { animation-delay: 0.4s; }
-    .btn:nth-child(2) { animation-delay: 0.8s; }
-    .btn:nth-child(3) { animation-delay: 1.2s; }
-
-    @keyframes fadeZoomIn {
-      0% { opacity: 0; transform: scale(0.8); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-
-    .btn::before {
-      content: "";
-      position: absolute;
-      top: -10px;
-      left: -10px;
-      right: -10px;
-      bottom: -10px;
-      background: radial-gradient(circle, rgba(255,0,255,0.5), rgba(255,0,255,0) 70%);
-      border-radius: 50px;
-      z-index: -1;
-      opacity: 0.6;
-      animation: neonPulse 2s infinite;
-      filter: blur(8px);
-    }
-
-    .btn:hover { transform: scale(1.08); }
-    @keyframes neonPulse { 0%,100%{opacity:0.4}50%{opacity:0.9} }
-
-    /* Icônes des salles choisies */
-    .chosen-icons { display:flex; gap:10px; margin-top:15px; }
-    .chosen-icons img { width:50px; height:50px; filter: drop-shadow(0 0 5px #ff66cc); border-radius:12px; }
-
-    @media (max-width: 600px) { .btn { font-size:1em; padding:12px 20px; } }
+    h1 { text-align: center; margin-bottom: 30px; }
+    .info { max-width: 400px; margin: auto; }
+    .info div { margin-bottom: 15px; }
   </style>
 </head>
 <body>
-  <div class="light-overlay"></div>
-  <div class="content" id="content">
-    <a href="#" class="btn" data-room="serieux">Connexion Authentique sérieuse</a>
-    <a href="#" class="btn" data-room="amical">Connexion Sincère amicale</a>
-    <a href="#" class="btn" data-room="fun">Connexion Fun</a>
-    <div class="chosen-icons" id="chosenIcons"></div>
+  <h1>Bienvenue sur Page 2</h1>
+  <div class="info">
+    <div><strong>Email :</strong> <span id="email"></span></div>
+    <div><strong>Salles choisies :</strong> <span id="rooms"></span></div>
   </div>
 
   <script type="module">
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-  import { app } from "./firebase.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { app } from "./firebase.js";
 
-  const auth = getAuth(app);
-  const db = getDatabase(app);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-  const content = document.getElementById("content");
-  const chosenIcons = document.getElementById("chosenIcons");
+    const emailSpan = document.getElementById("email");
+    const roomsSpan = document.getElementById("rooms");
 
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) return;
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        alert("Vous devez être connecté !");
+        window.location.href = "inscription.html";
+        return;
+      }
 
-    // ✅ On lit maintenant "rooms" (comme dans ta DB)
-    const snapshot = await get(ref(db, 'users/' + user.uid + '/rooms'));
-    const rooms = snapshot.val() || [];
+      emailSpan.textContent = user.email;
 
-    // ✅ Masquer les boutons non choisis
-    const buttons = content.querySelectorAll('.btn');
-    buttons.forEach(btn => {
-      if (!rooms.includes(btn.dataset.room)) {
-        btn.style.display = 'none';
+      // Récupérer les salles depuis la DB
+      const snap = await get(ref(db, `users/${user.uid}/rooms`));
+      if (snap.exists()) {
+        roomsSpan.textContent = snap.val().join(", ");
+      } else {
+        roomsSpan.textContent = "Aucune salle sélectionnée";
       }
     });
-
-    // ✅ Afficher uniquement les icônes des salles choisies
-    chosenIcons.innerHTML = '';
-    rooms.forEach(room => {
-      let src = '';
-      if(room==='serieux') src='serieux.png';
-      if(room==='amical') src='amical.png';
-      if(room==='fun') src='fun.png';
-      if(src){
-        const img = document.createElement('img');
-        img.src = src;
-        img.alt = room;
-        chosenIcons.appendChild(img);
-      }
-    });
-
-    // ✅ Navigation
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        window.location.href = btn.dataset.room + '.html';
-      });
-    });
-  });
-</script>
+  </script>
 </body>
 </html>
