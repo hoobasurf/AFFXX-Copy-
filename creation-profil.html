@@ -7,196 +7,156 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
     body {
-      margin:0; padding:20px;
-      font-family:'Orbitron', sans-serif;
-      background: url("ville.jpg") no-repeat center center/cover;
-      color:white;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      min-height:100vh;
+      margin: 0; padding: 0;
+      height: 100vh; display: flex; justify-content: center; align-items: center;
+      font-family: 'Orbitron', sans-serif;
+      background: url("planete-romantique.jpg") no-repeat center center/cover;
+      color: white;
     }
-
     .container {
-      background: rgba(0,0,0,0.25);
-      padding:30px;
-      border-radius:20px;
-      box-shadow: 0 0 30px #ff66cc, 0 0 60px rgba(255,102,204,0.5);
-      max-width:450px; width:90%;
-      text-align:center;
-      animation: glowPulse 2s infinite alternate;
+      background: rgba(0,0,0,0.5);
+      padding: 25px;
+      border-radius: 15px;
+      width: 90%; max-width: 400px;
+      box-shadow: 0 0 20px #ff66cc;
+      text-align: center;
     }
-
-    @keyframes glowPulse {
-      0% { box-shadow:0 0 20px #ff66cc, 0 0 40px rgba(255,102,204,0.3); }
-      100% { box-shadow:0 0 35px #ff66cc, 0 0 70px rgba(255,102,204,0.5); }
-    }
-
     h1 {
-      color:#ff66cc;
-      text-shadow:0 0 10px #ff66cc;
-      margin-bottom:20px;
+      color: #ff66cc;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #ff66cc;
     }
-
-    .photos { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:20px; }
-    .photos img { width:80px; height:80px; border-radius:10px; object-fit:cover; border:2px solid #ff66cc; box-shadow:0 0 10px #ff66cc; }
-
-    .info { margin-bottom:20px; text-align:left; }
-    .info div { margin-bottom:10px; font-size:1em; line-height:1.4em; }
-
-    .rooms { display:flex; gap:15px; justify-content:center; margin-top:10px; }
-    .rooms button {
-      padding:12px 20px; border:none; border-radius:10px; background:#ff66cc; color:white;
-      font-size:1em; cursor:pointer; box-shadow:0 0 10px #ff66cc; transition:0.3s;
-    }
-    .rooms button:hover { box-shadow:0 0 20px #ff66cc; }
-    .rooms button:disabled { opacity:0.4; cursor:default; }
-
-    #saveProfile {
-      margin-top:20px;
-      padding:15px 30px;
-      font-size:1.1em;
-      font-weight:bold;
-      color:#ff66cc;
-      background:transparent;
-      border:2px solid #000;
-      border-radius:12px;
-      text-shadow:0 0 10px #ff66cc;
-      box-shadow: 0 0 10px #ff66cc;
-      cursor:pointer;
-      animation: neonBlink 1.5s infinite alternate;
-    }
-    @keyframes neonBlink {
-      0% { box-shadow: 0 0 5px #ff66cc, 0 0 10px #ff66cc, 0 0 20px #ff66cc; }
-      100% { box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc, 0 0 30px #ff66cc; }
-    }
-
+    label { display: block; text-align: left; margin-top: 15px; font-size: 0.9em; }
     input, textarea {
-      width:100%; padding:10px; margin-top:5px;
-      border:none; border-radius:8px;
-      background: rgba(255,255,255,0.15); color:white;
-      font-family:'Orbitron'; font-size:0.9em;
+      width: 100%; padding: 10px; margin-top: 5px;
+      border: none; border-radius: 8px;
+      background: rgba(255,255,255,0.15); color: white;
+      font-family: 'Orbitron'; font-size: 0.9em;
     }
-    textarea { resize:none; }
+    textarea { resize: none; }
+    .preview { display:flex; flex-wrap: wrap; gap:10px; margin-top:10px; justify-content:center; }
+    .preview img { 
+      width:60px; height:60px; object-fit:cover; border-radius:8px; 
+      border:2px solid #ff66cc; cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .preview img:hover { transform: scale(1.1); }
+    button {
+      margin-top: 20px; padding: 12px; width: 100%;
+      border: none; border-radius: 8px;
+      background: #ff66cc; color: white; font-size: 1em; cursor: pointer;
+      box-shadow: 0 0 10px #ff66cc;
+    }
+    button:hover { box-shadow: 0 0 20px #ff66cc; }
+
+    /* Lightbox pour zoom */
+    #lightbox {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center;
+      z-index:1000;
+    }
+    #lightbox img {
+      max-width: 90%; max-height: 90%; border-radius:10px; box-shadow:0 0 25px #ff66cc;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Mon Profil</h1>
-    <div class="photos" id="photos"></div>
+    <form id="profileForm">
+      <label>Pseudo :
+        <input type="text" id="pseudo" placeholder="Votre pseudo" required>
+      </label>
+      <label>Âge :
+        <input type="number" id="age" required>
+      </label>
+      <label>Lieu :
+        <input type="text" id="location" placeholder="Votre ville" required>
+      </label>
+      <label>Description :
+        <textarea id="description" rows="3" placeholder="Parlez un peu de vous..." required></textarea>
+      </label>
 
-    <div class="info">
-      <label>Pseudo:<input type="text" id="pseudo" placeholder="Votre pseudo"></label>
-      <label>Âge:<input type="number" id="age" placeholder="Votre âge"></label>
-      <label>Lieu:<input type="text" id="location" placeholder="Votre ville"></label>
-      <label>Description:<textarea id="description" rows="3" placeholder="Parlez un peu de vous..."></textarea></label>
-    </div>
+      <label>Photos (max 5) :
+        <input type="file" id="photos" accept="image/*" multiple>
+      </label>
+      <div class="preview" id="preview"></div>
 
-    <label>Photos (max 5):<input type="file" id="photoInput" multiple accept="image/*"></label>
-
-    <div class="rooms">
-      <button id="serieux" disabled>Sérieux</button>
-      <button id="amical" disabled>Amitié</button>
-      <button id="fun" disabled>Fun</button>
-    </div>
-
-    <button id="saveProfile">Enregistrer</button>
+      <button type="submit">Enregistrer</button>
+    </form>
   </div>
 
+  <!-- Lightbox -->
+  <div id="lightbox"><img src="" alt="preview"></div>
+
   <script type="module">
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const photosDiv = document.getElementById("photos");
-    const photoInput = document.getElementById("photoInput");
-    const pseudoInput = document.getElementById("pseudo");
-    const ageInput = document.getElementById("age");
-    const locationInput = document.getElementById("location");
-    const descInput = document.getElementById("description");
-
-    const buttons = {
-      serieux: document.getElementById("serieux"),
-      amical: document.getElementById("amical"),
-      fun: document.getElementById("fun")
-    };
-
+    const form = document.getElementById("profileForm");
+    const photosInput = document.getElementById("photos");
+    const preview = document.getElementById("preview");
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = lightbox.querySelector("img");
     let photoFiles = [];
 
-    // Prévisualisation photos
-    photoInput.addEventListener("change", () => {
-      photosDiv.innerHTML = "";
-      photoFiles = Array.from(photoInput.files).slice(0,5);
+    // Prévisualisation des photos + limite 5
+    photosInput.addEventListener("change", () => {
+      let files = Array.from(photosInput.files);
+      if (files.length > 5) {
+        alert("Vous ne pouvez sélectionner que 5 photos maximum !");
+        files = files.slice(0, 5);
+      }
+      photoFiles = files;
+      preview.innerHTML = "";
       photoFiles.forEach(file => {
         const img = document.createElement("img");
         img.src = URL.createObjectURL(file);
-        photosDiv.appendChild(img);
+        img.addEventListener("click", () => {
+          lightboxImg.src = img.src;
+          lightbox.style.display = "flex";
+        });
+        preview.appendChild(img);
       });
     });
 
-    onAuthStateChanged(auth, async user => {
-      if(!user) { window.location.href="inscription.html"; return; }
-
-      // Récupérer données existantes
-      try {
-        const snap = await get(ref(db, `users/${user.uid}`));
-        if(snap.exists()) {
-          const data = snap.val();
-          pseudoInput.value = data.pseudo || "";
-          ageInput.value = data.age || "";
-          locationInput.value = data.location || "";
-          descInput.value = data.description || "";
-
-          if(data.photos && data.photos.length > 0){
-            photosDiv.innerHTML = "";
-            data.photos.forEach(p => {
-              const img = document.createElement("img");
-              img.src = p;
-              photosDiv.appendChild(img);
-            });
-          }
-
-          const rooms = data.rooms || [];
-          Object.keys(buttons).forEach(key => {
-            if(!rooms.includes(key)) buttons[key].disabled = true;
-            else buttons[key].disabled = false;
-            buttons[key].addEventListener("click", () => {
-              if(key==="serieux") window.location.href="authentique.html";
-              if(key==="amical") window.location.href="amicale.html";
-              if(key==="fun") window.location.href="fun.html";
-            });
-          });
-        }
-      } catch(err){ console.error(err); }
+    // Fermer le zoom
+    lightbox.addEventListener("click", () => {
+      lightbox.style.display = "none";
     });
 
-    document.getElementById("saveProfile").addEventListener("click", async () => {
+    // Sauvegarde profil
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
       const user = auth.currentUser;
-      if(!user) return alert("Non connecté");
+      if (!user) return alert("Non connecté");
 
-      // Créer tableau photos en base64 (pas Firebase Storage)
-      const photosData = await Promise.all(photoFiles.map(f => new Promise(res=>{
-        const reader = new FileReader();
-        reader.onload = e => res(e.target.result);
-        reader.readAsDataURL(f);
-      })));
+      const pseudo = document.getElementById("pseudo").value.trim();
+      const age = document.getElementById("age").value.trim();
+      const location = document.getElementById("location").value.trim();
+      const description = document.getElementById("description").value.trim();
 
-      await set(ref(db, `users/${user.uid}`), {
-        pseudo: pseudoInput.value.trim(),
-        age: ageInput.value.trim(),
-        location: locationInput.value.trim(),
-        description: descInput.value.trim(),
-        photos: photosData,
-        rooms: Object.keys(buttons).filter(k=>!buttons[k].disabled),
-        joinedAt: new Date().toISOString(),
-        email: user.email
+      // Convertir photos en base64
+      const photoBase64 = await Promise.all(photoFiles.map(file => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }));
+
+      await set(ref(db, "users/" + user.uid + "/profile"), {
+        pseudo, age, location, description,
+        photos: photoBase64
       });
 
       alert("Profil enregistré !");
-      window.location.href="page2.html";
+      window.location.href = "page2.html";
     });
   </script>
 </body>
