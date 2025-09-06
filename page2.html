@@ -3,93 +3,117 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Page 2</title>
+  <title>Mon Profil</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
     body {
-      margin:0; padding:0;
-      font-family:'Orbitron', sans-serif;
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
       background: url("planete-magique.jpg") no-repeat center center/cover;
-      color:white; display:flex; justify-content:center; align-items:center; height:100vh;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
     .container {
-      background: rgba(0,0,0,0.25);
-      padding:30px;
-      border-radius:20px;
-      box-shadow: 0 0 30px #ff66cc, 0 0 60px rgba(255,102,204,0.5);
-      max-width:450px; width:90%;
-      text-align:center;
-      animation: glowPulse 2s infinite alternate;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px #ff66cc;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      backdrop-filter: blur(8px);
+      animation: glow 2s infinite alternate;
     }
-
-    @keyframes glowPulse {
-      0% { box-shadow:0 0 20px #ff66cc, 0 0 40px rgba(255,102,204,0.3); }
-      100% { box-shadow:0 0 35px #ff66cc, 0 0 70px rgba(255,102,204,0.5); }
+    @keyframes glow {
+      from { box-shadow: 0 0 10px #ff66cc; }
+      to   { box-shadow: 0 0 25px #ff66cc, 0 0 40px #ff3399; }
     }
-
     h1 {
-      color:#ff66cc;
-      text-shadow: 0 0 10px #ff66cc;
-      margin-bottom:20px;
+      color: #ff66cc;
+      text-shadow: 0 0 10px #ff66cc, 0 0 20px #ff3399;
+      margin-bottom: 20px;
     }
-
-    .photos { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:20px; }
-    .photos img { width:80px; height:80px; border-radius:10px; object-fit:cover; border:2px solid #ff66cc; box-shadow:0 0 10px #ff66cc; }
-
-    .info { margin-bottom:20px; text-align:left; }
-    .info div { margin-bottom:10px; font-size:1em; line-height:1.4em; }
-
-    .rooms { display:flex; gap:15px; justify-content:center; margin-top:10px; }
-    .rooms button {
-      padding:12px 20px; border:none; border-radius:10px; background:#ff66cc; color:white;
-      font-size:1em; cursor:pointer; box-shadow:0 0 10px #ff66cc; transition:0.3s;
+    .photos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 15px;
     }
-    .rooms button:hover { box-shadow:0 0 20px #ff66cc; }
-    .rooms button:disabled { opacity:0.4; cursor:default; }
-
-    /* Bouton Mon Profil */
-    #myProfile {
-      margin-top:20px;
-      padding:15px 30px;
-      font-size:1.1em;
-      font-weight:bold;
-      color:#ff66cc;
-      background:transparent;
-      border:2px solid #000;
-      border-radius:12px;
-      text-shadow:0 0 10px #ff66cc;
+    .photos img {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 2px solid #ff66cc;
+    }
+    .info {
+      text-align: left;
+      margin: 10px 0;
+    }
+    .info strong {
+      color: #ff66cc;
+    }
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin-top: 8px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-family: 'Orbitron';
+      resize: none;
+    }
+    input[type="file"] {
+      margin-top: 10px;
+      color: white;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-family: 'Orbitron';
+      cursor: pointer;
+      background: black;
+      color: #ff66cc;
+      border: 2px solid #ff66cc;
       box-shadow: 0 0 10px #ff66cc;
-      cursor:pointer;
-      animation: neonBlink 1.5s infinite alternate;
+      animation: pulse 1.5s infinite alternate;
     }
-    @keyframes neonBlink {
-      0% { box-shadow: 0 0 5px #ff66cc, 0 0 10px #ff66cc, 0 0 20px #ff66cc; }
-      100% { box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc, 0 0 30px #ff66cc; }
+    @keyframes pulse {
+      from { box-shadow: 0 0 10px #ff66cc; }
+      to { box-shadow: 0 0 20px #ff3399; }
     }
-
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Mon Profil</h1>
-    <div class="photos" id="photos"></div>
+    <div class="photos" id="photoGallery"></div>
+
+    <div class="info"><strong>Pseudo :</strong> <span id="pseudo"></span></div>
+    <div class="info"><strong>Âge :</strong> <span id="age"></span></div>
+    <div class="info"><strong>Lieu :</strong> <span id="location"></span></div>
     <div class="info">
-      <div><strong>Pseudo :</strong> <span id="pseudo"></span></div>
-      <div><strong>Âge :</strong> <span id="age"></span></div>
-      <div><strong>Lieu :</strong> <span id="location"></span></div>
-      <div><strong>Description :</strong> <span id="description"></span></div>
+      <strong>Description :</strong>
+      <p id="descriptionText"></p>
+      <textarea id="descriptionInput" style="display:none;"></textarea>
     </div>
-    <div class="rooms">
-      <button id="serieux">Sérieux</button>
-      <button id="amical">Amitié</button>
-      <button id="fun">Fun</button>
-    </div>
-    <button id="myProfile">Mon profil</button>
+
+    <input type="file" id="photosInput" accept="image/*" multiple style="display:none;">
+    
+    <button id="editBtn">Modifier</button>
   </div>
 
   <script type="module">
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
@@ -98,59 +122,75 @@
     const pseudoSpan = document.getElementById("pseudo");
     const ageSpan = document.getElementById("age");
     const locationSpan = document.getElementById("location");
-    const descriptionSpan = document.getElementById("description");
-    const photosDiv = document.getElementById("photos");
+    const descriptionText = document.getElementById("descriptionText");
+    const descriptionInput = document.getElementById("descriptionInput");
+    const photoGallery = document.getElementById("photoGallery");
+    const photosInput = document.getElementById("photosInput");
+    const editBtn = document.getElementById("editBtn");
 
-    const buttons = {
-      serieux: document.getElementById("serieux"),
-      amical: document.getElementById("amical"),
-      fun: document.getElementById("fun")
-    };
+    let currentUserData = null;
 
-    onAuthStateChanged(auth, async user => {
-      if(!user) {
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
         window.location.href = "inscription.html";
         return;
       }
 
-      try {
-        const snap = await get(ref(db, `users/${user.uid}`));
-        if(snap.exists()) {
-          const data = snap.val();
-
-          pseudoSpan.textContent = data.pseudo || "";
-          ageSpan.textContent = data.age || "";
-          locationSpan.textContent = data.location || "";
-          descriptionSpan.textContent = data.description || "";
-
-          if(data.photos && data.photos.length > 0) {
-            photosDiv.innerHTML = "";
-            data.photos.forEach(p => {
-              const img = document.createElement("img");
-              img.src = p;
-              photosDiv.appendChild(img);
-            });
-          }
-
-          const rooms = data.rooms || [];
-          Object.keys(buttons).forEach(key => {
-            if(!rooms.includes(key)) {
-              buttons[key].disabled = true;
-            } else {
-              buttons[key].addEventListener("click", () => {
-                if(key === "serieux") window.location.href = "authentique.html";
-                if(key === "amical") window.location.href = "amicale.html";
-                if(key === "fun") window.location.href = "fun.html";
-              });
-            }
+      const snap = await get(ref(db, "users/" + user.uid));
+      if (snap.exists()) {
+        currentUserData = snap.val();
+        pseudoSpan.textContent = currentUserData.pseudo || "";
+        ageSpan.textContent = currentUserData.age || "";
+        locationSpan.textContent = currentUserData.location || "";
+        descriptionText.textContent = currentUserData.description || "";
+        if (currentUserData.photos) {
+          photoGallery.innerHTML = "";
+          currentUserData.photos.forEach(url => {
+            const img = document.createElement("img");
+            img.src = url;
+            photoGallery.appendChild(img);
           });
         }
-      } catch(err) { console.error(err); }
+      }
     });
 
-    // Bouton Mon profil (peut rediriger vers creation-profil.html)
-    document.getElementById("myProfile").addEventListener("click", () => {
-      window.location.href = "creation-profil.html";
+    let editing = false;
+    editBtn.addEventListener("click", async () => {
+      if (!editing) {
+        // Passer en mode édition
+        descriptionInput.style.display = "block";
+        descriptionInput.value = descriptionText.textContent;
+        descriptionText.style.display = "none";
+        photosInput.style.display = "block";
+        editBtn.textContent = "Enregistrer";
+        editing = true;
+      } else {
+        // Sauvegarde
+        const newDescription = descriptionInput.value;
+        const newPhotos = Array.from(photosInput.files).map(file => URL.createObjectURL(file));
+
+        // ⚠️ Ici on met juste les photos en mémoire locale (File → URL) puisque tu ne veux pas Firebase Storage
+        // En production, il faudra trouver une solution pour stocker réellement ces images côté serveur.
+        const updates = { description: newDescription };
+        if (newPhotos.length > 0) updates.photos = newPhotos;
+
+        await update(ref(db, "users/" + auth.currentUser.uid), updates);
+
+        // Rafraîchissement
+        descriptionText.textContent = newDescription;
+        descriptionText.style.display = "block";
+        descriptionInput.style.display = "none";
+        photosInput.style.display = "none";
+        photoGallery.innerHTML = "";
+        (updates.photos || currentUserData.photos || []).forEach(url => {
+          const img = document.createElement("img");
+          img.src = url;
+          photoGallery.appendChild(img);
+        });
+
+        editBtn.textContent = "Modifier";
+        editing = false;
+      }
     });
   </script>
 </body>
