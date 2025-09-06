@@ -9,7 +9,7 @@
     body {
       margin:0; padding:0;
       font-family:'Orbitron', sans-serif;
-      background:url("planete-romantique.jpg") no-repeat center center/cover;
+      background:url("planete-magique.jpg") no-repeat center center/cover;
       color:white; display:flex; justify-content:center; align-items:center; height:100vh;
     }
     .container {
@@ -82,11 +82,17 @@
             });
           }
 
-          // Activer seulement les boutons correspondant aux salles choisies
+          // Boutons des salles
           const rooms = data.rooms || [];
           Object.keys(buttons).forEach(key => {
             if (!rooms.includes(key)) {
               buttons[key].disabled = true;
+            } else {
+              buttons[key].addEventListener("click", () => {
+                if (key === "serieux") window.location.href = "authentique.html";
+                if (key === "amical") window.location.href = "amicale.html";
+                if (key === "fun") window.location.href = "fun.html";
+              });
             }
           });
 
