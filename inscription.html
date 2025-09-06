@@ -7,67 +7,40 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
   <style>
     body {
-      margin: 0; padding: 0; height: 100vh; width: 100vw;
-      background: url('/ville.jpg') no-repeat center center/cover;
-      font-family: 'Orbitron', sans-serif;
-      display: flex; justify-content: center; align-items: center;
+      margin:0; padding:0; height:100vh; width:100vw; background:url('/ville.jpg') no-repeat center center/cover;
+      font-family:'Orbitron', sans-serif; display:flex; justify-content:center; align-items:center;
     }
     .form-container {
-      background: rgba(0, 0, 0, 0.3); padding: 40px; border-radius: 15px;
-      text-align: center; border: 2px solid rgba(0,0,0,0.5);
-      box-shadow: 0 0 20px rgba(255, 0, 255, 0.2);
+      background: rgba(0,0,0,0.3); padding:40px; border-radius:15px; text-align:center;
+      box-shadow:0 0 20px rgba(255,0,255,0.2);
     }
-    h1 { color: #ff6aab; margin-bottom: 30px; }
-    input, label { width: 100%; margin: 10px 0; color: white; font-size: 16px; }
-    input[type="email"], input[type="password"] {
-      padding: 12px; border: none; border-radius: 8px; background: rgba(255,255,255,0.2);
-      outline: none;
-    }
-    input::placeholder { color: rgba(255,255,255,0.7); }
-    .rooms { margin-top: 20px; text-align: left; }
-    .rooms label { display: block; margin: 5px 0; }
-    button {
-      width: 100%; padding: 12px; margin-top: 20px;
-      border: none; border-radius: 8px; background-color: #ff6aab; color: white;
-      font-size: 18px; cursor: pointer;
-    }
-    button:hover { box-shadow: 0 0 15px #ff6aab, 0 0 25px #d600d6; }
-    .msg { margin-top: 15px; color: #ff6aab; font-weight: bold; }
+    input { width:100%; padding:12px; border:none; border-radius:8px; margin:10px 0; background:rgba(255,255,255,0.2); color:white; }
+    button { width:100%; padding:12px; border:none; border-radius:8px; background:#ff6aab; color:white; font-size:18px; cursor:pointer; }
   </style>
 </head>
 <body>
-  <div id="formContainer" class="form-container">
+  <div class="form-container">
     <h1>Inscription</h1>
     <form id="signupForm">
       <input type="email" id="email" placeholder="Email" required>
       <input type="password" id="password" placeholder="Mot de passe" required>
-
-      <div class="rooms">
-        <label><input type="checkbox" name="rooms" value="serieux"> Connexion sérieuse</label>
-        <label><input type="checkbox" name="rooms" value="amical"> Connexion amicale</label>
-        <label><input type="checkbox" name="rooms" value="fun"> Connexion fun</label>
+      <div>
+        <label><input type="checkbox" name="rooms" value="serieux"> Sérieux</label>
+        <label><input type="checkbox" name="rooms" value="amical"> Amitié</label>
+        <label><input type="checkbox" name="rooms" value="fun"> Fun</label>
       </div>
-
       <button type="submit">S’inscrire</button>
-      <div id="message" class="msg"></div>
     </form>
   </div>
 
   <script type="module">
-    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
     import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
     const db = getDatabase(app);
-
-    const formContainer = document.getElementById("formContainer");
     const form = document.getElementById("signupForm");
-    const messageDiv = document.getElementById("message");
-
-    onAuthStateChanged(auth, user => {
-      if (user) window.location.href = "creation-profil.html"; // déjà connecté
-    });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -77,17 +50,13 @@
 
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await set(ref(db, `users/${userCredential.user.uid}`), {
-          email: userCredential.user.email,
-          joinedAt: new Date().toISOString(),
-          rooms: selectedRooms
+        await set(ref(db, 'users/' + userCredential.user.uid), {
+          rooms: selectedRooms,
+          joinedAt: new Date().toISOString()
         });
-
-        messageDiv.textContent = "Compte créé ! Redirection…";
-        setTimeout(() => window.location.href = "creation-profil.html", 1500);
-      } catch (error) {
-        console.error("Erreur inscription :", error);
-        alert("Erreur : " + error.message);
+        window.location.href = "creation-profil.html";
+      } catch (err) {
+        alert("Erreur : " + err.message);
       }
     });
   </script>
