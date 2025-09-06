@@ -6,47 +6,25 @@
   <title>Création du Profil</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
-    body {
-      margin: 0; padding: 0;
-      height: 100vh; display: flex; justify-content: center; align-items: center;
-      font-family: 'Orbitron', sans-serif;
-      background: url("planete-romantique.jpg") no-repeat center center/cover;
-      color: white;
-    }
-    .container {
-      background: rgba(0,0,0,0.5);
-      padding: 25px;
-      border-radius: 15px;
-      width: 90%; max-width: 400px;
-      box-shadow: 0 0 20px #ff66cc;
-      text-align: center;
-    }
-    h1 {
-      color: #ff66cc;
-      margin-bottom: 20px;
-      text-shadow: 0 0 10px #ff66cc;
-    }
-    label { display: block; text-align: left; margin-top: 15px; font-size: 0.9em; }
-    input, textarea {
-      width: 100%; padding: 10px; margin-top: 5px;
-      border: none; border-radius: 8px;
-      background: rgba(255,255,255,0.15); color: white;
-      font-family: 'Orbitron'; font-size: 0.9em;
-    }
-    textarea { resize: none; }
-    button {
-      margin-top: 20px; padding: 12px; width: 100%;
-      border: none; border-radius: 8px;
-      background: #ff66cc; color: white; font-size: 1em; cursor: pointer;
-      box-shadow: 0 0 10px #ff66cc;
-    }
-    button:hover { box-shadow: 0 0 20px #ff66cc; }
+    body { margin:0; padding:0; height:100vh; display:flex; justify-content:center; align-items:center; font-family:'Orbitron', sans-serif; background:url("planete-romantique.jpg") no-repeat center center/cover; color:white; }
+    .container { background: rgba(0,0,0,0.5); padding:25px; border-radius:15px; width:90%; max-width:400px; text-align:center; box-shadow:0 0 20px #ff66cc; }
+    h1 { color:#ff66cc; margin-bottom:20px; text-shadow:0 0 10px #ff66cc; }
+    label { display:block; text-align:left; margin-top:15px; font-size:0.9em; }
+    input, textarea { width:100%; padding:10px; margin-top:5px; border:none; border-radius:8px; background:rgba(255,255,255,0.15); color:white; font-family:'Orbitron'; font-size:0.9em; }
+    textarea { resize:none; }
+    .preview { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
+    .preview img { width:60px; height:60px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc; }
+    button { margin-top:20px; padding:12px; width:100%; border:none; border-radius:8px; background:#ff66cc; color:white; font-size:1em; cursor:pointer; box-shadow:0 0 10px #ff66cc; }
+    button:hover { box-shadow:0 0 20px #ff66cc; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Mon Profil</h1>
     <form id="profileForm">
+      <label>Pseudo :
+        <input type="text" id="pseudo" placeholder="Votre pseudo" required>
+      </label>
       <label>Âge :
         <input type="number" id="age" required>
       </label>
@@ -56,49 +34,67 @@
       <label>Description :
         <textarea id="description" rows="3" placeholder="Parlez un peu de vous..." required></textarea>
       </label>
+      <label>Photos (max 5) :
+        <input type="file" id="photos" accept="image/*" multiple>
+      </label>
+      <div class="preview" id="preview"></div>
       <button type="submit">Enregistrer</button>
     </form>
   </div>
 
   <script type="module">
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
     const db = getDatabase(app);
-    const form = document.getElementById("profileForm");
 
-    onAuthStateChanged(auth, async user => {
-      if (!user) {
-        alert("Non connecté !");
-        window.location.href = "inscription.html";
-      } else {
-        // Optionnel : récupérer l’existant pour pré-remplir si besoin
-        const snap = await get(ref(db, "users/" + user.uid));
-        if (snap.exists()) {
-          const data = snap.val();
-          if (data.age) document.getElementById("age").value = data.age;
-          if (data.location) document.getElementById("location").value = data.location;
-          if (data.description) document.getElementById("description").value = data.description;
-        }
-      }
+    const form = document.getElementById("profileForm");
+    const photosInput = document.getElementById("photos");
+    const preview = document.getElementById("preview");
+    let photoFiles = [];
+
+    // Prévisualisation photos
+    photosInput.addEventListener("change", () => {
+      preview.innerHTML = "";
+      photoFiles = Array.from(photosInput.files).slice(0,5); // max 5
+      photoFiles.forEach(file => {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        preview.appendChild(img);
+      });
     });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const user = auth.currentUser;
-      if (!user) return alert("Non connecté");
+      if (!user) { alert("Non connecté"); return; }
 
+      const pseudo = document.getElementById("pseudo").value.trim();
       const age = document.getElementById("age").value;
       const location = document.getElementById("location").value.trim();
       const description = document.getElementById("description").value.trim();
 
-      // On met à jour seulement les champs du profil, pas les salles ni email
+      // Convertir photos en Base64
+      const photoBase64 = [];
+      for (let i = 0; i < photoFiles.length; i++) {
+        const file = photoFiles[i];
+        const base64 = await new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.readAsDataURL(file);
+        });
+        photoBase64.push(base64);
+      }
+
+      // Update DB sans toucher aux salles ni email
       await update(ref(db, "users/" + user.uid), {
+        pseudo,
         age,
         location,
-        description
+        description,
+        photos: photoBase64
       });
 
       // Redirection vers page2
