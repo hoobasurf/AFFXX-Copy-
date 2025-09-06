@@ -7,23 +7,36 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
     body {
-      margin: 0; padding: 20px;
-      font-family: 'Orbitron', sans-serif;
-      background: #111;
-      color: #ff66cc;
+      margin:0; padding:0; font-family:'Orbitron', sans-serif;
+      background:url("planete-romantique.jpg") no-repeat center center/cover;
+      color:white; display:flex; justify-content:center; align-items:center; height:100vh;
     }
-    h1 { text-align: center; margin-bottom: 30px; }
-    .info { max-width: 400px; margin: auto; }
-    .info div { margin-bottom: 15px; }
-    #loading { text-align: center; font-size: 1.2em; margin-bottom: 20px; }
+    .container {
+      text-align:center; background:rgba(0,0,0,0.5); padding:30px; border-radius:15px;
+      box-shadow:0 0 20px #ff66cc; max-width:450px; width:90%;
+    }
+    h1 { color:#ff66cc; text-shadow:0 0 10px #ff66cc; margin-bottom:20px; }
+    .pseudo { font-size:1.2em; margin-bottom:15px; }
+    .photos { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:20px; }
+    .photos img { width:60px; height:60px; border-radius:8px; object-fit:cover; border:2px solid #ff66cc; }
+    .rooms { display:flex; gap:15px; justify-content:center; margin-top:10px; }
+    .rooms button {
+      padding:15px 25px; border:none; border-radius:10px; background:#ff66cc; color:white;
+      font-size:1em; cursor:pointer; box-shadow:0 0 10px #ff66cc; transition:0.3s;
+    }
+    .rooms button:hover { box-shadow:0 0 20px #ff66cc; }
   </style>
 </head>
 <body>
-  <h1>Bienvenue sur Page 2</h1>
-  <div id="loading">Chargement…</div>
-  <div class="info" style="display:none;">
-    <div><strong>Email :</strong> <span id="email"></span></div>
-    <div><strong>Salles choisies :</strong> <span id="rooms"></span></div>
+  <div class="container">
+    <h1>Bienvenue !</h1>
+    <div class="pseudo" id="pseudo"></div>
+    <div class="photos" id="photos"></div>
+    <div class="rooms">
+      <button id="serieux">Sérieux</button>
+      <button id="amical">Amitié</button>
+      <button id="fun">Fun</button>
+    </div>
   </div>
 
   <script type="module">
@@ -34,38 +47,53 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const emailSpan = document.getElementById("email");
-    const roomsSpan = document.getElementById("rooms");
-    const loadingDiv = document.getElementById("loading");
-    const infoDiv = document.querySelector(".info");
+    const pseudoDiv = document.getElementById("pseudo");
+    const photosDiv = document.getElementById("photos");
+
+    const buttons = {
+      serieux: document.getElementById("serieux"),
+      amical: document.getElementById("amical"),
+      fun: document.getElementById("fun")
+    };
 
     onAuthStateChanged(auth, async user => {
       if (!user) {
-        alert("Vous devez être connecté !");
         window.location.href = "inscription.html";
         return;
       }
 
-      // Récupération des données
       try {
         const snap = await get(ref(db, `users/${user.uid}`));
         if (snap.exists()) {
           const data = snap.val();
-          emailSpan.textContent = data.email || user.email;
-          roomsSpan.textContent = data.rooms ? data.rooms.join(", ") : "Aucune salle sélectionnée";
-        } else {
-          emailSpan.textContent = user.email;
-          roomsSpan.textContent = "Aucune salle sélectionnée";
-        }
-      } catch (err) {
-        console.error("Erreur récupération DB :", err);
-        emailSpan.textContent = user.email;
-        roomsSpan.textContent = "Impossible de charger les salles";
-      }
 
-      // Afficher les infos et cacher le chargement
-      loadingDiv.style.display = "none";
-      infoDiv.style.display = "block";
+          // Afficher pseudo
+          if (data.pseudo) pseudoDiv.textContent = "Pseudo : " + data.pseudo;
+
+          // Afficher photos
+          if (data.photos && data.photos.length > 0) {
+            photosDiv.innerHTML = "";
+            data.photos.forEach(p => {
+              const img = document.createElement("img");
+              img.src = p;
+              photosDiv.appendChild(img);
+            });
+          }
+
+          // Activer boutons selon salles choisies à l'inscription
+          const rooms = data.rooms || [];
+          Object.keys(buttons).forEach(key => {
+            if (!rooms.includes(key)) {
+              buttons[key].disabled = true;
+              buttons[key].style.opacity = 0.5;
+              buttons[key].style.cursor = "default";
+            }
+          });
+
+        }
+      } catch(err) {
+        console.error("Erreur récupération DB :", err);
+      }
     });
   </script>
 </body>
