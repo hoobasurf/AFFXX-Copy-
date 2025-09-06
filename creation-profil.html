@@ -3,28 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Création du Profil</title>
+  <title>Création de profil</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
     body {
       margin: 0;
-      padding: 0;
-      height: 100vh;
-      background: url("ville.jpg") no-repeat center center/cover;
       font-family: 'Orbitron', sans-serif;
+      background: url("planete-magique.jpg") no-repeat center center/cover;
+      color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
+      min-height: 100vh;
     }
 
-    .form-container {
+    .container {
       background: rgba(0,0,0,0.6);
-      padding: 30px;
+      padding: 25px;
       border-radius: 15px;
       width: 90%;
-      max-width: 450px;
+      max-width: 500px;
       box-shadow: 0 0 20px #ff66cc;
-      color: white;
       text-align: center;
     }
 
@@ -38,35 +37,36 @@
       width: 100%;
       margin: 10px 0;
       padding: 12px;
-      border: none;
       border-radius: 8px;
+      border: none;
       background: rgba(255,255,255,0.1);
       color: white;
       font-family: 'Orbitron';
     }
 
     input::placeholder, textarea::placeholder {
-      color: rgba(255,255,255,0.6);
+      color: rgba(255,255,255,0.7);
     }
 
-    input[type="file"] {
-      background: none;
-    }
-
-    .preview {
+    .photos {
       display: flex;
-      gap: 10px;
       flex-wrap: wrap;
+      gap: 10px;
       justify-content: center;
-      margin-top: 10px;
+      margin: 15px 0;
     }
 
-    .preview img {
-      width: 60px;
-      height: 60px;
+    .photos img {
+      width: 70px;
+      height: 70px;
       object-fit: cover;
       border-radius: 8px;
       border: 2px solid #ff66cc;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .photos img:hover {
+      transform: scale(1.1);
     }
 
     button {
@@ -85,98 +85,147 @@
     button:hover {
       box-shadow: 0 0 20px #ff66cc;
     }
+
+    /* ✅ Lightbox pour zoom photo */
+    .lightbox {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 10px;
+      box-shadow: 0 0 25px #ff66cc;
+    }
   </style>
 </head>
 <body>
-  <div class="form-container">
-    <h1>Création du Profil</h1>
-    <form id="profileForm">
-      <input type="text" id="pseudo" placeholder="Pseudo" required>
-      <input type="number" id="age" placeholder="Âge" required>
-      <input type="text" id="location" placeholder="Lieu" required>
-      <textarea id="description" rows="3" placeholder="Description"></textarea>
+  <div class="container">
+    <h1>Création de profil</h1>
+    <input type="text" id="pseudo" placeholder="Pseudo" required>
+    <input type="number" id="age" placeholder="Âge" required>
+    <input type="text" id="location" placeholder="Lieu" required>
+    <textarea id="description" rows="3" placeholder="Décris-toi..."></textarea>
 
-      <label>Photos (max 5) :</label>
-      <input type="file" id="photos" accept="image/*" multiple>
-      <div class="preview" id="preview"></div>
+    <label>Ajoute tes photos (max 5) :</label>
+    <input type="file" id="photos" accept="image/*" multiple>
+    <div class="photos" id="preview"></div>
 
-      <button type="submit">Enregistrer</button>
-    </form>
+    <button id="saveBtn">Enregistrer</button>
+  </div>
+
+  <!-- ✅ Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <img id="lightboxImg" src="" alt="Zoom photo">
   </div>
 
   <script type="module">
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const form = document.getElementById("profileForm");
+    const pseudoInput = document.getElementById("pseudo");
+    const ageInput = document.getElementById("age");
+    const locationInput = document.getElementById("location");
+    const descInput = document.getElementById("description");
     const photosInput = document.getElementById("photos");
     const preview = document.getElementById("preview");
+    const saveBtn = document.getElementById("saveBtn");
 
-    // Limiter à 5 photos
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightboxImg");
+
+    let currentUserId = null;
+
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        alert("Vous devez être connecté !");
+        window.location.href = "inscription.html";
+      } else {
+        currentUserId = user.uid;
+      }
+    });
+
+    // ✅ Gestion preview + zoom photo
     photosInput.addEventListener("change", () => {
       let files = Array.from(photosInput.files);
       if (files.length > 5) {
-        alert("Vous pouvez sélectionner au maximum 5 photos !");
+        alert("Max 5 photos !");
         files = files.slice(0, 5);
       }
+
       const dt = new DataTransfer();
-      files.forEach(f => dt.items.add(f));
+      files.forEach(file => dt.items.add(file));
       photosInput.files = dt.files;
 
       preview.innerHTML = "";
       files.forEach(file => {
         const img = document.createElement("img");
         img.src = URL.createObjectURL(file);
+        img.addEventListener("click", () => {
+          lightboxImg.src = img.src;
+          lightbox.style.display = "flex";
+        });
         preview.appendChild(img);
       });
     });
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const pseudo = document.getElementById("pseudo").value.trim();
-      const age = document.getElementById("age").value.trim();
-      const location = document.getElementById("location").value.trim();
-      const description = document.getElementById("description").value.trim();
-
-      onAuthStateChanged(auth, (user) => {
-        if (!user) return alert("Non connecté !");
-        const userRef = ref(db, "users/" + user.uid);
-
-        let photos = [];
-        if (photosInput.files.length > 0) {
-          let loaded = 0;
-          Array.from(photosInput.files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-              photos.push(ev.target.result);
-              loaded++;
-              if (loaded === photosInput.files.length) {
-                saveProfile(userRef, { pseudo, age, location, description, photos });
-              }
-            };
-            reader.readAsDataURL(file);
-          });
-        } else {
-          saveProfile(userRef, { pseudo, age, location, description });
-        }
-      });
+    // Fermer zoom
+    lightbox.addEventListener("click", () => {
+      lightbox.style.display = "none";
     });
 
-    function saveProfile(userRef, data) {
-      update(userRef, data)
-        .then(() => {
-          alert("Profil enregistré !");
-          window.location.href = "page2.html"; // ✅ redirection corrigée
-        })
-        .catch(err => {
-          console.error("Erreur :", err);
-          alert("Erreur lors de l'enregistrement");
+    // ✅ Sauvegarde profil
+    saveBtn.addEventListener("click", () => {
+      const pseudo = pseudoInput.value.trim();
+      const age = ageInput.value.trim();
+      const location = locationInput.value.trim();
+      const description = descInput.value.trim();
+
+      if (!pseudo || !age || !location) {
+        alert("Merci de remplir tous les champs obligatoires !");
+        return;
+      }
+
+      let photos = [];
+      if (photosInput.files.length > 0) {
+        let loaded = 0;
+        Array.from(photosInput.files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = e => {
+            photos.push(e.target.result);
+            loaded++;
+            if (loaded === photosInput.files.length) {
+              saveProfile(pseudo, age, location, description, photos);
+            }
+          };
+          reader.readAsDataURL(file);
         });
+      } else {
+        saveProfile(pseudo, age, location, description, photos);
+      }
+    });
+
+    function saveProfile(pseudo, age, location, description, photos) {
+      set(ref(db, "users/" + currentUserId), {
+        pseudo, age, location, description, photos
+      }).then(() => {
+        alert("Profil créé avec succès !");
+        window.location.href = "page2.html";
+      }).catch(err => {
+        console.error("Erreur :", err);
+        alert("Erreur sauvegarde profil");
+      });
     }
   </script>
 </body>
