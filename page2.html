@@ -16,7 +16,6 @@
       align-items: center;
       min-height: 100vh;
     }
-
     .container {
       background: rgba(0,0,0,0.6);
       padding: 25px;
@@ -25,58 +24,60 @@
       max-width: 500px;
       box-shadow: 0 0 20px #ff66cc;
     }
-
     h1 {
       text-align: center;
       color: #ff66cc;
       text-shadow: 0 0 10px #ff66cc;
       margin-bottom: 20px;
     }
-
-    .info {
-      margin: 10px 0;
-      font-size: 1.1em;
-    }
-
+    .info { margin: 10px 0; }
     .photos {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin: 15px 0;
+      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 15px 0;
     }
-
     .photos img {
-      width: 70px;
-      height: 70px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 2px solid #ff66cc;
-      cursor: pointer;
+      width: 70px; height: 70px; object-fit: cover;
+      border-radius: 8px; border: 2px solid #ff66cc; cursor: pointer;
       transition: transform 0.2s;
     }
-    .photos img:hover {
-      transform: scale(1.1);
-    }
-
+    .photos img:hover { transform: scale(1.1); }
     button {
       margin-top: 15px;
       padding: 12px;
       width: 100%;
       border: none;
       border-radius: 8px;
-      background: #ff66cc;
-      color: white;
       font-size: 1em;
       cursor: pointer;
+      font-family: 'Orbitron';
+    }
+    #editBtn {
+      background: #ff66cc;
+      color: white;
       box-shadow: 0 0 10px #ff66cc;
     }
+    #editBtn:hover { box-shadow: 0 0 20px #ff66cc; }
 
-    button:hover {
-      box-shadow: 0 0 20px #ff66cc;
+    /* ✅ Boutons salles flashy */
+    .room-btn {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid #ff66cc;
+      background: rgba(255,255,255,0.1);
+      color: #ff66cc;
+      font-size: 1em;
+      cursor: pointer;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px #ff66cc;
+      box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff33aa;
+      transition: all 0.3s ease-in-out;
+    }
+    .room-btn:hover {
+      background: rgba(255,0,150,0.3);
+      box-shadow: 0 0 20px #ff66cc, 0 0 40px #ff33aa;
     }
 
-    /* ✅ Lightbox pour zoom */
+    /* ✅ Lightbox */
     .lightbox {
       display: none;
       position: fixed;
@@ -84,12 +85,10 @@
       top: 0; left: 0;
       width: 100%; height: 100%;
       background: rgba(0,0,0,0.9);
-      justify-content: center;
-      align-items: center;
+      justify-content: center; align-items: center;
     }
     .lightbox img {
-      max-width: 90%;
-      max-height: 90%;
+      max-width: 90%; max-height: 90%;
       border-radius: 10px;
       box-shadow: 0 0 25px #ff66cc;
     }
@@ -99,15 +98,18 @@
   <div class="container">
     <h1>Mon Profil</h1>
 
-    <div class="info"><strong>Pseudo :</strong> <span id="pseudo">Chargement...</span></div>
-    <div class="info"><strong>Âge :</strong> <span id="age">Chargement...</span></div>
-    <div class="info"><strong>Lieu :</strong> <span id="location">Chargement...</span></div>
-    <div class="info"><strong>Description :</strong> <span id="description">Chargement...</span></div>
-    <div class="info"><strong>Salles :</strong> <span id="rooms">Chargement...</span></div>
+    <div class="info"><strong>Pseudo :</strong> <span id="pseudo"></span></div>
+    <div class="info"><strong>Âge :</strong> <span id="age"></span></div>
+    <div class="info"><strong>Lieu :</strong> <span id="location"></span></div>
+    <div class="info"><strong>Description :</strong> <span id="description"></span></div>
+    <div class="info"><strong>Salles :</strong> <span id="rooms"></span></div>
 
     <div class="photos" id="photos"></div>
 
     <button id="editBtn">Modifier</button>
+
+    <!-- ✅ Boutons Salles -->
+    <div id="roomsButtons"></div>
   </div>
 
   <!-- ✅ Lightbox -->
@@ -129,6 +131,7 @@
     const descSpan = document.getElementById("description");
     const roomsSpan = document.getElementById("rooms");
     const photosDiv = document.getElementById("photos");
+    const roomsButtonsDiv = document.getElementById("roomsButtons");
 
     const lightbox = document.getElementById("lightbox");
     const lightboxImg = document.getElementById("lightboxImg");
@@ -139,44 +142,61 @@
         window.location.href = "inscription.html";
         return;
       }
+      const snap = await get(ref(db, "users/" + user.uid));
+      if (snap.exists()) {
+        const data = snap.val();
+        pseudoSpan.textContent = data.pseudo || "Non renseigné";
+        ageSpan.textContent = data.age || "Non renseigné";
+        locationSpan.textContent = data.location || "Non renseigné";
+        descSpan.textContent = data.description || "Non renseignée";
+        roomsSpan.textContent = (data.rooms && data.rooms.length > 0) ? data.rooms.join(", ") : "Aucune";
 
-      try {
-        const snap = await get(ref(db, "users/" + user.uid));
-        if (snap.exists()) {
-          const data = snap.val();
-          pseudoSpan.textContent = data.pseudo || "Non renseigné";
-          ageSpan.textContent = data.age || "Non renseigné";
-          locationSpan.textContent = data.location || "Non renseigné";
-          descSpan.textContent = data.description || "Non renseignée";
-          roomsSpan.textContent = (data.rooms && data.rooms.length > 0) ? data.rooms.join(", ") : "Aucune";
-
-          photosDiv.innerHTML = "";
-          if (data.photos && data.photos.length > 0) {
-            data.photos.forEach(src => {
-              const img = document.createElement("img");
-              img.src = src;
-              img.addEventListener("click", () => {
-                lightboxImg.src = src;
-                lightbox.style.display = "flex";
-              });
-              photosDiv.appendChild(img);
+        // ✅ photos
+        photosDiv.innerHTML = "";
+        if (data.photos) {
+          data.photos.forEach(src => {
+            const img = document.createElement("img");
+            img.src = src;
+            img.addEventListener("click", () => {
+              lightboxImg.src = src;
+              lightbox.style.display = "flex";
             });
-          }
-        } else {
-          alert("Aucun profil trouvé, veuillez le créer !");
-          window.location.href = "creation-profil.html";
+            photosDiv.appendChild(img);
+          });
         }
-      } catch (err) {
-        console.error("Erreur chargement profil :", err);
+
+        // ✅ boutons salles
+        roomsButtonsDiv.innerHTML = "";
+        if (data.rooms) {
+          if (data.rooms.includes("serieux")) {
+            addRoomButton("Sérieux", "authentique.html");
+          }
+          if (data.rooms.includes("amical")) {
+            addRoomButton("Amical", "amicale.html");
+          }
+          if (data.rooms.includes("fun")) {
+            addRoomButton("Fun", "fun.html");
+          }
+        }
       }
     });
 
-    // ✅ fermer le zoom
+    function addRoomButton(name, link) {
+      const btn = document.createElement("button");
+      btn.textContent = name;
+      btn.className = "room-btn";
+      btn.addEventListener("click", () => {
+        window.location.href = link;
+      });
+      roomsButtonsDiv.appendChild(btn);
+    }
+
+    // fermer zoom
     lightbox.addEventListener("click", () => {
       lightbox.style.display = "none";
     });
 
-    // ✅ bouton modifier
+    // bouton modifier
     document.getElementById("editBtn").addEventListener("click", () => {
       window.location.href = "creation-profil.html";
     });
