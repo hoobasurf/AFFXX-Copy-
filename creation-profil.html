@@ -3,20 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Création de profil</title>
+  <title>Création du Profil</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background: url("planete-magique.jpg") no-repeat center center/cover;
+      background: url("galaxie-rose.jpg") no-repeat center center/cover;
       color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
     }
-
     .container {
       background: rgba(0,0,0,0.6);
       padding: 25px;
@@ -24,18 +23,16 @@
       width: 90%;
       max-width: 500px;
       box-shadow: 0 0 20px #ff66cc;
-      text-align: center;
     }
-
     h1 {
+      text-align: center;
       color: #ff66cc;
       text-shadow: 0 0 10px #ff66cc;
       margin-bottom: 20px;
     }
-
     input, textarea {
       width: 100%;
-      margin: 10px 0;
+      margin: 8px 0;
       padding: 12px;
       border-radius: 8px;
       border: none;
@@ -43,32 +40,24 @@
       color: white;
       font-family: 'Orbitron';
     }
-
     input::placeholder, textarea::placeholder {
-      color: rgba(255,255,255,0.7);
+      color: rgba(255,255,255,0.6);
     }
-
-    .photos {
+    .preview {
       display: flex;
-      flex-wrap: wrap;
       gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
       justify-content: center;
-      margin: 15px 0;
     }
-
-    .photos img {
-      width: 70px;
-      height: 70px;
+    .preview img {
+      width: 60px;
+      height: 60px;
       object-fit: cover;
       border-radius: 8px;
       border: 2px solid #ff66cc;
       cursor: pointer;
-      transition: transform 0.2s;
     }
-    .photos img:hover {
-      transform: scale(1.1);
-    }
-
     button {
       margin-top: 15px;
       padding: 12px;
@@ -81,54 +70,27 @@
       cursor: pointer;
       box-shadow: 0 0 10px #ff66cc;
     }
-
     button:hover {
       box-shadow: 0 0 20px #ff66cc;
-    }
-
-    /* ✅ Lightbox pour zoom photo */
-    .lightbox {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9);
-      justify-content: center;
-      align-items: center;
-    }
-
-    .lightbox img {
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 10px;
-      box-shadow: 0 0 25px #ff66cc;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Création de profil</h1>
+    <h1>Création du Profil</h1>
     <input type="text" id="pseudo" placeholder="Pseudo" required>
     <input type="number" id="age" placeholder="Âge" required>
     <input type="text" id="location" placeholder="Lieu" required>
     <textarea id="description" rows="3" placeholder="Décris-toi..."></textarea>
-
-    <label>Ajoute tes photos (max 5) :</label>
+    <label>Photos (max 5) :</label>
     <input type="file" id="photos" accept="image/*" multiple>
-    <div class="photos" id="preview"></div>
-
+    <div class="preview" id="preview"></div>
     <button id="saveBtn">Enregistrer</button>
-  </div>
-
-  <!-- ✅ Lightbox -->
-  <div class="lightbox" id="lightbox">
-    <img id="lightboxImg" src="" alt="Zoom photo">
   </div>
 
   <script type="module">
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { getDatabase, ref, update, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
@@ -142,28 +104,41 @@
     const preview = document.getElementById("preview");
     const saveBtn = document.getElementById("saveBtn");
 
-    const lightbox = document.getElementById("lightbox");
-    const lightboxImg = document.getElementById("lightboxImg");
-
     let currentUserId = null;
 
-    onAuthStateChanged(auth, user => {
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        alert("Vous devez être connecté !");
         window.location.href = "inscription.html";
-      } else {
-        currentUserId = user.uid;
+        return;
+      }
+      currentUserId = user.uid;
+
+      // Charger profil existant si dispo
+      const snap = await get(ref(db, "users/" + user.uid));
+      if (snap.exists()) {
+        const data = snap.val();
+        pseudoInput.value = data.pseudo || "";
+        ageInput.value = data.age || "";
+        locationInput.value = data.location || "";
+        descInput.value = data.description || "";
+        if (data.photos) {
+          preview.innerHTML = "";
+          data.photos.forEach(src => {
+            const img = document.createElement("img");
+            img.src = src;
+            preview.appendChild(img);
+          });
+        }
       }
     });
 
-    // ✅ Gestion preview + zoom photo
+    // Limite 5 photos
     photosInput.addEventListener("change", () => {
       let files = Array.from(photosInput.files);
       if (files.length > 5) {
-        alert("Max 5 photos !");
+        alert("Maximum 5 photos !");
         files = files.slice(0, 5);
       }
-
       const dt = new DataTransfer();
       files.forEach(file => dt.items.add(file));
       photosInput.files = dt.files;
@@ -172,60 +147,50 @@
       files.forEach(file => {
         const img = document.createElement("img");
         img.src = URL.createObjectURL(file);
-        img.addEventListener("click", () => {
-          lightboxImg.src = img.src;
-          lightbox.style.display = "flex";
-        });
         preview.appendChild(img);
       });
     });
 
-    // Fermer zoom
-    lightbox.addEventListener("click", () => {
-      lightbox.style.display = "none";
-    });
-
-    // ✅ Sauvegarde profil
     saveBtn.addEventListener("click", () => {
       const pseudo = pseudoInput.value.trim();
       const age = ageInput.value.trim();
       const location = locationInput.value.trim();
-      const description = descInput.value.trim();
-
-      if (!pseudo || !age || !location) {
-        alert("Merci de remplir tous les champs obligatoires !");
-        return;
-      }
+      const desc = descInput.value.trim();
 
       let photos = [];
+
       if (photosInput.files.length > 0) {
-        let loaded = 0;
-        Array.from(photosInput.files).forEach(file => {
+        let processed = 0;
+        for (let file of photosInput.files) {
           const reader = new FileReader();
-          reader.onload = e => {
+          reader.onload = (e) => {
             photos.push(e.target.result);
-            loaded++;
-            if (loaded === photosInput.files.length) {
-              saveProfile(pseudo, age, location, description, photos);
+            processed++;
+            if (processed === photosInput.files.length) {
+              saveProfile(pseudo, age, location, desc, photos);
             }
           };
           reader.readAsDataURL(file);
-        });
+        }
       } else {
-        saveProfile(pseudo, age, location, description, photos);
+        // Pas de photo => sauvegarde quand même
+        saveProfile(pseudo, age, location, desc, null);
       }
     });
 
-    function saveProfile(pseudo, age, location, description, photos) {
-      set(ref(db, "users/" + currentUserId), {
-        pseudo, age, location, description, photos
-      }).then(() => {
-        alert("Profil créé avec succès !");
-        window.location.href = "page2.html";
-      }).catch(err => {
-        console.error("Erreur :", err);
-        alert("Erreur sauvegarde profil");
-      });
+    function saveProfile(pseudo, age, location, desc, photos) {
+      const data = { pseudo, age, location, description: desc };
+      if (photos) data.photos = photos;
+
+      update(ref(db, "users/" + currentUserId), data)
+        .then(() => {
+          alert("Profil enregistré !");
+          window.location.href = "page2.html";
+        })
+        .catch(err => {
+          console.error("Erreur :", err);
+          alert("Erreur enregistrement !");
+        });
     }
   </script>
 </body>
