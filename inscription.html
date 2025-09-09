@@ -120,13 +120,18 @@
     const formContainer = document.getElementById("formContainer");
     const form = document.getElementById("signupForm");
 
-    function saveUser(uid, email, rooms){
-      set(ref(db, 'users/' + uid), {
+    // Fonction qui retourne une Promise pour s'assurer que l'enregistrement est terminé
+    function saveUser(uid, email, rooms) {
+      return set(ref(db, 'users/' + uid), {
         email: email,
         joinedAt: new Date().toISOString(),
         rooms: rooms
-      }).then(()=>console.log("Utilisateur enregistré :", email, rooms))
-        .catch(err=>console.error("Erreur DB :", err));
+      }).then(() => {
+        console.log("Utilisateur enregistré :", email, rooms);
+      }).catch(err => {
+        console.error("Erreur DB :", err);
+        throw err;
+      });
     }
 
     // Redirection si déjà connecté
@@ -148,7 +153,8 @@
 
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        saveUser(userCredential.user.uid, userCredential.user.email, selectedRooms);
+        // ⚡ On attend que l'enregistrement dans Firebase soit terminé avant la redirection
+        await saveUser(userCredential.user.uid, userCredential.user.email, selectedRooms);
 
         formContainer.classList.add("fade-out");
         setTimeout(() => {
