@@ -64,24 +64,7 @@
       transform: scale(1.1);
     }
 
-    button {
-      margin-top: 15px;
-      padding: 12px;
-      width: 100%;
-      border: none;
-      border-radius: 8px;
-      background: #ff66cc;
-      color: white;
-      font-size: 1em;
-      cursor: pointer;
-      box-shadow: 0 0 10px #ff66cc;
-    }
-
-    button:hover {
-      box-shadow: 0 0 20px #ff66cc;
-    }
-
-    /* ✅ Lightbox pour zoom photo */
+    /* ✅ Lightbox plein écran */
     .lightbox {
       display: none;
       position: fixed;
@@ -98,35 +81,7 @@
       max-height: 90%;
       border-radius: 10px;
       box-shadow: 0 0 25px #ff66cc;
-    }
-
-    .edit-section {
-      margin-top: 20px;
-      display: none;
-    }
-
-    textarea, input[type="file"] {
-      width: 100%;
-      margin: 10px 0;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      font-family: 'Orbitron';
-    }
-
-    .preview {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
-
-    .preview img {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 2px solid #ff66cc;
+      cursor: pointer;
     }
 
     /* ✅ Boutons néon */
@@ -155,33 +110,24 @@
       <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
       <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
       <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
+      <div><strong>Email :</strong> <span id="email">Non renseigné</span></div>
       <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
-      <div><strong>Salles :</strong> <span id="rooms">Non renseigné</span></div>
     </div>
 
     <div class="photos" id="photosContainer"></div>
-
-    <button id="editBtn">Modifier</button>
-
-    <div class="edit-section" id="editSection">
-      <textarea id="newDescription" rows="3" placeholder="Nouvelle description"></textarea>
-      <input type="file" id="newPhotos" accept="image/*" multiple>
-      <div class="preview" id="preview"></div>
-      <button id="saveBtn">Enregistrer</button>
-    </div>
 
     <!-- ✅ Boutons des salles -->
     <div id="roomButtons"></div>
   </div>
 
-  <!-- ✅ Lightbox -->
+  <!-- ✅ Lightbox pour zoom photo -->
   <div class="lightbox" id="lightbox">
     <img id="lightboxImg" src="" alt="Zoom photo">
   </div>
 
   <script type="module">
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
@@ -190,23 +136,13 @@
     const pseudoSpan = document.getElementById("pseudo");
     const ageSpan = document.getElementById("age");
     const locationSpan = document.getElementById("location");
+    const emailSpan = document.getElementById("email");
     const descSpan = document.getElementById("description");
-    const roomsSpan = document.getElementById("rooms");
     const photosContainer = document.getElementById("photosContainer");
-
-    const editBtn = document.getElementById("editBtn");
-    const editSection = document.getElementById("editSection");
-    const newDesc = document.getElementById("newDescription");
-    const newPhotos = document.getElementById("newPhotos");
-    const preview = document.getElementById("preview");
-    const saveBtn = document.getElementById("saveBtn");
+    const roomButtons = document.getElementById("roomButtons");
 
     const lightbox = document.getElementById("lightbox");
     const lightboxImg = document.getElementById("lightboxImg");
-    const roomButtons = document.getElementById("roomButtons");
-
-    let currentUserId = null;
-    let currentPhotos = [];
 
     onAuthStateChanged(auth, async user => {
       if (!user) {
@@ -214,7 +150,6 @@
         window.location.href = "inscription.html";
         return;
       }
-      currentUserId = user.uid;
 
       const snap = await get(ref(db, "users/" + user.uid));
       if (snap.exists()) {
@@ -222,20 +157,10 @@
         pseudoSpan.textContent = data.pseudo || "Non renseigné";
         ageSpan.textContent = data.age || "Non renseigné";
         locationSpan.textContent = data.location || "Non renseigné";
+        emailSpan.textContent = data.email || "Non renseigné";
         descSpan.textContent = data.description || "Non renseignée";
-
-        // ✅ Correction ici
-        if (data.rooms) {
-          const roomsArray = Array.isArray(data.rooms) ? data.rooms : Object.values(data.rooms);
-          roomsSpan.textContent = roomsArray.join(", ");
-          displayRoomButtons(roomsArray);
-        } else {
-          roomsSpan.textContent = "Non renseigné";
-          displayRoomButtons([]);
-        }
-
-        currentPhotos = data.photos || [];
-        displayPhotos(currentPhotos);
+        displayPhotos(data.photos || []);
+        displayRoomButtons(data.rooms || []);
       }
     });
 
@@ -265,76 +190,11 @@
       });
     }
 
-    // Fermer lightbox au clic
+    // ✅ Fermer lightbox au clic sur l’image ou en dehors
     lightbox.addEventListener("click", () => {
       lightbox.style.display = "none";
+      lightboxImg.src = "";
     });
-
-    // Mode édition
-    editBtn.addEventListener("click", () => {
-      editSection.style.display = editSection.style.display === "none" ? "block" : "none";
-      newDesc.value = descSpan.textContent !== "Non renseignée" ? descSpan.textContent : "";
-    });
-
-    // Limite 5 photos
-    newPhotos.addEventListener("change", () => {
-      let files = Array.from(newPhotos.files);
-      if (files.length > 5) {
-        alert("Vous pouvez sélectionner au maximum 5 photos !");
-        files = files.slice(0, 5);
-      }
-      const dt = new DataTransfer();
-      files.forEach(file => dt.items.add(file));
-      newPhotos.files = dt.files;
-
-      preview.innerHTML = "";
-      files.forEach(file => {
-        const img = document.createElement("img");
-        img.src = URL.createObjectURL(file);
-        preview.appendChild(img);
-      });
-    });
-
-    // Sauvegarde (description + photos uniquement)
-    saveBtn.addEventListener("click", () => {
-      const desc = newDesc.value.trim();
-      let updatedPhotos = [];
-
-      if (newPhotos.files.length > 0) {
-        let filesProcessed = 0;
-        for (let i = 0; i < newPhotos.files.length; i++) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            updatedPhotos.push(e.target.result);
-            filesProcessed++;
-            if (filesProcessed === newPhotos.files.length) {
-              updateProfile(desc, updatedPhotos);
-            }
-          };
-          reader.readAsDataURL(newPhotos.files[i]);
-        }
-      } else {
-        updateProfile(desc, currentPhotos);
-      }
-    });
-
-    function updateProfile(desc, photos) {
-      update(ref(db, "users/" + currentUserId), {
-        description: desc,
-        photos: photos
-      }).then(() => {
-        descSpan.textContent = desc || "Non renseignée";
-        currentPhotos = photos;
-        displayPhotos(currentPhotos);
-        preview.innerHTML = "";
-        newPhotos.value = "";
-        alert("Profil mis à jour !");
-        editSection.style.display = "none";
-      }).catch(err => {
-        console.error("Erreur mise à jour :", err);
-        alert("Erreur lors de la mise à jour !");
-      });
-    }
   </script>
 </body>
 </html>
