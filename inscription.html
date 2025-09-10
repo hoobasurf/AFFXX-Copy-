@@ -45,22 +45,23 @@
       margin-bottom: 30px;
     }
 
-    input, label {
+    input, label, textarea {
       width: 100%;
       margin: 10px 0;
       color: white;
       font-size: 16px;
     }
 
-    input[type="email"], input[type="password"], input[type="text"], input[type="number"] {
+    input[type="email"], input[type="password"], input[type="text"], input[type="number"], textarea {
       padding: 12px;
       border: none;
       border-radius: 8px;
       background: rgba(255,255,255,0.2);
       outline: none;
+      resize: vertical;
     }
 
-    input::placeholder {
+    input::placeholder, textarea::placeholder {
       color: rgba(255,255,255,0.7);
     }
 
@@ -72,6 +73,22 @@
     .rooms label {
       display: block;
       margin: 5px 0;
+    }
+
+    .photos-preview {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .photos-preview img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 2px solid #ff6aab;
     }
 
     button {
@@ -100,6 +117,9 @@
       <input type="text" id="pseudo" placeholder="Pseudo" required>
       <input type="number" id="age" placeholder="Âge" required>
       <input type="text" id="location" placeholder="Lieu" required>
+
+      <textarea id="description" rows="3" placeholder="Description (présente-toi en quelques mots)"></textarea>
+
       <input type="email" id="email" placeholder="Email" required>
       <input type="password" id="password" placeholder="Mot de passe" required>
 
@@ -109,7 +129,11 @@
         <label><input type="checkbox" name="rooms" value="fun"> Fun</label>
       </div>
 
-      <button type="submit">S’inscrire</button>
+      <label for="photos">Choisir des photos (max 5) :</label>
+      <input type="file" id="photos" accept="image/*" multiple>
+      <div class="photos-preview" id="photosPreview"></div>
+
+      <button type="submit" id="submitBtn">S’inscrire</button>
     </form>
   </div>
 
@@ -122,8 +146,11 @@
     const db = getDatabase(app);
     const formContainer = document.getElementById("formContainer");
     const form = document.getElementById("signupForm");
+    const photosInput = document.getElementById("photos");
+    const photosPreview = document.getElementById("photosPreview");
+    const submitBtn = document.getElementById("submitBtn");
 
-    function saveUser(uid, email, rooms, pseudo, age, location) {
+    function saveUser(uid, email, rooms, pseudo, age, location, description, photos) {
       return set(ref(db, 'users/' + uid), {
         email: email,
         joinedAt: new Date().toISOString(),
@@ -131,16 +158,17 @@
         pseudo: pseudo,
         age: age,
         location: location,
-        description: "",
-        photos: []
+        description: description || "",
+        photos: photos || []
       }).then(() => {
-        console.log("Utilisateur enregistré :", email, rooms, pseudo, age, location);
+        console.log("Utilisateur enregistré :", email, rooms, pseudo, age, location, description, photos && photos.length);
       }).catch(err => {
         console.error("Erreur DB :", err);
         throw err;
       });
     }
 
+    // Redirection si déjà connecté (vers profil.html)
     onAuthStateChanged(auth, (user) => {
       if (user) {
         formContainer.classList.add("fade-out");
@@ -150,34 +178,82 @@
       }
     });
 
+    // Prévisualisation et limite 5 photos
+    photosInput.addEventListener("change", () => {
+      let files = Array.from(photosInput.files || []);
+      if (files.length > 5) {
+        alert("Vous pouvez sélectionner au maximum 5 photos. Seules les 5 premières seront prises en compte.");
+        files = files.slice(0, 5);
+        const dt = new DataTransfer();
+        files.forEach(f => dt.items.add(f));
+        photosInput.files = dt.files;
+      }
+      photosPreview.innerHTML = "";
+      files.forEach(file => {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        photosPreview.appendChild(img);
+      });
+    });
+
+    // Helper : lire un fichier en DataURL
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Soumission du formulaire
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Inscription en cours...";
+
       const pseudo = document.getElementById("pseudo").value.trim();
       const age = document.getElementById("age").value.trim();
       const location = document.getElementById("location").value.trim();
+      const description = document.getElementById("description").value.trim();
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
-      const selectedRooms = Array.from(document.querySelectorAll('input[name="rooms"]:checked'))
+      let selectedRooms = Array.from(document.querySelectorAll('input[name="rooms"]:checked'))
                                  .map(cb => cb.value);
+
+      // assure-toi max 5
+      let files = Array.from(photosInput.files || []);
+      if (files.length > 5) files = files.slice(0, 5);
 
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+        // Convertir photos en Data URLs si présentes
+        let photosData = [];
+        if (files.length > 0) {
+          photosData = await Promise.all(files.map(f => readFileAsDataURL(f)));
+        }
+
         await saveUser(
           userCredential.user.uid,
           userCredential.user.email,
           selectedRooms,
           pseudo,
           age,
-          location
+          location,
+          description,
+          photosData
         );
 
         formContainer.classList.add("fade-out");
         setTimeout(() => {
-          window.location.href = "creation-profil.html"; 
+          window.location.href = "profil.html";
         }, 800);
       } catch (error) {
         console.error("Erreur inscription :", error);
-        alert("Erreur : " + error.message);
+        alert("Erreur : " + (error.message || error));
+        submitBtn.disabled = false;
+        submitBtn.textContent = "S’inscrire";
       }
     });
   </script>
