@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Création de Profil</title>
+  <title>Mon Profil</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
     body {
@@ -33,37 +33,24 @@
       margin-bottom: 20px;
     }
 
-    label {
-      display: block;
-      margin-top: 12px;
-      font-size: 0.9em;
+    .info {
+      margin-bottom: 20px;
       text-align: left;
     }
 
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      margin-top: 5px;
-      font-family: 'Orbitron', sans-serif;
-      background: rgba(255,255,255,0.1);
-      color: #fff;
+    .info div {
+      margin: 8px 0;
     }
 
-    input:focus, textarea:focus {
-      outline: 2px solid #ff66cc;
-    }
-
-    .photos-preview {
+    .photos {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 10px;
       justify-content: center;
+      margin: 15px 0;
     }
 
-    .photos-preview img {
+    .photos img {
       width: 70px;
       height: 70px;
       object-fit: cover;
@@ -73,12 +60,12 @@
       transition: transform 0.2s;
     }
 
-    .photos-preview img:hover {
+    .photos img:hover {
       transform: scale(1.1);
     }
 
     button {
-      margin-top: 20px;
+      margin-top: 15px;
       padding: 12px;
       width: 100%;
       border: none;
@@ -94,7 +81,7 @@
       box-shadow: 0 0 20px #ff66cc;
     }
 
-    /* ✅ Lightbox pour zoom */
+    /* ✅ Lightbox pour zoom photo */
     .lightbox {
       display: none;
       position: fixed;
@@ -112,30 +99,79 @@
       border-radius: 10px;
       box-shadow: 0 0 25px #ff66cc;
     }
+
+    .edit-section {
+      margin-top: 20px;
+      display: none;
+    }
+
+    textarea, input[type="file"] {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-family: 'Orbitron';
+    }
+
+    .preview {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .preview img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #ff66cc;
+    }
+
+    /* ✅ Boutons néon */
+    .room-btn {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      border: 2px solid #ff66cc;
+      background: rgba(0,0,0,0.4);
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      font-size: 0.9em;
+      box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
+      transition: 0.3s;
+    }
+    .room-btn:hover {
+      box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Création de Profil</h1>
-    <form id="profileForm">
-      <label for="pseudo">Pseudo :</label>
-      <input type="text" id="pseudo" required>
+    <h1>Mon Profil</h1>
+    <div class="info">
+      <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
+      <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
+      <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
+      <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
+      <div><strong>Salles :</strong> <span id="rooms">Non renseigné</span></div>
+    </div>
 
-      <label for="age">Âge :</label>
-      <input type="number" id="age" min="16" required>
+    <div class="photos" id="photosContainer"></div>
 
-      <label for="location">Lieu :</label>
-      <input type="text" id="location" required>
+    <button id="editBtn">Modifier</button>
 
-      <label for="description">Description :</label>
-      <textarea id="description" rows="3"></textarea>
+    <div class="edit-section" id="editSection">
+      <textarea id="newDescription" rows="3" placeholder="Nouvelle description"></textarea>
+      <input type="file" id="newPhotos" accept="image/*" multiple>
+      <div class="preview" id="preview"></div>
+      <button id="saveBtn">Enregistrer</button>
+    </div>
 
-      <label for="photos">Photos (max 5) :</label>
-      <input type="file" id="photos" accept="image/*" multiple>
-      <div class="photos-preview" id="photosPreview"></div>
-
-      <button type="submit">Enregistrer</button>
-    </form>
+    <!-- ✅ Boutons des salles -->
+    <div id="roomButtons"></div>
   </div>
 
   <!-- ✅ Lightbox -->
@@ -145,104 +181,158 @@
 
   <script type="module">
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const form = document.getElementById("profileForm");
-    const photosInput = document.getElementById("photos");
-    const photosPreview = document.getElementById("photosPreview");
+    const pseudoSpan = document.getElementById("pseudo");
+    const ageSpan = document.getElementById("age");
+    const locationSpan = document.getElementById("location");
+    const descSpan = document.getElementById("description");
+    const roomsSpan = document.getElementById("rooms");
+    const photosContainer = document.getElementById("photosContainer");
+
+    const editBtn = document.getElementById("editBtn");
+    const editSection = document.getElementById("editSection");
+    const newDesc = document.getElementById("newDescription");
+    const newPhotos = document.getElementById("newPhotos");
+    const preview = document.getElementById("preview");
+    const saveBtn = document.getElementById("saveBtn");
 
     const lightbox = document.getElementById("lightbox");
     const lightboxImg = document.getElementById("lightboxImg");
+    const roomButtons = document.getElementById("roomButtons");
 
     let currentUserId = null;
+    let currentPhotos = [];
 
-    onAuthStateChanged(auth, user => {
+    onAuthStateChanged(auth, async user => {
       if (!user) {
-        alert("Veuillez vous connecter !");
+        alert("Vous devez être connecté !");
         window.location.href = "inscription.html";
         return;
       }
       currentUserId = user.uid;
+
+      const snap = await get(ref(db, "users/" + user.uid));
+      if (snap.exists()) {
+        const data = snap.val();
+        pseudoSpan.textContent = data.pseudo || "Non renseigné";
+        ageSpan.textContent = data.age || "Non renseigné";
+        locationSpan.textContent = data.location || "Non renseigné";
+        descSpan.textContent = data.description || "Non renseignée";
+
+        // ✅ Correction ici
+        if (data.rooms) {
+          const roomsArray = Array.isArray(data.rooms) ? data.rooms : Object.values(data.rooms);
+          roomsSpan.textContent = roomsArray.join(", ");
+          displayRoomButtons(roomsArray);
+        } else {
+          roomsSpan.textContent = "Non renseigné";
+          displayRoomButtons([]);
+        }
+
+        currentPhotos = data.photos || [];
+        displayPhotos(currentPhotos);
+      }
     });
 
-    // ✅ Prévisualisation photos + limite 5
-    photosInput.addEventListener("change", () => {
-      let files = Array.from(photosInput.files);
-      if (files.length > 5) {
-        alert("Vous pouvez sélectionner au maximum 5 photos !");
-        files = files.slice(0, 5);
-      }
-
-      const dt = new DataTransfer();
-      files.forEach(file => dt.items.add(file));
-      photosInput.files = dt.files;
-
-      photosPreview.innerHTML = "";
-      files.forEach(file => {
+    function displayPhotos(photos) {
+      photosContainer.innerHTML = "";
+      photos.forEach(url => {
         const img = document.createElement("img");
-        img.src = URL.createObjectURL(file);
+        img.src = url;
         img.addEventListener("click", () => {
-          lightboxImg.src = img.src;
+          lightboxImg.src = url;
           lightbox.style.display = "flex";
         });
-        photosPreview.appendChild(img);
+        photosContainer.appendChild(img);
       });
-    });
+    }
 
-    // ✅ Fermer zoom au clic
+    function displayRoomButtons(rooms) {
+      roomButtons.innerHTML = "";
+      rooms.forEach(room => {
+        const btn = document.createElement("button");
+        btn.classList.add("room-btn");
+        btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
+        if (room === "serieux") btn.onclick = () => window.location.href = "authentique.html";
+        if (room === "amical") btn.onclick = () => window.location.href = "amicale.html";
+        if (room === "fun") btn.onclick = () => window.location.href = "fun.html";
+        roomButtons.appendChild(btn);
+      });
+    }
+
+    // Fermer lightbox au clic
     lightbox.addEventListener("click", () => {
       lightbox.style.display = "none";
     });
 
-    // ✅ Enregistrer le profil
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const pseudo = document.getElementById("pseudo").value.trim();
-      const age = document.getElementById("age").value.trim();
-      const location = document.getElementById("location").value.trim();
-      const description = document.getElementById("description").value.trim();
+    // Mode édition
+    editBtn.addEventListener("click", () => {
+      editSection.style.display = editSection.style.display === "none" ? "block" : "none";
+      newDesc.value = descSpan.textContent !== "Non renseignée" ? descSpan.textContent : "";
+    });
 
-      if (!pseudo || !age || !location) {
-        alert("Veuillez remplir tous les champs !");
-        return;
+    // Limite 5 photos
+    newPhotos.addEventListener("change", () => {
+      let files = Array.from(newPhotos.files);
+      if (files.length > 5) {
+        alert("Vous pouvez sélectionner au maximum 5 photos !");
+        files = files.slice(0, 5);
       }
+      const dt = new DataTransfer();
+      files.forEach(file => dt.items.add(file));
+      newPhotos.files = dt.files;
 
-      let photos = [];
-      if (photosInput.files.length > 0) {
+      preview.innerHTML = "";
+      files.forEach(file => {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        preview.appendChild(img);
+      });
+    });
+
+    // Sauvegarde (description + photos uniquement)
+    saveBtn.addEventListener("click", () => {
+      const desc = newDesc.value.trim();
+      let updatedPhotos = [];
+
+      if (newPhotos.files.length > 0) {
         let filesProcessed = 0;
-        for (let i = 0; i < photosInput.files.length; i++) {
+        for (let i = 0; i < newPhotos.files.length; i++) {
           const reader = new FileReader();
           reader.onload = (e) => {
-            photos.push(e.target.result);
+            updatedPhotos.push(e.target.result);
             filesProcessed++;
-            if (filesProcessed === photosInput.files.length) {
-              saveProfile(pseudo, age, location, description, photos);
+            if (filesProcessed === newPhotos.files.length) {
+              updateProfile(desc, updatedPhotos);
             }
           };
-          reader.readAsDataURL(photosInput.files[i]);
+          reader.readAsDataURL(newPhotos.files[i]);
         }
       } else {
-        saveProfile(pseudo, age, location, description, []);
+        updateProfile(desc, currentPhotos);
       }
     });
 
-    function saveProfile(pseudo, age, location, description, photos) {
-      set(ref(db, "users/" + currentUserId), {
-        pseudo,
-        age,
-        location,
-        description,
-        photos
+    function updateProfile(desc, photos) {
+      update(ref(db, "users/" + currentUserId), {
+        description: desc,
+        photos: photos
       }).then(() => {
-        alert("Profil enregistré !");
-        window.location.href = "page2.html";
+        descSpan.textContent = desc || "Non renseignée";
+        currentPhotos = photos;
+        displayPhotos(currentPhotos);
+        preview.innerHTML = "";
+        newPhotos.value = "";
+        alert("Profil mis à jour !");
+        editSection.style.display = "none";
       }).catch(err => {
-        console.error("Erreur Firebase :", err);
-        alert("Erreur lors de l'enregistrement !");
+        console.error("Erreur mise à jour :", err);
+        alert("Erreur lors de la mise à jour !");
       });
     }
   </script>
