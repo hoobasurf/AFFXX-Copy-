@@ -52,7 +52,7 @@
       font-size: 16px;
     }
 
-    input[type="email"], input[type="password"] {
+    input[type="email"], input[type="password"], input[type="text"], input[type="number"] {
       padding: 12px;
       border: none;
       border-radius: 8px;
@@ -97,6 +97,9 @@
   <div id="formContainer" class="form-container">
     <h1>Inscription</h1>
     <form id="signupForm">
+      <input type="text" id="pseudo" placeholder="Pseudo" required>
+      <input type="number" id="age" placeholder="Âge" required>
+      <input type="text" id="location" placeholder="Lieu" required>
       <input type="email" id="email" placeholder="Email" required>
       <input type="password" id="password" placeholder="Mot de passe" required>
 
@@ -120,32 +123,38 @@
     const formContainer = document.getElementById("formContainer");
     const form = document.getElementById("signupForm");
 
-    // Fonction qui retourne une Promise pour s'assurer que l'enregistrement est terminé
-    function saveUser(uid, email, rooms) {
+    function saveUser(uid, email, rooms, pseudo, age, location) {
       return set(ref(db, 'users/' + uid), {
         email: email,
         joinedAt: new Date().toISOString(),
-        rooms: rooms
+        rooms: rooms,
+        pseudo: pseudo,
+        age: age,
+        location: location,
+        description: "",
+        photos: []
       }).then(() => {
-        console.log("Utilisateur enregistré :", email, rooms);
+        console.log("Utilisateur enregistré :", email, rooms, pseudo, age, location);
       }).catch(err => {
         console.error("Erreur DB :", err);
         throw err;
       });
     }
 
-    // Redirection si déjà connecté
     onAuthStateChanged(auth, (user) => {
       if (user) {
         formContainer.classList.add("fade-out");
         setTimeout(() => {
-          window.location.href = "creation-profil.html";
+          window.location.href = "profil.html";
         }, 800);
       }
     });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const pseudo = document.getElementById("pseudo").value.trim();
+      const age = document.getElementById("age").value.trim();
+      const location = document.getElementById("location").value.trim();
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
       const selectedRooms = Array.from(document.querySelectorAll('input[name="rooms"]:checked'))
@@ -153,12 +162,18 @@
 
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        // ⚡ On attend que l'enregistrement dans Firebase soit terminé avant la redirection
-        await saveUser(userCredential.user.uid, userCredential.user.email, selectedRooms);
+        await saveUser(
+          userCredential.user.uid,
+          userCredential.user.email,
+          selectedRooms,
+          pseudo,
+          age,
+          location
+        );
 
         formContainer.classList.add("fade-out");
         setTimeout(() => {
-          window.location.href = "creation-profil.html"; 
+          window.location.href = "profil.html"; 
         }, 800);
       } catch (error) {
         console.error("Erreur inscription :", error);
