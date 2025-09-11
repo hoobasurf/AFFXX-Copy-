@@ -198,12 +198,8 @@
           lightbox.style.display = "flex";
         });
         photosPreview.appendChild(img);
-        // convert en DataURL
-        const reader = new FileReader();
-        reader.onload = e => photosData.push(e.target.result);
-        reader.readAsDataURL(file);
+        photosData.push(img.src); // on garde juste l’URL temporaire
       });
-    });
 
     // fermer lightbox
     lightbox.addEventListener("click", () => { 
