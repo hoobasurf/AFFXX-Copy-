@@ -2,36 +2,22 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<title>Connexion Authentique Sérieuse</title>
+<title>Connexion Authentique</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin:0; padding:0; }
-html, body { height:100%; width:100%; font-family: 'Orbitron', sans-serif; background: url('planete-romantique.jpg') no-repeat center center/cover; overflow: hidden; color: white; }
+html, body { height:100%; width:100%; font-family: 'Orbitron', sans-serif; background: url('planete.jpg') no-repeat center center/cover; overflow: hidden; color: white; }
 body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%); z-index:1; pointer-events:none; animation: floatStars 60s linear infinite; }
 @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
 .header { position: relative; z-index:2; padding: 20px; }
 .btn-back { position: absolute; top:20px; left:20px; color: #ff66cc; font-size:1.5em; cursor:pointer; text-decoration:none; transition: transform .2s; }
 .btn-back:hover { transform: scale(1.2); }
-/* Titre futuriste centré et descendu */
 .page-title { 
-  position: absolute;
-  top: 80px; /* descendu de ~2cm */
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.5em;
-  color: #ff66cc;
-  text-shadow: 
-    0 0 8px #ff66cc, 
-    0 0 16px #ff66cc,
-    1px 1px 2px black,
-    -1px -1px 2px black,
-    1px -1px 2px black,
-    -1px 1px 2px black;
-  pointer-events: none;
+  position: absolute; top:80px; left:50%; transform: translateX(-50%);
+  font-family: 'Orbitron', sans-serif; font-size: 1.5em; color: #ff66cc;
+  text-shadow: 1px 1px 2px black, 0 0 8px #ff66cc, 0 0 16px #ff66cc; pointer-events: none;
 }
-
 .carousel-container { z-index:2; position: relative; width:100%; height:calc(100% - 60px); overflow: hidden; display: flex; align-items:center; }
 .carousel { display:flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; gap:40px; padding:40px; }
 .carousel::-webkit-scrollbar { display:none; }
@@ -56,7 +42,7 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 
 <div class="header">
   <a href="page2.html" class="btn-back">&larr; Retour</a>
-  <div class="page-title">Page Sérieuse</div>
+  <div class="page-title">Page Authentique</div>
 </div>
 
 <div class="carousel-container fade-in">
@@ -142,26 +128,25 @@ document.addEventListener('DOMContentLoaded', () => {
       <button id="fullChatClose" style="position:absolute; bottom:20px; left:50%; transform: translateX(-50%);
         padding:10px 16px; background:#ff66cc; border:none; border-radius:8px; color:white; cursor:pointer;">Retour</button>
     `;
+    document.body.appendChild(fullChat);
+    const chatBody=document.getElementById("fullChatBody");
+    document.getElementById("fullChatClose").onclick=()=>fullChat.remove();
     document.getElementById("fullChatSend").onclick=()=>{
-  const text=document.getElementById("fullChatInput").value.trim(); 
-  if(!text) return;
-  chats[name]=chats[name]||[]; 
-  chats[name].push(text); 
-  saveChats();
-  const div=document.createElement("div"); 
-  div.style.marginBottom="8px"; 
-  div.innerHTML=`<strong style="color:#ff66cc">${currentUser}:</strong> ${text}`;
-  chatBody.appendChild(div); 
-  document.getElementById("fullChatInput").value=""; 
-  chatBody.scrollTop=chatBody.scrollHeight;
-
-  // 👉 ajout du mini profil si pas encore créé
-  createMiniProfile(name, imgSrc);
-};
+      const text=document.getElementById("fullChatInput").value.trim(); 
+      if(!text) return;
+      chats[name]=chats[name]||[]; 
+      chats[name].push(text); 
+      saveChats();
+      const div=document.createElement("div"); div.style.marginBottom="8px"; 
+      div.innerHTML=`<strong style="color:#ff66cc">${currentUser}:</strong> ${text}`;
+      chatBody.appendChild(div); 
+      document.getElementById("fullChatInput").value=""; 
+      chatBody.scrollTop=chatBody.scrollHeight;
+      createMiniProfile(name, imgSrc);
+    };
   }
 
   for(let n in positions){ const card=[...document.querySelectorAll(".card")].find(c=>c.dataset.name===n); if(card) createMiniProfile(n, card.querySelector("img").src); }
-
   document.addEventListener("click", e=>{ if(e.target.classList.contains("btn-chat")){ const card=e.target.closest(".card"); if(card) openChat(card.dataset.name); } });
 
   document.querySelectorAll(".btn-like").forEach(btn=>{
@@ -169,10 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(likes[name]) btn.classList.add("active");
     btn.addEventListener("click", ()=>{
       const isActive=btn.classList.toggle("active"); likes[name]=isActive; saveLikes();
-      if(isActive){
-        chats[name]=chats[name]||[]; chats[name].push(`💌 Vous avez liké ${name.split(',')[0]} !`); saveChats();
-        createMiniProfile(name, card.querySelector("img").src);
-      }
+      if(isActive){ chats[name]=chats[name]||[]; chats[name].push(`💌 Vous avez liké ${name.split(',')[0]} !`); saveChats(); createMiniProfile(name, card.querySelector("img").src); }
     });
   });
 
