@@ -1,4 +1,245 @@
-<!DOCTYPE html>
+<!DOCTYPE<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Connexion Authentique</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin:0; padding:0; }
+html, body { height:100%; width:100%; font-family: 'Orbitron', sans-serif; background: url('planete-romantique.jpg') no-repeat center center/cover; overflow: hidden; color: white; }
+body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%); z-index:1; pointer-events:none; animation: floatStars 60s linear infinite; }
+@keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
+.header { position: relative; z-index:2; padding: 20px; }
+.btn-back { position: absolute; top:20px; left:20px; color: #ff66cc; font-size:1.5em; cursor:pointer; text-decoration:none; transition: transform .2s; }
+.btn-back:hover { transform: scale(1.2); }
+.carousel-container { z-index:2; position: relative; width:100%; height:calc(100% - 60px); overflow: hidden; display: flex; align-items:center; }
+.carousel { display:flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; gap:40px; padding:40px; }
+.carousel::-webkit-scrollbar { display:none; }
+.card { scroll-snap-align: center; flex: 0 0 150px; background: rgba(0,0,0,0.5); border-radius: 16px; padding: 15px; text-align: center; transition: transform .3s, box-shadow .3s; cursor: pointer; position: relative; }
+.card img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 3px solid; }
+.girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
+.boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
+.name { font-size:1.1em; margin-bottom:5px; }
+.btns { display:flex; justify-content: center; gap: 8px; margin-top: 6px; }
+.btn-like, .btn-chat, .btn-fav { width:30px; height:30px; border-radius:50%; background-color:rgba(255,255,255,0.1); border:1px solid #ff66cc; color:#ff66cc; display:flex; align-items:center; justify-content:center; font-size:1em; cursor:pointer; transition: transform .2s, background-color .3s, color .3s; user-select:none; }
+.btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
+.btn-like.active { background-color: #ff66cc; border-color: #ff66cc; color:white; box-shadow: 0 0 12px #ff66cc; }
+.btn-fav.active { background-color: #ffea00; border-color: #ffea00; color:#333; box-shadow:0 0 12px #ffea00; }
+.mini-profile { position: absolute; width: 60px; height: 60px; border-radius: 50%; border: 2px solid #ff66cc; box-shadow: 0 0 8px #ff66cc; z-index: 5000; touch-action: none; }
+.close-btn { position: absolute; bottom: -5px; right: -5px; background: #ff66cc; border-radius: 50%; width: 16px; height: 16px; display:flex; align-items:center; justify-content:center; font-size: 12px; color:white; border: 1px solid white; cursor: pointer; z-index: 5100; }
+@keyframes neonBlink { 0%, 100% { box-shadow: 0 0 8px #ff66cc; border-color: #ff66cc; } 50% { box-shadow: 0 0 20px #ff66cc; border-color: #ffea00; } }
+.mini-profile.new-message { animation: neonBlink 1s infinite; }
+#btnFavorites { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #ffea00; border:none; border-radius:12px; color:#333; padding:10px 20px; font-size:1.2em; cursor:pointer; z-index:1000; box-shadow: 0 0 12px #ffea00; animation: neonBlink 2s infinite alternate; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="page2.html" class="btn-back">&larr; Retour</a>
+</div>
+
+<div class="carousel-container fade-in">
+  <div class="carousel" id="carousel">
+    <div class="card girl" data-name="Sophie, 28">
+      <img src="https://i.pravatar.cc/150?img=47" alt="Sophie">
+      <div class="name">Sophie</div>
+      <div class="btns">
+        <div class="btn-chat" title="Chat">💬</div>
+        <div class="btn-like" title="Like">💖</div>
+        <div class="btn-fav" title="Favoris">⭐️</div>
+      </div>
+    </div>
+    <div class="card boy" data-name="Lucas, 31">
+      <img src="https://i.pravatar.cc/150?img=12" alt="Lucas">
+      <div class="name">Lucas</div>
+      <div class="btns">
+        <div class="btn-chat" title="Chat">💬</div>
+        <div class="btn-like" title="Like">💖</div>
+        <div class="btn-fav" title="Favoris">⭐️</div>
+      </div>
+    </div>
+    <div class="card girl" data-name="Emma, 25">
+      <img src="https://i.pravatar.cc/150?img=35" alt="Emma">
+      <div class="name">Emma</div>
+      <div class="btns">
+        <div class="btn-chat" title="Chat">💬</div>
+        <div class="btn-like" title="Like">💖</div>
+        <div class="btn-fav" title="Favoris">⭐️</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="btnFavorites">Favoris</button>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  let positions = JSON.parse(localStorage.getItem("miniProfilePositions")||"{}");
+  let chats = JSON.parse(localStorage.getItem("chatMessages")||"{}"); 
+  let likes = JSON.parse(localStorage.getItem("likes")||"{}");
+  let favorites = JSON.parse(localStorage.getItem("favorites")||"[]");
+  let currentUser = "Lucas";
+
+  function savePositions(){ localStorage.setItem("miniProfilePositions", JSON.stringify(positions)); }
+  function saveChats(){ localStorage.setItem("chatMessages", JSON.stringify(chats)); }
+  function saveLikes(){ localStorage.setItem("likes", JSON.stringify(likes)); }
+  function saveFavorites(){ localStorage.setItem("favorites", JSON.stringify(favorites)); }
+
+  function createMiniProfile(name,imgSrc){
+    const existing = document.querySelector(`.mini-profile[data-mini="${name}"]`);
+    if(existing){
+      existing.classList.add("new-message");
+      return;
+    }
+
+    const wrapper=document.createElement("div"); 
+    wrapper.style.position="absolute"; wrapper.style.width="60px"; wrapper.style.height="60px"; wrapper.dataset.mini=name;
+    const mini=document.createElement("img"); mini.src=imgSrc; mini.className="mini-profile"; mini.dataset.mini=name;
+    const close=document.createElement("div"); close.className="close-btn"; close.textContent="×";
+    wrapper.appendChild(mini); wrapper.appendChild(close); 
+    document.body.appendChild(wrapper);
+
+    if(positions[name]){
+        wrapper.style.left=positions[name].x+"px"; 
+        wrapper.style.top=positions[name].y+"px"; 
+    } else { 
+        wrapper.style.left="20px"; 
+        wrapper.style.top="20px"; 
+    }
+
+    mini.addEventListener("click", ()=>{
+        mini.classList.remove("new-message");
+        openChat(name);
+    });
+
+    close.addEventListener("click", e=>{
+        e.stopPropagation(); 
+        delete positions[name]; 
+        delete chats[name]; 
+        delete likes[name]; 
+        favorites=favorites.filter(f=>f!==name); 
+        savePositions(); saveChats(); saveLikes(); saveFavorites(); wrapper.remove();
+    });
+
+    let offsetX=0, offsetY=0;
+    wrapper.addEventListener("touchstart", e=>{
+        const touch=e.touches[0]; 
+        offsetX=touch.clientX-wrapper.getBoundingClientRect().left; 
+        offsetY=touch.clientY-wrapper.getBoundingClientRect().top;
+    });
+    wrapper.addEventListener("touchmove", e=>{
+        const touch=e.touches[0]; 
+        wrapper.style.left=(touch.clientX-offsetX)+"px"; 
+        wrapper.style.top=(touch.clientY-offsetY)+"px"; 
+    });
+    wrapper.addEventListener("touchend", ()=>{
+        positions[name]={x:wrapper.offsetLeft,y:wrapper.offsetTop}; 
+        savePositions();
+    });
+  }
+
+  function openChat(name){
+    const card=[...document.querySelectorAll(".card")].find(c=>c.dataset.name===name);
+    const imgSrc=card? card.querySelector("img").src:"";
+    let existing=document.getElementById("fullScreenChat"); if(existing) existing.remove();
+    const fullChat=document.createElement("div"); fullChat.id="fullScreenChat";
+    Object.assign(fullChat.style,{position:"fixed",top:"0",left:"0",width:"100%",height:"100%",background:"rgba(0,0,0,0.7)",backdropFilter:"blur(12px)",display:"flex",flexDirection:"column",justifyContent:"space-between",zIndex:"10000",padding:"20px",color:"white"});
+    fullChat.innerHTML=`
+      <div style="display:flex; align-items:center; gap:10px;">
+        <img src="${imgSrc}" style="width:50px;height:50px;border-radius:50%;border:2px solid #ff66cc;">
+        <div style="font-size:1.2em;">${name}</div>
+      </div>
+      <div id="fullChatBody" style="flex:1; overflow-y:auto; margin:15px 0;">
+        ${ (chats[name]||[]).map(msg=>`<div style="margin-bottom:8px;"><strong style="color:#ff66cc">${currentUser}:</strong> ${msg}</div>`).join('') }
+      </div>
+      <div style="display:flex; gap:10px; margin-bottom:50px;">
+        <textarea id="fullChatInput" rows="2" style="flex:1;border-radius:8px;border:none;padding:8px;resize:none;background: rgba(255,255,255,0.1);color:white;font-family:'Orbitron';"></textarea>
+        <button id="fullChatSend" style="padding:8px 16px;background:#ff66cc;border:none;border-radius:8px;color:white;cursor:pointer;">Envoyer</button>
+      </div>
+      <button id="fullChatClose" style="position:absolute; bottom:20px; left:50%; transform: translateX(-50%);
+        padding:10px 16px; background:#ff66cc; border:none; border-radius:8px; color:white; cursor:pointer;">Retour</button>
+    `;
+    document.body.appendChild(fullChat);
+
+    const chatBody = document.getElementById("fullChatBody");
+
+    document.getElementById("fullChatSend").onclick=()=>{
+      const text=document.getElementById("fullChatInput").value.trim(); 
+      if(!text) return;
+      chats[name]=chats[name]||[]; 
+      chats[name].push(text); 
+      saveChats();
+      const div=document.createElement("div"); 
+      div.style.marginBottom="8px"; 
+      div.innerHTML=`<strong style="color:#ff66cc">${currentUser}:</strong> ${text}`;
+      chatBody.appendChild(div); 
+      document.getElementById("fullChatInput").value=""; 
+      chatBody.scrollTop=chatBody.scrollHeight;
+
+      createMiniProfile(name, imgSrc);
+    };
+
+    document.getElementById("fullChatClose").onclick=()=>fullChat.remove();
+  }
+
+  for(let n in positions){ 
+    const card=[...document.querySelectorAll(".card")].find(c=>c.dataset.name===n); 
+    if(card) createMiniProfile(n, card.querySelector("img").src); 
+  }
+
+  document.addEventListener("click", e=>{ 
+    if(e.target.classList.contains("btn-chat")){
+      const card=e.target.closest(".card"); 
+      if(card) openChat(card.dataset.name); 
+    } 
+  });
+
+  document.querySelectorAll(".btn-like").forEach(btn=>{
+    const card=btn.closest(".card"); const name=card.dataset.name;
+    if(likes[name]) btn.classList.add("active");
+    btn.addEventListener("click", ()=>{
+      const isActive=btn.classList.toggle("active"); likes[name]=isActive; saveLikes();
+      if(isActive){
+        chats[name]=chats[name]||[]; 
+        chats[name].push(`💌 Vous avez liké ${name.split(',')[0]} !`); 
+        saveChats();
+        createMiniProfile(name, card.querySelector("img").src);
+      }
+    });
+  });
+
+  document.querySelectorAll(".btn-fav").forEach(btn=>{
+    const card=btn.closest(".card"); const name=card.dataset.name;
+    if(favorites.includes(name)) btn.classList.add("active");
+    btn.addEventListener("click", ()=>{
+      if(favorites.includes(name)){ favorites=favorites.filter(f=>f!==name); btn.classList.remove("active"); }
+      else { favorites.push(name); btn.classList.add("active"); }
+      saveFavorites();
+    });
+  });
+
+  document.getElementById("btnFavorites").addEventListener("click", ()=>{
+    let html=favorites.map(favName=>{
+      const card=[...document.querySelectorAll(".card")].find(c=>c.dataset.name===favName); if(!card) return "";
+      const img=card.querySelector("img").src;
+      return `<div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; cursor:pointer;" class="favItem" data-name="${favName}">
+                <img src="${img}" style="width:50px; height:50px; border-radius:50%; border:2px solid #ff66cc;">
+                <span>${favName}</span>
+              </div>`;
+    }).join("");
+    let existing=document.getElementById("favoritesView"); if(existing) existing.remove();
+    const favView=document.createElement("div"); favView.id="favoritesView";
+    Object.assign(favView.style,{position:"fixed",top:"0",left:"0",width:"100%",height:"100%",background:"rgba(0,0,0,0.8)",zIndex:"10000",padding:"20px",color:"white",overflowY:"auto"});
+    favView.innerHTML=`<h2>Favoris</h2>${html}<button id="closeFav" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); padding:10px 20px; border:none; border-radius:12px; background:#ffea00; color:#333; cursor:pointer;">Fermer</button>`;
+    document.body.appendChild(favView);
+    document.getElementById("closeFav").onclick=()=>favView.remove();
+    document.querySelectorAll(".favItem").forEach(item=>{ item.addEventListener("click", ()=>{ openChat(item.dataset.name); }); });
+  });
+});
+</script>
+</body>
+</html> html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
