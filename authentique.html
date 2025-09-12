@@ -8,23 +8,25 @@
     body {
       margin: 0;
       padding: 0;
-      min-height: 100vh;
       background: url('planete-romantique.jpg') no-repeat center center/cover;
       font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    .profiles {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow-y: auto;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px;
+      justify-content: center;
     }
 
     .profile-card {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
+      background: rgba(0,0,0,0.6);
       padding: 20px;
-      margin: 20px;
-      width: 300px;
+      border-radius: 10px;
       text-align: center;
-      backdrop-filter: blur(10px);
+      width: 200px;
     }
 
     .profile-card img {
@@ -32,107 +34,111 @@
       border-radius: 10px;
     }
 
-    .profile-card h2 {
-      margin: 10px 0;
+    .buttons {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-around;
     }
 
-    .profile-card button {
-      margin: 5px;
-      padding: 10px 20px;
+    button {
+      padding: 6px 10px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
     }
 
-    .like { background: #ff6aab; color: white; }
-    .chat { background: #6aafff; color: white; }
+    .like { background: #ff4081; color: white; }
+    .chat { background: #2196f3; color: white; }
 
-    #miniProfiles {
+    .chat-window {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      color: white;
+      z-index: 1000;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .chat-input {
+      display: flex;
+      padding: 10px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      margin-right: 10px;
+      font-size: 16px; /* ✅ empêche le zoom mobile */
+    }
+
+    .chat-input button {
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #4caf50;
+      color: white;
+      cursor: pointer;
+    }
+
+    .mini-profiles {
       position: fixed;
       bottom: 10px;
       left: 10px;
       display: flex;
       gap: 10px;
+      z-index: 1100;
     }
 
     .mini-profile {
-      background: #fff;
-      padding: 8px;
-      border-radius: 50%;
+      background: rgba(0,0,0,0.6);
+      padding: 5px 10px;
+      border-radius: 20px;
       cursor: pointer;
-      font-size: 14px;
-      text-align: center;
-    }
-
-    #chatWindow {
-      display: none;
-      position: fixed;
-      bottom: 60px;
-      right: 20px;
-      width: 260px;
-      height: 320px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.5);
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    #chatMessages {
-      flex: 1;
-      padding: 10px;
-      overflow-y: auto;
-      font-size: 14px;
-    }
-
-    #chatInput {
-      border: none;
-      padding: 10px;
-      font-size: 14px;
-      width: 70%;
-      outline: none;
-    }
-
-    #sendMessage {
-      width: 30%;
-      border: none;
-      background: #ff6aab;
-      color: white;
-      cursor: pointer;
-    }
-
-    .chat-footer {
-      display: flex;
+      white-space: nowrap;
     }
   </style>
 </head>
 <body>
-
-  <div class="profile-card" data-username="Clara">
-    <h2>Clara</h2>
-    <img src="clara.jpg" alt="Clara">
-    <p>Passionnée et romantique ✨</p>
-    <button class="like">Like</button>
-    <button class="chat">Message</button>
+  <div class="profiles">
+    <div class="profile-card" data-username="Alice">
+      <img src="alice.jpg" alt="Alice">
+      <p>Alice, 25</p>
+      <div class="buttons">
+        <button class="like">❤️</button>
+        <button class="chat">💬 Chat</button>
+      </div>
+    </div>
+    <div class="profile-card" data-username="Bob">
+      <img src="bob.jpg" alt="Bob">
+      <p>Bob, 30</p>
+      <div class="buttons">
+        <button class="like">❤️</button>
+        <button class="chat">💬 Chat</button>
+      </div>
+    </div>
   </div>
 
-  <div class="profile-card" data-username="David">
-    <h2>David</h2>
-    <img src="david.jpg" alt="David">
-    <p>Sincère et attentionné 💕</p>
-    <button class="like">Like</button>
-    <button class="chat">Message</button>
-  </div>
-
-  <div id="miniProfiles"></div>
-
-  <div id="chatWindow">
-    <div id="chatMessages"></div>
-    <div class="chat-footer">
-      <input type="text" id="chatInput" placeholder="Écris un message...">
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Écrire un message...">
       <button id="sendMessage">Envoyer</button>
     </div>
   </div>
+
+  <div class="mini-profiles" id="miniProfiles"></div>
 
   <script>
     const chatButtons = document.querySelectorAll(".chat");
@@ -144,11 +150,7 @@
     const miniProfiles = document.getElementById("miniProfiles");
 
     let currentUser = null;
-    let chats = JSON.parse(localStorage.getItem("chats")) || {};
-
-    function saveChats() {
-      localStorage.setItem("chats", JSON.stringify(chats));
-    }
+    let chats = {};
 
     function openChat(username) {
       currentUser = username;
@@ -162,10 +164,10 @@
     }
 
     function addMiniProfile(username) {
-      if (document.querySelector(\`.mini-profile[data-username="\${username}"]\`)) return;
+      if (document.querySelector(`.mini-profile[data-username="${username}"]`)) return;
       const mini = document.createElement("div");
       mini.className = "mini-profile";
-      mini.textContent = username[0];
+      mini.textContent = username;
       mini.dataset.username = username;
       mini.onclick = () => openChat(username);
       miniProfiles.appendChild(mini);
@@ -197,10 +199,7 @@
       p.textContent = "Moi: " + chatInput.value;
       chatMessages.appendChild(p);
       chatInput.value = "";
-      saveChats();
     });
-
-    Object.keys(chats).forEach(username => addMiniProfile(username));
   </script>
 </body>
 </html>
