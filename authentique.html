@@ -13,100 +13,123 @@
       font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
     }
-    .profiles {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      padding: 20px;
-    }
+
     .profile-card {
-      background: rgba(255,255,255,0.85);
-      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
       padding: 20px;
-      width: 200px;
+      margin: 20px;
+      width: 300px;
       text-align: center;
+      backdrop-filter: blur(10px);
     }
-    .profile-card img { width: 100%; border-radius: 8px; }
-    .profile-card button {
-      margin-top: 10px;
-      padding: 8px;
+
+    .profile-card img {
       width: 100%;
+      border-radius: 10px;
+    }
+
+    .profile-card h2 {
+      margin: 10px 0;
+    }
+
+    .profile-card button {
+      margin: 5px;
+      padding: 10px 20px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
     }
-    .chat-window {
+
+    .like { background: #ff6aab; color: white; }
+    .chat { background: #6aafff; color: white; }
+
+    #miniProfiles {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .mini-profile {
+      background: #fff;
+      padding: 8px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    #chatWindow {
       display: none;
       position: fixed;
-      bottom: 0;
-      right: 0;
-      width: 300px;
-      height: 400px;
-      background: #fff;
-      border: 2px solid #ccc;
-      border-radius: 10px 10px 0 0;
+      bottom: 60px;
+      right: 20px;
+      width: 260px;
+      height: 320px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
       flex-direction: column;
+      overflow: hidden;
     }
-    .chat-messages {
+
+    #chatMessages {
       flex: 1;
       padding: 10px;
       overflow-y: auto;
+      font-size: 14px;
     }
-    .chat-input {
-      display: flex;
-      border-top: 1px solid #ccc;
-    }
-    .chat-input input {
-      flex: 1;
-      padding: 8px;
+
+    #chatInput {
       border: none;
+      padding: 10px;
+      font-size: 14px;
+      width: 70%;
       outline: none;
-      font-size: 16px; /* ✅ pas de zoom mobile */
     }
-    .chat-input button {
-      padding: 8px;
+
+    #sendMessage {
+      width: 30%;
       border: none;
       background: #ff6aab;
       color: white;
       cursor: pointer;
     }
-    .mini-profiles {
+
+    .chat-footer {
       display: flex;
-      gap: 10px;
-      padding: 10px;
-    }
-    .mini-profile {
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 50%;
-      padding: 10px;
-      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div class="profiles">
-    <div class="profile-card" data-username="Alice">
-      <img src="alice.jpg" alt="Alice">
-      <p>Alice</p>
-      <button class="like">Like</button>
-      <button class="chat">Message</button>
-    </div>
-    <div class="profile-card" data-username="Bob">
-      <img src="bob.jpg" alt="Bob">
-      <p>Bob</p>
-      <button class="like">Like</button>
-      <button class="chat">Message</button>
-    </div>
+
+  <div class="profile-card" data-username="Clara">
+    <h2>Clara</h2>
+    <img src="clara.jpg" alt="Clara">
+    <p>Passionnée et romantique ✨</p>
+    <button class="like">Like</button>
+    <button class="chat">Message</button>
   </div>
 
-  <div class="mini-profiles" id="miniProfiles"></div>
+  <div class="profile-card" data-username="David">
+    <h2>David</h2>
+    <img src="david.jpg" alt="David">
+    <p>Sincère et attentionné 💕</p>
+    <button class="like">Like</button>
+    <button class="chat">Message</button>
+  </div>
 
-  <div class="chat-window" id="chatWindow">
-    <div class="chat-messages" id="chatMessages"></div>
-    <div class="chat-input">
-      <input type="text" id="chatInput" placeholder="Écris ton message...">
+  <div id="miniProfiles"></div>
+
+  <div id="chatWindow">
+    <div id="chatMessages"></div>
+    <div class="chat-footer">
+      <input type="text" id="chatInput" placeholder="Écris un message...">
       <button id="sendMessage">Envoyer</button>
     </div>
   </div>
@@ -142,7 +165,7 @@
       if (document.querySelector(\`.mini-profile[data-username="\${username}"]\`)) return;
       const mini = document.createElement("div");
       mini.className = "mini-profile";
-      mini.textContent = username;
+      mini.textContent = username[0];
       mini.dataset.username = username;
       mini.onclick = () => openChat(username);
       miniProfiles.appendChild(mini);
