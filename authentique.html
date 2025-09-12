@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let chats = JSON.parse(localStorage.getItem("chatMessages")||"{}"); 
   let likes = JSON.parse(localStorage.getItem("likes")||"{}");
   let favorites = JSON.parse(localStorage.getItem("favorites")||"[]");
-  let currentUser = "Luckas";
+  let currentUser = localStorage.getItem("pseudo") || "Anonyme";
 
   function savePositions(){ localStorage.setItem("miniProfilePositions", JSON.stringify(positions)); }
   function saveChats(){ localStorage.setItem("chatMessages", JSON.stringify(chats)); }
