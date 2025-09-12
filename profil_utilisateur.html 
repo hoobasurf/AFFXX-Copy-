@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil Utilisateur</title>
+<style>
+  body {
+    background: #111;
+    color: white;
+    font-family: 'Orbitron', sans-serif;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+  }
+  .profile-container {
+    max-width: 600px;
+    margin: auto;
+    background: #222;
+    padding: 20px;
+    border-radius: 12px;
+  }
+  .photos {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  .photos img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  .photos img:hover { transform: scale(1.1); }
+  .rooms {
+    margin-top: 20px;
+  }
+  .rooms button {
+    margin: 5px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    background: #ff66cc;
+    color: white;
+    cursor: pointer;
+  }
+  .rooms button:hover {
+    background: #ff3385;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+  }
+  .modal img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="profile-container">
+  <h1>Profil de <span id="pseudo">Chargement...</span></h1>
+  <p><strong>Âge :</strong> <span id="age">–</span></p>
+  <p><strong>Lieu :</strong> <span id="location">–</span></p>
+  <p><strong>Email :</strong> <span id="email">–</span></p>
+  <p><strong>Description :</strong> <span id="description">–</span></p>
+
+  <div class="photos" id="photosContainer"></div>
+  <div class="rooms" id="roomsContainer"></div>
+</div>
+
+<!-- MODAL pour zoom photo -->
+<div id="photoModal" class="modal" onclick="this.style.display='none'">
+  <img id="modalImg" src="">
+</div>
+
+<script type="module">
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { app } from "./firebase.js";
+
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+const pseudoEl = document.getElementById("pseudo");
+const ageEl = document.getElementById("age");
+const locationEl = document.getElementById("location");
+const emailEl = document.getElementById("email");
+const descEl = document.getElementById("description");
+const photosContainer = document.getElementById("photosContainer");
+const roomsContainer = document.getElementById("roomsContainer");
+const modal = document.getElementById("photoModal");
+const modalImg = document.getElementById("modalImg");
+
+// Récupère l'UID ou pseudo depuis l'URL
+const params = new URLSearchParams(window.location.search);
+const uid = params.get("uid"); // ex: profil_utilisateur.html?uid=XYZ
+
+if(!uid) {
+  alert("Utilisateur non spécifié !");
+  window.location.href = "authentique.html";
+}
+
+// Vérifie que l'utilisateur est connecté
+onAuthStateChanged(auth, async (user) => {
+  if(!user) {
+    window.location.href = "inscription.html";
+    return;
+  }
+
+  try {
+    const snapshot = await get(ref(db, "users/" + uid));
+    if(!snapshot.exists()) {
+      alert("Utilisateur introuvable !");
+      window.location.href = "authentique.html";
+      return;
+    }
+
+    const data = snapshot.val();
+
+    pseudoEl.textContent = data.pseudo || "Non renseigné";
+    ageEl.textContent = data.age || "–";
+    locationEl.textContent = data.location || "–";
+    emailEl.textContent = data.email || "–";
+    descEl.textContent = data.description || "–";
+
+    // Photos
+    photosContainer.innerHTML = "";
+    if(data.photos && data.photos.length) {
+      data.photos.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.onclick = () => {
+          modal.style.display = "flex";
+          modalImg.src = url;
+        };
+        photosContainer.appendChild(img);
+      });
+    }
+
+    // Rooms
+    roomsContainer.innerHTML = "";
+    if(data.rooms && data.rooms.length) {
+      data.rooms.forEach(room => {
+        const btn = document.createElement("button");
+        btn.textContent = room;
+        roomsContainer.appendChild(btn);
+      });
+    }
+  } catch(err) {
+    console.error(err);
+    alert("Erreur lors du chargement du profil.");
+  }
+});
+</script>
+</body>
+</html>
