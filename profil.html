@@ -145,7 +145,8 @@
           }
         }
       } else {
-        window.location.href = "inscription.html";
+        // ✅ Plus de redirection → message affiché
+        document.body.innerHTML = "<h2 style='color:white; text-align:center;'>Veuillez vous inscrire ou vous connecter.</h2>";
       }
     });
   </script>
