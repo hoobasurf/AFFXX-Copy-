@@ -31,12 +31,7 @@
 
     h1 { color: #ff6aab; margin-bottom: 30px; }
 
-    input, label, textarea {
-      width: 100%;
-      margin: 10px 0;
-      color: white;
-      font-size: 16px;
-    }
+    input, label, textarea { width: 100%; margin: 10px 0; color: white; font-size: 16px; }
 
     input[type="email"], input[type="password"], 
     input[type="text"], input[type="number"], textarea {
@@ -48,9 +43,7 @@
       resize: vertical;
     }
 
-    input::placeholder, textarea::placeholder { 
-      color: rgba(255,255,255,0.7); 
-    }
+    input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.7); }
 
     .rooms { margin-top: 20px; text-align: left; }
     .rooms label { display: block; margin: 5px 0; }
@@ -160,6 +153,16 @@
 
     let photosData = [];
 
+    // 🔹 Vérifier si l'utilisateur est déjà enregistré
+    document.addEventListener('DOMContentLoaded', () => {
+      const pseudo = localStorage.getItem("pseudo");
+      const userData = JSON.parse(localStorage.getItem("userData") || "null");
+      if (pseudo && userData) {
+        // Redirection automatique
+        window.location.href = "/page2";
+      }
+    });
+
     // ✅ Prévisualisation et zoom photos
     photosInput.addEventListener("change", () => {
       let files = Array.from(photosInput.files || []);
@@ -207,6 +210,12 @@
           photos: photosData, 
           joinedAt: new Date().toISOString()
         });
+
+        // 🔹 Stocker les données localement pour redirection automatique à l'ouverture
+        localStorage.setItem("pseudo", pseudo);
+        localStorage.setItem("userData", JSON.stringify({
+          pseudo, age, location, description, rooms: selectedRooms, photos: photosData
+        }));
 
         window.location.href = "/page2";
       } catch(err) {
