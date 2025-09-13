@@ -2,58 +2,60 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Profil Utilisateur</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+<title>Profil Utilisateur</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
-* { box-sizing:border-box; margin:0; padding:0; }
-body { font-family:'Orbitron', sans-serif; background: radial-gradient(circle at center, #330033, #000000); color:white; min-height:100vh; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:20px; }
-.container { background: rgba(0,0,0,0.6); border:2px solid #ff66cc; border-radius:20px; padding:20px; width:100%; max-width:400px; text-align:center; box-shadow:0 0 20px #ff66cc; animation: neonBlink 2s infinite alternate; }
-h1 { color:#ff66cc; margin-bottom:10px; }
-h2 { color:#9933ff; margin-bottom:15px; }
-.profile-pic { width:150px; height:150px; border-radius:50%; object-fit:cover; border:3px solid #ff66cc; box-shadow:0 0 12px #ff66cc; margin-bottom:15px; }
-.description { margin:10px 0; font-size:0.9em; line-height:1.4; }
-.photos { display:flex; overflow-x:auto; gap:10px; padding:10px 0; margin-top:10px; }
-.photos img { width:70px; height:70px; border-radius:12px; border:2px solid #ff66cc; object-fit:cover; flex-shrink:0; animation: neonBlink 2s infinite alternate; }
-button { margin-top:20px; padding:10px 20px; border:none; border-radius:12px; background:#ff66cc; color:white; font-size:1em; cursor:pointer; box-shadow:0 0 12px #ff66cc; transition: transform .2s; }
-button:hover { transform: scale(1.1); }
-@keyframes neonBlink { 0%,100%{box-shadow:0 0 8px #ff66cc;border-color:#ff66cc;} 50%{box-shadow:0 0 20px #ff66cc;border-color:#ffea00;} }
+body { margin:0; font-family:'Orbitron',sans-serif; background: url('planete-magique.jpg') no-repeat center center/cover; color:white; display:flex; justify-content:center; align-items:center; min-height:100vh;}
+.container { background: rgba(0,0,0,0.6); padding:25px; border-radius:15px; width:90%; max-width:500px; box-shadow: 0 0 20px #ff66cc; text-align:center;}
+h1 { color:#ff66cc; text-shadow:0 0 10px #ff66cc; margin-bottom:20px;}
+.info div { margin:8px 0; text-align:left;}
+.photos { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:15px 0;}
+.photos img { width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc; cursor:pointer; transition: transform .2s;}
+.photos img:hover { transform:scale(1.1);}
+.lightbox { display:none; position:fixed; z-index:1000; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center;}
+.lightbox img { max-width:90%; max-height:90%; border-radius:10px; box-shadow:0 0 25px #ff66cc;}
 </style>
 </head>
 <body>
-<div class="container" id="profileContainer">
-  <img src="" alt="Photo Profil" class="profile-pic" id="profilePic">
-  <h1 id="pseudo">Utilisateur</h1>
-  <h2 id="age">-- ans</h2>
-  <div class="description" id="description">Aucune description</div>
-  <div class="photos" id="photosGallery"></div>
-  <button id="btnBack">Retour</button>
+<div class="container">
+  <h1>Profil</h1>
+  <div class="info">
+    <div><strong>Pseudo :</strong> <span id="pseudo">Chargement...</span></div>
+    <div><strong>Âge :</strong> <span id="age">Chargement...</span></div>
+    <div><strong>Lieu :</strong> <span id="location">Chargement...</span></div>
+    <div><strong>Description :</strong> <span id="description">Chargement...</span></div>
+    <div class="photos" id="photosContainer"></div>
+  </div>
 </div>
+<div class="lightbox" id="lightbox"><img id="lightboxImg" src="" alt="Zoom photo"></div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const profileData = JSON.parse(localStorage.getItem("selectedUser")||"{}");
-  if(!profileData.pseudo){
-    document.getElementById("profileContainer").innerHTML = "<h1>Profil introuvable</h1>";
-    return;
-  }
+const pseudoSpan = document.getElementById("pseudo");
+const ageSpan = document.getElementById("age");
+const locationSpan = document.getElementById("location");
+const descSpan = document.getElementById("description");
+const photosContainer = document.getElementById("photosContainer");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
 
-  document.getElementById("profilePic").src = profileData.photo || "";
-  document.getElementById("pseudo").textContent = profileData.pseudo || "Utilisateur";
-  document.getElementById("age").textContent = profileData.age ? profileData.age + " ans" : "-- ans";
-  document.getElementById("description").textContent = profileData.description || "Aucune description";
-
-  const photosGallery = document.getElementById("photosGallery");
-  if(profileData.photos && profileData.photos.length){
-    profileData.photos.forEach(src => {
+document.addEventListener('DOMContentLoaded', ()=>{
+  const user = JSON.parse(localStorage.getItem("selectedUser") || "{}");
+  if(user){
+    pseudoSpan.textContent = user.pseudo || "Non renseigné";
+    ageSpan.textContent = user.age || "Non renseigné";
+    locationSpan.textContent = user.location || "Non renseigné";
+    descSpan.textContent = user.description || "Non renseignée";
+    (user.photos||[]).forEach(url=>{
       const img = document.createElement("img");
-      img.src = src;
-      photosGallery.appendChild(img);
+      img.src=url;
+      img.addEventListener("click",()=>{ lightboxImg.src=url; lightbox.style.display="flex"; });
+      photosContainer.appendChild(img);
     });
   }
-
-  document.getElementById("btnBack").addEventListener("click", ()=>{ window.history.back(); });
 });
+
+lightbox.addEventListener("click",()=>{ lightbox.style.display="none"; });
 </script>
 </body>
 </html>
