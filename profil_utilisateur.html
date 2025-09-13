@@ -2,77 +2,57 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profil Utilisateur</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing:border-box; margin:0; padding:0; }
-  html, body { width:100%; height:100%; font-family:'Orbitron', sans-serif; background: #111; color:white; }
-  body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%); z-index:1; pointer-events:none; animation: floatStars 60s linear infinite; }
-  @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
-
-  .container { position:relative; z-index:2; max-width:800px; margin:50px auto; padding:20px; background: rgba(0,0,0,0.7); border-radius:16px; text-align:center; }
-  .back-btn { position:absolute; top:20px; left:20px; color:#ff66cc; text-decoration:none; font-size:1.5em; }
-  h1 { margin-bottom:10px; color:#ff66cc; }
-  p { margin:5px 0; font-size:1.1em; }
-  .photos { margin-top:20px; display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
-  .photos img { width:100px; height:100px; object-fit:cover; border-radius:12px; cursor:pointer; border:3px solid #ff66cc; transition: transform .3s; }
-  .photos img:hover { transform: scale(1.1); }
-
-  /* Modal zoom */
-  .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); justify-content:center; align-items:center; z-index:10000; }
-  .modal img { max-width:90%; max-height:90%; border-radius:12px; }
-
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:'Orbitron', sans-serif; background: radial-gradient(circle at center, #330033, #000000); color:white; min-height:100vh; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:20px; }
+.container { background: rgba(0,0,0,0.6); border:2px solid #ff66cc; border-radius:20px; padding:20px; width:100%; max-width:400px; text-align:center; box-shadow:0 0 20px #ff66cc; animation: neonBlink 2s infinite alternate; }
+h1 { color:#ff66cc; margin-bottom:10px; }
+h2 { color:#9933ff; margin-bottom:15px; }
+.profile-pic { width:150px; height:150px; border-radius:50%; object-fit:cover; border:3px solid #ff66cc; box-shadow:0 0 12px #ff66cc; margin-bottom:15px; }
+.description { margin:10px 0; font-size:0.9em; line-height:1.4; }
+.photos { display:flex; overflow-x:auto; gap:10px; padding:10px 0; margin-top:10px; }
+.photos img { width:70px; height:70px; border-radius:12px; border:2px solid #ff66cc; object-fit:cover; flex-shrink:0; animation: neonBlink 2s infinite alternate; }
+button { margin-top:20px; padding:10px 20px; border:none; border-radius:12px; background:#ff66cc; color:white; font-size:1em; cursor:pointer; box-shadow:0 0 12px #ff66cc; transition: transform .2s; }
+button:hover { transform: scale(1.1); }
+@keyframes neonBlink { 0%,100%{box-shadow:0 0 8px #ff66cc;border-color:#ff66cc;} 50%{box-shadow:0 0 20px #ff66cc;border-color:#ffea00;} }
 </style>
 </head>
 <body>
-<a href="authentique.html" class="back-btn">&larr; Retour</a>
-<div class="container">
+<div class="container" id="profileContainer">
+  <img src="" alt="Photo Profil" class="profile-pic" id="profilePic">
   <h1 id="pseudo">Utilisateur</h1>
-  <p><strong>Nom complet :</strong> <span id="name">---</span></p>
-  <p><strong>Âge :</strong> <span id="age">---</span></p>
-  <p><strong>Description :</strong> <span id="description">---</span></p>
-  <div class="photos" id="photosContainer"></div>
-</div>
-
-<div class="modal" id="photoModal">
-  <img id="modalImg" src="">
+  <h2 id="age">-- ans</h2>
+  <div class="description" id="description">Aucune description</div>
+  <div class="photos" id="photosGallery"></div>
+  <button id="btnBack">Retour</button>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const userData = JSON.parse(localStorage.getItem("selectedUser") || "{}");
-  if(!userData.name){
-    document.getElementById("pseudo").textContent = "Utilisateur inconnu";
-    document.getElementById("name").textContent = "---";
-    document.getElementById("age").textContent = "---";
-    document.getElementById("description").textContent = "---";
-  } else {
-    document.getElementById("pseudo").textContent = userData.pseudo || userData.name;
-    document.getElementById("name").textContent = userData.name || "---";
-    document.getElementById("age").textContent = userData.age || "---";
-    document.getElementById("description").textContent = userData.description || "---";
+  const profileData = JSON.parse(localStorage.getItem("selectedUser")||"{}");
+  if(!profileData.pseudo){
+    document.getElementById("profileContainer").innerHTML = "<h1>Profil introuvable</h1>";
+    return;
+  }
 
-    const photosContainer = document.getElementById("photosContainer");
-    let photos = userData.photos || [];
-    // si aucune photo multiple définie, affiche la photo principale
-    if(photos.length === 0 && userData.photo) photos.push(userData.photo);
+  document.getElementById("profilePic").src = profileData.photo || "";
+  document.getElementById("pseudo").textContent = profileData.pseudo || "Utilisateur";
+  document.getElementById("age").textContent = profileData.age ? profileData.age + " ans" : "-- ans";
+  document.getElementById("description").textContent = profileData.description || "Aucune description";
 
-    photos.forEach(url => {
+  const photosGallery = document.getElementById("photosGallery");
+  if(profileData.photos && profileData.photos.length){
+    profileData.photos.forEach(src => {
       const img = document.createElement("img");
-      img.src = url;
-      img.onclick = () => {
-        const modal = document.getElementById("photoModal");
-        const modalImg = document.getElementById("modalImg");
-        modal.style.display = "flex";
-        modalImg.src = url;
-      };
-      photosContainer.appendChild(img);
+      img.src = src;
+      photosGallery.appendChild(img);
     });
   }
 
-  const modal = document.getElementById("photoModal");
-  modal.addEventListener("click", () => { modal.style.display = "none"; });
+  document.getElementById("btnBack").addEventListener("click", ()=>{ window.history.back(); });
 });
 </script>
 </body>
