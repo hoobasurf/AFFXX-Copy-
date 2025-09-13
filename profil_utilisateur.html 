@@ -1,119 +1,162 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profil Utilisateur</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
-<style>
-  body { background:#111; color:white; font-family:'Orbitron',sans-serif; padding:20px; text-align:center; }
-  .profile-container { max-width:600px; margin:auto; background:#222; padding:20px; border-radius:12px; }
-  .photos { margin-top:15px; display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
-  .photos img { width:100px; height:100px; object-fit:cover; border-radius:8px; cursor:pointer; }
-  .rooms { margin-top:20px; }
-  .rooms button { margin:5px; padding:10px 15px; border:none; border-radius:8px; background:#ff66cc; color:white; cursor:pointer; }
-  .rooms button:hover { background:#ff3385; }
-  .modal { display:none; position:fixed; z-index:10000; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center; }
-  .modal img { max-width:90%; max-height:90%; border-radius:12px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil Utilisateur</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: 'Orbitron', sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    .profile-container {
+      max-width: 600px;
+      margin: auto;
+      background: #222;
+      padding: 20px;
+      border-radius: 12px;
+    }
+    .photos {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .photos img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 2px solid #ff66cc;
+      transition: transform 0.3s;
+    }
+    .photos img:hover {
+      transform: scale(1.1);
+    }
+    .rooms {
+      margin-top: 20px;
+    }
+    .rooms button {
+      margin: 5px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      background: #ff66cc;
+      color: white;
+      cursor: pointer;
+    }
+    .rooms button:hover {
+      background: #ff3385;
+    }
+
+    /* MODAL pour zoom photo */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 10000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 12px;
+    }
+  </style>
 </head>
 <body>
 
-<div class="profile-container">
-  <h1>Profil Utilisateur</h1>
-  <p><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></p>
-  <p><strong>Âge :</strong> <span id="age">Non renseigné</span></p>
-  <p><strong>Lieu :</strong> <span id="location">Non renseigné</span></p>
-  <p><strong>Email :</strong> <span id="email">Non renseigné</span></p>
-  <p><strong>Description :</strong> <span id="description">Non renseignée</span></p>
+  <div class="profile-container">
+    <h1>Profil Utilisateur</h1>
+    <p><strong>Pseudo :</strong> <span id="pseudo">Chargement...</span></p>
+    <p><strong>Âge :</strong> <span id="age">Chargement...</span></p>
+    <p><strong>Lieu :</strong> <span id="location">Chargement...</span></p>
+    <p><strong>Email :</strong> <span id="email">Chargement...</span></p>
+    <p><strong>Description :</strong> <span id="description">Chargement...</span></p>
 
-  <div class="photos" id="photosContainer"></div>
-  <div class="rooms" id="roomsContainer"></div>
-</div>
+    <div class="photos" id="photosContainer"></div>
 
-<div id="photoModal" class="modal" onclick="this.style.display='none'">
-  <img id="modalImg" src="">
-</div>
+    <div class="rooms" id="roomsContainer"></div>
+  </div>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js"></script>
+  <!-- MODAL pour zoom -->
+  <div id="photoModal" class="modal" onclick="this.style.display='none'">
+    <img id="modalImg" src="">
+  </div>
 
-<script>
-  // ⚡ Configuration Firebase (à remplacer par la tienne)
-  const firebaseConfig = {
-    apiKey: "TON_API_KEY",
-    authDomain: "TON_DOMAINE.firebaseapp.com",
-    databaseURL: "https://TON_DOMAINE.firebaseio.com",
-    projectId: "TON_PROJECT_ID",
-    storageBucket: "TON_PROJECT_ID.appspot.com",
-    messagingSenderId: "TON_SENDER_ID",
-    appId: "TON_APP_ID"
-  };
-  firebase.initializeApp(firebaseConfig);
+  <script type="module">
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { app } from "./firebase.js";
 
-  const auth = firebase.auth();
-  const db = firebase.database();
+    const db = getDatabase(app);
 
-  const pseudoEl = document.getElementById("pseudo");
-  const ageEl = document.getElementById("age");
-  const locationEl = document.getElementById("location");
-  const emailEl = document.getElementById("email");
-  const descEl = document.getElementById("description");
-  const photosContainer = document.getElementById("photosContainer");
-  const roomsContainer = document.getElementById("roomsContainer");
+    const pseudoEl = document.getElementById("pseudo");
+    const ageEl = document.getElementById("age");
+    const locationEl = document.getElementById("location");
+    const emailEl = document.getElementById("email");
+    const descEl = document.getElementById("description");
+    const photosContainer = document.getElementById("photosContainer");
+    const roomsContainer = document.getElementById("roomsContainer");
 
-  const modal = document.getElementById("photoModal");
-  const modalImg = document.getElementById("modalImg");
+    const modal = document.getElementById("photoModal");
+    const modalImg = document.getElementById("modalImg");
 
-  auth.onAuthStateChanged(function(user){
-    if(user){
-      db.ref("users/" + user.uid).once("value").then(function(snapshot){
-        if(snapshot.exists()){
-          const data = snapshot.val();
-          pseudoEl.textContent = data.pseudo || "Non renseigné";
-          ageEl.textContent = data.age || "Non renseigné";
-          locationEl.textContent = data.location || "Non renseigné";
-          emailEl.textContent = data.email || "Non renseigné";
-          descEl.textContent = data.description || "Non renseignée";
-
-          // PHOTOS
-          photosContainer.innerHTML = "";
-          if(data.photos && data.photos.length > 0){
-            data.photos.forEach(url => {
-              const img = document.createElement("img");
-              img.src = url;
-              img.onclick = () => {
-                modal.style.display = "flex";
-                modalImg.src = url;
-              };
-              photosContainer.appendChild(img);
-            });
-          }
-
-          // ROOMS
-          roomsContainer.innerHTML = "";
-          if(data.rooms && data.rooms.length > 0){
-            data.rooms.forEach(room => {
-              const btn = document.createElement("button");
-              btn.textContent = room;
-              btn.onclick = () => {
-                if(room === "serieux") window.location.href="authentique.html";
-                if(room === "amical") window.location.href="amicale.html";
-                if(room === "fun") window.location.href="fun.html";
-              };
-              roomsContainer.appendChild(btn);
-            });
-          }
-        }
-      });
-    } else {
-      // Pas connecté → retour inscription
-      window.location.href = "inscription.html";
+    // Récupérer l'UID dans l'URL
+    const params = new URLSearchParams(window.location.search);
+    const uid = params.get('uid');
+    if(!uid){
+      alert("UID utilisateur manquant !");
+      window.location.href = "page2.html"; // retour à la page principale
     }
-  });
-</script>
 
+    async function loadUser(uid){
+      const snapshot = await get(ref(db, "users/" + uid));
+      if(snapshot.exists()){
+        const data = snapshot.val();
+        pseudoEl.textContent = data.pseudo || "Non renseigné";
+        ageEl.textContent = data.age || "Non renseigné";
+        locationEl.textContent = data.location || "Non renseigné";
+        emailEl.textContent = data.email || "Non renseigné";
+        descEl.textContent = data.description || "Non renseignée";
+
+        // PHOTOS
+        photosContainer.innerHTML = "";
+        if(data.photos && data.photos.length > 0){
+          data.photos.forEach(url=>{
+            const img = document.createElement("img");
+            img.src = url;
+            img.onclick = () => { modal.style.display="flex"; modalImg.src=url; };
+            photosContainer.appendChild(img);
+          });
+        }
+
+        // ROOMS
+        roomsContainer.innerHTML = "";
+        if(data.rooms && data.rooms.length > 0){
+          data.rooms.forEach(room=>{
+            const btn = document.createElement("button");
+            btn.textContent = room;
+            roomsContainer.appendChild(btn);
+          });
+        }
+      } else {
+        alert("Utilisateur introuvable !");
+        window.location.href = "page2.html";
+      }
+    }
+
+    loadUser(uid);
+  </script>
 </body>
 </html>
