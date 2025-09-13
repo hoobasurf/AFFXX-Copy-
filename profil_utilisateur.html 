@@ -2,90 +2,115 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profil Utilisateur</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
     body {
-      background: #111;
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(to right, #1e0033, #33001a);
       color: white;
-      font-family: Arial, sans-serif;
-      padding: 20px;
       text-align: center;
-    }
-    .profile-container {
-      max-width: 600px;
-      margin: auto;
-      background: #222;
       padding: 20px;
-      border-radius: 12px;
     }
+
+    .profile-header {
+      margin-bottom: 20px;
+    }
+
+    .profile-header img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #ff66cc;
+      box-shadow: 0 0 12px #ff66cc;
+    }
+
+    h1 {
+      margin: 15px 0 5px;
+    }
+
+    .photos {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
     .photos img {
       width: 120px;
       height: 120px;
+      border-radius: 12px;
       object-fit: cover;
-      border-radius: 8px;
-      margin: 5px;
+      border: 2px solid #ff66cc;
+      box-shadow: 0 0 8px #ff66cc;
     }
-    button {
-      margin-top: 20px;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 8px;
+
+    .description {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 12px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-top: 25px;
+      padding: 10px 20px;
       background: #ff66cc;
       color: white;
-      cursor: pointer;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: transform 0.2s;
+    }
+
+    .back-btn:hover {
+      transform: scale(1.1);
     }
   </style>
 </head>
 <body>
-  <div class="profile-container">
-    <h1 id="pseudo">Chargement...</h1>
-    <p><strong>Âge :</strong> <span id="age"></span></p>
-    <p><strong>Lieu :</strong> <span id="location"></span></p>
-    <p><strong>Email :</strong> <span id="email"></span></p>
-    <p><strong>Description :</strong> <span id="description"></span></p>
 
-    <div class="photos" id="photosContainer"></div>
-
-    <button onclick="history.back()">⬅ Retour</button>
+  <div class="profile-header">
+    <img id="userPhoto" src="" alt="Photo de profil">
+    <h1 id="userName">Nom</h1>
+    <p id="userAge"></p>
   </div>
 
-  <script type="module">
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-    import { app } from "./firebase.js";
+  <div class="photos" id="userPhotos"></div>
 
-    const db = getDatabase(app);
+  <div class="description">
+    <p id="userDescription">Aucune description disponible.</p>
+  </div>
 
-    // Récupération du paramètre UID dans l’URL
-    const params = new URLSearchParams(window.location.search);
-    const uid = params.get("uid");
+  <a href="authentique.html" class="back-btn">⬅ Retour</a>
 
-    if (!uid) {
-      document.body.innerHTML = "<h2>Profil introuvable ❌</h2>";
-    } else {
-      get(ref(db, "users/" + uid)).then(snapshot => {
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          document.getElementById("pseudo").textContent = data.pseudo || "Non renseigné";
-          document.getElementById("age").textContent = data.age || "Non renseigné";
-          document.getElementById("location").textContent = data.location || "Non renseigné";
-          document.getElementById("email").textContent = data.email || "Non renseigné";
-          document.getElementById("description").textContent = data.description || "Non renseignée";
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const user = JSON.parse(localStorage.getItem("selectedUser"));
 
-          // Afficher toutes les photos
-          const photosContainer = document.getElementById("photosContainer");
-          if (data.photos && data.photos.length > 0) {
-            data.photos.forEach(url => {
-              const img = document.createElement("img");
-              img.src = url;
-              photosContainer.appendChild(img);
-            });
-          }
-        } else {
-          document.body.innerHTML = "<h2>Utilisateur introuvable ❌</h2>";
+      if (user) {
+        document.getElementById("userName").textContent = user.name || "Nom inconnu";
+        document.getElementById("userAge").textContent = user.age ? `${user.age} ans` : "";
+        document.getElementById("userPhoto").src = user.photo || "https://via.placeholder.com/120";
+        document.getElementById("userDescription").textContent = user.description || "Cette personne n'a pas encore ajouté de description.";
+
+        const photosContainer = document.getElementById("userPhotos");
+        if (user.photos && user.photos.length > 0) {
+          user.photos.forEach(photo => {
+            const img = document.createElement("img");
+            img.src = photo;
+            photosContainer.appendChild(img);
+          });
         }
-      });
-    }
+      } else {
+        document.getElementById("userName").textContent = "Profil introuvable";
+      }
+    });
   </script>
+
 </body>
 </html>
