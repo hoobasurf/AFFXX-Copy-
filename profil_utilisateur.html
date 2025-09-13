@@ -1,99 +1,79 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profil Utilisateur</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin:0; padding:0; }
-html, body { height:100%; width:100%; font-family: 'Orbitron', sans-serif; background: url('planete-romantique.jpg') no-repeat center center/cover; overflow: hidden; color: white; }
-body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%); z-index:1; pointer-events:none; animation: floatStars 60s linear infinite; }
-@keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
-.header { position: relative; z-index:2; padding: 20px; }
-.btn-back { position: absolute; top:20px; left:20px; color: #ff66cc; font-size:1.5em; cursor:pointer; text-decoration:none; transition: transform .2s; }
-.btn-back:hover { transform: scale(1.2); }
-.profile-container { z-index:2; position: relative; max-width:600px; margin:80px auto 20px; background: rgba(0,0,0,0.5); padding:20px; border-radius:16px; text-align:center; color:white; }
-.profile-container h1 { font-size:2em; color:#ff66cc; margin-bottom:10px; }
-.profile-container p { margin:6px 0; }
-.photos-container { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:15px; }
-.photos-container img { width:80px; height:80px; object-fit:cover; border-radius:50%; border:2px solid #ff66cc; cursor:pointer; transition: transform .3s, box-shadow .3s; }
-.photos-container img:hover { transform: scale(1.1); box-shadow:0 0 15px #ff66cc; }
-.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center; z-index:10000; }
-.lightbox img { max-width:90%; max-height:90%; border-radius:10px; cursor:pointer; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { width:100%; height:100%; font-family:'Orbitron', sans-serif; background: #111; color:white; }
+  body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%); z-index:1; pointer-events:none; animation: floatStars 60s linear infinite; }
+  @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
+
+  .container { position:relative; z-index:2; max-width:800px; margin:50px auto; padding:20px; background: rgba(0,0,0,0.7); border-radius:16px; text-align:center; }
+  .back-btn { position:absolute; top:20px; left:20px; color:#ff66cc; text-decoration:none; font-size:1.5em; }
+  h1 { margin-bottom:10px; color:#ff66cc; }
+  p { margin:5px 0; font-size:1.1em; }
+  .photos { margin-top:20px; display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
+  .photos img { width:100px; height:100px; object-fit:cover; border-radius:12px; cursor:pointer; border:3px solid #ff66cc; transition: transform .3s; }
+  .photos img:hover { transform: scale(1.1); }
+
+  /* Modal zoom */
+  .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); justify-content:center; align-items:center; z-index:10000; }
+  .modal img { max-width:90%; max-height:90%; border-radius:12px; }
+
 </style>
 </head>
 <body>
-
-<div class="header">
-  <a href="authentique.html" class="btn-back">&larr; Retour</a>
-</div>
-
-<div class="profile-container">
+<a href="authentique.html" class="back-btn">&larr; Retour</a>
+<div class="container">
   <h1 id="pseudo">Utilisateur</h1>
-  <p id="age"></p>
-  <p id="location"></p>
-  <p id="email"></p>
-  <p id="description"></p>
-  <div class="photos-container" id="photosContainer"></div>
+  <p><strong>Nom complet :</strong> <span id="name">---</span></p>
+  <p><strong>Âge :</strong> <span id="age">---</span></p>
+  <p><strong>Description :</strong> <span id="description">---</span></p>
+  <div class="photos" id="photosContainer"></div>
 </div>
 
-<div class="lightbox" id="lightbox">
-  <img id="lightboxImg" src="">
+<div class="modal" id="photoModal">
+  <img id="modalImg" src="">
 </div>
 
-<script type="module">
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-import { app } from "./firebase.js";
-
-const db = getDatabase(app);
-const params = new URLSearchParams(window.location.search);
-const uid = params.get("uid");
-
-if(!uid){ window.location.href = "authentique.html"; }
-
-const pseudoEl = document.getElementById("pseudo");
-const ageEl = document.getElementById("age");
-const locationEl = document.getElementById("location");
-const emailEl = document.getElementById("email");
-const descEl = document.getElementById("description");
-const photosContainer = document.getElementById("photosContainer");
-const lightbox = document.getElementById("lightbox");
-const lightboxImg = document.getElementById("lightboxImg");
-
-get(ref(db, "users/" + uid)).then(snapshot => {
-  if(snapshot.exists()){
-    const data = snapshot.val();
-    pseudoEl.textContent = data.pseudo || "Utilisateur";
-    ageEl.textContent = data.age ? `Âge: ${data.age}` : "";
-    locationEl.textContent = data.location ? `Lieu: ${data.location}` : "";
-    emailEl.textContent = data.email ? `Email: ${data.email}` : "";
-    descEl.textContent = data.description ? `Description: ${data.description}` : "";
-
-    // Photos multiples
-    photosContainer.innerHTML = "";
-    if(data.photos && data.photos.length > 0){
-      data.photos.forEach(url => {
-        const img = document.createElement("img");
-        img.src = url;
-        img.onclick = () => {
-          lightbox.style.display = "flex";
-          lightboxImg.src = url;
-        };
-        photosContainer.appendChild(img);
-      });
-    }
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const userData = JSON.parse(localStorage.getItem("selectedUser") || "{}");
+  if(!userData.name){
+    document.getElementById("pseudo").textContent = "Utilisateur inconnu";
+    document.getElementById("name").textContent = "---";
+    document.getElementById("age").textContent = "---";
+    document.getElementById("description").textContent = "---";
   } else {
-    window.location.href = "authentique.html";
-  }
-});
+    document.getElementById("pseudo").textContent = userData.pseudo || userData.name;
+    document.getElementById("name").textContent = userData.name || "---";
+    document.getElementById("age").textContent = userData.age || "---";
+    document.getElementById("description").textContent = userData.description || "---";
 
-// Fermer lightbox
-lightbox.addEventListener("click", ()=>{
-  lightbox.style.display = "none";
-  lightboxImg.src = "";
+    const photosContainer = document.getElementById("photosContainer");
+    let photos = userData.photos || [];
+    // si aucune photo multiple définie, affiche la photo principale
+    if(photos.length === 0 && userData.photo) photos.push(userData.photo);
+
+    photos.forEach(url => {
+      const img = document.createElement("img");
+      img.src = url;
+      img.onclick = () => {
+        const modal = document.getElementById("photoModal");
+        const modalImg = document.getElementById("modalImg");
+        modal.style.display = "flex";
+        modalImg.src = url;
+      };
+      photosContainer.appendChild(img);
+    });
+  }
+
+  const modal = document.getElementById("photoModal");
+  modal.addEventListener("click", () => { modal.style.display = "none"; });
 });
 </script>
-
 </body>
 </html>
