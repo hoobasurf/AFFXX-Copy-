@@ -40,21 +40,22 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 </div>
 
 <div class="carousel-container fade-in">
-  <div class="carousel" id="carousel">
-    <!-- Profils dynamiques insérés ici -->
-  </div>
+  <div class="carousel" id="carousel"></div>
 </div>
 
 <button id="btnFavorites">Favoris</button>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  // 🔹 récupère tous les utilisateurs stockés
+  let allUsers = JSON.parse(localStorage.getItem("allUsers") || "[]");
   let positions = JSON.parse(localStorage.getItem("miniProfilePositions")||"{}");
   let chats = JSON.parse(localStorage.getItem("chatMessages")||"{}"); 
   let likes = JSON.parse(localStorage.getItem("likes")||"{}");
   let favorites = JSON.parse(localStorage.getItem("favorites")||"[]");
 
   let currentUser = localStorage.getItem("pseudo") || "Utilisateur";
+  const carousel = document.getElementById("carousel");
 
   function savePositions(){ localStorage.setItem("miniProfilePositions", JSON.stringify(positions)); }
   function saveChats(){ localStorage.setItem("chatMessages", JSON.stringify(chats)); }
@@ -62,11 +63,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function saveFavorites(){ localStorage.setItem("favorites", JSON.stringify(favorites)); }
 
   function createCard(user){
-    const carousel = document.getElementById("carousel");
     const card = document.createElement("div");
-    card.className = "card " + (user.gender||"girl");
-    card.dataset.name = user.pseudo + ", " + user.age;
-    card.dataset.age = user.age;
+    card.className = "card " + (user.gender || "girl");
+    card.dataset.name = user.pseudo;
+    card.dataset.age = user.age || "";
     card.dataset.description = user.description || "";
     card.dataset.photos = JSON.stringify(user.photos || []);
     card.innerHTML = `
@@ -81,27 +81,26 @@ document.addEventListener('DOMContentLoaded', () => {
     carousel.appendChild(card);
   }
 
-  // Récupérer utilisateurs stockés
-  const users = JSON.parse(localStorage.getItem("allUsers")||"[]");
-  users.forEach(u => createCard(u));
+  // Génère toutes les cartes dynamiquement
+  allUsers.forEach(createCard);
 
-  // ⚡ Gestion clic photo → profil_utilisateur.html
-  document.addEventListener('click', e => {
+  // ⚡ click sur photo = profil utilisateur
+  document.addEventListener("click", e => {
     if(e.target.tagName === "IMG" && e.target.closest(".card")){
       const card = e.target.closest(".card");
       const userData = {
-        pseudo: card.querySelector(".name").textContent,
+        pseudo: card.dataset.name,
         age: card.dataset.age,
         description: card.dataset.description,
-        photo: card.querySelector("img").src,
-        photos: JSON.parse(card.dataset.photos || "[]")
+        photos: JSON.parse(card.dataset.photos || "[]"),
+        photo: card.querySelector("img").src
       };
       localStorage.setItem("selectedUser", JSON.stringify(userData));
       window.location.href = "profil_utilisateur.html";
     }
   });
 
-  // ⚡ Mini profiles, chat, likes, favoris (inchangé par rapport à ton fichier original)
+  // Mini-profiles, likes, favoris, chat (inchangés par rapport à ton fichier)
   function createMiniProfile(name,imgSrc){
     const existing = document.querySelector(`.mini-profile[data-mini="${name}"]`);
     if(existing){ existing.classList.add("new-message"); return; }
@@ -111,8 +110,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const close=document.createElement("div"); close.className="close-btn"; close.textContent="×";
     wrapper.appendChild(mini); wrapper.appendChild(close); 
     document.body.appendChild(wrapper);
-    if(positions[name]){ wrapper.style.left=positions[name].x+"px"; wrapper.style.top=positions[name].y+"px"; } 
-    else { wrapper.style.left="20px"; wrapper.style.top="20px"; }
+    if(positions[name]){
+        wrapper.style.left=positions[name].x+"px"; 
+        wrapper.style.top=positions[name].y+"px"; 
+    } else { 
+        wrapper.style.left="20px"; 
+        wrapper.style.top="20px"; 
+    }
     mini.addEventListener("click", ()=>{ mini.classList.remove("new-message"); openChat(name); });
     close.addEventListener("click", e=>{ e.stopPropagation(); delete positions[name]; delete chats[name]; delete likes[name]; favorites=favorites.filter(f=>f!==name); savePositions(); saveChats(); saveLikes(); saveFavorites(); wrapper.remove(); });
     let offsetX=0, offsetY=0;
@@ -143,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         padding:10px 16px; background:#ff66cc; border:none; border-radius:8px; color:white; cursor:pointer;">Retour</button>
     `;
     document.body.appendChild(fullChat);
+
     const chatBody = document.getElementById("fullChatBody");
     document.getElementById("fullChatSend").onclick=()=>{
       const text=document.getElementById("fullChatInput").value.trim(); 
@@ -161,19 +166,18 @@ document.addEventListener('DOMContentLoaded', () => {
   for(let n in positions){ const card=[...document.querySelectorAll(".card")].find(c=>c.dataset.name===n); if(card) createMiniProfile(n, card.querySelector("img").src); }
 
   document.addEventListener("click", e=>{ if(e.target.classList.contains("btn-chat")){ const card=e.target.closest(".card"); if(card) openChat(card.dataset.name); } });
-
   document.querySelectorAll(".btn-like").forEach(btn=>{
     const card=btn.closest(".card"); const name=card.dataset.name;
     if(likes[name]) btn.classList.add("active");
     btn.addEventListener("click", ()=>{
       const isActive=btn.classList.toggle("active"); likes[name]=isActive; saveLikes();
-      if(isActive){ chats[name]=chats[name]||[]; chats[name].push(`<div style="margin-bottom:8px;"><strong style="color:#ff66cc">${currentUser}:</strong> 💌 Vous avez liké ${name.split(',')[0]} !</div>`); } 
-      else { if(chats[name]){ chats[name]=chats[name].filter(msg => !msg.includes(`Vous avez liké ${name.split(',')[0]}`)); } }
-      saveChats();
-      createMiniProfile(name, card.querySelector("img").src);
+      if(isActive){
+        chats[name]=chats[name]||[]; 
+        chats[name].push(`<div style="margin-bottom:8px;"><strong style="color:#ff66cc">${currentUser}:</strong> 💌 Vous avez liké ${name.split(',')[0]} !</div>`); 
+      } else { if(chats[name]){ chats[name]=chats[name].filter(msg => !msg.includes(`Vous avez liké ${name.split(',')[0]}`)); } }
+      saveChats(); createMiniProfile(name, card.querySelector("img").src);
     });
   });
-
   document.querySelectorAll(".btn-fav").forEach(btn=>{
     const card=btn.closest(".card"); const name=card.dataset.name;
     if(favorites.includes(name)) btn.classList.add("active");
@@ -183,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
       saveFavorites();
     });
   });
-
   document.getElementById("btnFavorites").addEventListener("click", ()=>{
     let html=favorites.map(favName=>{
       const card=[...document.querySelectorAll(".card")].find(c=>c.dataset.name===favName); if(!card) return "";
