@@ -25,7 +25,6 @@
       max-width: 500px;
       box-shadow: 0 0 20px #ff66cc;
       text-align: center;
-      z-index: 1;
     }
 
     h1 {
@@ -34,14 +33,8 @@
       margin-bottom: 20px;
     }
 
-    .info {
-      margin-bottom: 20px;
-      text-align: left;
-    }
-
-    .info div {
-      margin: 8px 0;
-    }
+    .info { margin-bottom: 20px; text-align: left; }
+    .info div { margin: 8px 0; }
 
     .photos {
       display: flex;
@@ -50,7 +43,6 @@
       justify-content: center;
       margin: 15px 0;
     }
-
     .photos img {
       width: 70px;
       height: 70px;
@@ -60,10 +52,7 @@
       cursor: pointer;
       transition: transform 0.2s;
     }
-
-    .photos img:hover {
-      transform: scale(1.1);
-    }
+    .photos img:hover { transform: scale(1.1); }
 
     button {
       margin-top: 15px;
@@ -77,10 +66,7 @@
       cursor: pointer;
       box-shadow: 0 0 10px #ff66cc;
     }
-
-    button:hover {
-      box-shadow: 0 0 20px #ff66cc;
-    }
+    button:hover { box-shadow: 0 0 20px #ff66cc; }
 
     /* ✅ Lightbox pour zoom photo */
     .lightbox {
@@ -93,7 +79,6 @@
       justify-content: center;
       align-items: center;
     }
-
     .lightbox img {
       max-width: 90%;
       max-height: 90%;
@@ -101,33 +86,39 @@
       box-shadow: 0 0 25px #ff66cc;
     }
 
-    .edit-section {
-      margin-top: 20px;
+    /* ✅ Popup overlay */
+    #overlay {
       display: none;
+      position: fixed;
+      z-index: 2000;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      font-family: 'Orbitron';
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 20px;
+    }
+    #overlay button {
+      width: auto;
+      padding: 10px 20px;
+      margin-top: 15px;
     }
 
+    .edit-section { margin-top: 20px; display: none; }
     textarea, input[type="file"] {
-      width: 100%;
-      margin: 10px 0;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
+      width: 100%; margin: 10px 0; padding: 10px;
+      border-radius: 8px; border: none;
       font-family: 'Orbitron';
     }
 
-    .preview {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
-
+    .preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
     .preview img {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 2px solid #ff66cc;
+      width: 60px; height: 60px; object-fit: cover;
+      border-radius: 8px; border: 2px solid #ff66cc;
     }
 
     /* ✅ Boutons néon */
@@ -147,29 +138,6 @@
     .room-btn:hover {
       box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
     }
-
-    /* ✅ Overlay connexion */
-    #overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.95);
-      color: #fff;
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      z-index: 2000;
-    }
-    #overlay h2 {
-      color: #ff66cc;
-      margin-bottom: 20px;
-    }
-    #overlay button {
-      width: auto;
-      padding: 10px 20px;
-    }
   </style>
 </head>
 <body>
@@ -184,7 +152,6 @@
     </div>
 
     <div class="photos" id="photosContainer"></div>
-
     <button id="editBtn">Modifier</button>
 
     <div class="edit-section" id="editSection">
@@ -203,10 +170,10 @@
     <img id="lightboxImg" src="" alt="Zoom photo">
   </div>
 
-  <!-- ✅ Overlay connexion -->
+  <!-- ✅ Overlay pour déconnexion -->
   <div id="overlay">
     <h2>Vous devez être connecté</h2>
-    <button onclick="window.location.href='inscription.html'">Aller à l'inscription</button>
+    <button id="goInscription">Aller à l'inscription</button>
   </div>
 
   <script type="module">
@@ -235,13 +202,15 @@
     const lightboxImg = document.getElementById("lightboxImg");
     const roomButtons = document.getElementById("roomButtons");
     const overlay = document.getElementById("overlay");
+    const goInscription = document.getElementById("goInscription");
 
     let currentUserId = null;
     let currentPhotos = [];
 
+    // Vérifie état de connexion
     onAuthStateChanged(auth, async user => {
       if (!user) {
-        overlay.style.display = "flex"; // ✅ plus de boucle
+        overlay.style.display = "flex";
         return;
       }
       currentUserId = user.uid;
@@ -286,10 +255,8 @@
       });
     }
 
-    // Fermer lightbox au clic
-    lightbox.addEventListener("click", () => {
-      lightbox.style.display = "none";
-    });
+    // Fermer lightbox
+    lightbox.addEventListener("click", () => { lightbox.style.display = "none"; });
 
     // Mode édition
     editBtn.addEventListener("click", () => {
@@ -304,10 +271,6 @@
         alert("Vous pouvez sélectionner au maximum 5 photos !");
         files = files.slice(0, 5);
       }
-      const dt = new DataTransfer();
-      files.forEach(file => dt.items.add(file));
-      newPhotos.files = dt.files;
-
       preview.innerHTML = "";
       files.forEach(file => {
         const img = document.createElement("img");
@@ -319,43 +282,26 @@
     // Sauvegarde (description + photos uniquement)
     saveBtn.addEventListener("click", () => {
       const desc = newDesc.value.trim();
-      let updatedPhotos = [];
-
-      if (newPhotos.files.length > 0) {
-        let filesProcessed = 0;
-        for (let i = 0; i < newPhotos.files.length; i++) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            updatedPhotos.push(e.target.result);
-            filesProcessed++;
-            if (filesProcessed === newPhotos.files.length) {
-              updateProfile(desc, updatedPhotos);
-            }
-          };
-          reader.readAsDataURL(newPhotos.files[i]);
-        }
-      } else {
-        updateProfile(desc, currentPhotos);
-      }
-    });
-
-    function updateProfile(desc, photos) {
       update(ref(db, "users/" + currentUserId), {
-        description: desc,
-        photos: photos
+        description: desc
       }).then(() => {
         descSpan.textContent = desc || "Non renseignée";
-        currentPhotos = photos;
-        displayPhotos(currentPhotos);
-        preview.innerHTML = "";
-        newPhotos.value = "";
         alert("Profil mis à jour !");
         editSection.style.display = "none";
       }).catch(err => {
         console.error("Erreur mise à jour :", err);
         alert("Erreur lors de la mise à jour !");
       });
-    }
+    });
+
+    // ✅ Bouton Aller à l’inscription corrigé
+    goInscription.addEventListener("click", () => {
+      if (!currentUserId) {
+        window.location.href = "inscription.html";
+      } else {
+        overlay.style.display = "none";
+      }
+    });
   </script>
 </body>
 </html>
