@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mon Profil</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inscription</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background: url("planete-magique.jpg") no-repeat center center/cover;
+      background: url("galaxie-magique.jpg") no-repeat center center/cover;
       color: #fff;
       display: flex;
       justify-content: center;
@@ -22,7 +22,7 @@
       padding: 25px;
       border-radius: 15px;
       width: 90%;
-      max-width: 500px;
+      max-width: 400px;
       box-shadow: 0 0 20px #ff66cc;
       text-align: center;
     }
@@ -33,32 +33,14 @@
       margin-bottom: 20px;
     }
 
-    .info {
-      margin-bottom: 20px;
-      text-align: left;
-    }
-
-    .info div { margin: 8px 0; }
-
-    .photos {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin: 15px 0;
-    }
-
-    .photos img {
-      width: 70px;
-      height: 70px;
-      object-fit: cover;
+    input {
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
       border-radius: 8px;
-      border: 2px solid #ff66cc;
-      cursor: pointer;
-      transition: transform 0.2s;
+      border: none;
+      font-family: 'Orbitron';
     }
-
-    .photos img:hover { transform: scale(1.1); }
 
     button {
       margin-top: 15px;
@@ -73,158 +55,111 @@
       box-shadow: 0 0 10px #ff66cc;
     }
 
-    button:hover { box-shadow: 0 0 20px #ff66cc; }
-
-    /* Lightbox */
-    .lightbox {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9);
-      justify-content: center;
-      align-items: center;
+    button:hover {
+      box-shadow: 0 0 20px #ff66cc;
     }
 
-    .lightbox img {
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 10px;
-      box-shadow: 0 0 25px #ff66cc;
-    }
-
-    .edit-section { display: none; margin-top: 20px; }
-
-    textarea, input[type="file"] {
-      width: 100%;
-      margin: 10px 0;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      font-family: 'Orbitron';
-    }
-
-    .preview {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
-
-    .preview img {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 2px solid #ff66cc;
-    }
-
-    .room-btn {
-      padding: 10px 20px;
-      margin: 10px 5px;
-      border: 2px solid #ff66cc;
-      background: rgba(0,0,0,0.4);
-      color: #fff;
-      border-radius: 8px;
-      cursor: pointer;
-      text-transform: uppercase;
+    .switch {
+      margin-top: 15px;
       font-size: 0.9em;
-      box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
-      transition: 0.3s;
+      cursor: pointer;
+      color: #ccc;
     }
-
-    .room-btn:hover { box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset; }
+    .switch:hover { color: #ff66cc; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Mon Profil</h1>
-    <div class="info">
-      <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
-      <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
-      <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
-      <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
-      <div><strong>Salles :</strong> <span id="rooms">Non renseigné</span></div>
-    </div>
-
-    <div class="photos" id="photosContainer"></div>
-
-    <div id="roomButtons"></div>
-  </div>
-
-  <div class="lightbox" id="lightbox">
-    <img id="lightboxImg" src="" alt="Zoom photo">
+    <h1 id="formTitle">Inscription</h1>
+    <input type="text" id="pseudo" placeholder="Pseudo" />
+    <input type="number" id="age" placeholder="Âge" />
+    <input type="text" id="location" placeholder="Lieu" />
+    <input type="text" id="description" placeholder="Description" />
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Mot de passe" />
+    <button id="submitBtn">S'inscrire</button>
+    <div class="switch" id="switchMode">Déjà un compte ? Se connecter</div>
   </div>
 
   <script type="module">
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
+      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getDatabase, ref, set, get } 
+      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const pseudoSpan = document.getElementById("pseudo");
-    const ageSpan = document.getElementById("age");
-    const locationSpan = document.getElementById("location");
-    const descSpan = document.getElementById("description");
-    const roomsSpan = document.getElementById("rooms");
-    const photosContainer = document.getElementById("photosContainer");
-    const lightbox = document.getElementById("lightbox");
-    const lightboxImg = document.getElementById("lightboxImg");
-    const roomButtons = document.getElementById("roomButtons");
+    let isLogin = false;
 
-    let currentPhotos = [];
+    const formTitle = document.getElementById("formTitle");
+    const pseudoInput = document.getElementById("pseudo");
+    const ageInput = document.getElementById("age");
+    const locationInput = document.getElementById("location");
+    const descInput = document.getElementById("description");
+    const emailInput = document.getElementById("email");
+    const passInput = document.getElementById("password");
+    const submitBtn = document.getElementById("submitBtn");
+    const switchMode = document.getElementById("switchMode");
 
-    onAuthStateChanged(auth, async user => {
-      if (!user) {
-        alert("Vous devez être connecté !");
-        window.location.href = "inscription.html";
-        return;
-      }
-
-      const snap = await get(ref(db, "users/" + user.uid));
-      if (snap.exists()) {
-        const data = snap.val();
-        pseudoSpan.textContent = data.pseudo || "Non renseigné";
-        ageSpan.textContent = data.age || "Non renseigné";
-        locationSpan.textContent = data.location || "Non renseigné";
-        descSpan.textContent = data.description || "Non renseignée";
-        roomsSpan.textContent = data.rooms ? data.rooms.join(", ") : "Non renseigné";
-        currentPhotos = data.photos || [];
-        displayPhotos(currentPhotos);
-        displayRoomButtons(data.rooms || []);
+    // 🔄 Basculer entre inscription et connexion
+    switchMode.addEventListener("click", () => {
+      isLogin = !isLogin;
+      if (isLogin) {
+        formTitle.textContent = "Connexion";
+        pseudoInput.style.display = "none";
+        ageInput.style.display = "none";
+        locationInput.style.display = "none";
+        descInput.style.display = "none";
+        submitBtn.textContent = "Se connecter";
+        switchMode.textContent = "Pas de compte ? S'inscrire";
+      } else {
+        formTitle.textContent = "Inscription";
+        pseudoInput.style.display = "block";
+        ageInput.style.display = "block";
+        locationInput.style.display = "block";
+        descInput.style.display = "block";
+        submitBtn.textContent = "S'inscrire";
+        switchMode.textContent = "Déjà un compte ? Se connecter";
       }
     });
 
-    function displayPhotos(photos) {
-      photosContainer.innerHTML = "";
-      photos.forEach(url => {
-        const img = document.createElement("img");
-        img.src = url;
-        img.addEventListener("click", () => {
-          lightboxImg.src = url;
-          lightbox.style.display = "flex";
-        });
-        photosContainer.appendChild(img);
-      });
-    }
+    // ▶️ Gérer inscription ou connexion
+    submitBtn.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      const password = passInput.value.trim();
 
-    function displayRoomButtons(rooms) {
-      roomButtons.innerHTML = "";
-      rooms.forEach(room => {
-        const btn = document.createElement("button");
-        btn.classList.add("room-btn");
-        btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
-        if (room === "serieux") btn.onclick = () => window.location.href = "authentique.html";
-        if (room === "amical") btn.onclick = () => window.location.href = "amicale.html";
-        if (room === "fun") btn.onclick = () => window.location.href = "fun.html";
-        roomButtons.appendChild(btn);
-      });
-    }
+      if (!email || !password) {
+        alert("Email et mot de passe obligatoires !");
+        return;
+      }
 
-    lightbox.addEventListener("click", () => { lightbox.style.display = "none"; });
+      try {
+        if (isLogin) {
+          // Connexion
+          await signInWithEmailAndPassword(auth, email, password);
+          window.location.href = "page2.html";
+        } else {
+          // Inscription
+          const cred = await createUserWithEmailAndPassword(auth, email, password);
+          const user = cred.user;
+
+          await set(ref(db, "users/" + user.uid), {
+            pseudo: pseudoInput.value.trim(),
+            age: ageInput.value.trim(),
+            location: locationInput.value.trim(),
+            description: descInput.value.trim(),
+            rooms: [],   // 🔹 vide par défaut
+            photos: []   // 🔹 vide par défaut
+          });
+
+          window.location.href = "page2.html";
+        }
+      } catch (err) {
+        alert("Erreur : " + err.message);
+      }
+    });
   </script>
 </body>
 </html>
