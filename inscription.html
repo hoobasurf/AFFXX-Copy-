@@ -3,217 +3,228 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inscription</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <title>Mon Profil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
     body {
       margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      width: 100%;
-      background: url('/ville.jpg') no-repeat center center/cover;
       font-family: 'Orbitron', sans-serif;
-      display: block;
-      overflow-x: hidden;
-    }
-
-    .form-container {
-      background: rgba(0, 0, 0, 0.3);
-      padding: 40px;
-      border-radius: 15px;
-      text-align: center;
-      border: 2px solid rgba(0,0,0,0.5);
-      box-shadow: 0 0 20px rgba(255, 0, 255, 0.2);
-      margin: 40px auto;
-      max-width: 400px;
-      width: 90%;
-    }
-
-    h1 { color: #ff6aab; margin-bottom: 30px; }
-
-    input, label, textarea { width: 100%; margin: 10px 0; color: white; font-size: 16px; }
-
-    input[type="email"], input[type="password"], 
-    input[type="text"], input[type="number"], textarea {
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.2);
-      outline: none;
-      resize: vertical;
-    }
-
-    input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.7); }
-
-    .rooms { margin-top: 20px; text-align: left; }
-    .rooms label { display: block; margin: 5px 0; }
-
-    .photos-preview {
+      background: url("planete-magique.jpg") no-repeat center center/cover;
+      color: #fff;
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
       justify-content: center;
-      margin-top: 8px;
+      align-items: center;
+      min-height: 100vh;
     }
-    .photos-preview img {
-      width: 60px;
-      height: 60px;
+
+    .container {
+      background: rgba(0,0,0,0.6);
+      padding: 25px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 0 20px #ff66cc;
+      text-align: center;
+    }
+
+    h1 {
+      color: #ff66cc;
+      text-shadow: 0 0 10px #ff66cc;
+      margin-bottom: 20px;
+    }
+
+    .info {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .info div { margin: 8px 0; }
+
+    .photos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 15px 0;
+    }
+
+    .photos img {
+      width: 70px;
+      height: 70px;
       object-fit: cover;
-      border-radius: 6px;
-      border: 2px solid #ff6aab;
+      border-radius: 8px;
+      border: 2px solid #ff66cc;
       cursor: pointer;
+      transition: transform 0.2s;
     }
+
+    .photos img:hover { transform: scale(1.1); }
 
     button {
-      width: 100%;
+      margin-top: 15px;
       padding: 12px;
-      margin-top: 20px;
+      width: 100%;
       border: none;
       border-radius: 8px;
-      background-color: #ff6aab;
+      background: #ff66cc;
       color: white;
-      font-size: 18px;
+      font-size: 1em;
       cursor: pointer;
-    }
-    button:hover {
-      box-shadow: 0 0 15px #ff6aab, 0 0 25px #d600d6;
+      box-shadow: 0 0 10px #ff66cc;
     }
 
+    button:hover { box-shadow: 0 0 20px #ff66cc; }
+
+    /* Lightbox */
     .lightbox {
       display: none;
       position: fixed;
       z-index: 1000;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
-      background:rgba(0,0,0,0.9);
-      justify-content:center;
-      align-items:center;
-    }
-    .lightbox img {
-      max-width:90%;
-      max-height:90%;
-      border-radius:10px;
-      cursor:pointer;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      justify-content: center;
+      align-items: center;
     }
 
-    /* 📱 Responsive */
-    @media (max-width: 480px) {
-      .form-container { padding: 20px; margin: 20px auto; width: 95%; }
-      h1 { font-size: 1.4em; margin-bottom: 20px; }
-      input, textarea { font-size: 14px; padding: 10px; }
-      button { font-size: 16px; padding: 10px; }
-      .photos-preview img { width: 50px; height: 50px; }
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 10px;
+      box-shadow: 0 0 25px #ff66cc;
     }
+
+    .edit-section { display: none; margin-top: 20px; }
+
+    textarea, input[type="file"] {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-family: 'Orbitron';
+    }
+
+    .preview {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .preview img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #ff66cc;
+    }
+
+    .room-btn {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      border: 2px solid #ff66cc;
+      background: rgba(0,0,0,0.4);
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      font-size: 0.9em;
+      box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
+      transition: 0.3s;
+    }
+
+    .room-btn:hover { box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset; }
   </style>
 </head>
 <body>
-  <div class="form-container">
-    <h1>Inscription</h1>
-    <form id="signupForm">
-      <input type="text" id="pseudo" placeholder="Pseudo" required>
-      <input type="number" id="age" placeholder="Âge" required>
-      <input type="text" id="location" placeholder="Lieu" required>
-      <textarea id="description" rows="3" placeholder="Description (présente-toi)"></textarea>
-      <input type="email" id="email" placeholder="Email" required>
-      <input type="password" id="password" placeholder="Mot de passe" required>
+  <div class="container">
+    <h1>Mon Profil</h1>
+    <div class="info">
+      <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
+      <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
+      <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
+      <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
+      <div><strong>Salles :</strong> <span id="rooms">Non renseigné</span></div>
+    </div>
 
-      <div class="rooms">
-        <label><input type="checkbox" name="rooms" value="serieux"> Sérieux</label>
-        <label><input type="checkbox" name="rooms" value="amical"> Amitié</label>
-        <label><input type="checkbox" name="rooms" value="fun"> Fun</label>
-      </div>
+    <div class="photos" id="photosContainer"></div>
 
-      <label for="photos">Choisir des photos (max 5) :</label>
-      <input type="file" id="photos" accept="image/*" multiple>
-      <div class="photos-preview" id="photosPreview"></div>
-
-      <button type="submit">S’inscrire</button>
-    </form>
+    <div id="roomButtons"></div>
   </div>
 
-  <div class="lightbox" id="lightbox"><img id="lightboxImg"></div>
+  <div class="lightbox" id="lightbox">
+    <img id="lightboxImg" src="" alt="Zoom photo">
+  </div>
 
   <script type="module">
-    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, updateProfile } 
-      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { getDatabase, ref, set } 
-      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const form = document.getElementById("signupForm");
-    const photosInput = document.getElementById("photos");
-    const photosPreview = document.getElementById("photosPreview");
+    const pseudoSpan = document.getElementById("pseudo");
+    const ageSpan = document.getElementById("age");
+    const locationSpan = document.getElementById("location");
+    const descSpan = document.getElementById("description");
+    const roomsSpan = document.getElementById("rooms");
+    const photosContainer = document.getElementById("photosContainer");
     const lightbox = document.getElementById("lightbox");
     const lightboxImg = document.getElementById("lightboxImg");
+    const roomButtons = document.getElementById("roomButtons");
 
-    let photosData = [];
+    let currentPhotos = [];
 
-    // ✅ Vérifier si utilisateur est déjà connecté (Firebase)
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        window.location.href = "page2.html"; // Redirection uniquement si connecté
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        alert("Vous devez être connecté !");
+        window.location.href = "inscription.html";
+        return;
+      }
+
+      const snap = await get(ref(db, "users/" + user.uid));
+      if (snap.exists()) {
+        const data = snap.val();
+        pseudoSpan.textContent = data.pseudo || "Non renseigné";
+        ageSpan.textContent = data.age || "Non renseigné";
+        locationSpan.textContent = data.location || "Non renseigné";
+        descSpan.textContent = data.description || "Non renseignée";
+        roomsSpan.textContent = data.rooms ? data.rooms.join(", ") : "Non renseigné";
+        currentPhotos = data.photos || [];
+        displayPhotos(currentPhotos);
+        displayRoomButtons(data.rooms || []);
       }
     });
 
-    // ✅ Prévisualisation et zoom photos
-    photosInput.addEventListener("change", () => {
-      let files = Array.from(photosInput.files || []);
-      if (files.length > 5) { files = files.slice(0, 5); }
-      photosPreview.innerHTML = "";
-      photosData = [];
-      files.forEach(file => {
+    function displayPhotos(photos) {
+      photosContainer.innerHTML = "";
+      photos.forEach(url => {
         const img = document.createElement("img");
-        img.src = URL.createObjectURL(file);
+        img.src = url;
         img.addEventListener("click", () => {
-          lightboxImg.src = img.src;
+          lightboxImg.src = url;
           lightbox.style.display = "flex";
         });
-        photosPreview.appendChild(img);
-        photosData.push(img.src); 
+        photosContainer.appendChild(img);
       });
-    });
+    }
 
-    // ✅ Fermer lightbox
-    lightbox.addEventListener("click", () => { 
-      lightbox.style.display = "none"; 
-      lightboxImg.src = ""; 
-    });
+    function displayRoomButtons(rooms) {
+      roomButtons.innerHTML = "";
+      rooms.forEach(room => {
+        const btn = document.createElement("button");
+        btn.classList.add("room-btn");
+        btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
+        if (room === "serieux") btn.onclick = () => window.location.href = "authentique.html";
+        if (room === "amical") btn.onclick = () => window.location.href = "amicale.html";
+        if (room === "fun") btn.onclick = () => window.location.href = "fun.html";
+        roomButtons.appendChild(btn);
+      });
+    }
 
-    // ✅ Enregistrement Firebase
-    form.addEventListener("submit", async e => {
-      e.preventDefault();
-      const pseudo = document.getElementById("pseudo").value.trim();
-      const age = document.getElementById("age").value.trim();
-      const location = document.getElementById("location").value.trim();
-      const description = document.getElementById("description").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const selectedRooms = Array.from(document.querySelectorAll('input[name="rooms"]:checked')).map(cb => cb.value);
-
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const uid = userCredential.user.uid;
-
-        await updateProfile(userCredential.user, { displayName: pseudo });
-
-        await set(ref(db,'users/'+uid), {
-          email, pseudo, age, location, description, 
-          rooms: selectedRooms, 
-          photos: photosData, 
-          joinedAt: new Date().toISOString()
-        });
-
-        window.location.href = "page2.html";
-      } catch(err) {
-        console.error(err); 
-        alert(err.message || err);
-      }
-    });
+    lightbox.addEventListener("click", () => { lightbox.style.display = "none"; });
   </script>
 </body>
 </html>
