@@ -4,167 +4,77 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mon Profil</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
     body {
-      margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      background: url("planete-magique.jpg") no-repeat center center/cover;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      margin:0; padding:0; font-family:'Orbitron',sans-serif;
+      background: url('/ville.jpg') no-repeat center center/cover;
+      color:white; text-align:center;
     }
-    .container {
-      background: rgba(0,0,0,0.6);
-      padding: 25px;
-      border-radius: 15px;
-      width: 90%;
-      max-width: 500px;
-      box-shadow: 0 0 20px #ff66cc;
-      text-align: center;
+    .profile-container {
+      background:rgba(0,0,0,0.5); max-width:600px; margin:40px auto; padding:20px;
+      border-radius:15px; box-shadow:0 0 20px rgba(255,0,255,0.3);
     }
-    h1 {
-      color: #ff66cc;
-      text-shadow: 0 0 10px #ff66cc;
-      margin-bottom: 20px;
+    .main-photo {
+      width:150px; height:150px; object-fit:cover;
+      border-radius:50%; border:3px solid #ff6aab; margin-bottom:15px;
     }
-    .info { margin-bottom: 20px; text-align: left; }
-    .info div { margin: 8px 0; }
-
-    .photos {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin: 15px 0;
+    .gallery { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:20px; }
+    .gallery img {
+      width:100px; height:100px; object-fit:cover;
+      border-radius:10px; border:2px solid #ff6aab; cursor:pointer;
     }
-    .photos img {
-      width: 70px;
-      height: 70px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 2px solid #ff66cc;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .photos img:hover { transform: scale(1.1); }
-
-    /* Boutons salles */
-    .room-btn {
-      padding: 10px 20px;
-      margin: 5px;
-      border: 2px solid #ff66cc;
-      background: rgba(0,0,0,0.4);
-      color: #fff;
-      border-radius: 8px;
-      cursor: pointer;
-      text-transform: uppercase;
-      font-size: 0.9em;
-      box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
-      transition: 0.3s;
-    }
-    .room-btn:hover {
-      box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
-    }
-
-    /* Lightbox */
-    .lightbox {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9);
-      justify-content: center;
-      align-items: center;
-    }
-    .lightbox img {
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 10px;
-      box-shadow: 0 0 25px #ff66cc;
-    }
+    .lightbox { display:none; position:fixed; z-index:1000; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.9); justify-content:center; align-items:center; }
+    .lightbox img { max-width:90%; max-height:90%; border-radius:10px; }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="profile-container">
     <h1>Mon Profil</h1>
-    <div class="info">
-      <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
-      <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
-      <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
-      <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
-    </div>
-
-    <!-- Salles en boutons -->
-    <div id="roomButtons"></div>
-
-    <!-- Photos -->
-    <div class="photos" id="photosContainer"></div>
+    <img id="mainPhoto" class="main-photo" src="" alt="Photo de profil">
+    <p><strong>Pseudo :</strong> <span id="pseudo"></span></p>
+    <p><strong>Âge :</strong> <span id="age"></span></p>
+    <p><strong>Lieu :</strong> <span id="location"></span></p>
+    <p><strong>Description :</strong> <span id="description"></span></p>
+    <p><strong>Salles :</strong> <span id="rooms"></span></p>
+    <div class="gallery" id="gallery"></div>
   </div>
 
-  <!-- Lightbox -->
-  <div class="lightbox" id="lightbox">
-    <img id="lightboxImg" src="" alt="Zoom photo">
-  </div>
+  <div class="lightbox" id="lightbox"><img id="lightboxImg"></div>
 
   <script>
-    const pseudoSpan = document.getElementById("pseudo");
-    const ageSpan = document.getElementById("age");
-    const locationSpan = document.getElementById("location");
-    const descSpan = document.getElementById("description");
-    const photosContainer = document.getElementById("photosContainer");
-    const roomButtons = document.getElementById("roomButtons");
+    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
 
+    document.getElementById("pseudo").textContent = userData.pseudo || "Non renseigné";
+    document.getElementById("age").textContent = userData.age || "Non renseigné";
+    document.getElementById("location").textContent = userData.location || "Non renseigné";
+    document.getElementById("description").textContent = userData.description || "Non renseignée";
+    document.getElementById("rooms").textContent = (userData.rooms && userData.rooms.length) ? userData.rooms.join(", ") : "Non renseigné";
+
+    const mainPhoto = document.getElementById("mainPhoto");
+    const gallery = document.getElementById("gallery");
     const lightbox = document.getElementById("lightbox");
     const lightboxImg = document.getElementById("lightboxImg");
 
-    // 🔹 Charger depuis localStorage
-    const userData = JSON.parse(localStorage.getItem("userData") || "null");
-
-    if (userData) {
-      pseudoSpan.textContent = userData.pseudo || "Non renseigné";
-      ageSpan.textContent = userData.age || "Non renseigné";
-      locationSpan.textContent = userData.location || "Non renseigné";
-      descSpan.textContent = userData.description || "Non renseignée";
-
-      // Salles → boutons
-      roomButtons.innerHTML = "";
-      if (userData.rooms && userData.rooms.length > 0) {
-        userData.rooms.forEach(room => {
-          const btn = document.createElement("button");
-          btn.classList.add("room-btn");
-          btn.textContent = room;
-          // redirections possibles
-          if (room === "serieux") btn.onclick = () => window.location.href = "authentique.html";
-          if (room === "amical") btn.onclick = () => window.location.href = "amicale.html";
-          if (room === "fun") btn.onclick = () => window.location.href = "fun.html";
-          roomButtons.appendChild(btn);
-        });
-      }
-
-      // Photos en base64
-      if (userData.photos && userData.photos.length > 0) {
-        photosContainer.innerHTML = "";
-        userData.photos.forEach(url => {
+    if (userData.photos && userData.photos.length > 0) {
+      mainPhoto.src = userData.photos[0];
+      userData.photos.forEach((src, index) => {
+        if (index > 0) {
           const img = document.createElement("img");
-          img.src = url;
+          img.src = src;
           img.addEventListener("click", () => {
-            lightboxImg.src = url;
+            lightboxImg.src = img.src;
             lightbox.style.display = "flex";
           });
-          photosContainer.appendChild(img);
-        });
-      }
+          gallery.appendChild(img);
+        }
+      });
+    } else {
+      mainPhoto.src = "https://via.placeholder.com/150?text=?";
     }
 
-    // fermer lightbox
-    lightbox.addEventListener("click", () => {
-      lightbox.style.display = "none";
-      lightboxImg.src = "";
-    });
+    lightbox.addEventListener("click", () => lightbox.style.display = "none");
   </script>
 </body>
 </html>
