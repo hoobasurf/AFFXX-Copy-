@@ -32,6 +32,7 @@
     }
     .info { margin-bottom: 20px; text-align: left; }
     .info div { margin: 8px 0; }
+
     .photos {
       display: flex;
       flex-wrap: wrap;
@@ -49,19 +50,26 @@
       transition: transform 0.2s;
     }
     .photos img:hover { transform: scale(1.1); }
-    button {
-      margin-top: 15px;
-      padding: 12px;
-      width: 100%;
-      border: none;
+
+    /* Boutons salles */
+    .room-btn {
+      padding: 10px 20px;
+      margin: 5px;
+      border: 2px solid #ff66cc;
+      background: rgba(0,0,0,0.4);
+      color: #fff;
       border-radius: 8px;
-      background: #ff66cc;
-      color: white;
-      font-size: 1em;
       cursor: pointer;
-      box-shadow: 0 0 10px #ff66cc;
+      text-transform: uppercase;
+      font-size: 0.9em;
+      box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
+      transition: 0.3s;
     }
-    button:hover { box-shadow: 0 0 20px #ff66cc; }
+    .room-btn:hover {
+      box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
+    }
+
+    /* Lightbox */
     .lightbox {
       display: none;
       position: fixed;
@@ -88,8 +96,12 @@
       <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
       <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
       <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
-      <div><strong>Salles :</strong> <span id="rooms">Non renseigné</span></div>
     </div>
+
+    <!-- Salles en boutons -->
+    <div id="roomButtons"></div>
+
+    <!-- Photos -->
     <div class="photos" id="photosContainer"></div>
   </div>
 
@@ -103,8 +115,8 @@
     const ageSpan = document.getElementById("age");
     const locationSpan = document.getElementById("location");
     const descSpan = document.getElementById("description");
-    const roomsSpan = document.getElementById("rooms");
     const photosContainer = document.getElementById("photosContainer");
+    const roomButtons = document.getElementById("roomButtons");
 
     const lightbox = document.getElementById("lightbox");
     const lightboxImg = document.getElementById("lightboxImg");
@@ -117,9 +129,23 @@
       ageSpan.textContent = userData.age || "Non renseigné";
       locationSpan.textContent = userData.location || "Non renseigné";
       descSpan.textContent = userData.description || "Non renseignée";
-      roomsSpan.textContent = userData.rooms?.join(", ") || "Non renseigné";
 
-      // afficher photos
+      // Salles → boutons
+      roomButtons.innerHTML = "";
+      if (userData.rooms && userData.rooms.length > 0) {
+        userData.rooms.forEach(room => {
+          const btn = document.createElement("button");
+          btn.classList.add("room-btn");
+          btn.textContent = room;
+          // redirections possibles
+          if (room === "serieux") btn.onclick = () => window.location.href = "authentique.html";
+          if (room === "amical") btn.onclick = () => window.location.href = "amicale.html";
+          if (room === "fun") btn.onclick = () => window.location.href = "fun.html";
+          roomButtons.appendChild(btn);
+        });
+      }
+
+      // Photos en base64
       if (userData.photos && userData.photos.length > 0) {
         photosContainer.innerHTML = "";
         userData.photos.forEach(url => {
