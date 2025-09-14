@@ -65,6 +65,23 @@
     }
     .switch:hover { color: #ff66cc; }
 
+    /* Bouton custom pour photos */
+    .custom-file {
+      margin-top: 15px;
+      padding: 12px;
+      width: 100%;
+      border-radius: 8px;
+      background: #ff66cc;
+      color: white;
+      font-size: 1em;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ff66cc;
+      display: inline-block;
+    }
+    .custom-file:hover { box-shadow: 0 0 20px #ff66cc; }
+
+    #photoInput { display: none; }
+
     .preview {
       display: flex;
       flex-wrap: wrap;
@@ -112,7 +129,8 @@
     <input type="email" id="email" placeholder="Email" />
     <input type="password" id="password" placeholder="Mot de passe" />
 
-    <!-- Upload photos -->
+    <!-- Bouton custom pour les photos -->
+    <label for="photoInput" class="custom-file">📷 Photos profil (5 max)</label>
     <input type="file" id="photoInput" accept="image/*" multiple />
     <div class="preview" id="preview"></div>
 
@@ -125,19 +143,43 @@
     <img id="lightboxImg" src="" alt="Zoom photo">
   </div>
 
-  <script>
+  <script type="module">
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
+      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getDatabase, ref, set } 
+      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { app } from "./firebase.js";
+
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const formTitle = document.getElementById("formTitle");
+    const submitBtn = document.getElementById("submitBtn");
+    const switchMode = document.getElementById("switchMode");
+    const pseudo = document.getElementById("pseudo");
+    const age = document.getElementById("age");
+    const location = document.getElementById("location");
+    const description = document.getElementById("description");
+    const email = document.getElementById("email");
+    const password = document.getElementById("password");
     const photoInput = document.getElementById("photoInput");
     const preview = document.getElementById("preview");
     const lightbox = document.getElementById("lightbox");
     const lightboxImg = document.getElementById("lightboxImg");
 
+    let isLogin = false;
+    let currentPhotos = [];
+
+    // Gestion photos
     photoInput.addEventListener("change", () => {
       preview.innerHTML = "";
+      currentPhotos = [];
       const files = Array.from(photoInput.files).slice(0, 5); // max 5 photos
 
       files.forEach(file => {
         const reader = new FileReader();
         reader.onload = e => {
+          currentPhotos.push(e.target.result); // on stocke les images en base64
           const img = document.createElement("img");
           img.src = e.target.result;
           img.addEventListener("click", () => {
@@ -152,6 +194,57 @@
 
     lightbox.addEventListener("click", () => {
       lightbox.style.display = "none";
+    });
+
+    // Mode switch
+    switchMode.addEventListener("click", () => {
+      isLogin = !isLogin;
+      if (isLogin) {
+        formTitle.textContent = "Connexion";
+        submitBtn.textContent = "Se connecter";
+        switchMode.textContent = "Pas de compte ? S'inscrire";
+        pseudo.style.display = "none";
+        age.style.display = "none";
+        location.style.display = "none";
+        description.style.display = "none";
+        photoInput.style.display = "none";
+        preview.innerHTML = "";
+      } else {
+        formTitle.textContent = "Inscription";
+        submitBtn.textContent = "S'inscrire";
+        switchMode.textContent = "Déjà un compte ? Se connecter";
+        pseudo.style.display = "block";
+        age.style.display = "block";
+        location.style.display = "block";
+        description.style.display = "block";
+        photoInput.style.display = "none"; // car remplacé par label custom
+      }
+    });
+
+    // Soumission formulaire
+    submitBtn.addEventListener("click", async () => {
+      try {
+        if (isLogin) {
+          await signInWithEmailAndPassword(auth, email.value, password.value);
+          window.location.href = "page2.html";
+        } else {
+          const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
+          const user = userCred.user;
+
+          await set(ref(db, "users/" + user.uid), {
+            pseudo: pseudo.value,
+            age: age.value,
+            location: location.value,
+            description: description.value,
+            photos: currentPhotos,
+            rooms: []
+          });
+
+          window.location.href = "page2.html";
+        }
+      } catch (error) {
+        alert("Erreur : " + error.message);
+      }
     });
   </script>
 </body>
