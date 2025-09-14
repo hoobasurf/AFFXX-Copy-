@@ -44,7 +44,7 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
   <a href="page2.html" class="btn-back">&larr; Retour</a>
 </div>
 
-<!-- MON PROFIL MIS EN AVANT -->
+<!-- MON MINI-PROFIL PRIVÉ POUR MOI -->
 <div id="myProfile"></div>
 
 <div class="carousel-container fade-in">
@@ -64,26 +64,22 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentUser = localStorage.getItem("pseudo") || "Utilisateur";
   const carousel = document.getElementById("carousel");
 
-  function savePositions(){ localStorage.setItem("miniProfilePositions", JSON.stringify(positions)); }
-  function saveChats(){ localStorage.setItem("chatMessages", JSON.stringify(chats)); }
-  function saveLikes(){ localStorage.setItem("likes", JSON.stringify(likes)); }
-  function saveFavorites(){ localStorage.setItem("favorites", JSON.stringify(favorites)); }
-
+  // ✅ Ton mini-profil uniquement pour toi
   const myProfileDiv = document.getElementById("myProfile");
   const me = allUsers.find(u => u.pseudo === currentUser);
   if(me){
-    const firstPhoto = (me.photos && me.photos.length > 0) ? me.photos[0] : (me.photo || 'https://i.pravatar.cc/150?img=12');
+    const firstPhoto = (me.photos && me.photos.length > 0) ? me.photos[0] : 'https://i.pravatar.cc/150?img=12';
     myProfileDiv.innerHTML = `
       <img src="${firstPhoto}" alt="Mon profil" id="myProfilePic">
       <div>${me.pseudo}</div>
     `;
-    const myPic = document.getElementById("myProfilePic");
-    if(myPic){
-      myPic.addEventListener("click", ()=>{ window.location.href = "page2.html"; });
-    }
+    document.getElementById("myProfilePic").addEventListener("click", ()=>{
+      window.location.href = "page2.html";
+    });
   }
 
-  function createCard(user){
+  // ✅ Carrousel : toutes les autres users sauf toi
+  allUsers.filter(u=>u.pseudo!==currentUser).forEach(user=>{
     const card = document.createElement("div");
     card.className = "card " + (user.gender || "girl");
     card.dataset.name = user.pseudo;
@@ -91,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     card.dataset.description = user.description || "";
     card.dataset.photos = JSON.stringify(user.photos || []);
     card.innerHTML = `
-      <img src="${user.photo}" alt="${user.pseudo}">
+      <img src="${user.photos && user.photos.length>0 ? user.photos[0] : 'https://i.pravatar.cc/150?img=12'}" alt="${user.pseudo}">
       <div class="name">${user.pseudo}</div>
       <div class="btns">
         <div class="btn-chat" title="Chat">💬</div>
@@ -100,10 +96,9 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
     carousel.appendChild(card);
-  }
+  });
 
-  allUsers.forEach(createCard);
-
+  // ✅ Interactions sur cards
   document.addEventListener("click", e => {
     if(e.target.tagName === "IMG" && e.target.closest(".card")){
       const card = e.target.closest(".card");
@@ -119,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // ✅ Chat, like, favoris restent inchangés
   function createMiniProfile(name,imgSrc){
     const existing = document.querySelector(`.mini-profile[data-mini="${name}"]`);
     if(existing){ existing.classList.add("new-message"); return; }
@@ -136,11 +132,11 @@ document.addEventListener('DOMContentLoaded', () => {
         wrapper.style.top="20px"; 
     }
     mini.addEventListener("click", ()=>{ mini.classList.remove("new-message"); openChat(name); });
-    close.addEventListener("click", e=>{ e.stopPropagation(); delete positions[name]; delete chats[name]; delete likes[name]; favorites=favorites.filter(f=>f!==name); savePositions(); saveChats(); saveLikes(); saveFavorites(); wrapper.remove(); });
+    close.addEventListener("click", e=>{ e.stopPropagation(); delete positions[name]; delete chats[name]; delete likes[name]; favorites=favorites.filter(f=>f!==name); localStorage.setItem("miniProfilePositions", JSON.stringify(positions)); localStorage.setItem("chatMessages", JSON.stringify(chats)); localStorage.setItem("likes", JSON.stringify(likes)); localStorage.setItem("favorites", JSON.stringify(favorites)); wrapper.remove(); });
     let offsetX=0, offsetY=0;
     wrapper.addEventListener("touchstart", e=>{ const touch=e.touches[0]; offsetX=touch.clientX-wrapper.getBoundingClientRect().left; offsetY=touch.clientY-wrapper.getBoundingClientRect().top; });
     wrapper.addEventListener("touchmove", e=>{ const touch=e.touches[0]; wrapper.style.left=(touch.clientX-offsetX)+"px"; wrapper.style.top=(touch.clientY-offsetY)+"px"; });
-    wrapper.addEventListener("touchend", ()=>{ positions[name]={x:wrapper.offsetLeft,y:wrapper.offsetTop}; savePositions(); });
+    wrapper.addEventListener("touchend", ()=>{ positions[name]={x:wrapper.offsetLeft,y:wrapper.offsetTop}; localStorage.setItem("miniProfilePositions", JSON.stringify(positions)); });
   }
 
   function openChat(name){
@@ -172,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if(!text) return;
       chats[name]=chats[name]||[]; 
       chats[name].push(`<div style="margin-bottom:8px;"><strong style="color:#ff66cc">${currentUser}:</strong> ${text}</div>`); 
-      saveChats();
+      localStorage.setItem("chatMessages", JSON.stringify(chats));
       const div=document.createElement("div"); div.style.marginBottom="8px"; div.innerHTML=`<strong style="color:#ff66cc">${currentUser}:</strong> ${text}`;
       chatBody.appendChild(div); 
       document.getElementById("fullChatInput").value=""; chatBody.scrollTop=chatBody.scrollHeight;
@@ -181,19 +177,17 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("fullChatClose").onclick=()=>fullChat.remove();
   }
 
-  for(let n in positions){ const card=[...document.querySelectorAll(".card")].find(c=>c.dataset.name===n); if(card) createMiniProfile(n, card.querySelector("img").src); }
-
   document.addEventListener("click", e=>{ if(e.target.classList.contains("btn-chat")){ const card=e.target.closest(".card"); if(card) openChat(card.dataset.name); } });
   document.querySelectorAll(".btn-like").forEach(btn=>{
     const card=btn.closest(".card"); const name=card.dataset.name;
     if(likes[name]) btn.classList.add("active");
     btn.addEventListener("click", ()=>{
-      const isActive=btn.classList.toggle("active"); likes[name]=isActive; saveLikes();
+      const isActive=btn.classList.toggle("active"); likes[name]=isActive; localStorage.setItem("likes", JSON.stringify(likes));
       if(isActive){
         chats[name]=chats[name]||[]; 
         chats[name].push(`<div style="margin-bottom:8px;"><strong style="color:#ff66cc">${currentUser}:</strong> 💌 Vous avez liké ${name.split(',')[0]} !</div>`); 
       } else { if(chats[name]){ chats[name]=chats[name].filter(msg => !msg.includes(`Vous avez liké ${name.split(',')[0]}`)); } }
-      saveChats(); createMiniProfile(name, card.querySelector("img").src);
+      localStorage.setItem("chatMessages", JSON.stringify(chats)); createMiniProfile(name, card.querySelector("img").src);
     });
   });
   document.querySelectorAll(".btn-fav").forEach(btn=>{
@@ -202,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener("click", ()=>{
       if(favorites.includes(name)){ favorites=favorites.filter(f=>f!==name); btn.classList.remove("active"); }
       else { favorites.push(name); btn.classList.add("active"); }
-      saveFavorites();
+      localStorage.setItem("favorites", JSON.stringify(favorites));
     });
   });
   document.getElementById("btnFavorites").addEventListener("click", ()=>{
