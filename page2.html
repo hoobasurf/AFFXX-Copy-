@@ -69,6 +69,41 @@
     }
 
     button:hover { box-shadow: 0 0 20px #ff66cc; }
+
+    /* Lightbox */
+    .lightbox {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 10px;
+      box-shadow: 0 0 25px #ff66cc;
+    }
+
+    .room-btn {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      border: 2px solid #ff66cc;
+      background: rgba(0,0,0,0.4);
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      font-size: 0.9em;
+      box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
+      transition: 0.3s;
+    }
+
+    .room-btn:hover { box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset; }
   </style>
 </head>
 <body>
@@ -85,6 +120,11 @@
     <div class="carousel-container" id="carousel"></div>
     <button id="prevBtn">⬅ Précédent</button>
     <button id="nextBtn">Suivant ➡</button>
+    <div id="roomButtons"></div>
+  </div>
+
+  <div class="lightbox" id="lightbox">
+    <img id="lightboxImg" src="" alt="Zoom photo">
   </div>
 
   <script type="module">
@@ -103,13 +143,16 @@
     const carouselContainer = document.getElementById("carousel");
     const prevBtn = document.getElementById("prevBtn");
     const nextBtn = document.getElementById("nextBtn");
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightboxImg");
+    const roomButtons = document.getElementById("roomButtons");
 
     let photos = [];
     let currentIndex = 0;
 
+    // Vérifier si utilisateur connecté
     onAuthStateChanged(auth, async user => {
       if (!user) {
-        alert("Vous devez être connecté !");
         window.location.href = "inscription.html";
         return;
       }
@@ -124,6 +167,7 @@
         roomsSpan.textContent = data.rooms ? data.rooms.join(", ") : "Non renseigné";
         photos = data.photos || [];
         showPhoto(0);
+        displayRoomButtons(data.rooms || []);
       }
     });
 
@@ -133,6 +177,10 @@
       const img = document.createElement("img");
       img.src = photos[index];
       img.classList.add("active");
+      img.addEventListener("click", () => {
+        lightboxImg.src = photos[index];
+        lightbox.style.display = "flex";
+      });
       carouselContainer.appendChild(img);
     }
 
@@ -147,6 +195,21 @@
       currentIndex = (currentIndex + 1) % photos.length;
       showPhoto(currentIndex);
     });
+
+    function displayRoomButtons(rooms) {
+      roomButtons.innerHTML = "";
+      rooms.forEach(room => {
+        const btn = document.createElement("button");
+        btn.classList.add("room-btn");
+        btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
+        if (room === "serieux") btn.onclick = () => window.location.href = "authentique.html";
+        if (room === "amical") btn.onclick = () => window.location.href = "amicale.html";
+        if (room === "fun") btn.onclick = () => window.location.href = "fun.html";
+        roomButtons.appendChild(btn);
+      });
+    }
+
+    lightbox.addEventListener("click", () => { lightbox.style.display = "none"; });
   </script>
 </body>
 </html>
