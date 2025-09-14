@@ -9,7 +9,7 @@
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background: url("ville.jpg") no-repeat center center/cover;
+      background: url("galaxie-magique.jpg") no-repeat center center/cover;
       color: #fff;
       display: flex;
       justify-content: center;
@@ -22,7 +22,7 @@
       padding: 25px;
       border-radius: 15px;
       width: 90%;
-      max-width: 400px;
+      max-width: 420px;
       box-shadow: 0 0 20px #ff66cc;
       text-align: center;
     }
@@ -54,7 +54,6 @@
       cursor: pointer;
       box-shadow: 0 0 10px #ff66cc;
     }
-
     button:hover { box-shadow: 0 0 20px #ff66cc; }
 
     .switch {
@@ -64,23 +63,6 @@
       color: #ccc;
     }
     .switch:hover { color: #ff66cc; }
-
-    /* Bouton custom pour photos */
-    .custom-file {
-      margin-top: 15px;
-      padding: 12px;
-      width: 100%;
-      border-radius: 8px;
-      background: #ff66cc;
-      color: white;
-      font-size: 1em;
-      cursor: pointer;
-      box-shadow: 0 0 10px #ff66cc;
-      display: inline-block;
-    }
-    .custom-file:hover { box-shadow: 0 0 20px #ff66cc; }
-
-    #photoInput { display: none; }
 
     .preview {
       display: flex;
@@ -117,6 +99,15 @@
       border-radius: 10px;
       box-shadow: 0 0 25px #ff66cc;
     }
+
+    .salles {
+      text-align: left;
+      margin-top: 15px;
+    }
+    .salles label {
+      display: block;
+      margin: 6px 0;
+    }
   </style>
 </head>
 <body>
@@ -126,19 +117,25 @@
     <input type="number" id="age" placeholder="Âge" />
     <input type="text" id="location" placeholder="Lieu" />
     <textarea id="description" placeholder="Description"></textarea>
+
+    <label for="photos">Photos de profil (5 max) :</label>
+    <input type="file" id="photos" accept="image/*" multiple />
+    <div class="preview" id="preview"></div>
+
+    <div class="salles">
+      <strong>Choisis tes salles :</strong>
+      <label><input type="checkbox" value="serieux"> Authentique</label>
+      <label><input type="checkbox" value="amical"> Amicale</label>
+      <label><input type="checkbox" value="fun"> Fun</label>
+    </div>
+
     <input type="email" id="email" placeholder="Email" />
     <input type="password" id="password" placeholder="Mot de passe" />
 
-    <!-- Bouton custom pour les photos -->
-    <label for="photoInput" class="custom-file">📷 Photos profil (5 max)</label>
-    <input type="file" id="photoInput" accept="image/*" multiple />
-    <div class="preview" id="preview"></div>
-
-    <button id="submitBtn">S'inscrire</button>
-    <div class="switch" id="switchMode">Déjà un compte ? Se connecter</div>
+    <button id="submitBtn">S’inscrire</button>
+    <div class="switch" id="toggleForm">Déjà un compte ? Se connecter</div>
   </div>
 
-  <!-- Lightbox -->
   <div class="lightbox" id="lightbox">
     <img id="lightboxImg" src="" alt="Zoom photo">
   </div>
@@ -148,42 +145,41 @@
       from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
     import { getDatabase, ref, set } 
       from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } 
+      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
     const db = getDatabase(app);
+    const storage = getStorage(app);
 
-    const formTitle = document.getElementById("formTitle");
-    const submitBtn = document.getElementById("submitBtn");
-    const switchMode = document.getElementById("switchMode");
     const pseudo = document.getElementById("pseudo");
     const age = document.getElementById("age");
-    const location = document.getElementById("location");
+    const locationInput = document.getElementById("location");
     const description = document.getElementById("description");
+    const photosInput = document.getElementById("photos");
+    const preview = document.getElementById("preview");
     const email = document.getElementById("email");
     const password = document.getElementById("password");
-    const photoInput = document.getElementById("photoInput");
-    const preview = document.getElementById("preview");
+    const submitBtn = document.getElementById("submitBtn");
+    const toggleForm = document.getElementById("toggleForm");
     const lightbox = document.getElementById("lightbox");
     const lightboxImg = document.getElementById("lightboxImg");
 
     let isLogin = false;
-    let currentPhotos = [];
 
-    // Gestion photos
-    photoInput.addEventListener("change", () => {
+    // Preview photos
+    let selectedFiles = [];
+    photosInput.addEventListener("change", () => {
       preview.innerHTML = "";
-      currentPhotos = [];
-      const files = Array.from(photoInput.files).slice(0, 5); // max 5 photos
-
-      files.forEach(file => {
+      selectedFiles = Array.from(photosInput.files).slice(0, 5); // max 5
+      selectedFiles.forEach(file => {
         const reader = new FileReader();
         reader.onload = e => {
-          currentPhotos.push(e.target.result); // on stocke les images en base64
           const img = document.createElement("img");
           img.src = e.target.result;
           img.addEventListener("click", () => {
-            lightboxImg.src = img.src;
+            lightboxImg.src = e.target.result;
             lightbox.style.display = "flex";
           });
           preview.appendChild(img);
@@ -196,54 +192,52 @@
       lightbox.style.display = "none";
     });
 
-    // Mode switch
-    switchMode.addEventListener("click", () => {
+    toggleForm.addEventListener("click", () => {
       isLogin = !isLogin;
-      if (isLogin) {
-        formTitle.textContent = "Connexion";
-        submitBtn.textContent = "Se connecter";
-        switchMode.textContent = "Pas de compte ? S'inscrire";
-        pseudo.style.display = "none";
-        age.style.display = "none";
-        location.style.display = "none";
-        description.style.display = "none";
-        photoInput.style.display = "none";
-        preview.innerHTML = "";
-      } else {
-        formTitle.textContent = "Inscription";
-        submitBtn.textContent = "S'inscrire";
-        switchMode.textContent = "Déjà un compte ? Se connecter";
-        pseudo.style.display = "block";
-        age.style.display = "block";
-        location.style.display = "block";
-        description.style.display = "block";
-        photoInput.style.display = "none"; // car remplacé par label custom
-      }
+      document.getElementById("formTitle").textContent = isLogin ? "Connexion" : "Inscription";
+      submitBtn.textContent = isLogin ? "Se connecter" : "S’inscrire";
+      toggleForm.textContent = isLogin ? "Pas encore de compte ? Inscription" : "Déjà un compte ? Se connecter";
     });
 
-    // Soumission formulaire
     submitBtn.addEventListener("click", async () => {
-      try {
-        if (isLogin) {
-          await signInWithEmailAndPassword(auth, email.value, password.value);
-          window.location.href = "page2.html";
-        } else {
+      if (!isLogin) {
+        try {
           const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
-          const user = userCred.user;
+          const uid = userCred.user.uid;
 
-          await set(ref(db, "users/" + user.uid), {
+          // upload des photos
+          let photoUrls = [];
+          for (let i = 0; i < selectedFiles.length; i++) {
+            const file = selectedFiles[i];
+            const storageRef = sRef(storage, `users/${uid}/photo_${i}`);
+            await uploadBytes(storageRef, file);
+            const url = await getDownloadURL(storageRef);
+            photoUrls.push(url);
+          }
+
+          // choix des salles
+          const selectedRooms = Array.from(document.querySelectorAll(".salles input:checked")).map(cb => cb.value);
+
+          await set(ref(db, "users/" + uid), {
             pseudo: pseudo.value,
             age: age.value,
-            location: location.value,
+            location: locationInput.value,
             description: description.value,
-            photos: currentPhotos,
-            rooms: []
+            photos: photoUrls,
+            rooms: selectedRooms
           });
 
           window.location.href = "page2.html";
+        } catch (err) {
+          alert(err.message);
         }
-      } catch (error) {
-        alert("Erreur : " + error.message);
+      } else {
+        try {
+          await signInWithEmailAndPassword(auth, email.value, password.value);
+          window.location.href = "page2.html";
+        } catch (err) {
+          alert(err.message);
+        }
       }
     });
   </script>
