@@ -136,7 +136,7 @@
   <div class="lightbox" id="lightbox"><img id="lightboxImg"></div>
 
   <script type="module">
-    import { getAuth, createUserWithEmailAndPassword, updateProfile } 
+    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, updateProfile } 
       from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
     import { getDatabase, ref, set } 
       from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
@@ -153,13 +153,10 @@
 
     let photosData = [];
 
-    // 🔹 Vérifier si l'utilisateur est déjà enregistré
-    document.addEventListener('DOMContentLoaded', () => {
-      const pseudo = localStorage.getItem("pseudo");
-      const userData = JSON.parse(localStorage.getItem("userData") || "null");
-      if (pseudo && userData) {
-        // Redirection automatique
-        window.location.href = "/page2";
+    // ✅ Vérifier si utilisateur est déjà connecté (Firebase)
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = "page2.html"; // Redirection uniquement si connecté
       }
     });
 
@@ -211,13 +208,7 @@
           joinedAt: new Date().toISOString()
         });
 
-        // 🔹 Stocker les données localement pour redirection automatique à l'ouverture
-        localStorage.setItem("pseudo", pseudo);
-        localStorage.setItem("userData", JSON.stringify({
-          pseudo, age, location, description, rooms: selectedRooms, photos: photosData
-        }));
-
-        window.location.href = "/page2";
+        window.location.href = "page2.html";
       } catch(err) {
         console.error(err); 
         alert(err.message || err);
