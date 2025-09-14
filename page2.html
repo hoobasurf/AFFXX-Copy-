@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mon Profil</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
     body {
       margin: 0;
@@ -35,60 +35,30 @@
 
     .info div { margin: 8px 0; text-align: left; }
 
-    .carousel-container {
+    /* Carrousel */
+    .carousel {
       position: relative;
-      margin: 15px 0;
-      height: 200px;
+      width: 100%;
+      height: 250px;
       overflow: hidden;
+      margin: 15px 0;
       border-radius: 10px;
       border: 2px solid #ff66cc;
+      box-shadow: 0 0 20px #ff66cc;
     }
-
-    .carousel-container img {
+    .carousel img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      display: none;
+      position: absolute;
+      top:0;
+      left:0;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
     }
+    .carousel img.active { opacity: 1; }
 
-    .carousel-container img.active {
-      display: block;
-    }
-
-    button {
-      margin-top: 15px;
-      padding: 12px;
-      width: 100%;
-      border: none;
-      border-radius: 8px;
-      background: #ff66cc;
-      color: white;
-      font-size: 1em;
-      cursor: pointer;
-      box-shadow: 0 0 10px #ff66cc;
-    }
-
-    button:hover { box-shadow: 0 0 20px #ff66cc; }
-
-    /* Lightbox */
-    .lightbox {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9);
-      justify-content: center;
-      align-items: center;
-    }
-
-    .lightbox img {
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 10px;
-      box-shadow: 0 0 25px #ff66cc;
-    }
-
+    /* Boutons salle néon */
     .room-btn {
       padding: 10px 20px;
       margin: 10px 5px;
@@ -102,8 +72,9 @@
       box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
       transition: 0.3s;
     }
-
-    .room-btn:hover { box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset; }
+    .room-btn:hover {
+      box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
+    }
   </style>
 </head>
 <body>
@@ -117,14 +88,8 @@
       <div><strong>Salles :</strong> <span id="rooms">Non renseigné</span></div>
     </div>
 
-    <div class="carousel-container" id="carousel"></div>
-    <button id="prevBtn">⬅ Précédent</button>
-    <button id="nextBtn">Suivant ➡</button>
+    <div class="carousel" id="carousel"></div>
     <div id="roomButtons"></div>
-  </div>
-
-  <div class="lightbox" id="lightbox">
-    <img id="lightboxImg" src="" alt="Zoom photo">
   </div>
 
   <script type="module">
@@ -140,19 +105,15 @@
     const locationSpan = document.getElementById("location");
     const descSpan = document.getElementById("description");
     const roomsSpan = document.getElementById("rooms");
-    const carouselContainer = document.getElementById("carousel");
-    const prevBtn = document.getElementById("prevBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    const lightbox = document.getElementById("lightbox");
-    const lightboxImg = document.getElementById("lightboxImg");
+    const carousel = document.getElementById("carousel");
     const roomButtons = document.getElementById("roomButtons");
 
-    let photos = [];
+    let carouselImages = [];
     let currentIndex = 0;
 
-    // Vérifier si utilisateur connecté
     onAuthStateChanged(auth, async user => {
       if (!user) {
+        alert("Vous devez être connecté !");
         window.location.href = "inscription.html";
         return;
       }
@@ -165,36 +126,35 @@
         locationSpan.textContent = data.location || "Non renseigné";
         descSpan.textContent = data.description || "Non renseignée";
         roomsSpan.textContent = data.rooms ? data.rooms.join(", ") : "Non renseigné";
-        photos = data.photos || [];
-        showPhoto(0);
+
+        // ✅ Carrousel
+        carouselImages = data.photos || [];
+        displayCarousel(carouselImages);
+
+        // ✅ Boutons salles
         displayRoomButtons(data.rooms || []);
       }
     });
 
-    function showPhoto(index) {
-      carouselContainer.innerHTML = "";
-      if (photos.length === 0) return;
-      const img = document.createElement("img");
-      img.src = photos[index];
-      img.classList.add("active");
-      img.addEventListener("click", () => {
-        lightboxImg.src = photos[index];
-        lightbox.style.display = "flex";
+    function displayCarousel(photos) {
+      carousel.innerHTML = "";
+      photos.forEach((url, i) => {
+        const img = document.createElement("img");
+        img.src = url;
+        if(i===0) img.classList.add("active");
+        carousel.appendChild(img);
       });
-      carouselContainer.appendChild(img);
+      if(photos.length>1) startCarousel();
     }
 
-    prevBtn.addEventListener("click", () => {
-      if (photos.length === 0) return;
-      currentIndex = (currentIndex - 1 + photos.length) % photos.length;
-      showPhoto(currentIndex);
-    });
-
-    nextBtn.addEventListener("click", () => {
-      if (photos.length === 0) return;
-      currentIndex = (currentIndex + 1) % photos.length;
-      showPhoto(currentIndex);
-    });
+    function startCarousel() {
+      setInterval(() => {
+        const imgs = carousel.querySelectorAll("img");
+        imgs.forEach(img => img.classList.remove("active"));
+        currentIndex = (currentIndex + 1) % imgs.length;
+        imgs[currentIndex].classList.add("active");
+      }, 3000); // 3 secondes
+    }
 
     function displayRoomButtons(rooms) {
       roomButtons.innerHTML = "";
@@ -202,14 +162,12 @@
         const btn = document.createElement("button");
         btn.classList.add("room-btn");
         btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
-        if (room === "serieux") btn.onclick = () => window.location.href = "authentique.html";
-        if (room === "amical") btn.onclick = () => window.location.href = "amicale.html";
-        if (room === "fun") btn.onclick = () => window.location.href = "fun.html";
+        if(room==="serieux") btn.onclick = () => window.location.href="authentique.html";
+        if(room==="amical") btn.onclick = () => window.location.href="amicale.html";
+        if(room==="fun") btn.onclick = () => window.location.href="fun.html";
         roomButtons.appendChild(btn);
       });
     }
-
-    lightbox.addEventListener("click", () => { lightbox.style.display = "none"; });
   </script>
 </body>
 </html>
