@@ -3,126 +3,358 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Page 2 - Profil & Salles</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <title>Mon Profil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
   <style>
     body {
       margin: 0;
-      padding: 0;
       font-family: 'Orbitron', sans-serif;
-      background: url('planete-romantique.jpg') no-repeat center center/cover;
-      color: white;
-      overflow: hidden;
-    }
-    header {
-      padding: 20px;
-      text-align: center;
-      font-size: 1.5em;
-      color: #ff66cc;
-      text-shadow: 0 0 10px #ff66cc;
-    }
-    #profile {
-      text-align: center;
-      margin-top: 20px;
-    }
-    #profile img {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      border: 3px solid #ff66cc;
-      box-shadow: 0 0 15px #ff66cc;
-    }
-    #profile h2 {
-      margin: 10px 0 0;
-    }
-    .rooms {
+      background: url("planete-magique.jpg") no-repeat center center/cover;
+      color: #fff;
       display: flex;
       justify-content: center;
-      gap: 20px;
-      margin-top: 40px;
+      align-items: center;
+      min-height: 100vh;
     }
-    .room-btn {
+
+    .container {
       background: rgba(0,0,0,0.6);
-      padding: 15px 30px;
-      border-radius: 12px;
-      border: 2px solid #ff66cc;
-      color: #ff66cc;
-      font-size: 1.2em;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.3s;
+      padding: 25px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 0 20px #ff66cc;
+      text-align: center;
+      z-index: 1;
     }
-    .room-btn:hover {
+
+    h1 {
+      color: #ff66cc;
+      text-shadow: 0 0 10px #ff66cc;
+      margin-bottom: 20px;
+    }
+
+    .info {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .info div {
+      margin: 8px 0;
+    }
+
+    .photos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 15px 0;
+    }
+
+    .photos img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #ff66cc;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .photos img:hover {
       transform: scale(1.1);
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      background: #ff66cc;
+      color: white;
+      font-size: 1em;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ff66cc;
+    }
+
+    button:hover {
       box-shadow: 0 0 20px #ff66cc;
     }
-    #notConnected {
+
+    /* ✅ Lightbox pour zoom photo */
+    .lightbox {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 10px;
+      box-shadow: 0 0 25px #ff66cc;
+    }
+
+    .edit-section {
+      margin-top: 20px;
+      display: none;
+    }
+
+    textarea, input[type="file"] {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-family: 'Orbitron';
+    }
+
+    .preview {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .preview img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #ff66cc;
+    }
+
+    /* ✅ Boutons néon */
+    .room-btn {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      border: 2px solid #ff66cc;
+      background: rgba(0,0,0,0.4);
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      font-size: 0.9em;
+      box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
+      transition: 0.3s;
+    }
+    .room-btn:hover {
+      box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
+    }
+
+    /* ✅ Overlay connexion */
+    #overlay {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85);
-      display: flex;
+      background: rgba(0,0,0,0.95);
+      color: #fff;
+      display: none;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
-      z-index: 1000;
-      color: white;
+      align-items: center;
       text-align: center;
-      font-size: 1.2em;
+      z-index: 2000;
     }
-    #notConnected button {
-      margin-top: 20px;
+    #overlay h2 {
+      color: #ff66cc;
+      margin-bottom: 20px;
+    }
+    #overlay button {
+      width: auto;
       padding: 10px 20px;
-      border: none;
-      background: #ff66cc;
-      color: white;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1em;
-      box-shadow: 0 0 10px #ff66cc;
     }
   </style>
 </head>
 <body>
-  <header>Bienvenue sur la Page 2</header>
-  <div id="profile"></div>
+  <div class="container">
+    <h1>Mon Profil</h1>
+    <div class="info">
+      <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
+      <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
+      <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
+      <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
+      <div><strong>Salles :</strong> <span id="rooms">Non renseigné</span></div>
+    </div>
 
-  <div class="rooms">
-    <div class="room-btn" onclick="goToRoom('authentique')">Authentique</div>
-    <div class="room-btn" onclick="goToRoom('amical')">Amical</div>
-    <div class="room-btn" onclick="goToRoom('fun')">Fun</div>
+    <div class="photos" id="photosContainer"></div>
+
+    <button id="editBtn">Modifier</button>
+
+    <div class="edit-section" id="editSection">
+      <textarea id="newDescription" rows="3" placeholder="Nouvelle description"></textarea>
+      <input type="file" id="newPhotos" accept="image/*" multiple>
+      <div class="preview" id="preview"></div>
+      <button id="saveBtn">Enregistrer</button>
+    </div>
+
+    <!-- ✅ Boutons des salles -->
+    <div id="roomButtons"></div>
   </div>
 
-  <div id="notConnected" style="display: none;">
-    <p>⚠️ Vous devez être connecté pour accéder à cette page.</p>
-    <button onclick="redirectToInscription()">Fermer</button>
+  <!-- ✅ Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <img id="lightboxImg" src="" alt="Zoom photo">
   </div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      let pseudo = localStorage.getItem("pseudo");
-      let photo = localStorage.getItem("photo");
+  <!-- ✅ Overlay connexion -->
+  <div id="overlay">
+    <h2>Vous devez être connecté</h2>
+    <button onclick="window.location.href='inscription.html'">Aller à l'inscription</button>
+  </div>
 
-      const profileDiv = document.getElementById("profile");
-      const notConnectedDiv = document.getElementById("notConnected");
+  <script type="module">
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { app } from "./firebase.js";
 
-      if (!pseudo) {
-        // Pas de compte → afficher le message, mais pas de boucle
-        notConnectedDiv.style.display = "flex";
-      } else {
-        // Profil affiché normalement
-        profileDiv.innerHTML = `
-          <img src="${photo || 'default.jpg'}" alt="Photo de ${pseudo}">
-          <h2>${pseudo}</h2>
-        `;
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const pseudoSpan = document.getElementById("pseudo");
+    const ageSpan = document.getElementById("age");
+    const locationSpan = document.getElementById("location");
+    const descSpan = document.getElementById("description");
+    const roomsSpan = document.getElementById("rooms");
+    const photosContainer = document.getElementById("photosContainer");
+
+    const editBtn = document.getElementById("editBtn");
+    const editSection = document.getElementById("editSection");
+    const newDesc = document.getElementById("newDescription");
+    const newPhotos = document.getElementById("newPhotos");
+    const preview = document.getElementById("preview");
+    const saveBtn = document.getElementById("saveBtn");
+
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightboxImg");
+    const roomButtons = document.getElementById("roomButtons");
+    const overlay = document.getElementById("overlay");
+
+    let currentUserId = null;
+    let currentPhotos = [];
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        overlay.style.display = "flex"; // ✅ plus de boucle
+        return;
+      }
+      currentUserId = user.uid;
+
+      const snap = await get(ref(db, "users/" + user.uid));
+      if (snap.exists()) {
+        const data = snap.val();
+        pseudoSpan.textContent = data.pseudo || "Non renseigné";
+        ageSpan.textContent = data.age || "Non renseigné";
+        locationSpan.textContent = data.location || "Non renseigné";
+        descSpan.textContent = data.description || "Non renseignée";
+        roomsSpan.textContent = data.rooms ? data.rooms.join(", ") : "Non renseigné";
+        currentPhotos = data.photos || [];
+        displayPhotos(currentPhotos);
+        displayRoomButtons(data.rooms || []);
       }
     });
 
-    function goToRoom(room) {
-      window.location.href = room + ".html";
+    function displayPhotos(photos) {
+      photosContainer.innerHTML = "";
+      photos.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.addEventListener("click", () => {
+          lightboxImg.src = url;
+          lightbox.style.display = "flex";
+        });
+        photosContainer.appendChild(img);
+      });
     }
 
-    function redirectToInscription() {
-      window.location.href = "inscription.html";
+    function displayRoomButtons(rooms) {
+      roomButtons.innerHTML = "";
+      rooms.forEach(room => {
+        const btn = document.createElement("button");
+        btn.classList.add("room-btn");
+        btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
+        if (room === "serieux") btn.onclick = () => window.location.href = "authentique.html";
+        if (room === "amical") btn.onclick = () => window.location.href = "amicale.html";
+        if (room === "fun") btn.onclick = () => window.location.href = "fun.html";
+        roomButtons.appendChild(btn);
+      });
+    }
+
+    // Fermer lightbox au clic
+    lightbox.addEventListener("click", () => {
+      lightbox.style.display = "none";
+    });
+
+    // Mode édition
+    editBtn.addEventListener("click", () => {
+      editSection.style.display = editSection.style.display === "none" ? "block" : "none";
+      newDesc.value = descSpan.textContent !== "Non renseignée" ? descSpan.textContent : "";
+    });
+
+    // Limite 5 photos
+    newPhotos.addEventListener("change", () => {
+      let files = Array.from(newPhotos.files);
+      if (files.length > 5) {
+        alert("Vous pouvez sélectionner au maximum 5 photos !");
+        files = files.slice(0, 5);
+      }
+      const dt = new DataTransfer();
+      files.forEach(file => dt.items.add(file));
+      newPhotos.files = dt.files;
+
+      preview.innerHTML = "";
+      files.forEach(file => {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        preview.appendChild(img);
+      });
+    });
+
+    // Sauvegarde (description + photos uniquement)
+    saveBtn.addEventListener("click", () => {
+      const desc = newDesc.value.trim();
+      let updatedPhotos = [];
+
+      if (newPhotos.files.length > 0) {
+        let filesProcessed = 0;
+        for (let i = 0; i < newPhotos.files.length; i++) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            updatedPhotos.push(e.target.result);
+            filesProcessed++;
+            if (filesProcessed === newPhotos.files.length) {
+              updateProfile(desc, updatedPhotos);
+            }
+          };
+          reader.readAsDataURL(newPhotos.files[i]);
+        }
+      } else {
+        updateProfile(desc, currentPhotos);
+      }
+    });
+
+    function updateProfile(desc, photos) {
+      update(ref(db, "users/" + currentUserId), {
+        description: desc,
+        photos: photos
+      }).then(() => {
+        descSpan.textContent = desc || "Non renseignée";
+        currentPhotos = photos;
+        displayPhotos(currentPhotos);
+        preview.innerHTML = "";
+        newPhotos.value = "";
+        alert("Profil mis à jour !");
+        editSection.style.display = "none";
+      }).catch(err => {
+        console.error("Erreur mise à jour :", err);
+        alert("Erreur lors de la mise à jour !");
+      });
     }
   </script>
 </body>
