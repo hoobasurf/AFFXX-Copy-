@@ -13,8 +13,9 @@
       color: #fff;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       min-height: 100vh;
+      padding-top: 30px;
     }
 
     .container {
@@ -25,40 +26,48 @@
       max-width: 500px;
       box-shadow: 0 0 20px #ff66cc;
       text-align: center;
+      border: 3px solid #ff66cc; /* contour rose */
     }
 
     h1 {
       color: #ff66cc;
-      text-shadow: 0 0 10px #ff66cc;
+      text-shadow: 0 0 15px #ff66cc;
       margin-bottom: 20px;
     }
 
-    .info div { margin: 8px 0; text-align: left; }
+    .info {
+      margin-bottom: 20px;
+      text-align: left;
+    }
 
-    /* Carrousel */
-    .carousel {
+    .info div {
+      margin: 8px 0;
+    }
+
+    .carousel-container {
       position: relative;
       width: 100%;
       height: 250px;
+      border-radius: 12px;
       overflow: hidden;
-      margin: 15px 0;
-      border-radius: 10px;
+      margin-bottom: 15px;
+      background: rgba(0,0,0,0.3);
       border: 2px solid #ff66cc;
-      box-shadow: 0 0 20px #ff66cc;
+      box-shadow: 0 0 15px #ff66cc inset;
     }
-    .carousel img {
+
+    .carousel-container img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      position: absolute;
-      top:0;
-      left:0;
-      opacity: 0;
-      transition: opacity 1s ease-in-out;
+      display: none;
+      transition: all 0.5s ease;
     }
-    .carousel img.active { opacity: 1; }
 
-    /* Boutons salle néon */
+    .carousel-container img.active {
+      display: block;
+    }
+
     .room-btn {
       padding: 10px 20px;
       margin: 10px 5px;
@@ -73,7 +82,29 @@
       transition: 0.3s;
     }
     .room-btn:hover {
-      box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
+      box-shadow: 0 0 25px #ff66cc, 0 0 40px #ff66cc inset;
+    }
+
+    /* Lightbox */
+    .lightbox {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background: rgba(0,0,0,0.95);
+      justify-content:center;
+      align-items:center;
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 10px;
+      box-shadow: 0 0 35px #ff66cc;
+      cursor:pointer;
     }
   </style>
 </head>
@@ -88,8 +119,12 @@
       <div><strong>Salles :</strong> <span id="rooms">Non renseigné</span></div>
     </div>
 
-    <div class="carousel" id="carousel"></div>
+    <div class="carousel-container" id="carousel"></div>
     <div id="roomButtons"></div>
+  </div>
+
+  <div class="lightbox" id="lightbox">
+    <img id="lightboxImg" src="" alt="Zoom photo">
   </div>
 
   <script type="module">
@@ -107,67 +142,79 @@
     const roomsSpan = document.getElementById("rooms");
     const carousel = document.getElementById("carousel");
     const roomButtons = document.getElementById("roomButtons");
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightboxImg");
 
     let carouselImages = [];
-    let currentIndex = 0;
+    let currentUserId = null;
+    let carouselIndex = 0;
+    let carouselInterval;
 
     onAuthStateChanged(auth, async user => {
-      if (!user) {
+      if(!user){
         alert("Vous devez être connecté !");
         window.location.href = "inscription.html";
         return;
       }
+      currentUserId = user.uid;
 
-      const snap = await get(ref(db, "users/" + user.uid));
-      if (snap.exists()) {
+      const snap = await get(ref(db,"users/"+user.uid));
+      if(snap.exists()){
         const data = snap.val();
         pseudoSpan.textContent = data.pseudo || "Non renseigné";
         ageSpan.textContent = data.age || "Non renseigné";
         locationSpan.textContent = data.location || "Non renseigné";
         descSpan.textContent = data.description || "Non renseignée";
         roomsSpan.textContent = data.rooms ? data.rooms.join(", ") : "Non renseigné";
-
-        // ✅ Carrousel
         carouselImages = data.photos || [];
         displayCarousel(carouselImages);
-
-        // ✅ Boutons salles
         displayRoomButtons(data.rooms || []);
       }
     });
 
-    function displayCarousel(photos) {
+    function displayCarousel(photos){
       carousel.innerHTML = "";
-      photos.forEach((url, i) => {
+      photos.forEach((url,i)=>{
         const img = document.createElement("img");
         img.src = url;
         if(i===0) img.classList.add("active");
+        img.addEventListener("click", ()=>{
+          lightboxImg.src = url;
+          lightbox.style.display = "flex";
+        });
         carousel.appendChild(img);
       });
-      if(photos.length>1) startCarousel();
+
+      if(photos.length>1){
+        clearInterval(carouselInterval);
+        carouselIndex=0;
+        carouselInterval=setInterval(()=>{
+          const imgs = carousel.querySelectorAll("img");
+          imgs.forEach(img=>img.classList.remove("active"));
+          carouselIndex = (carouselIndex+1)%imgs.length;
+          imgs[carouselIndex].classList.add("active");
+        }, 3000);
+      }
     }
 
-    function startCarousel() {
-      setInterval(() => {
-        const imgs = carousel.querySelectorAll("img");
-        imgs.forEach(img => img.classList.remove("active"));
-        currentIndex = (currentIndex + 1) % imgs.length;
-        imgs[currentIndex].classList.add("active");
-      }, 3000); // 3 secondes
-    }
-
-    function displayRoomButtons(rooms) {
+    function displayRoomButtons(rooms){
       roomButtons.innerHTML = "";
-      rooms.forEach(room => {
+      rooms.forEach(room=>{
         const btn = document.createElement("button");
         btn.classList.add("room-btn");
-        btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
-        if(room==="serieux") btn.onclick = () => window.location.href="authentique.html";
-        if(room==="amical") btn.onclick = () => window.location.href="amicale.html";
-        if(room==="fun") btn.onclick = () => window.location.href="fun.html";
+        btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
+        if(room==="serieux") btn.onclick=()=>window.location.href="authentique.html";
+        if(room==="amical") btn.onclick=()=>window.location.href="amicale.html";
+        if(room==="fun") btn.onclick=()=>window.location.href="fun.html";
         roomButtons.appendChild(btn);
       });
     }
+
+    lightbox.addEventListener("click", ()=>{
+      lightbox.style.display="none";
+      lightboxImg.src="";
+    });
+
   </script>
 </body>
 </html>
