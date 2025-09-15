@@ -59,7 +59,6 @@ h1 {
 }
 .photos img:hover { transform: scale(1.1); }
 
-/* Lightbox */
 .lightbox {
   display: none;
   position: fixed;
@@ -116,147 +115,68 @@ h1 {
   <img id="lightboxImg" src="">
 </div>
 
-<script type="module">
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-import { app } from "./firebase.js";
+<script>
+document.addEventListener("DOMContentLoaded", ()=>{
+  const pseudo = document.getElementById("pseudo");
+  const age = document.getElementById("age");
+  const location = document.getElementById("location");
+  const description = document.getElementById("description");
+  const mainPhoto = document.getElementById("mainPhoto");
+  const photosContainer = document.getElementById("photosContainer");
+  const roomButtons = document.getElementById("roomButtons");
+  const lightbox = document.getElementById("lightbox");
+  const lightboxImg = document.getElementById("lightboxImg");
 
-const auth = getAuth(app);
-const db = getDatabase(app);
-
-const pseudoSpan = document.getElementById("pseudo");
-const ageSpan = document.getElementById("age");
-const locationSpan = document.getElementById("location");
-const descSpan = document.getElementById("description");
-const mainPhoto = document.getElementById("mainPhoto");
-const photosContainer = document.getElementById("photosContainer");
-const roomButtons = document.getElementById("roomButtons");
-
-const lightbox = document.getElementById("lightbox");
-const lightboxImg = document.getElementById("lightboxImg");
-
-// Valeurs par défaut (affichées si Firebase et localStorage n'ont rien)
-const DEFAULT_PHOTOS = [
-  "https://via.placeholder.com/800x600?text=Photo1",
-  "https://via.placeholder.com/800x600?text=Photo2",
-  "https://via.placeholder.com/800x600?text=Photo3"
-];
-const DEFAULT_ROOMS = ["Romantique", "Cosmos", "Voyage"];
-
-// Map une salle à une URL (tu peux adapter les noms de pages si besoin)
-function roomToUrl(room) {
-  const r = (room || "").toString().toLowerCase().trim();
-  if (!r) return "#";
-  if (r.includes("serieux") || r.includes("authentique") || r.includes("serious")) return "authentique.html";
-  if (r.includes("amical") || r.includes("amitie") || r.includes("amitié")) return "amicale.html";
-  if (r.includes("fun")) return "fun.html";
-  // fallback — tente room-slug.html (ex: romantique -> romantique.html)
-  const slug = r.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  return slug ? `${slug}.html` : "#";
-}
-
-function clearChildEvents(el) {
-  const newEl = el.cloneNode(false);
-  el.parentNode.replaceChild(newEl, el);
-  return newEl;
-}
-
-onAuthStateChanged(auth, async user => {
-  if (!user) {
-    alert("Vous devez être connecté !");
-    window.location.href = "inscription.html";
-    return;
-  }
-
-  // Récup Firebase puis fallback localStorage (inscription précédente)
-  let data = null;
-  try {
-    const snap = await get(ref(db, "users/" + user.uid));
-    if (snap.exists()) data = snap.val();
-  } catch (e) {
-    console.warn("Erreur lecture Firebase :", e);
-  }
-
-  if (!data) {
-    try {
-      const stored = JSON.parse(localStorage.getItem("userData") || "null");
-      if (stored) data = stored;
-    } catch(e){
-      data = null;
-    }
-  }
-
-  // Si toujours pas de data, utilise objet vide pour utiliser les defaults plus bas
-  data = data || {};
-
-  // Remplissage des infos textuelles
-  pseudoSpan.textContent = data.pseudo || localStorage.getItem("pseudo") || "Non renseigné";
-  ageSpan.textContent = data.age || "Non renseigné";
-  locationSpan.textContent = data.location || "Non renseigné";
-  descSpan.textContent = data.description || "Non renseignée";
-
-  // Photos : priorité Firebase -> localStorage.userData.photos -> DEFAULT_PHOTOS
-  let photos = Array.isArray(data.photos) && data.photos.length ? data.photos.slice() : null;
-  if (!photos) {
-    try {
-      const stored = JSON.parse(localStorage.getItem("userData") || "null");
-      if (stored && Array.isArray(stored.photos) && stored.photos.length) photos = stored.photos.slice();
-    } catch(e){ photos = null; }
-  }
-  if (!photos) photos = DEFAULT_PHOTOS.slice();
-
-  // mainPhoto : évite multi-listeners — on remplace onclick directement
-  mainPhoto.src = photos[0] || DEFAULT_PHOTOS[0];
-  mainPhoto.onclick = () => {
-    lightboxImg.src = photos[0] || DEFAULT_PHOTOS[0];
-    lightbox.style.display = "flex";
+  // Récupération du user depuis localStorage (en cliquant sur mini-profil)
+  const data = JSON.parse(localStorage.getItem("currentUserProfile")) || {
+    pseudo:"Utilisateur",
+    age:"",
+    location:"",
+    description:"",
+    photos:[],
+    rooms:["Salle1","Salle2"]
   };
 
-  // Miniatures
-  photosContainer.innerHTML = "";
-  photos.forEach(url => {
-    const img = document.createElement("img");
-    img.src = url;
-    img.alt = "photo";
-    img.addEventListener("click", () => {
-      lightboxImg.src = url;
+  pseudo.textContent = data.pseudo || "Non renseigné";
+  age.textContent = data.age || "Non renseigné";
+  location.textContent = data.location || "Non renseigné";
+  description.textContent = data.description || "Non renseignée";
+
+  const photos = data.photos || [];
+  if(photos.length>0){
+    mainPhoto.src = photos[0];
+    mainPhoto.addEventListener("click", ()=>{
+      lightboxImg.src = photos[0];
       lightbox.style.display = "flex";
     });
-    photosContainer.appendChild(img);
-  });
 
-  // Rooms : priorité Firebase -> localStorage.userData.rooms -> DEFAULT_ROOMS
-  let rooms = Array.isArray(data.rooms) && data.rooms.length ? data.rooms.slice() : null;
-  if (!rooms) {
-    try {
-      const stored = JSON.parse(localStorage.getItem("userData") || "null");
-      if (stored && Array.isArray(stored.rooms) && stored.rooms.length) rooms = stored.rooms.slice();
-    } catch(e){ rooms = null; }
-  }
-  if (!rooms) rooms = DEFAULT_ROOMS.slice();
-
-  // Boutons des salles : redirection via roomToUrl
-  roomButtons.innerHTML = "";
-  rooms.forEach(room => {
-    const btn = document.createElement("button");
-    btn.className = "room-btn";
-    btn.textContent = (room || "").toString().charAt(0).toUpperCase() + (room || "").toString().slice(1);
-    btn.addEventListener("click", () => {
-      const url = roomToUrl(room);
-      if (!url || url === "#") {
-        alert("Page de la salle introuvable pour : " + room);
-        return;
-      }
-      window.location.href = url;
+    photosContainer.innerHTML="";
+    photos.forEach(url=>{
+      const img = document.createElement("img");
+      img.src = url;
+      img.addEventListener("click", ()=>{
+        lightboxImg.src = url;
+        lightbox.style.display = "flex";
+      });
+      photosContainer.appendChild(img);
     });
+  } else {
+    mainPhoto.src = "https://via.placeholder.com/400x300?text=Photo";
+  }
+
+  // Boutons salles
+  roomButtons.innerHTML="";
+  (data.rooms||[]).forEach(room=>{
+    const btn=document.createElement("button");
+    btn.className="room-btn";
+    btn.textContent=room;
     roomButtons.appendChild(btn);
   });
-});
 
-// Fermer lightbox au clic (n'importe où)
-lightbox.addEventListener("click", () => {
-  lightbox.style.display = "none";
-  lightboxImg.src = "";
+  lightbox.addEventListener("click", ()=>{
+    lightbox.style.display="none";
+    lightboxImg.src="";
+  });
 });
 </script>
 </body>
