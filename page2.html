@@ -59,6 +59,7 @@ h1 {
 }
 .photos img:hover { transform: scale(1.1); }
 
+/* Lightbox */
 .lightbox {
   display: none;
   position: fixed;
@@ -115,68 +116,77 @@ h1 {
   <img id="lightboxImg" src="">
 </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", ()=>{
-  const pseudo = document.getElementById("pseudo");
-  const age = document.getElementById("age");
-  const location = document.getElementById("location");
-  const description = document.getElementById("description");
-  const mainPhoto = document.getElementById("mainPhoto");
-  const photosContainer = document.getElementById("photosContainer");
-  const roomButtons = document.getElementById("roomButtons");
-  const lightbox = document.getElementById("lightbox");
-  const lightboxImg = document.getElementById("lightboxImg");
+<script type="module">
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { app } from "./firebase.js";
 
-  // Récupération du user depuis localStorage (en cliquant sur mini-profil)
-  const data = JSON.parse(localStorage.getItem("currentUserProfile")) || {
-    pseudo:"Utilisateur",
-    age:"",
-    location:"",
-    description:"",
-    photos:[],
-    rooms:["Salle1","Salle2"]
-  };
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-  pseudo.textContent = data.pseudo || "Non renseigné";
-  age.textContent = data.age || "Non renseigné";
-  location.textContent = data.location || "Non renseigné";
-  description.textContent = data.description || "Non renseignée";
+const pseudoSpan = document.getElementById("pseudo");
+const ageSpan = document.getElementById("age");
+const locationSpan = document.getElementById("location");
+const descSpan = document.getElementById("description");
+const mainPhoto = document.getElementById("mainPhoto");
+const photosContainer = document.getElementById("photosContainer");
+const roomButtons = document.getElementById("roomButtons");
 
-  const photos = data.photos || [];
-  if(photos.length>0){
-    mainPhoto.src = photos[0];
-    mainPhoto.addEventListener("click", ()=>{
-      lightboxImg.src = photos[0];
-      lightbox.style.display = "flex";
-    });
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
 
-    photosContainer.innerHTML="";
-    photos.forEach(url=>{
-      const img = document.createElement("img");
-      img.src = url;
-      img.addEventListener("click", ()=>{
-        lightboxImg.src = url;
-        lightbox.style.display = "flex";
-      });
-      photosContainer.appendChild(img);
-    });
-  } else {
-    mainPhoto.src = "https://via.placeholder.com/400x300?text=Photo";
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    alert("Vous devez être connecté !");
+    window.location.href = "inscription.html";
+    return;
   }
 
-  // Boutons salles
-  roomButtons.innerHTML="";
-  (data.rooms||[]).forEach(room=>{
-    const btn=document.createElement("button");
-    btn.className="room-btn";
-    btn.textContent=room;
-    roomButtons.appendChild(btn);
-  });
+  const snap = await get(ref(db, "users/" + user.uid));
+  if (snap.exists()) {
+    const data = snap.val();
+    pseudoSpan.textContent = data.pseudo || "Non renseigné";
+    ageSpan.textContent = data.age || "Non renseigné";
+    locationSpan.textContent = data.location || "Non renseigné";
+    descSpan.textContent = data.description || "Non renseignée";
 
-  lightbox.addEventListener("click", ()=>{
-    lightbox.style.display="none";
-    lightboxImg.src="";
-  });
+    const photos = data.photos || [];
+    if (photos.length > 0) {
+      // ✅ Affiche la vraie photo principale
+      mainPhoto.src = photos[0];
+      mainPhoto.addEventListener("click", () => {
+        lightboxImg.src = photos[0];
+        lightbox.style.display = "flex";
+      });
+
+      photosContainer.innerHTML = "";
+      photos.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.addEventListener("click", () => {
+          lightboxImg.src = url;
+          lightbox.style.display = "flex";
+        });
+        photosContainer.appendChild(img);
+      });
+    } else {
+      mainPhoto.src = "https://via.placeholder.com/400x300?text=Photo";
+    }
+
+    // ✅ Boutons des salles (garde les noms depuis firebase si existants)
+    roomButtons.innerHTML = "";
+    (data.rooms || ["Salle 1", "Salle 2"]).forEach(room => {
+      const btn = document.createElement("button");
+      btn.className = "room-btn";
+      btn.textContent = room;
+      roomButtons.appendChild(btn);
+    });
+  }
+});
+
+lightbox.addEventListener("click", () => {
+  lightbox.style.display = "none";
+  lightboxImg.src = "";
 });
 </script>
 </body>
