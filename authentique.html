@@ -14,11 +14,32 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 .btn-back { position: absolute; top:20px; left:20px; color: #ff66cc; font-size:1.5em; cursor:pointer; text-decoration:none; transition: transform .2s; }
 .btn-back:hover { transform: scale(1.2); }
 
-#myProfile { z-index: 3; position: relative; text-align:center; margin-top:10px; }
-#myProfile img { width:100px; height:100px; border-radius:50%; border:3px solid #ff66cc; box-shadow:0 0 15px #ff66cc; cursor:pointer; object-fit:cover; }
-#myProfile div { margin-top:8px; font-size:1.2em; color:#ff66cc; }
+/* Mini profil en haut centré */
+#myProfile { 
+  z-index: 3; 
+  position: fixed; 
+  top: 15px; 
+  left: 50%; 
+  transform: translateX(-50%); 
+  text-align:center; 
+  cursor:pointer;
+}
+#myProfile img { 
+  width:80px; 
+  height:80px; 
+  border-radius:50%; 
+  border:3px solid #ff66cc; 
+  box-shadow:0 0 15px #ff66cc; 
+  object-fit:cover; 
+}
+#myProfile div { 
+  margin-top:6px; 
+  font-size:1em; 
+  color:#ff66cc; 
+  text-shadow:0 0 6px black;
+}
 
-.carousel-container { z-index:2; position: relative; width:100%; height:calc(100% - 180px); overflow: hidden; display: flex; align-items:center; }
+.carousel-container { z-index:2; position: relative; width:100%; height:calc(100% - 180px); overflow: hidden; display: flex; align-items:center; margin-top:120px; }
 .carousel { display:flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; gap:40px; padding:40px; }
 .carousel::-webkit-scrollbar { display:none; }
 .card { scroll-snap-align: center; flex: 0 0 150px; background: rgba(0,0,0,0.5); border-radius: 16px; padding: 15px; text-align: center; transition: transform .3s, box-shadow .3s; cursor: pointer; position: relative; }
@@ -31,11 +52,41 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 .btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
 .btn-like.active { background-color: #ff66cc; border-color: #ff66cc; color:white; box-shadow: 0 0 12px #ff66cc; }
 .btn-fav.active { background-color: #ffea00; border-color: #ffea00; color:#333; box-shadow:0 0 12px #ffea00; }
-.mini-profile { position: absolute; width: 60px; height: 60px; border-radius: 50%; border: 2px solid #ff66cc; box-shadow: 0 0 8px #ff66cc; z-index: 5000; touch-action: none; object-fit: cover; }
-.close-btn { position: absolute; bottom: -5px; right: -5px; background: #ff66cc; border-radius: 50%; width: 16px; height: 16px; display:flex; align-items:center; justify-content:center; font-size: 12px; color:white; border: 1px solid white; cursor: pointer; z-index: 5100; }
-@keyframes neonBlink { 0%, 100% { box-shadow: 0 0 8px #ff66cc; border-color: #ff66cc; } 50% { box-shadow: 0 0 20px #ff66cc; border-color: #ffea00; } }
-.mini-profile.new-message { animation: neonBlink 1s infinite; }
+
 #btnFavorites { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #ffea00; border:none; border-radius:12px; color:#333; padding:10px 20px; font-size:1.2em; cursor:pointer; z-index:1000; box-shadow: 0 0 12px #ffea00; animation: neonBlink 2s infinite alternate; }
+
+/* Overlay profil */
+.overlay {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+}
+.overlay-content {
+  position: relative;
+  width: 90%;
+  max-width: 900px;
+  height: 90%;
+  margin: 5% auto;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 20px #ff66cc;
+}
+.overlay-content iframe {
+  width: 100%;
+  height: 100%;
+}
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 2rem;
+  color: #fff;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -47,6 +98,14 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 <!-- MON MINI-PROFIL PRIVÉ POUR MOI -->
 <div id="myProfile"></div>
 
+<!-- Overlay -->
+<div id="profileOverlay" class="overlay">
+  <div class="overlay-content">
+    <span class="close-btn">&times;</span>
+    <iframe src="profil2.html" frameborder="0"></iframe>
+  </div>
+</div>
+
 <div class="carousel-container fade-in">
   <div class="carousel" id="carousel"></div>
 </div>
@@ -56,7 +115,6 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   let allUsers = JSON.parse(localStorage.getItem("allUsers") || "[]");
-  let positions = JSON.parse(localStorage.getItem("miniProfilePositions")||"{}");
   let chats = JSON.parse(localStorage.getItem("chatMessages")||"{}"); 
   let likes = JSON.parse(localStorage.getItem("likes")||"{}");
   let favorites = JSON.parse(localStorage.getItem("favorites")||"[]");
@@ -64,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentUser = localStorage.getItem("pseudo") || "Utilisateur";
   const carousel = document.getElementById("carousel");
 
-  // ✅ Ton mini-profil uniquement pour toi
+  // ✅ Mini profil perso
   const myProfileDiv = document.getElementById("myProfile");
   const me = allUsers.find(u => u.pseudo === currentUser);
   if(me){
@@ -73,12 +131,16 @@ document.addEventListener('DOMContentLoaded', () => {
       <img src="${firstPhoto}" alt="Mon profil" id="myProfilePic">
       <div>${me.pseudo}</div>
     `;
-    document.getElementById("myProfilePic").addEventListener("click", ()=>{
-      window.location.href = "page2.html";
-    });
   }
 
-  // ✅ Carrousel : toutes les autres users sauf toi
+  // ✅ Overlay ouverture/fermeture
+  const overlay = document.getElementById("profileOverlay");
+  const closeBtn = overlay.querySelector(".close-btn");
+  myProfileDiv.addEventListener("click", ()=>{ overlay.style.display="block"; });
+  closeBtn.addEventListener("click", ()=>{ overlay.style.display="none"; });
+  overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.style.display="none"; });
+
+  // ✅ Carrousel : autres users sauf toi
   allUsers.filter(u=>u.pseudo!==currentUser).forEach(user=>{
     const card = document.createElement("div");
     card.className = "card " + (user.gender || "girl");
@@ -98,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     carousel.appendChild(card);
   });
 
-  // ✅ Interactions sur cards
+  // ✅ Navigation vers profil utilisateur
   document.addEventListener("click", e => {
     if(e.target.tagName === "IMG" && e.target.closest(".card")){
       const card = e.target.closest(".card");
@@ -114,80 +176,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ✅ Chat, like, favoris restent inchangés
-  function createMiniProfile(name,imgSrc){
-    const existing = document.querySelector(`.mini-profile[data-mini="${name}"]`);
-    if(existing){ existing.classList.add("new-message"); return; }
-    const wrapper=document.createElement("div"); 
-    wrapper.style.position="absolute"; wrapper.style.width="60px"; wrapper.style.height="60px"; wrapper.dataset.mini=name;
-    const mini=document.createElement("img"); mini.src=imgSrc; mini.className="mini-profile"; mini.dataset.mini=name;
-    const close=document.createElement("div"); close.className="close-btn"; close.textContent="×";
-    wrapper.appendChild(mini); wrapper.appendChild(close); 
-    document.body.appendChild(wrapper);
-    if(positions[name]){
-        wrapper.style.left=positions[name].x+"px"; 
-        wrapper.style.top=positions[name].y+"px"; 
-    } else { 
-        wrapper.style.left="20px"; 
-        wrapper.style.top="20px"; 
-    }
-    mini.addEventListener("click", ()=>{ mini.classList.remove("new-message"); openChat(name); });
-    close.addEventListener("click", e=>{ e.stopPropagation(); delete positions[name]; delete chats[name]; delete likes[name]; favorites=favorites.filter(f=>f!==name); localStorage.setItem("miniProfilePositions", JSON.stringify(positions)); localStorage.setItem("chatMessages", JSON.stringify(chats)); localStorage.setItem("likes", JSON.stringify(likes)); localStorage.setItem("favorites", JSON.stringify(favorites)); wrapper.remove(); });
-    let offsetX=0, offsetY=0;
-    wrapper.addEventListener("touchstart", e=>{ const touch=e.touches[0]; offsetX=touch.clientX-wrapper.getBoundingClientRect().left; offsetY=touch.clientY-wrapper.getBoundingClientRect().top; });
-    wrapper.addEventListener("touchmove", e=>{ const touch=e.touches[0]; wrapper.style.left=(touch.clientX-offsetX)+"px"; wrapper.style.top=(touch.clientY-offsetY)+"px"; });
-    wrapper.addEventListener("touchend", ()=>{ positions[name]={x:wrapper.offsetLeft,y:wrapper.offsetTop}; localStorage.setItem("miniProfilePositions", JSON.stringify(positions)); });
-  }
-
-  function openChat(name){
-    const card=[...document.querySelectorAll(".card")].find(c=>c.dataset.name===name);
-    const imgSrc=card? card.querySelector("img").src:"";
-    let existing=document.getElementById("fullScreenChat"); if(existing) existing.remove();
-    const fullChat=document.createElement("div"); fullChat.id="fullScreenChat";
-    Object.assign(fullChat.style,{position:"fixed",top:"0",left:"0",width:"100%",height:"100%",background:"rgba(0,0,0,0.7)",backdropFilter:"blur(12px)",display:"flex",flexDirection:"column",justifyContent:"space-between",zIndex:"10000",padding:"20px",color:"white"});
-    fullChat.innerHTML=`
-      <div style="display:flex; align-items:center; gap:10px;">
-        <img src="${imgSrc}" style="width:50px;height:50px;border-radius:50%;border:2px solid #ff66cc;">
-        <div style="font-size:1.2em;">${name}</div>
-      </div>
-      <div id="fullChatBody" style="flex:1; overflow-y:auto; margin:15px 0;">
-        ${ (chats[name]||[]).join('') }
-      </div>
-      <div style="display:flex; gap:10px; margin-bottom:50px;">
-        <textarea id="fullChatInput" rows="2" style="flex:1;border-radius:8px;border:none;padding:8px;resize:none;background: rgba(255,255,255,0.1);color:white;font-family:'Orbitron';"></textarea>
-        <button id="fullChatSend" style="padding:8px 16px;background:#ff66cc;border:none;border-radius:8px;color:white;cursor:pointer;">Envoyer</button>
-      </div>
-      <button id="fullChatClose" style="position:absolute; bottom:20px; left:50%; transform: translateX(-50%);
-        padding:10px 16px; background:#ff66cc; border:none; border-radius:8px; color:white; cursor:pointer;">Retour</button>
-    `;
-    document.body.appendChild(fullChat);
-
-    const chatBody = document.getElementById("fullChatBody");
-    document.getElementById("fullChatSend").onclick=()=>{
-      const text=document.getElementById("fullChatInput").value.trim(); 
-      if(!text) return;
-      chats[name]=chats[name]||[]; 
-      chats[name].push(`<div style="margin-bottom:8px;"><strong style="color:#ff66cc">${currentUser}:</strong> ${text}</div>`); 
-      localStorage.setItem("chatMessages", JSON.stringify(chats));
-      const div=document.createElement("div"); div.style.marginBottom="8px"; div.innerHTML=`<strong style="color:#ff66cc">${currentUser}:</strong> ${text}`;
-      chatBody.appendChild(div); 
-      document.getElementById("fullChatInput").value=""; chatBody.scrollTop=chatBody.scrollHeight;
-      createMiniProfile(name, imgSrc);
-    };
-    document.getElementById("fullChatClose").onclick=()=>fullChat.remove();
-  }
-
-  document.addEventListener("click", e=>{ if(e.target.classList.contains("btn-chat")){ const card=e.target.closest(".card"); if(card) openChat(card.dataset.name); } });
+  // ✅ Like / fav comme avant
   document.querySelectorAll(".btn-like").forEach(btn=>{
     const card=btn.closest(".card"); const name=card.dataset.name;
     if(likes[name]) btn.classList.add("active");
     btn.addEventListener("click", ()=>{
       const isActive=btn.classList.toggle("active"); likes[name]=isActive; localStorage.setItem("likes", JSON.stringify(likes));
-      if(isActive){
-        chats[name]=chats[name]||[]; 
-        chats[name].push(`<div style="margin-bottom:8px;"><strong style="color:#ff66cc">${currentUser}:</strong> 💌 Vous avez liké ${name.split(',')[0]} !</div>`); 
-      } else { if(chats[name]){ chats[name]=chats[name].filter(msg => !msg.includes(`Vous avez liké ${name.split(',')[0]}`)); } }
-      localStorage.setItem("chatMessages", JSON.stringify(chats)); createMiniProfile(name, card.querySelector("img").src);
     });
   });
   document.querySelectorAll(".btn-fav").forEach(btn=>{
@@ -198,23 +192,6 @@ document.addEventListener('DOMContentLoaded', () => {
       else { favorites.push(name); btn.classList.add("active"); }
       localStorage.setItem("favorites", JSON.stringify(favorites));
     });
-  });
-  document.getElementById("btnFavorites").addEventListener("click", ()=>{
-    let html=favorites.map(favName=>{
-      const card=[...document.querySelectorAll(".card")].find(c=>c.dataset.name===favName); if(!card) return "";
-      const img=card.querySelector("img").src;
-      return `<div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; cursor:pointer;" class="favItem" data-name="${favName}">
-                <img src="${img}" style="width:50px; height:50px; border-radius:50%; border:2px solid #ff66cc;">
-                <span>${favName}</span>
-              </div>`;
-    }).join("");
-    let existing=document.getElementById("favoritesView"); if(existing) existing.remove();
-    const favView=document.createElement("div"); favView.id="favoritesView";
-    Object.assign(favView.style,{position:"fixed",top:"0",left:"0",width:"100%",height:"100%",background:"rgba(0,0,0,0.8)",zIndex:"10000",padding:"20px",color:"white",overflowY:"auto"});
-    favView.innerHTML=`<h2>Favoris</h2>${html}<button id="closeFav" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); padding:10px 20px; border:none; border-radius:12px; background:#ffea00; color:#333; cursor:pointer;">Fermer</button>`;
-    document.body.appendChild(favView);
-    document.getElementById("closeFav").onclick=()=>favView.remove();
-    document.querySelectorAll(".favItem").forEach(item=>{ item.addEventListener("click", ()=>{ openChat(item.dataset.name); }); });
   });
 });
 </script>
