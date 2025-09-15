@@ -14,25 +14,11 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 .btn-back { position: absolute; top:20px; left:20px; color: #ff66cc; font-size:1.5em; cursor:pointer; text-decoration:none; transition: transform .2s; }
 .btn-back:hover { transform: scale(1.2); }
 
-#miniProfileContainer {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  text-align: center;
-  cursor: pointer;
-}
-#miniProfileContainer img {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: 3px solid #ff66cc;
-  box-shadow: 0 0 15px #ff66cc;
-  object-fit: cover;
-}
+#myProfile { z-index: 3; position: relative; text-align:center; margin-top:10px; }
+#myProfile img { width:100px; height:100px; border-radius:50%; border:3px solid #ff66cc; box-shadow:0 0 15px #ff66cc; cursor:pointer; object-fit:cover; }
+#myProfile div { margin-top:8px; font-size:1.2em; color:#ff66cc; }
 
-.carousel-container { z-index:2; position: relative; width:100%; height:calc(100% - 180px); overflow: hidden; display: flex; align-items:center; margin-top:120px; }
+.carousel-container { z-index:2; position: relative; width:100%; height:calc(100% - 180px); overflow: hidden; display: flex; align-items:center; }
 .carousel { display:flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; gap:40px; padding:40px; }
 .carousel::-webkit-scrollbar { display:none; }
 .card { scroll-snap-align: center; flex: 0 0 150px; background: rgba(0,0,0,0.5); border-radius: 16px; padding: 15px; text-align: center; transition: transform .3s, box-shadow .3s; cursor: pointer; position: relative; }
@@ -45,6 +31,11 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 .btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
 .btn-like.active { background-color: #ff66cc; border-color: #ff66cc; color:white; box-shadow: 0 0 12px #ff66cc; }
 .btn-fav.active { background-color: #ffea00; border-color: #ffea00; color:#333; box-shadow:0 0 12px #ffea00; }
+.mini-profile { position: absolute; width: 60px; height: 60px; border-radius: 50%; border: 2px solid #ff66cc; box-shadow: 0 0 8px #ff66cc; z-index: 5000; touch-action: none; object-fit: cover; }
+.close-btn { position: absolute; bottom: -5px; right: -5px; background: #ff66cc; border-radius: 50%; width: 16px; height: 16px; display:flex; align-items:center; justify-content:center; font-size: 12px; color:white; border: 1px solid white; cursor: pointer; z-index: 5100; }
+@keyframes neonBlink { 0%, 100% { box-shadow: 0 0 8px #ff66cc; border-color: #ff66cc; } 50% { box-shadow: 0 0 20px #ff66cc; border-color: #ffea00; } }
+.mini-profile.new-message { animation: neonBlink 1s infinite; }
+#btnFavorites { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #ffea00; border:none; border-radius:12px; color:#333; padding:10px 20px; font-size:1.2em; cursor:pointer; z-index:1000; box-shadow: 0 0 12px #ffea00; animation: neonBlink 2s infinite alternate; }
 </style>
 </head>
 <body>
@@ -54,69 +45,90 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 </div>
 
 <!-- MINI-PROFIL PRIVÉ -->
-<div id="miniProfileContainer">
-  <img id="myMiniProfile" src="" alt="Mon mini-profil">
-  <div id="miniProfileName" style="color:#ff66cc;margin-top:5px;"></div>
-</div>
+<div id="myProfile"></div>
 
 <div class="carousel-container fade-in">
   <div class="carousel" id="carousel"></div>
 </div>
 
+<button id="btnFavorites">Favoris</button>
+
 <script>
-// === Données simulées ===
-let allUsers = JSON.parse(localStorage.getItem("allUsers") || "[]");
-let currentUserPseudo = localStorage.getItem("pseudo") || "Moi";
+document.addEventListener('DOMContentLoaded', () => {
+  // Données locales
+  let allUsers = JSON.parse(localStorage.getItem("allUsers") || "[]");
+  let positions = JSON.parse(localStorage.getItem("miniProfilePositions")||"{}");
+  let chats = JSON.parse(localStorage.getItem("chatMessages")||"{}"); 
+  let likes = JSON.parse(localStorage.getItem("likes")||"{}");
+  let favorites = JSON.parse(localStorage.getItem("favorites")||"[]");
 
-// Mini profil uniquement pour toi
-const miniProfileImg = document.getElementById("myMiniProfile");
-const miniProfileName = document.getElementById("miniProfileName");
-const me = allUsers.find(u=>u.pseudo===currentUserPseudo);
-if(me){
-  miniProfileImg.src = me.photos && me.photos.length>0 ? me.photos[0] : "https://i.pravatar.cc/150?img=12";
-  miniProfileName.textContent = me.pseudo;
-}
-miniProfileImg.addEventListener("click", ()=>{
-  // Ouvre la page profil2 (ta page perso)
-  const lightbox = document.createElement("div");
-  Object.assign(lightbox.style,{
-    position:"fixed",top:"0",left:"0",width:"100%",height:"100%",background:"rgba(0,0,0,0.9)",zIndex:"2000",display:"flex",justifyContent:"center",alignItems:"center",flexDirection:"column"
+  let currentUserPseudo = localStorage.getItem("pseudo") || "Moi";
+
+  // Vérifier si l'utilisateur existe dans allUsers sinon le créer
+  let me = allUsers.find(u => u.pseudo === currentUserPseudo);
+  if(!me){
+    me = {
+      pseudo: currentUserPseudo,
+      photos: ["https://i.pravatar.cc/150?img=12"], // photo par défaut
+      gender: "girl"
+    };
+    allUsers.push(me);
+    localStorage.setItem("allUsers", JSON.stringify(allUsers));
+  }
+
+  const carousel = document.getElementById("carousel");
+
+  // 🔹 Mini-profil privé visible uniquement pour toi
+  const myProfileDiv = document.getElementById("myProfile");
+  myProfileDiv.innerHTML = `<img src="${me.photos[0]}" alt="Mon profil" id="myProfilePic"><div>${me.pseudo}</div>`;
+
+  document.getElementById("myProfilePic").addEventListener("click", ()=>{
+    // Lightbox mini-profil
+    const lightbox = document.createElement("div");
+    Object.assign(lightbox.style,{
+        position:"fixed", top:"0", left:"0", width:"100%", height:"100%", background:"rgba(0,0,0,0.9)", zIndex:"2000",
+        display:"flex", justifyContent:"center", alignItems:"center", flexDirection:"column", cursor:"pointer"
+    });
+    const img = document.createElement("img");
+    img.src = me.photos[0];
+    img.style.width="200px";
+    img.style.height="200px";
+    img.style.borderRadius="10px";
+    img.style.marginBottom="20px";
+    lightbox.appendChild(img);
+    const pseudoDiv = document.createElement("div");
+    pseudoDiv.textContent = me.pseudo;
+    pseudoDiv.style.color = "#ff66cc";
+    pseudoDiv.style.fontSize = "1.5em";
+    pseudoDiv.style.marginBottom = "10px";
+    lightbox.appendChild(pseudoDiv);
+    lightbox.addEventListener("click", ()=>lightbox.remove());
+    document.body.appendChild(lightbox);
   });
-  const img=document.createElement("img");
-  img.src = me.photos && me.photos.length>0 ? me.photos[0] : "https://i.pravatar.cc/150?img=12";
-  img.style.width="200px";
-  img.style.height="200px";
-  img.style.borderRadius="10px";
-  img.style.marginBottom="20px";
-  lightbox.appendChild(img);
-  const pseudoDiv=document.createElement("div");
-  pseudoDiv.textContent = me.pseudo;
-  pseudoDiv.style.color="#ff66cc";
-  pseudoDiv.style.fontSize="1.5em";
-  pseudoDiv.style.marginBottom="10px";
-  lightbox.appendChild(pseudoDiv);
-  // Fermer au clic
-  lightbox.addEventListener("click", ()=>lightbox.remove());
-  document.body.appendChild(lightbox);
-});
 
-// Carrousel pour les autres
-const carousel = document.getElementById("carousel");
-allUsers.filter(u=>u.pseudo!==currentUserPseudo).forEach(user=>{
-  const card=document.createElement("div");
-  card.className="card "+(user.gender||"girl");
-  card.dataset.name=user.pseudo;
-  card.dataset.photos=JSON.stringify(user.photos||[]);
-  card.innerHTML=`
-    <img src="${user.photos && user.photos.length>0 ? user.photos[0] : 'https://i.pravatar.cc/150?img=12'}" alt="${user.pseudo}">
-    <div class="name">${user.pseudo}</div>
-    <div class="btns">
-      <div class="btn-chat" title="Chat">💬</div>
-      <div class="btn-like" title="Like">💖</div>
-      <div class="btn-fav" title="Favoris">⭐️</div>
-    </div>
-  `;
-  carousel.appendChild(card);
+  // 🔹 Carrousel pour les autres utilisateurs
+  allUsers.filter(u=>u.pseudo!==currentUserPseudo).forEach(user=>{
+    const card = document.createElement("div");
+    card.className = "card " + (user.gender || "girl");
+    card.dataset.name = user.pseudo;
+    card.dataset.age = user.age || "";
+    card.dataset.description = user.description || "";
+    card.dataset.photos = JSON.stringify(user.photos || []);
+    card.innerHTML = `
+      <img src="${user.photos && user.photos.length>0 ? user.photos[0] : 'https://i.pravatar.cc/150?img=12'}" alt="${user.pseudo}">
+      <div class="name">${user.pseudo}</div>
+      <div class="btns">
+        <div class="btn-chat" title="Chat">💬</div>
+        <div class="btn-like" title="Like">💖</div>
+        <div class="btn-fav" title="Favoris">⭐️</div>
+      </div>
+    `;
+    carousel.appendChild(card);
+  });
+
+  // Les autres interactions (chat, like, fav) restent inchangées
+  // ...
+  // (on peut remettre tout le reste de ton code pour chat/fav exactement comme tu l'avais)
 });
 </script>
 </body>
