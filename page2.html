@@ -3,195 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mon Profil</title>
+<title>Profil Utilisateur</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
-body {
-  margin: 0;
-  font-family: 'Orbitron', sans-serif;
-  background: url("planete-magique.jpg") no-repeat center center/cover;
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  padding: 20px 0;
-}
-.container {
-  background: rgba(0,0,0,0.6);
-  padding: 25px;
-  border-radius: 15px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 0 20px #ff66cc;
-  text-align: center;
-}
-h1 {
-  color: #ff66cc;
-  text-shadow: 0 0 10px #ff66cc;
-  margin-bottom: 20px;
-}
-.info div { margin: 8px 0; text-align: left; }
-.main-photo {
-  width: 100%;
-  max-height: 300px;
-  object-fit: cover;
-  border-radius: 10px;
-  margin-bottom: 15px;
-  border: 2px solid #ff66cc;
-  cursor: pointer;
-}
-.photos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  margin: 15px 0;
-}
-.photos img {
-  width: 70px;
-  height: 70px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 2px solid #ff66cc;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.photos img:hover { transform: scale(1.1); }
-
-/* Lightbox */
-.lightbox {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.9);
-  justify-content: center;
-  align-items: center;
-}
-.lightbox img {
-  max-width: 90%;
-  max-height: 90%;
-  border-radius: 10px;
-  box-shadow: 0 0 25px #ff66cc;
-}
-
-.room-btn {
-  padding: 10px 20px;
-  margin: 10px 5px;
-  border: 2px solid #ff66cc;
-  background: rgba(0,0,0,0.4);
-  color: #fff;
-  border-radius: 8px;
-  cursor: pointer;
-  text-transform: uppercase;
-  font-size: 0.9em;
-  box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
-  transition: 0.3s;
-}
-.room-btn:hover {
-  box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
-}
+body { margin:0; font-family:'Orbitron'; background:#111; color:#fff; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; padding:20px 0;}
+.container { background:rgba(0,0,0,0.6); padding:25px; border-radius:15px; width:90%; max-width:500px; box-shadow:0 0 20px #ff66cc; text-align:center; }
+h1 { color:#ff66cc; text-shadow:0 0 10px #ff66cc; margin-bottom:20px; }
+.info div { margin:8px 0; text-align:left; }
+.main-photo { width:100%; max-height:300px; object-fit:cover; border-radius:10px; margin-bottom:15px; border:2px solid #ff66cc; cursor:pointer; }
+.photos { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:15px 0; }
+.photos img { width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc; cursor:pointer; transition:0.2s; }
+.photos img:hover { transform:scale(1.1); }
+.room-btn { padding:10px 20px; margin:10px 5px; border:2px solid #ff66cc; background:rgba(0,0,0,0.4); color:#fff; border-radius:8px; cursor:pointer; text-transform:uppercase; font-size:0.9em; box-shadow:0 0 10px #ff66cc,0 0 20px #ff66cc inset; transition:0.3s; }
+.room-btn:hover { box-shadow:0 0 20px #ff66cc,0 0 30px #ff66cc inset; }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>Mon Profil</h1>
-  <div class="info">
-    <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
-    <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
-    <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
-    <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
-  </div>
-
-  <img id="mainPhoto" class="main-photo" src="" alt="Photo principale">
-
-  <div class="photos" id="photosContainer"></div>
-
-  <div id="roomButtons"></div>
+<h1>Mon Profil</h1>
+<div class="info">
+  <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
+  <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
+  <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
+  <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
 </div>
 
-<div class="lightbox" id="lightbox">
-  <img id="lightboxImg" src="">
+<img id="mainPhoto" class="main-photo" src="" alt="Photo principale">
+<div class="photos" id="photosContainer"></div>
+<div id="roomButtons"></div>
 </div>
 
-<script type="module">
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-import { app } from "./firebase.js";
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+  const pseudoSpan=document.getElementById("pseudo");
+  const ageSpan=document.getElementById("age");
+  const locationSpan=document.getElementById("location");
+  const descSpan=document.getElementById("description");
+  const mainPhoto=document.getElementById("mainPhoto");
+  const photosContainer=document.getElementById("photosContainer");
+  const roomButtons=document.getElementById("roomButtons");
 
-const auth = getAuth(app);
-const db = getDatabase(app);
+  let allUsers=JSON.parse(localStorage.getItem("allUsers")||"[]");
+  let currentUser=localStorage.getItem("pseudo")||"Utilisateur";
+  let me=allUsers.find(u=>u.pseudo===currentUser);
 
-const pseudoSpan = document.getElementById("pseudo");
-const ageSpan = document.getElementById("age");
-const locationSpan = document.getElementById("location");
-const descSpan = document.getElementById("description");
-const mainPhoto = document.getElementById("mainPhoto");
-const photosContainer = document.getElementById("photosContainer");
-const roomButtons = document.getElementById("roomButtons");
+  if(me){
+    pseudoSpan.textContent=me.pseudo||"Non renseigné";
+    ageSpan.textContent=me.age||"Non renseigné";
+    locationSpan.textContent=me.location||"Non renseigné";
+    descSpan.textContent=me.description||"Non renseignée";
 
-const lightbox = document.getElementById("lightbox");
-const lightboxImg = document.getElementById("lightboxImg");
+    const photos=me.photos||[];
+    mainPhoto.src=photos[0]||"https://via.placeholder.com/400x300?text=Photo";
+    photosContainer.innerHTML="";
+    photos.forEach(url=>{
+      const img=document.createElement("img");
+      img.src=url;
+      img.addEventListener("click",()=>mainPhoto.src=url);
+      photosContainer.appendChild(img);
+    });
 
-onAuthStateChanged(auth, async user => {
-  if (!user) {
-    alert("Vous devez être connecté !");
-    window.location.href = "inscription.html";
-    return;
+    roomButtons.innerHTML="";
+    (me.rooms||["Salle1","Salle2"]).forEach(room=>{
+      const btn=document.createElement("button");
+      btn.className="room-btn";
+      btn.textContent=room;
+      btn.addEventListener("click",()=>window.location.href=`${room.toLowerCase()}.html`);
+      roomButtons.appendChild(btn);
+    });
   }
-
-  const snap = await get(ref(db, "users/" + user.uid));
-  if (snap.exists()) {
-    const data = snap.val();
-
-    pseudoSpan.textContent = data.pseudo || "Non renseigné";
-    ageSpan.textContent = data.age || "Non renseigné";
-    locationSpan.textContent = data.location || "Non renseigné";
-    descSpan.textContent = data.description || "Non renseignée";
-
-    const photos = data.photos || [];
-    if (photos.length > 0) {
-      // photo principale
-      mainPhoto.src = photos[0];
-      mainPhoto.addEventListener("click", () => {
-        lightboxImg.src = photos[0];
-        lightbox.style.display = "flex";
-      });
-
-      // mini-photos
-      photosContainer.innerHTML = "";
-      photos.forEach(url => {
-        const img = document.createElement("img");
-        img.src = url;
-        img.addEventListener("click", () => {
-          lightboxImg.src = url;
-          lightbox.style.display = "flex";
-        });
-        photosContainer.appendChild(img);
-      });
-    } else {
-      mainPhoto.src = "https://via.placeholder.com/400x300?text=Photo";
-    }
-
-    // Boutons salles réelles
-    roomButtons.innerHTML = "";
-    if (data.rooms && data.rooms.length > 0) {
-      data.rooms.forEach(room => {
-        const btn = document.createElement("button");
-        btn.className = "room-btn";
-        btn.textContent = room;
-        btn.addEventListener("click", () => alert(`Entrer dans la salle: ${room}`)); // ici tu peux ajouter la vraie action
-        roomButtons.appendChild(btn);
-      });
-    }
-  }
-});
-
-lightbox.addEventListener("click", () => {
-  lightbox.style.display = "none";
-  lightboxImg.src = "";
 });
 </script>
 </body>
