@@ -16,9 +16,7 @@ body {
   align-items: flex-start;
   min-height: 100vh;
   padding: 20px 0;
-  overflow-x: hidden;
 }
-
 .container {
   background: rgba(0,0,0,0.6);
   padding: 25px;
@@ -27,22 +25,14 @@ body {
   max-width: 500px;
   box-shadow: 0 0 20px #ff66cc;
   text-align: center;
-  transition: transform 0.6s ease, opacity 0.6s ease;
+  position: relative;
 }
-
-.container.closing {
-  transform: scale(0.1) rotateX(45deg);
-  opacity: 0;
-}
-
 h1 {
   color: #ff66cc;
   text-shadow: 0 0 10px #ff66cc;
   margin-bottom: 20px;
 }
-
 .info div { margin: 8px 0; text-align: left; }
-
 .main-photo {
   width: 100%;
   max-height: 300px;
@@ -52,7 +42,6 @@ h1 {
   border: 2px solid #ff66cc;
   cursor: pointer;
 }
-
 .photos {
   display: flex;
   flex-wrap: wrap;
@@ -81,11 +70,6 @@ h1 {
   background: rgba(0,0,0,0.9);
   justify-content: center;
   align-items: center;
-  transition: transform 0.6s ease, opacity 0.6s ease;
-}
-.lightbox.closing {
-  transform: scale(0.1) rotateX(45deg);
-  opacity: 0;
 }
 .lightbox img {
   max-width: 90%;
@@ -94,82 +78,29 @@ h1 {
   box-shadow: 0 0 25px #ff66cc;
 }
 
-/* Modale pour modifier description/photos */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1100;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%) scale(0.1) rotateX(45deg);
-  width: 90%;
-  max-width: 450px;
-  background: rgba(0,0,0,0.8);
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 0 20px #ff66cc;
-  transition: transform 0.5s ease, opacity 0.5s ease;
-  opacity: 0;
-}
-.modal.show {
-  display: block;
-  transform: translate(-50%, -50%) scale(1) rotateX(0deg);
-  opacity: 1;
-}
-.modal textarea {
-  width: 100%;
-  height: 100px;
+/* Bouton Fermer */
+#closeBtn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  padding: 8px 12px;
+  background: #ff66cc;
+  border: none;
   border-radius: 8px;
-  border: 2px solid #ff66cc;
-  background: rgba(0,0,0,0.3);
-  color: #fff;
-  padding: 8px;
-  resize: none;
-}
-.modal input[type="file"] {
-  margin-top: 10px;
-}
-.modal button {
-  margin-top: 10px;
-  padding: 8px 15px;
-  border: 2px solid #ff66cc;
-  background: rgba(0,0,0,0.4);
-  color: #fff;
-  border-radius: 8px;
-  cursor: pointer;
-  box-shadow: 0 0 10px #ff66cc;
-  transition: 0.3s;
-}
-.modal button:hover {
-  box-shadow: 0 0 20px #ff66cc;
-}
-
-/* Boutons */
-.room-btn, #editBtn, #closeBtn {
-  padding: 10px 20px;
-  margin: 10px 5px;
-  border: 2px solid #ff66cc;
-  background: rgba(0,0,0,0.4);
-  color: #fff;
-  border-radius: 8px;
-  cursor: pointer;
-  text-transform: uppercase;
+  color: white;
   font-size: 0.9em;
-  box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
-  transition: 0.3s;
+  cursor: pointer;
+  z-index: 100;
 }
-.room-btn:hover, #editBtn:hover, #closeBtn:hover {
-  box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
+#closeBtn:hover {
+  background: #ff3399;
 }
 </style>
 </head>
 <body>
-<div class="container" id="profileContainer">
+<div class="container">
+  <button id="closeBtn">Fermer</button>
   <h1>Mon Profil</h1>
-
-  <div id="closeBtnContainer" style="display:none; text-align:right;">
-    <button id="closeBtn">Fermer ✖</button>
-  </div>
-
   <div class="info">
     <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
     <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
@@ -177,20 +108,8 @@ h1 {
     <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
   </div>
 
-  <button id="editBtn">Modifier</button>
-
   <img id="mainPhoto" class="main-photo" src="" alt="Photo principale">
   <div class="photos" id="photosContainer"></div>
-  <div id="roomButtons"></div>
-</div>
-
-<!-- Modale édition -->
-<div class="modal" id="editModal">
-  <h3>Modifier profil</h3>
-  <textarea id="descEdit" placeholder="Description..."></textarea>
-  <input type="file" id="photoEdit" multiple accept="image/*">
-  <button id="saveEdit">Enregistrer</button>
-  <button id="cancelEdit">Annuler</button>
 </div>
 
 <div class="lightbox" id="lightbox">
@@ -199,7 +118,7 @@ h1 {
 
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
@@ -211,18 +130,10 @@ const locationSpan = document.getElementById("location");
 const descSpan = document.getElementById("description");
 const mainPhoto = document.getElementById("mainPhoto");
 const photosContainer = document.getElementById("photosContainer");
-const roomButtons = document.getElementById("roomButtons");
-const profileContainer = document.getElementById("profileContainer");
-
-const editBtn = document.getElementById("editBtn");
-const editModal = document.getElementById("editModal");
-const descEdit = document.getElementById("descEdit");
-const photoEdit = document.getElementById("photoEdit");
-const saveEdit = document.getElementById("saveEdit");
-const cancelEdit = document.getElementById("cancelEdit");
 
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightboxImg");
+const closeBtn = document.getElementById("closeBtn");
 
 onAuthStateChanged(auth, async user => {
   if (!user) {
@@ -239,101 +150,38 @@ onAuthStateChanged(auth, async user => {
     ageSpan.textContent = data.age || "Non renseigné";
     locationSpan.textContent = data.location || "Non renseigné";
     descSpan.textContent = data.description || "Non renseignée";
-    descEdit.value = descSpan.textContent;
 
     const photos = data.photos || [];
     if (photos.length > 0) {
       mainPhoto.src = photos[0];
-      mainPhoto.addEventListener("click", () => openLightbox(photos[0]));
+      mainPhoto.addEventListener("click", () => {
+        lightboxImg.src = photos[0];
+        lightbox.style.display = "flex";
+      });
 
       photosContainer.innerHTML = "";
       photos.forEach(url => {
         const img = document.createElement("img");
         img.src = url;
-        img.addEventListener("click", () => openLightbox(url));
+        img.addEventListener("click", () => {
+          lightboxImg.src = url;
+          lightbox.style.display = "flex";
+        });
         photosContainer.appendChild(img);
       });
     } else {
       mainPhoto.src = "https://via.placeholder.com/400x300?text=Photo";
     }
-
-    // Boutons des salles
-    roomButtons.innerHTML = "";
-    const salleMapping = { "serieux":"authentique.html", "amicale":"amicale.html", "fun":"fun.html" };
-    if (data.rooms && data.rooms.length>0) {
-      data.rooms.forEach(room => {
-        if(salleMapping[room]){
-          const btn = document.createElement("button");
-          btn.className = "room-btn";
-          btn.textContent = room;
-          btn.addEventListener("click", () => window.location.href = salleMapping[room]);
-          roomButtons.appendChild(btn);
-        }
-      });
-    }
   }
 });
 
-// ✅ Mini profil fermé futuriste
-const params = new URLSearchParams(window.location.search);
-if(params.get("from")==="authentique"){
-  document.getElementById("closeBtnContainer").style.display = "block";
-  document.getElementById("closeBtn").addEventListener("click", () => {
-    profileContainer.classList.add("closing");
-    setTimeout(()=>{window.location.href="authentique.html"},600);
-  });
-}
-
-// ✅ Lightbox
-function openLightbox(url){
-  lightboxImg.src = url;
-  lightbox.style.display = "flex";
-  lightbox.style.transform = "scale(1) rotateX(0deg)";
-  lightbox.style.opacity = "1";
-}
 lightbox.addEventListener("click", () => {
-  lightbox.classList.add("closing");
-  setTimeout(()=>{ lightbox.style.display="none"; lightbox.classList.remove("closing"); lightboxImg.src=""; },600);
+  lightbox.style.display = "none";
+  lightboxImg.src = "";
 });
 
-// ✅ Bouton modifier
-editBtn.addEventListener("click", ()=> editModal.classList.add("show"));
-cancelEdit.addEventListener("click", ()=> editModal.classList.remove("show"));
-
-// ✅ Enregistrer modification
-saveEdit.addEventListener("click", async ()=>{
-  const user = auth.currentUser;
-  if(!user) return;
-  const updates = {};
-  if(descEdit.value) updates.description = descEdit.value;
-
-  // Si photos modifiées
-  const files = photoEdit.files;
-  if(files.length>0){
-    // Ici tu devrais uploader sur Firebase Storage et récupérer URL, ici placeholder simplifié
-    const newPhotos = [];
-    for(let i=0;i<files.length;i++){
-      newPhotos.push(URL.createObjectURL(files[i]));
-    }
-    updates.photos = newPhotos;
-  }
-
-  await update(ref(db,"users/"+user.uid), updates);
-
-  // Mettre à jour affichage
-  if(updates.description) descSpan.textContent = updates.description;
-  if(updates.photos){
-    mainPhoto.src = updates.photos[0];
-    photosContainer.innerHTML = "";
-    updates.photos.forEach(url=>{
-      const img = document.createElement("img");
-      img.src=url;
-      img.addEventListener("click",()=>openLightbox(url));
-      photosContainer.appendChild(img);
-    });
-  }
-
-  editModal.classList.remove("show");
+closeBtn.addEventListener("click", () => {
+  window.location.href = "authentique.html";
 });
 </script>
 </body>
