@@ -16,7 +16,9 @@ body {
   align-items: flex-start;
   min-height: 100vh;
   padding: 20px 0;
+  overflow-x: hidden;
 }
+
 .container {
   background: rgba(0,0,0,0.6);
   padding: 25px;
@@ -25,13 +27,22 @@ body {
   max-width: 500px;
   box-shadow: 0 0 20px #ff66cc;
   text-align: center;
+  transition: transform 0.6s ease, opacity 0.6s ease;
 }
+
+.container.closing {
+  transform: scale(0.1) rotateX(45deg);
+  opacity: 0;
+}
+
 h1 {
   color: #ff66cc;
   text-shadow: 0 0 10px #ff66cc;
   margin-bottom: 20px;
 }
+
 .info div { margin: 8px 0; text-align: left; }
+
 .main-photo {
   width: 100%;
   max-height: 300px;
@@ -41,6 +52,7 @@ h1 {
   border: 2px solid #ff66cc;
   cursor: pointer;
 }
+
 .photos {
   display: flex;
   flex-wrap: wrap;
@@ -77,6 +89,7 @@ h1 {
   box-shadow: 0 0 25px #ff66cc;
 }
 
+/* Boutons */
 .room-btn {
   padding: 10px 20px;
   margin: 10px 5px;
@@ -96,8 +109,12 @@ h1 {
 </style>
 </head>
 <body>
-<div class="container">
+<div class="container" id="profileContainer">
   <h1>Mon Profil</h1>
+  <div id="closeBtnContainer" style="display:none; text-align:right;">
+    <button id="closeBtn" class="room-btn">Fermer ✖</button>
+  </div>
+
   <div class="info">
     <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
     <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
@@ -171,7 +188,7 @@ onAuthStateChanged(auth, async user => {
       mainPhoto.src = "https://via.placeholder.com/400x300?text=Photo";
     }
 
-    // Afficher uniquement les salles choisies
+    // Boutons des salles
     roomButtons.innerHTML = "";
     const salleMapping = {
       "serieux": "authentique.html",
@@ -196,6 +213,19 @@ lightbox.addEventListener("click", () => {
   lightbox.style.display = "none";
   lightboxImg.src = "";
 });
+
+// ✅ Bouton fermer futuriste (uniquement si from=authentique)
+const params = new URLSearchParams(window.location.search);
+if (params.get("from") === "authentique") {
+  document.getElementById("closeBtnContainer").style.display = "block";
+  document.getElementById("closeBtn").addEventListener("click", () => {
+    const container = document.getElementById("profileContainer");
+    container.classList.add("closing");
+    setTimeout(() => {
+      window.location.href = "authentique.html";
+    }, 600); // Durée anim = 0.6s
+  });
+}
 </script>
 </body>
 </html>
