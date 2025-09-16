@@ -81,6 +81,11 @@ h1 {
   background: rgba(0,0,0,0.9);
   justify-content: center;
   align-items: center;
+  transition: transform 0.6s ease, opacity 0.6s ease;
+}
+.lightbox.closing {
+  transform: scale(0.1) rotateX(45deg);
+  opacity: 0;
 }
 .lightbox img {
   max-width: 90%;
@@ -89,8 +94,57 @@ h1 {
   box-shadow: 0 0 25px #ff66cc;
 }
 
+/* Modale pour modifier description/photos */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1100;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.1) rotateX(45deg);
+  width: 90%;
+  max-width: 450px;
+  background: rgba(0,0,0,0.8);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 0 20px #ff66cc;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  opacity: 0;
+}
+.modal.show {
+  display: block;
+  transform: translate(-50%, -50%) scale(1) rotateX(0deg);
+  opacity: 1;
+}
+.modal textarea {
+  width: 100%;
+  height: 100px;
+  border-radius: 8px;
+  border: 2px solid #ff66cc;
+  background: rgba(0,0,0,0.3);
+  color: #fff;
+  padding: 8px;
+  resize: none;
+}
+.modal input[type="file"] {
+  margin-top: 10px;
+}
+.modal button {
+  margin-top: 10px;
+  padding: 8px 15px;
+  border: 2px solid #ff66cc;
+  background: rgba(0,0,0,0.4);
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #ff66cc;
+  transition: 0.3s;
+}
+.modal button:hover {
+  box-shadow: 0 0 20px #ff66cc;
+}
+
 /* Boutons */
-.room-btn {
+.room-btn, #editBtn, #closeBtn {
   padding: 10px 20px;
   margin: 10px 5px;
   border: 2px solid #ff66cc;
@@ -103,7 +157,7 @@ h1 {
   box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
   transition: 0.3s;
 }
-.room-btn:hover {
+.room-btn:hover, #editBtn:hover, #closeBtn:hover {
   box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
 }
 </style>
@@ -111,8 +165,9 @@ h1 {
 <body>
 <div class="container" id="profileContainer">
   <h1>Mon Profil</h1>
+
   <div id="closeBtnContainer" style="display:none; text-align:right;">
-    <button id="closeBtn" class="room-btn">Fermer ✖</button>
+    <button id="closeBtn">Fermer ✖</button>
   </div>
 
   <div class="info">
@@ -122,9 +177,20 @@ h1 {
     <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
   </div>
 
+  <button id="editBtn">Modifier</button>
+
   <img id="mainPhoto" class="main-photo" src="" alt="Photo principale">
   <div class="photos" id="photosContainer"></div>
   <div id="roomButtons"></div>
+</div>
+
+<!-- Modale édition -->
+<div class="modal" id="editModal">
+  <h3>Modifier profil</h3>
+  <textarea id="descEdit" placeholder="Description..."></textarea>
+  <input type="file" id="photoEdit" multiple accept="image/*">
+  <button id="saveEdit">Enregistrer</button>
+  <button id="cancelEdit">Annuler</button>
 </div>
 
 <div class="lightbox" id="lightbox">
@@ -133,7 +199,7 @@ h1 {
 
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
@@ -146,6 +212,14 @@ const descSpan = document.getElementById("description");
 const mainPhoto = document.getElementById("mainPhoto");
 const photosContainer = document.getElementById("photosContainer");
 const roomButtons = document.getElementById("roomButtons");
+const profileContainer = document.getElementById("profileContainer");
+
+const editBtn = document.getElementById("editBtn");
+const editModal = document.getElementById("editModal");
+const descEdit = document.getElementById("descEdit");
+const photoEdit = document.getElementById("photoEdit");
+const saveEdit = document.getElementById("saveEdit");
+const cancelEdit = document.getElementById("cancelEdit");
 
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightboxImg");
@@ -165,23 +239,18 @@ onAuthStateChanged(auth, async user => {
     ageSpan.textContent = data.age || "Non renseigné";
     locationSpan.textContent = data.location || "Non renseigné";
     descSpan.textContent = data.description || "Non renseignée";
+    descEdit.value = descSpan.textContent;
 
     const photos = data.photos || [];
     if (photos.length > 0) {
       mainPhoto.src = photos[0];
-      mainPhoto.addEventListener("click", () => {
-        lightboxImg.src = photos[0];
-        lightbox.style.display = "flex";
-      });
+      mainPhoto.addEventListener("click", () => openLightbox(photos[0]));
 
       photosContainer.innerHTML = "";
       photos.forEach(url => {
         const img = document.createElement("img");
         img.src = url;
-        img.addEventListener("click", () => {
-          lightboxImg.src = url;
-          lightbox.style.display = "flex";
-        });
+        img.addEventListener("click", () => openLightbox(url));
         photosContainer.appendChild(img);
       });
     } else {
@@ -190,12 +259,8 @@ onAuthStateChanged(auth, async user => {
 
     // Boutons des salles
     roomButtons.innerHTML = "";
-    const salleMapping = {
-      "serieux": "authentique.html",
-      "amicale": "amicale.html",
-      "fun": "fun.html"
-    };
-    if (data.rooms && data.rooms.length > 0) {
+    const salleMapping = { "serieux":"authentique.html", "amicale":"amicale.html", "fun":"fun.html" };
+    if (data.rooms && data.rooms.length>0) {
       data.rooms.forEach(room => {
         if(salleMapping[room]){
           const btn = document.createElement("button");
@@ -209,23 +274,67 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-lightbox.addEventListener("click", () => {
-  lightbox.style.display = "none";
-  lightboxImg.src = "";
-});
-
-// ✅ Bouton fermer futuriste (uniquement si from=authentique)
+// ✅ Mini profil fermé futuriste
 const params = new URLSearchParams(window.location.search);
-if (params.get("from") === "authentique") {
+if(params.get("from")==="authentique"){
   document.getElementById("closeBtnContainer").style.display = "block";
   document.getElementById("closeBtn").addEventListener("click", () => {
-    const container = document.getElementById("profileContainer");
-    container.classList.add("closing");
-    setTimeout(() => {
-      window.location.href = "authentique.html";
-    }, 600); // Durée anim = 0.6s
+    profileContainer.classList.add("closing");
+    setTimeout(()=>{window.location.href="authentique.html"},600);
   });
 }
+
+// ✅ Lightbox
+function openLightbox(url){
+  lightboxImg.src = url;
+  lightbox.style.display = "flex";
+  lightbox.style.transform = "scale(1) rotateX(0deg)";
+  lightbox.style.opacity = "1";
+}
+lightbox.addEventListener("click", () => {
+  lightbox.classList.add("closing");
+  setTimeout(()=>{ lightbox.style.display="none"; lightbox.classList.remove("closing"); lightboxImg.src=""; },600);
+});
+
+// ✅ Bouton modifier
+editBtn.addEventListener("click", ()=> editModal.classList.add("show"));
+cancelEdit.addEventListener("click", ()=> editModal.classList.remove("show"));
+
+// ✅ Enregistrer modification
+saveEdit.addEventListener("click", async ()=>{
+  const user = auth.currentUser;
+  if(!user) return;
+  const updates = {};
+  if(descEdit.value) updates.description = descEdit.value;
+
+  // Si photos modifiées
+  const files = photoEdit.files;
+  if(files.length>0){
+    // Ici tu devrais uploader sur Firebase Storage et récupérer URL, ici placeholder simplifié
+    const newPhotos = [];
+    for(let i=0;i<files.length;i++){
+      newPhotos.push(URL.createObjectURL(files[i]));
+    }
+    updates.photos = newPhotos;
+  }
+
+  await update(ref(db,"users/"+user.uid), updates);
+
+  // Mettre à jour affichage
+  if(updates.description) descSpan.textContent = updates.description;
+  if(updates.photos){
+    mainPhoto.src = updates.photos[0];
+    photosContainer.innerHTML = "";
+    updates.photos.forEach(url=>{
+      const img = document.createElement("img");
+      img.src=url;
+      img.addEventListener("click",()=>openLightbox(url));
+      photosContainer.appendChild(img);
+    });
+  }
+
+  editModal.classList.remove("show");
+});
 </script>
 </body>
 </html>
