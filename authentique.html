@@ -1,33 +1,23 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Authentique</title>
+<meta charset="UTF-8" />
+<title>Authentique - Salle Sérieux</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin:0; padding:0; }
 html, body { height:100%; width:100%; font-family: 'Orbitron', sans-serif; background: url('planete-romantique.jpg') no-repeat center center/cover; overflow: hidden; color: white; }
 body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%); z-index:1; pointer-events:none; animation: floatStars 60s linear infinite; }
 @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
-
 .header { position: relative; z-index:2; padding: 20px; }
-.btn-back { position: absolute; top:20px; left:20px; color: #ff66cc; font-size:1.5em; cursor:pointer; text-decoration:none; transition: transform .2s; }
-.btn-back:hover { transform: scale(1.2); }
-
-#myProfile { z-index: 3; position: absolute; top:20px; right:20px; text-align:center; width:70px; }
-#myProfile img { width:70px; height:70px; border-radius:50%; border:3px solid #ff66cc; box-shadow:0 0 15px #ff66cc; cursor:pointer; object-fit:cover; }
-#myProfile div { margin-top:4px; font-size:0.9em; color:#ff66cc; text-align:center; }
-
-.carousel-container { z-index:2; position: relative; width:100%; height:calc(100% - 100px); overflow: hidden; display: flex; align-items:center; }
+.carousel-container { z-index:2; position: relative; width:100%; height:calc(100% - 180px); overflow: hidden; display: flex; align-items:center; }
 .carousel { display:flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; gap:40px; padding:40px; }
 .carousel::-webkit-scrollbar { display:none; }
-
 .card { scroll-snap-align: center; flex: 0 0 150px; background: rgba(0,0,0,0.5); border-radius: 16px; padding: 15px; text-align: center; transition: transform .3s, box-shadow .3s; cursor: pointer; position: relative; }
 .card img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 3px solid; }
 .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
 .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
-
 .name { font-size:1.1em; margin-bottom:5px; }
 .btns { display:flex; justify-content: center; gap: 8px; margin-top: 6px; }
 .btn-like, .btn-chat, .btn-fav { width:30px; height:30px; border-radius:50%; background-color:rgba(255,255,255,0.1); border:1px solid #ff66cc; color:#ff66cc; display:flex; align-items:center; justify-content:center; font-size:1em; cursor:pointer; transition: transform .2s, background-color .3s, color .3s; user-select:none; }
@@ -35,29 +25,21 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 .btn-like.active { background-color: #ff66cc; border-color: #ff66cc; color:white; box-shadow: 0 0 12px #ff66cc; }
 .btn-fav.active { background-color: #ffea00; border-color: #ffea00; color:#333; box-shadow:0 0 12px #ffea00; }
 
-/* Modal profil2 */
-#profileModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index:10000; justify-content:center; align-items:center; }
-#profileModal iframe { width:90%; height:90%; border:none; border-radius:12px; }
-#profileModalClose { position:absolute; top:20px; right:20px; background:#ff66cc; color:white; border:none; border-radius:50%; width:30px; height:30px; cursor:pointer; font-size:18px; }
-
+/* MINI-PROFIL PERSONNEL */
+#myProfile { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); text-align:center; z-index:5000; cursor:pointer; }
+#myProfile img { width:100px; height:100px; border-radius:50%; border:3px solid #ff66cc; box-shadow:0 0 15px #ff66cc; object-fit:cover; }
+#myProfile div { margin-top:8px; font-size:1.2em; color:#ff66cc; }
 </style>
 </head>
 <body>
-<div class="header">
-  <a href="page2.html" class="btn-back">&larr; Retour</a>
-</div>
 
-<!-- MINI PROFIL PRIVÉ -->
+<div class="header"></div>
+
+<!-- MINI-PROFIL PERSONNEL -->
 <div id="myProfile"></div>
 
-<div class="carousel-container">
+<div class="carousel-container fade-in">
   <div class="carousel" id="carousel"></div>
-</div>
-
-<!-- Modal pour profil2 -->
-<div id="profileModal">
-  <button id="profileModalClose">&times;</button>
-  <iframe id="profileIframe" src=""></iframe>
 </div>
 
 <script type="module">
@@ -68,48 +50,49 @@ import { app } from "./firebase.js";
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-const myProfileDiv = document.getElementById("myProfile");
-const carousel = document.getElementById("carousel");
-const profileModal = document.getElementById("profileModal");
-const profileIframe = document.getElementById("profileIframe");
-const profileModalClose = document.getElementById("profileModalClose");
-
 onAuthStateChanged(auth, async user => {
-  if(!user){
+  if (!user) {
     alert("Vous devez être connecté !");
     window.location.href = "inscription.html";
     return;
   }
 
-  const snap = await get(ref(db, "users/" + user.uid));
-  if(snap.exists()){
-    const data = snap.val();
-    const pseudo = data.pseudo || "Utilisateur";
-    const photoPrincipal = (data.photos && data.photos.length>0)? data.photos[0]:'https://via.placeholder.com/150';
-
-    // Mini-profil
-    myProfileDiv.innerHTML = `<img src="${photoPrincipal}" alt="Mini Profil"><div>${pseudo}</div>`;
-    myProfileDiv.querySelector('img').addEventListener('click', ()=>{
-      profileIframe.src = "profil2.html";
-      profileModal.style.display = "flex";
+  // Récupérer les infos utilisateur pour mini-profil
+  const snapUser = await get(ref(db, "users/" + user.uid));
+  let currentUserData = {};
+  if(snapUser.exists()){
+    currentUserData = snapUser.val();
+    const myProfileDiv = document.getElementById("myProfile");
+    const mainPhoto = (currentUserData.photos && currentUserData.photos.length>0) ? currentUserData.photos[0] : 'https://i.pravatar.cc/150?img=12';
+    myProfileDiv.innerHTML = `<img src="${mainPhoto}" alt="Mon profil"><div>${currentUserData.pseudo || 'Moi'}</div>`;
+    myProfileDiv.addEventListener("click", ()=>{
+      window.location.href = "page2.html";
     });
+  }
 
-    // Carrousel autres utilisateurs
-    const allUsers = JSON.parse(localStorage.getItem("allUsers") || "[]");
-    allUsers.filter(u=>u.pseudo!==pseudo).forEach(u=>{
+  // Récupérer les autres utilisateurs pour le carrousel
+  const snapAll = await get(ref(db, "users"));
+  if(snapAll.exists()){
+    const allUsers = snapAll.val();
+    const carousel = document.getElementById("carousel");
+    Object.keys(allUsers).forEach(uid=>{
+      if(uid===user.uid) return; // ignorer soi-même
+      const u = allUsers[uid];
       const card = document.createElement("div");
       card.className = "card " + (u.gender || "girl");
       card.dataset.name = u.pseudo;
+      card.dataset.age = u.age || "";
+      card.dataset.description = u.description || "";
       card.dataset.photos = JSON.stringify(u.photos || []);
-      card.innerHTML = `<img src="${(u.photos && u.photos.length>0)?u.photos[0]:'https://via.placeholder.com/150'}" alt="${u.pseudo}"><div class="name">${u.pseudo}</div>`;
+      card.innerHTML = `<img src="${u.photos && u.photos.length>0 ? u.photos[0] : 'https://i.pravatar.cc/150?img=12'}" alt="${u.pseudo}"><div class="name">${u.pseudo}</div>
+      <div class="btns">
+        <div class="btn-chat" title="Chat">💬</div>
+        <div class="btn-like" title="Like">💖</div>
+        <div class="btn-fav" title="Favoris">⭐️</div>
+      </div>`;
       carousel.appendChild(card);
     });
   }
-});
-
-profileModalClose.addEventListener("click", ()=>{
-  profileModal.style.display="none";
-  profileIframe.src="";
 });
 </script>
 </body>
