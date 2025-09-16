@@ -58,7 +58,22 @@ h1 {
   transition: transform 0.2s;
 }
 .photos img:hover { transform: scale(1.1); }
-
+.room-btn {
+  padding: 10px 20px;
+  margin: 10px 5px;
+  border: 2px solid #ff66cc;
+  background: rgba(0,0,0,0.4);
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-size: 0.9em;
+  box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
+  transition: 0.3s;
+}
+.room-btn:hover {
+  box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
+}
 /* Lightbox */
 .lightbox {
   display: none;
@@ -76,23 +91,6 @@ h1 {
   border-radius: 10px;
   box-shadow: 0 0 25px #ff66cc;
 }
-
-.room-btn {
-  padding: 10px 20px;
-  margin: 10px 5px;
-  border: 2px solid #ff66cc;
-  background: rgba(0,0,0,0.4);
-  color: #fff;
-  border-radius: 8px;
-  cursor: pointer;
-  text-transform: uppercase;
-  font-size: 0.9em;
-  box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
-  transition: 0.3s;
-}
-.room-btn:hover {
-  box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
-}
 </style>
 </head>
 <body>
@@ -108,7 +106,6 @@ h1 {
   <img id="mainPhoto" class="main-photo" src="" alt="Photo principale">
 
   <div class="photos" id="photosContainer"></div>
-
   <div id="roomButtons"></div>
 </div>
 
@@ -173,25 +170,19 @@ onAuthStateChanged(auth, async user => {
       mainPhoto.src = "https://via.placeholder.com/400x300?text=Photo";
     }
 
-    // Boutons salles directs
+    // ✅ Boutons des salles choisies uniquement
     roomButtons.innerHTML = "";
-
-    const salles = [
-      { name: "Sérieux", url: "authentique.html" },
-      { name: "Amicale", url: "amicale.html" },
-      { name: "Fun", url: "fun.html" }
-    ];
-
-    salles.forEach(salle => {
-      const btn = document.createElement("button");
-      btn.className = "room-btn";
-      btn.textContent = salle.name;
-      btn.addEventListener("click", () => {
-        window.location.href = salle.url;
+    if (data.rooms && data.rooms.length > 0) {
+      data.rooms.forEach(room => {
+        const btn = document.createElement("button");
+        btn.className = "room-btn";
+        btn.textContent = room;
+        btn.addEventListener("click", () => {
+          window.location.href = room + ".html";
+        });
+        roomButtons.appendChild(btn);
       });
-      roomButtons.appendChild(btn);
-    });
-
+    }
   }
 });
 
