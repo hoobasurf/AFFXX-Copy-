@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inscription</title>
+<title>Inscription / Connexion</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 <style>
 body {
   margin: 0;
   font-family: 'Orbitron', sans-serif;
-  background: url("planete-magique.jpg") no-repeat center center/cover;
+  background: url("ville.html") no-repeat center center/cover;
   color: #fff;
   display: flex;
   justify-content: center;
@@ -18,7 +18,7 @@ body {
   padding: 20px 0;
 }
 .container {
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.4); /* semi-transparent */
   padding: 25px;
   border-radius: 15px;
   width: 90%;
@@ -71,7 +71,7 @@ input[type="text"], input[type="email"], input[type="password"], input[type="num
   transition: transform 0.2s;
 }
 .photos img:hover { transform: scale(1.1); }
-button.submit-btn {
+button.submit-btn, button.login-btn {
   margin-top: 10px;
   padding: 10px 20px;
   border: none;
@@ -101,7 +101,7 @@ button.submit-btn {
 </head>
 <body>
 <div class="container">
-<h1>Inscription</h1>
+<h1>Inscription / Connexion</h1>
 <input type="text" id="pseudo" placeholder="Pseudo"><br>
 <input type="number" id="age" placeholder="Âge"><br>
 <input type="text" id="location" placeholder="Lieu"><br>
@@ -119,13 +119,14 @@ button.submit-btn {
 <input type="file" id="fileInput" multiple accept="image/*"><br>
 
 <button class="submit-btn" id="signupBtn">S'inscrire</button>
+<button class="login-btn" id="loginBtn">Connexion</button>
 </div>
 
 <div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
 
 <script type="module">
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
@@ -180,7 +181,16 @@ document.getElementById("signupBtn").addEventListener("click", async ()=>{
       rooms:selectedRooms,
       photos:photosData
     });
-    alert("Inscription réussie !");
+    window.location.href="authentique.html";
+  }catch(err){ console.error(err); alert(err.message); }
+});
+
+document.getElementById("loginBtn").addEventListener("click", async ()=>{
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  if(!email||!password){ alert("Remplir email et mot de passe"); return; }
+  try{
+    const userCredential = await signInWithEmailAndPassword(auth,email,password);
     window.location.href="authentique.html";
   }catch(err){ console.error(err); alert(err.message); }
 });
