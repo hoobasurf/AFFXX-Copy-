@@ -6,22 +6,106 @@
 <title>Inscription</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 <style>
-body { font-family: 'Orbitron', sans-serif; background:#111; color:#fff; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; }
-.container { background: rgba(0,0,0,0.6); padding:20px; border-radius:15px; max-width:400px; width:90%; text-align:center; box-shadow:0 0 20px #ff66cc; }
-h1 { color:#ff66cc; margin-bottom:15px; }
-input[type="text"], input[type="email"], input[type="password"] { width:90%; padding:8px; margin:8px 0; border-radius:8px; border:none; }
-.room-btn { padding:10px 15px; margin:5px; border:2px solid #ff66cc; background:rgba(0,0,0,0.4); color:#fff; border-radius:8px; cursor:pointer; box-shadow:0 0 10px #ff66cc, 0 0 20px #ff66cc inset; transition:0.3s; }
-.room-btn.selected { background:#ff66cc; color:#111; box-shadow:0 0 20px #ff66cc,0 0 30px #ff66cc inset; }
-.photos { display:flex; gap:10px; margin:15px 0; justify-content:center; flex-wrap:wrap; }
-.photos img { width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc; cursor:pointer; transition:transform .2s; }
-.photos img:hover { transform:scale(1.1); }
-button.submit-btn { margin-top:10px; padding:10px 20px; border:none; background:#ff66cc; color:#111; border-radius:8px; cursor:pointer; font-weight:bold; }
+body {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  background: url("planete-magique.jpg") no-repeat center center/cover;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 20px 0;
+}
+.container {
+  background: rgba(0,0,0,0.6);
+  padding: 25px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 0 20px #ff66cc;
+  text-align: center;
+}
+h1 {
+  color: #ff66cc;
+  text-shadow: 0 0 10px #ff66cc;
+  margin-bottom: 20px;
+}
+input[type="text"], input[type="email"], input[type="password"], input[type="number"] {
+  width: 90%;
+  padding: 8px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: none;
+}
+.room-btn {
+  padding: 10px 15px;
+  margin: 5px;
+  border: 2px solid #ff66cc;
+  background: rgba(0,0,0,0.4);
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
+  transition: 0.3s;
+}
+.room-btn.selected {
+  background: #ff66cc;
+  color: #111;
+  box-shadow: 0 0 20px #ff66cc,0 0 30px #ff66cc inset;
+}
+.photos {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.photos img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #ff66cc;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.photos img:hover { transform: scale(1.1); }
+button.submit-btn {
+  margin-top: 10px;
+  padding: 10px 20px;
+  border: none;
+  background: #ff66cc;
+  color: #111;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.lightbox {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.9);
+  justify-content: center;
+  align-items: center;
+}
+.lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+  box-shadow: 0 0 25px #ff66cc;
+}
 </style>
 </head>
 <body>
 <div class="container">
 <h1>Inscription</h1>
 <input type="text" id="pseudo" placeholder="Pseudo"><br>
+<input type="number" id="age" placeholder="Âge"><br>
+<input type="text" id="location" placeholder="Lieu"><br>
+<input type="text" id="description" placeholder="Description"><br>
 <input type="email" id="email" placeholder="Email"><br>
 <input type="password" id="password" placeholder="Mot de passe"><br>
 
@@ -32,10 +116,12 @@ button.submit-btn { margin-top:10px; padding:10px 20px; border:none; background:
 </div>
 
 <div class="photos" id="photoSelection"></div>
-<input type="file" id="fileInput" multiple accept="image/*">
+<input type="file" id="fileInput" multiple accept="image/*"><br>
 
 <button class="submit-btn" id="signupBtn">S'inscrire</button>
 </div>
+
+<div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
 
 <script type="module">
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
@@ -60,13 +146,14 @@ let photosData = [];
 
 document.getElementById("fileInput").addEventListener("change", e=>{
   photoSelection.innerHTML="";
-  photosData = [];
+  photosData=[];
   Array.from(e.target.files).forEach(file=>{
     const reader = new FileReader();
     reader.onload = () => {
       photosData.push(reader.result);
       const img = document.createElement("img");
       img.src = reader.result;
+      img.addEventListener("click", ()=>{ document.getElementById("lightboxImg").src=reader.result; document.getElementById("lightbox").style.display="flex"; });
       photoSelection.appendChild(img);
     };
     reader.readAsDataURL(file);
@@ -75,22 +162,31 @@ document.getElementById("fileInput").addEventListener("change", e=>{
 
 document.getElementById("signupBtn").addEventListener("click", async ()=>{
   const pseudo = document.getElementById("pseudo").value.trim();
+  const age = document.getElementById("age").value.trim();
+  const location = document.getElementById("location").value.trim();
+  const description = document.getElementById("description").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
-  if(!pseudo || !email || !password){ alert("Remplir tous les champs"); return; }
+  if(!pseudo||!age||!location||!description||!email||!password){ alert("Remplir tous les champs"); return; }
   try{
     const userCredential = await createUserWithEmailAndPassword(auth,email,password);
     const uid = userCredential.user.uid;
     await set(ref(db,"users/"+uid),{
-      pseudo: pseudo,
-      email: email,
-      rooms: selectedRooms,
-      photos: photosData
+      pseudo:pseudo,
+      age:age,
+      location:location,
+      description:description,
+      email:email,
+      rooms:selectedRooms,
+      photos:photosData
     });
-    localStorage.setItem("pseudo",pseudo);
     alert("Inscription réussie !");
     window.location.href="authentique.html";
   }catch(err){ console.error(err); alert(err.message); }
+});
+
+document.getElementById("lightbox").addEventListener("click", ()=>{
+  document.getElementById("lightbox").style.display="none";
 });
 </script>
 </body>
