@@ -3,105 +3,127 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profil Utilisateur</title>
+<title>Profil Complet</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
-body { margin:0; font-family:'Orbitron',sans-serif; background:url('planete-magique.jpg') no-repeat center center/cover; color:#fff; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; padding:20px 0; }
-.container { background:rgba(0,0,0,0.6); padding:25px; border-radius:15px; width:90%; max-width:500px; box-shadow:0 0 20px #ff66cc; text-align:center; }
-h1 { color:#ff66cc; text-shadow:0 0 10px #ff66cc; margin-bottom:20px; }
-.info div { margin:8px 0; text-align:left; }
-.main-photo { width:100%; max-height:300px; object-fit:cover; border-radius:10px; margin-bottom:15px; border:2px solid #ff66cc; cursor:pointer; }
-.photos { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:15px 0; }
-.photos img { width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc; cursor:pointer; transition: transform .2s; }
-.photos img:hover { transform:scale(1.1); }
-.lightbox { display:none; position:fixed; z-index:1000; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); justify-content:center; align-items:center; }
-.lightbox img { max-width:90%; max-height:90%; border-radius:10px; box-shadow:0 0 25px #ff66cc; }
-.room-btn { padding:10px 20px; margin:10px 5px; border:2px solid #ff66cc; background: rgba(0,0,0,0.4); color:#fff; border-radius:8px; cursor:pointer; text-transform: uppercase; font-size:0.9em; box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset; transition:0.3s; }
-.room-btn:hover { box-shadow:0 0 20px #ff66cc,0 0 30px #ff66cc inset; }
-#closeBtn { position: fixed; top:20px; right:20px; background:#ff66cc; border:none; border-radius:50%; width:40px; height:40px; color:#fff; font-size:1.5em; cursor:pointer; display:none; z-index:2000; transition: transform 0.3s; }
-#closeBtn:hover { transform: scale(1.2); }
+body {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  background: url("planete-magique.jpg") no-repeat center center/cover;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 20px 0;
+}
+.container {
+  background: rgba(0,0,0,0.6);
+  padding: 25px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 0 20px #ff66cc;
+  text-align: center;
+}
+h1 { color: #ff66cc; text-shadow: 0 0 10px #ff66cc; margin-bottom: 20px; }
+.info div { margin: 8px 0; text-align: left; }
+.main-photo { width: 100%; max-height: 300px; object-fit: cover; border-radius: 10px; margin-bottom: 15px; border: 2px solid #ff66cc; cursor: pointer; }
+.photos { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 15px 0; }
+.photos img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 2px solid #ff66cc; cursor: pointer; transition: transform 0.2s; }
+.photos img:hover { transform: scale(1.1); }
+.lightbox { display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
+.lightbox img { max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 0 25px #ff66cc; }
+.room-btn { padding: 10px 20px; margin: 10px 5px; border: 2px solid #ff66cc; background: rgba(0,0,0,0.4); color: #fff; border-radius: 8px; cursor: pointer; text-transform: uppercase; font-size: 0.9em; box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset; transition: 0.3s; }
+.room-btn:hover { box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset; }
+#closeBtn { position: fixed; top:20px; right:20px; background:#ff66cc; color:white; font-size:1.2em; border:none; border-radius:50%; width:40px; height:40px; cursor:pointer; display:none; z-index:1000; }
 </style>
 </head>
 <body>
 <div class="container">
-<h1>Mon Profil</h1>
-<div class="info">
-<div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
-<div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
-<div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
-<div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
+  <h1>Mon Profil</h1>
+  <div class="info">
+    <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
+    <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
+    <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
+    <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
+  </div>
+
+  <img id="mainPhoto" class="main-photo" src="" alt="Photo principale">
+  <div class="photos" id="photosContainer"></div>
+  <div id="roomButtons"></div>
 </div>
 
-<img id="mainPhoto" class="main-photo" src="" alt="Photo principale">
-<div class="photos" id="photosContainer"></div>
-<div id="roomButtons"></div>
+<button id="closeBtn">✕</button>
+<div class="lightbox" id="lightbox">
+  <img id="lightboxImg" src="">
 </div>
-
-<button id="closeBtn">×</button>
-
-<div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
 
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { app } from "./firebase.js";
 
-const auth=getAuth(app);
-const db=getDatabase(app);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-const pseudoSpan=document.getElementById("pseudo");
-const ageSpan=document.getElementById("age");
-const locationSpan=document.getElementById("location");
-const descSpan=document.getElementById("description");
-const mainPhoto=document.getElementById("mainPhoto");
-const photosContainer=document.getElementById("photosContainer");
-const roomButtons=document.getElementById("roomButtons");
-const lightbox=document.getElementById("lightbox");
-const lightboxImg=document.getElementById("lightboxImg");
-const closeBtn=document.getElementById("closeBtn");
+const pseudoSpan = document.getElementById("pseudo");
+const ageSpan = document.getElementById("age");
+const locationSpan = document.getElementById("location");
+const descSpan = document.getElementById("description");
+const mainPhoto = document.getElementById("mainPhoto");
+const photosContainer = document.getElementById("photosContainer");
+const roomButtons = document.getElementById("roomButtons");
+const closeBtn = document.getElementById("closeBtn");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
 
-const params=new URLSearchParams(window.location.search);
-const fromMiniProfile=params.get('mini')==='true';
-if(fromMiniProfile){ closeBtn.style.display="block"; }
-closeBtn.addEventListener("click", ()=>{
-  document.body.style.transition="transform 0.4s ease, opacity 0.4s ease";
-  document.body.style.transform="scale(0.3)";
-  document.body.style.opacity="0";
-  setTimeout(()=> window.history.back(),400);
-});
+const fromMiniProfile = localStorage.getItem("miniProfileClick") === "true";
 
-onAuthStateChanged(auth, async user=>{
-  if(!user){ alert("Connectez-vous"); window.location.href="inscription.html"; return; }
-  const snap = await get(ref(db,"users/"+user.uid));
+if(fromMiniProfile){
+  closeBtn.style.display = "block";
+  closeBtn.addEventListener("click", () => {
+    localStorage.removeItem("miniProfileClick");
+    document.body.style.transition = "transform 0.5s ease";
+    document.body.style.transform = "scale(0)";
+    setTimeout(()=> window.history.back(), 500);
+  });
+}
+
+onAuthStateChanged(auth, async user => {
+  if(!user){ window.location.href="inscription.html"; return; }
+  const snap = await get(ref(db, "users/" + user.uid));
   if(snap.exists()){
     const data = snap.val();
-    pseudoSpan.textContent=data.pseudo||"Non renseigné";
-    ageSpan.textContent=data.age||"Non renseigné";
-    locationSpan.textContent=data.location||"Non renseigné";
-    descSpan.textContent=data.description||"Non renseignée";
+    pseudoSpan.textContent = data.pseudo || "Non renseigné";
+    ageSpan.textContent = data.age || "Non renseigné";
+    locationSpan.textContent = data.location || "Non renseigné";
+    descSpan.textContent = data.description || "Non renseignée";
 
-    const photos=data.photos||[];
+    const photos = data.photos || [];
     if(photos.length>0){
-      mainPhoto.src=photos[0];
+      mainPhoto.src = photos[0];
       mainPhoto.addEventListener("click", ()=>{ lightboxImg.src=photos[0]; lightbox.style.display="flex"; });
+
       photosContainer.innerHTML="";
       photos.forEach(url=>{
-        const img=document.createElement("img");
+        const img = document.createElement("img");
         img.src=url;
         img.addEventListener("click", ()=>{ lightboxImg.src=url; lightbox.style.display="flex"; });
         photosContainer.appendChild(img);
       });
-    }else{ mainPhoto.src="https://via.placeholder.com/400x300?text=Photo"; }
+    } else { mainPhoto.src="https://via.placeholder.com/400x300?text=Photo"; }
 
+    // Boutons salles choisis
     const salleMapping={ "serieux":"authentique.html", "amicale":"amicale.html", "fun":"fun.html" };
     roomButtons.innerHTML="";
     if(data.rooms && data.rooms.length>0){
-      data.rooms.forEach(r=>{
-        if(salleMapping[r]){
+      data.rooms.forEach(room=>{
+        if(salleMapping[room]){
           const btn=document.createElement("button");
           btn.className="room-btn";
-          btn.textContent=r;
-          btn.addEventListener("click", ()=> window.location.href=salleMapping[r]);
+          btn.textContent=room;
+          btn.addEventListener("click",()=> window.location.href=salleMapping[room]);
           roomButtons.appendChild(btn);
         }
       });
