@@ -9,7 +9,7 @@
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background: url("planete-magique.jpg") no-repeat center center/cover;
+      background: url("ville.jpg") no-repeat center center/cover; /* ← fond corrigé */
       color: #fff;
       display: flex;
       justify-content: center;
@@ -17,14 +17,14 @@
       min-height: 100vh;
     }
     .container {
-  background: rgba(0,0,0,0.4); /* ← avant c'était 0.7 */
-  padding: 20px;
-  border-radius: 15px;
-  width: 95%;
-  max-width: 500px;
-  box-shadow: 0 0 20px #ff66cc;
-  text-align: center;
-}
+      background: rgba(0,0,0,0.4);
+      padding: 20px;
+      border-radius: 15px;
+      width: 95%;
+      max-width: 500px;
+      box-shadow: 0 0 20px #ff66cc;
+      text-align: center;
+    }
     h1 {
       color: #ff66cc;
       text-shadow: 0 0 10px #ff66cc;
@@ -51,7 +51,11 @@
       box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
       transition: 0.3s;
     }
-    button:hover {
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    button:hover:enabled {
       box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
     }
     .photos-preview {
@@ -73,7 +77,6 @@
     .photos-preview img:hover {
       transform: scale(1.2);
     }
-    /* Lightbox */
     .lightbox {
       display: none;
       position: fixed;
@@ -142,6 +145,11 @@
     const photosInput = document.getElementById("photos");
     const preview = document.getElementById("photosPreview");
 
+    const signupBtn = document.getElementById("signupBtn");
+    const loginBtn = document.getElementById("loginBtn");
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightboxImg");
+
     let uploadedPhotos = [];
 
     photosInput.addEventListener("change", e => {
@@ -164,9 +172,13 @@
     });
 
     signupBtn.addEventListener("click", async () => {
+      signupBtn.disabled = true; // empêcher double clic
       try {
+        console.log("Tentative de création de compte...");
         const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
         const user = userCred.user;
+        console.log("✅ Compte créé:", user.uid);
+
         const urls = [];
         for (let i = 0; i < uploadedPhotos.length; i++) {
           const file = uploadedPhotos[i];
@@ -175,6 +187,7 @@
           const url = await getDownloadURL(storageRef);
           urls.push(url);
         }
+
         const rooms = [...roomsSelect.selectedOptions].map(opt => opt.value);
         await set(ref(db, "users/" + user.uid), {
           email: email.value,
@@ -185,23 +198,33 @@
           rooms: rooms,
           photos: urls
         });
+
         window.location.href = "page2.html";
       } catch (e) {
-        alert("Erreur : " + e.message);
+        if (e.code === "auth/email-already-in-use") {
+          alert("⚠️ Cet email est déjà enregistré. Essaie de te connecter.");
+        } else {
+          alert("Erreur : " + e.message);
+        }
+        console.error(e);
+      } finally {
+        signupBtn.disabled = false;
       }
     });
 
     loginBtn.addEventListener("click", async () => {
+      loginBtn.disabled = true;
       try {
         await signInWithEmailAndPassword(auth, email.value, password.value);
         window.location.href = "page2.html";
       } catch (e) {
         alert("Erreur : " + e.message);
+        console.error(e);
+      } finally {
+        loginBtn.disabled = false;
       }
     });
 
-    const lightbox = document.getElementById("lightbox");
-    const lightboxImg = document.getElementById("lightboxImg");
     lightbox.addEventListener("click", () => {
       lightbox.style.display = "none";
       lightboxImg.src = "";
