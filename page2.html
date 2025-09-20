@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mon Profil</title>
+<title>Profil</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
 body {
   margin: 0;
   font-family: 'Orbitron', sans-serif;
-  background: url("planete-magique.jpg") no-repeat center center/cover;
+  background: url("ville.jpg") no-repeat center center/cover;
   color: #fff;
   display: flex;
   justify-content: center;
@@ -17,7 +17,6 @@ body {
   min-height: 100vh;
   padding: 20px 0;
 }
-
 .container {
   background: rgba(0,0,0,0.6);
   padding: 25px;
@@ -27,32 +26,12 @@ body {
   box-shadow: 0 0 20px #ff66cc;
   text-align: center;
 }
-
 h1 {
   color: #ff66cc;
   text-shadow: 0 0 10px #ff66cc;
   margin-bottom: 20px;
 }
-
-.mini-profil {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.mini-profil img {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 2px solid #ff66cc;
-  margin-bottom: 10px;
-  cursor: pointer;
-}
-
 .info div { margin: 8px 0; text-align: center; }
-
 .photos {
   display: flex;
   flex-wrap: wrap;
@@ -60,7 +39,6 @@ h1 {
   justify-content: center;
   margin: 15px 0;
 }
-
 .photos img {
   width: 70px;
   height: 70px;
@@ -70,9 +48,7 @@ h1 {
   cursor: pointer;
   transition: transform 0.2s;
 }
-
 .photos img:hover { transform: scale(1.1); }
-
 /* Lightbox */
 .lightbox {
   display: none;
@@ -84,14 +60,12 @@ h1 {
   justify-content: center;
   align-items: center;
 }
-
 .lightbox img {
   max-width: 90%;
   max-height: 90%;
   border-radius: 10px;
   box-shadow: 0 0 25px #ff66cc;
 }
-
 .room-btn {
   padding: 10px 20px;
   margin: 10px 5px;
@@ -114,19 +88,14 @@ h1 {
 <div class="container">
   <h1>Mon Profil</h1>
 
-  <div class="mini-profil" id="miniProfil">
-    <img id="miniPhoto" src="" alt="Photo Profil">
-    <div id="pseudoMini">Pseudo</div>
-  </div>
-
   <div class="info">
+    <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
     <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
     <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
     <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
   </div>
 
   <div class="photos" id="photosContainer"></div>
-
   <div id="roomButtons"></div>
 </div>
 
@@ -142,8 +111,7 @@ import { app } from "./firebase.js";
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-const miniPhoto = document.getElementById("miniPhoto");
-const pseudoMini = document.getElementById("pseudoMini");
+const pseudoSpan = document.getElementById("pseudo");
 const ageSpan = document.getElementById("age");
 const locationSpan = document.getElementById("location");
 const descSpan = document.getElementById("description");
@@ -164,20 +132,14 @@ onAuthStateChanged(auth, async user => {
   if (snap.exists()) {
     const data = snap.val();
 
-    pseudoMini.textContent = data.pseudo || "Non renseigné";
-    miniPhoto.src = (data.photos && data.photos[0]) || "https://via.placeholder.com/100x100?text=Photo";
-    miniPhoto.addEventListener("click", () => {
-      lightboxImg.src = miniPhoto.src;
-      lightbox.style.display = "flex";
-    });
-
+    pseudoSpan.textContent = data.pseudo || "Non renseigné";
     ageSpan.textContent = data.age || "Non renseigné";
     locationSpan.textContent = data.location || "Non renseigné";
     descSpan.textContent = data.description || "Non renseignée";
 
-    // Miniatures photos + zoom
-    const photos = data.photos || [];
+    // Photos miniatures avec zoom
     photosContainer.innerHTML = "";
+    const photos = data.photos || [];
     photos.forEach(url => {
       const img = document.createElement("img");
       img.src = url;
@@ -188,22 +150,24 @@ onAuthStateChanged(auth, async user => {
       photosContainer.appendChild(img);
     });
 
-    // Boutons salles à partir de l'inscription
-    const salleMapping = {
-      "serieux":"authentique.html",
-      "amicale":"amicale.html",
-      "fun":"fun.html"
-    };
+    // Boutons des salles choisies
     roomButtons.innerHTML = "";
-    (data.rooms || []).forEach(room => {
-      if(salleMapping[room]){
-        const btn = document.createElement("button");
-        btn.className = "room-btn";
-        btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
-        btn.addEventListener("click", ()=> window.location.href = salleMapping[room]);
-        roomButtons.appendChild(btn);
-      }
-    });
+    const salleMapping = {
+      "serieux": "authentique.html",
+      "amicale": "amicale.html",
+      "fun": "fun.html"
+    };
+    if(data.rooms && data.rooms.length > 0){
+      data.rooms.forEach(room => {
+        if(salleMapping[room]){
+          const btn = document.createElement("button");
+          btn.className = "room-btn";
+          btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
+          btn.addEventListener("click", () => window.location.href = salleMapping[room]);
+          roomButtons.appendChild(btn);
+        }
+      });
+    }
   }
 });
 
