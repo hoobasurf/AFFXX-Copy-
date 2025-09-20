@@ -115,41 +115,75 @@ const descSpan = document.getElementById("description");
 const photosContainer = document.getElementById("photosContainer");
 const roomButtons = document.getElementById("roomButtons");
 
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
+
 onAuthStateChanged(auth, async user => {
   if (!user) {
     alert("Vous devez être connecté !");
     window.location.href = "inscription.html";
     return;
   }
-  const snap = await get(ref(db, "users/" + user.uid));
-  if (snap.exists()) {
-    const data = snap.val();
 
-    pseudoMini.textContent = data.pseudo || "Non renseigné";
-    miniPhoto.src = (data.photos && data.photos[0]) || "https://i.pravatar.cc/150?img=12";
+  try {
+    const snap = await get(ref(db, "users/" + user.uid));
+    if (snap.exists()) {
+      const data = snap.val();
 
-    ageSpan.textContent = data.age || "Non renseigné";
-    locationSpan.textContent = data.location || "Non renseigné";
-    descSpan.textContent = data.description || "Non renseignée";
+      // Mini-profil
+      pseudoMini.textContent = data.pseudo || "Non renseigné";
+      miniPhoto.src = (data.photos && data.photos[0]) || "https://via.placeholder.com/100x100?text=Photo";
+      miniPhoto.addEventListener("click", () => {
+        lightboxImg.src = miniPhoto.src;
+        lightbox.style.display = "flex";
+      });
 
-    // Photos
-    const photos = data.photos || [];
-    photosContainer.innerHTML = "";
-    photos.forEach(url => {
-      const img = document.createElement("img");
-      img.src = url;
-      photosContainer.appendChild(img);
-    });
+      // Infos principales
+      ageSpan.textContent = data.age || "Non renseigné";
+      locationSpan.textContent = data.location || "Non renseigné";
+      descSpan.textContent = data.description || "Non renseignée";
 
-    // Boutons salles
-    roomButtons.innerHTML = "";
-    (data.rooms || []).forEach(room => {
-      const btn = document.createElement("button");
-      btn.className = "room-btn";
-      btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
-      roomButtons.appendChild(btn);
-    });
+      // Photos supplémentaires
+      photosContainer.innerHTML = "";
+      const photos = data.photos || [];
+      photos.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.addEventListener("click", () => {
+          lightboxImg.src = url;
+          lightbox.style.display = "flex";
+        });
+        photosContainer.appendChild(img);
+      });
+
+      // Boutons des salles
+      roomButtons.innerHTML = "";
+      const salleMapping = {
+        "serieux": "authentique.html",
+        "amicale": "amicale.html",
+        "fun": "fun.html"
+      };
+      (data.rooms || []).forEach(room => {
+        if(salleMapping[room]){
+          const btn = document.createElement("button");
+          btn.className = "room-btn";
+          btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
+          btn.addEventListener("click", () => window.location.href = salleMapping[room]);
+          roomButtons.appendChild(btn);
+        }
+      });
+    } else {
+      alert("Aucune donnée de profil trouvée pour cet utilisateur.");
+    }
+  } catch(e) {
+    console.error("Erreur récupération profil :", e);
+    alert("Erreur lors du chargement du profil : " + e.message);
   }
+});
+
+lightbox.addEventListener("click", () => {
+  lightbox.style.display = "none";
+  lightboxImg.src = "";
 });
 </script>
 </body>
