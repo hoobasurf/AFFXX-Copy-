@@ -9,7 +9,7 @@
 body {
   margin: 0;
   font-family: 'Orbitron', sans-serif;
-  background: url("ville.jpg") no-repeat center center/cover;
+  background: url("planete-magique.jpg") no-repeat center center/cover;
   color: #fff;
   display: flex;
   justify-content: center;
@@ -17,6 +17,7 @@ body {
   min-height: 100vh;
   padding: 20px 0;
 }
+
 .container {
   background: rgba(0,0,0,0.6);
   padding: 25px;
@@ -26,17 +27,20 @@ body {
   box-shadow: 0 0 20px #ff66cc;
   text-align: center;
 }
+
 h1 {
   color: #ff66cc;
   text-shadow: 0 0 10px #ff66cc;
   margin-bottom: 20px;
 }
+
 .mini-profil {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 20px;
 }
+
 .mini-profil img {
   width: 100px;
   height: 100px;
@@ -45,8 +49,9 @@ h1 {
   border: 2px solid #ff66cc;
   margin-bottom: 10px;
 }
-.mini-profil div { margin-top: 8px; font-size: 1.2em; color: #ff66cc; }
+
 .info div { margin: 8px 0; text-align: center; }
+
 .photos {
   display: flex;
   flex-wrap: wrap;
@@ -54,6 +59,7 @@ h1 {
   justify-content: center;
   margin: 15px 0;
 }
+
 .photos img {
   width: 70px;
   height: 70px;
@@ -63,7 +69,27 @@ h1 {
   cursor: pointer;
   transition: transform 0.2s;
 }
+
 .photos img:hover { transform: scale(1.1); }
+
+/* Lightbox */
+.lightbox {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.9);
+  justify-content: center;
+  align-items: center;
+}
+.lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+  box-shadow: 0 0 25px #ff66cc;
+}
+
 .room-btn {
   padding: 10px 20px;
   margin: 10px 5px;
@@ -81,9 +107,11 @@ h1 {
   box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
 }
 </style>
+</head>
 <body>
 <div class="container">
   <h1>Mon Profil</h1>
+
   <div class="mini-profil" id="miniProfil">
     <img id="miniPhoto" src="" alt="Photo Profil">
     <div id="pseudoMini">Pseudo</div>
@@ -97,6 +125,10 @@ h1 {
 
   <div class="photos" id="photosContainer"></div>
   <div id="roomButtons"></div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <img id="lightboxImg" src="">
 </div>
 
 <script type="module">
@@ -125,59 +157,46 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
-  try {
-    const snap = await get(ref(db, "users/" + user.uid));
-    if (snap.exists()) {
-      const data = snap.val();
+  const snap = await get(ref(db, "users/" + user.uid));
+  if (snap.exists()) {
+    const data = snap.val();
 
-      // Mini-profil
-      pseudoMini.textContent = data.pseudo || "Non renseigné";
-      miniPhoto.src = (data.photos && data.photos[0]) || "https://via.placeholder.com/100x100?text=Photo";
-      miniPhoto.addEventListener("click", () => {
-        lightboxImg.src = miniPhoto.src;
+    pseudoMini.textContent = data.pseudo || "Non renseigné";
+    miniPhoto.src = (data.photos && data.photos[0]) || "https://via.placeholder.com/100x100?text=Photo";
+    miniPhoto.addEventListener("click", () => {
+      lightboxImg.src = miniPhoto.src;
+      lightbox.style.display = "flex";
+    });
+
+    ageSpan.textContent = data.age || "Non renseigné";
+    locationSpan.textContent = data.location || "Non renseigné";
+    descSpan.textContent = data.description || "Non renseignée";
+
+    // Photos avec zoom
+    photosContainer.innerHTML = "";
+    const photos = data.photos || [];
+    photos.forEach(url => {
+      const img = document.createElement("img");
+      img.src = url;
+      img.addEventListener("click", () => {
+        lightboxImg.src = url;
         lightbox.style.display = "flex";
       });
+      photosContainer.appendChild(img);
+    });
 
-      // Infos principales
-      ageSpan.textContent = data.age || "Non renseigné";
-      locationSpan.textContent = data.location || "Non renseigné";
-      descSpan.textContent = data.description || "Non renseignée";
-
-      // Photos supplémentaires
-      photosContainer.innerHTML = "";
-      const photos = data.photos || [];
-      photos.forEach(url => {
-        const img = document.createElement("img");
-        img.src = url;
-        img.addEventListener("click", () => {
-          lightboxImg.src = url;
-          lightbox.style.display = "flex";
-        });
-        photosContainer.appendChild(img);
-      });
-
-      // Boutons des salles
-      roomButtons.innerHTML = "";
-      const salleMapping = {
-        "serieux": "authentique.html",
-        "amicale": "amicale.html",
-        "fun": "fun.html"
-      };
-      (data.rooms || []).forEach(room => {
-        if(salleMapping[room]){
-          const btn = document.createElement("button");
-          btn.className = "room-btn";
-          btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
-          btn.addEventListener("click", () => window.location.href = salleMapping[room]);
-          roomButtons.appendChild(btn);
-        }
-      });
-    } else {
-      alert("Aucune donnée de profil trouvée pour cet utilisateur.");
-    }
-  } catch(e) {
-    console.error("Erreur récupération profil :", e);
-    alert("Erreur lors du chargement du profil : " + e.message);
+    // Boutons salles
+    roomButtons.innerHTML = "";
+    const salleMapping = { "serieux":"authentique.html", "amicale":"amicale.html", "fun":"fun.html" };
+    (data.rooms || []).forEach(room => {
+      if(salleMapping[room]){
+        const btn = document.createElement("button");
+        btn.className = "room-btn";
+        btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
+        btn.addEventListener("click", () => window.location.href = salleMapping[room]);
+        roomButtons.appendChild(btn);
+      }
+    });
   }
 });
 
