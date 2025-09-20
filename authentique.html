@@ -8,18 +8,33 @@
 <style>
 * { box-sizing: border-box; margin:0; padding:0; }
 html, body { height:100%; width:100%; font-family: 'Orbitron', sans-serif; background: url('ville.jpg') no-repeat center center/cover; overflow: hidden; color: white; }
+body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%); z-index:1; pointer-events:none; animation: floatStars 60s linear infinite; }
+@keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
 .header { position: relative; z-index:2; padding: 20px; }
+.btn-back { position: absolute; top:20px; left:20px; color: #ff66cc; font-size:1.5em; cursor:pointer; text-decoration:none; transition: transform .2s; }
+.btn-back:hover { transform: scale(1.2); }
+
 #myProfile { z-index: 3; position: relative; text-align:center; margin-top:10px; }
 #myProfile img { width:100px; height:100px; border-radius:50%; border:3px solid #ff66cc; box-shadow:0 0 15px #ff66cc; cursor:pointer; object-fit:cover; }
 #myProfile div { margin-top:8px; font-size:1.2em; color:#ff66cc; }
+
 .carousel-container { z-index:2; position: relative; width:100%; height:calc(100% - 180px); overflow: hidden; display: flex; align-items:center; }
-.carousel { display:flex; overflow-x: auto; scroll-snap-type: x mandatory; gap:40px; padding:40px; }
+.carousel { display:flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; gap:40px; padding:40px; }
 .carousel::-webkit-scrollbar { display:none; }
-.card { scroll-snap-align: center; flex: 0 0 150px; background: rgba(0,0,0,0.5); border-radius: 16px; padding: 15px; text-align: center; transition: transform .3s; cursor: pointer; }
+.card { scroll-snap-align: center; flex: 0 0 150px; background: rgba(0,0,0,0.5); border-radius: 16px; padding: 15px; text-align: center; transition: transform .3s, box-shadow .3s; cursor: pointer; position: relative; }
 .card img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 3px solid; }
 .girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
 .boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
 .name { font-size:1.1em; margin-bottom:5px; }
+.btns { display:flex; justify-content: center; gap: 8px; margin-top: 6px; }
+.btn-like, .btn-chat, .btn-fav { width:30px; height:30px; border-radius:50%; background-color:rgba(255,255,255,0.1); border:1px solid #ff66cc; color:#ff66cc; display:flex; align-items:center; justify-content:center; font-size:1em; cursor:pointer; transition: transform .2s, background-color .3s, color .3s; user-select:none; }
+.btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
+.btn-like.active { background-color: #ff66cc; border-color: #ff66cc; color:white; box-shadow: 0 0 12px #ff66cc; }
+.btn-fav.active { background-color: #ffea00; border-color: #ffea00; color:#333; box-shadow:0 0 12px #ffea00; }
+.mini-profile { position: absolute; width: 60px; height: 60px; border-radius: 50%; border: 2px solid #ff66cc; box-shadow: 0 0 8px #ff66cc; z-index: 5000; touch-action: none; object-fit: cover; }
+@keyframes neonBlink { 0%, 100% { box-shadow: 0 0 8px #ff66cc; border-color: #ff66cc; } 50% { box-shadow: 0 0 20px #ff66cc; border-color: #ffea00; } }
+.mini-profile.new-message { animation: neonBlink 1s infinite; }
+#btnFavorites { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #ffea00; border:none; border-radius:12px; color:#333; padding:10px 20px; font-size:1.2em; cursor:pointer; z-index:1000; box-shadow: 0 0 12px #ffea00; animation: neonBlink 2s infinite alternate; }
 </style>
 </head>
 <body>
@@ -28,25 +43,26 @@ html, body { height:100%; width:100%; font-family: 'Orbitron', sans-serif; backg
   <a href="page2.html" class="btn-back">&larr; Retour</a>
 </div>
 
-<!-- Mini-profil -->
+<!-- MON MINI-PROFIL PRIVÉ POUR MOI -->
 <div id="myProfile"></div>
 
 <div class="carousel-container fade-in">
   <div class="carousel" id="carousel"></div>
 </div>
 
+<button id="btnFavorites">Favoris</button>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   let allUsers = JSON.parse(localStorage.getItem("allUsers") || "[]");
   let currentUser = localStorage.getItem("pseudo") || "Utilisateur";
   const carousel = document.getElementById("carousel");
-  const myProfileDiv = document.getElementById("myProfile");
 
+  // Mini-profil uniquement pour toi
+  const myProfileDiv = document.getElementById("myProfile");
   const me = allUsers.find(u => u.pseudo === currentUser);
   if(me){
-    const firstPhoto = (me.photos && me.photos.length > 0)
-      ? me.photos[0]
-      : "https://i.pravatar.cc/150?img=12";
+    const firstPhoto = (me.photos && me.photos.length > 0) ? me.photos[0] : 'https://i.pravatar.cc/150?img=12';
     myProfileDiv.innerHTML = `
       <img src="${firstPhoto}" alt="Mon profil" id="myProfilePic">
       <div>${me.pseudo}</div>
@@ -57,16 +73,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // afficher les autres utilisateurs
+  // Carrousel : autres users sauf toi
   allUsers.filter(u=>u.pseudo!==currentUser).forEach(user=>{
-    const firstPhoto = (user.photos && user.photos.length > 0)
-      ? user.photos[0]
-      : "https://i.pravatar.cc/150?img=12";
+    const firstUserPhoto = (user.photos && user.photos.length>0) ? user.photos[0] : 'https://i.pravatar.cc/150?img=12';
     const card = document.createElement("div");
     card.className = "card " + (user.gender || "girl");
+    card.dataset.name = user.pseudo;
+    card.dataset.age = user.age || "";
+    card.dataset.description = user.description || "";
+    card.dataset.photos = JSON.stringify(user.photos || []);
     card.innerHTML = `
-      <img src="${firstPhoto}" alt="${user.pseudo}">
+      <img src="${firstUserPhoto}" alt="${user.pseudo}">
       <div class="name">${user.pseudo}</div>
+      <div class="btns">
+        <div class="btn-chat" title="Chat">💬</div>
+        <div class="btn-like" title="Like">💖</div>
+        <div class="btn-fav" title="Favoris">⭐️</div>
+      </div>
     `;
     carousel.appendChild(card);
   });
