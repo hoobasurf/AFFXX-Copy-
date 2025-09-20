@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin:0; padding:0; }
-html, body { height:100%; width:100%; font-family: 'Orbitron', sans-serif; background: url('ville.html') no-repeat center center/cover; overflow: hidden; color: white; }
+html, body { height:100%; width:100%; font-family: 'Orbitron', sans-serif; background: url('ville.jpg') no-repeat center center/cover; overflow: hidden; color: white; }
 body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%); z-index:1; pointer-events:none; animation: floatStars 60s linear infinite; }
 @keyframes floatStars { 0% {transform: translateY(0);} 100% {transform: translateY(-10px);} }
 .header { position: relative; z-index:2; padding: 20px; }
@@ -44,7 +44,7 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
   <a href="page2.html" class="btn-back">&larr; Retour</a>
 </div>
 
-<!-- MON MINI-PROFIL PRIVÉ POUR LUI-MÊME -->
+<!-- MON MINI-PROFIL PRIVÉ POUR MOI -->
 <div id="myProfile"></div>
 
 <div class="carousel-container fade-in">
@@ -55,22 +55,27 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { app } from "./firebase.js";
 
-document.addEventListener('DOMContentLoaded', () => {
-  const auth = getAuth();
-  let allUsers = JSON.parse(localStorage.getItem("allUsers") || "[]");
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-  let currentUserEmail = localStorage.getItem("userEmail"); // stocké à l'inscription ou login
-  const carousel = document.getElementById("carousel");
+// Récupérer la liste de tous les utilisateurs depuis Firebase
+let allUsers = [];
 
-  // MINI-PROFIL PRIVÉ POUR LUI-MÊME
-  const myProfileDiv = document.getElementById("myProfile");
-  onAuthStateChanged(auth, user => {
-    if(!user) return;
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
 
-    currentUserEmail = user.email;
+  // Récupération des données utilisateurs depuis Firebase
+  const snapshot = await get(ref(db, 'users/'));
+  if(snapshot.exists()){
+    allUsers = Object.values(snapshot.val());
+    const currentUserEmail = user.email;
 
-    const me = allUsers.find(u => u.email === currentUserEmail || u.uid === currentUserEmail);
+    // MON MINI-PROFIL
+    const myProfileDiv = document.getElementById("myProfile");
+    const me = allUsers.find(u => u.email === currentUserEmail || u.uid === user.uid);
     if(me){
       const firstPhoto = (me.photos && me.photos.length > 0) ? me.photos[0] : 'https://i.pravatar.cc/150?img=12';
       myProfileDiv.innerHTML = `
@@ -82,27 +87,29 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = "page2.html";
       });
     }
-  });
 
-  // Carrousel : autres users sauf toi
-  allUsers.filter(u=>u.email!==currentUserEmail).forEach(user=>{
-    const card = document.createElement("div");
-    card.className = "card " + (user.gender || "girl");
-    card.dataset.name = user.pseudo;
-    card.dataset.age = user.age || "";
-    card.dataset.description = user.description || "";
-    card.dataset.photos = JSON.stringify(user.photos || []);
-    card.innerHTML = `
-      <img src="${user.photos && user.photos.length>0 ? user.photos[0] : 'https://i.pravatar.cc/150?img=12'}" alt="${user.pseudo}">
-      <div class="name">${user.pseudo}</div>
-      <div class="btns">
-        <div class="btn-chat" title="Chat">💬</div>
-        <div class="btn-like" title="Like">💖</div>
-        <div class="btn-fav" title="Favoris">⭐️</div>
-      </div>
-    `;
-    carousel.appendChild(card);
-  });
+    // CARROUSEL : autres users sauf toi
+    const carousel = document.getElementById("carousel");
+    carousel.innerHTML = "";
+    allUsers.filter(u => u.email !== currentUserEmail).forEach(user => {
+      const card = document.createElement("div");
+      card.className = "card " + (user.gender || "girl");
+      card.dataset.name = user.pseudo;
+      card.dataset.age = user.age || "";
+      card.dataset.description = user.description || "";
+      card.dataset.photos = JSON.stringify(user.photos || []);
+      card.innerHTML = `
+        <img src="${user.photos && user.photos.length>0 ? user.photos[0] : 'https://i.pravatar.cc/150?img=12'}" alt="${user.pseudo}">
+        <div class="name">${user.pseudo}</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat">💬</div>
+          <div class="btn-like" title="Like">💖</div>
+          <div class="btn-fav" title="Favoris">⭐️</div>
+        </div>
+      `;
+      carousel.appendChild(card);
+    });
+  }
 });
 </script>
 </body>
