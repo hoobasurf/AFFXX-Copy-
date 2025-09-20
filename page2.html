@@ -26,6 +26,7 @@
       max-width: 500px;
       box-shadow: 0 0 20px #ff66cc;
       text-align: center;
+      position: relative;
     }
 
     h1 {
@@ -107,10 +108,31 @@
     .room-btn:hover {
       box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
     }
+
+    /* Bouton fermer futuriste */
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(0,0,0,0.5);
+      border: 2px solid #ff66cc;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.9em;
+      cursor: pointer;
+      box-shadow: 0 0 15px #ff66cc;
+      display: none; /* caché par défaut */
+    }
+    .close-btn:hover {
+      box-shadow: 0 0 25px #ff66cc;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <button class="close-btn" id="closeBtn">Fermer ✖</button>
+
     <h1>Mon Profil</h1>
 
     <!-- Mini profil centré -->
@@ -149,13 +171,22 @@
     const descSpan = document.getElementById("description");
     const photosContainer = document.getElementById("photosContainer");
     const roomButtons = document.getElementById("roomButtons");
+    const closeBtn = document.getElementById("closeBtn");
 
     const lightbox = document.getElementById("lightbox");
     const lightboxImg = document.getElementById("lightboxImg");
 
+    // Vérifie si l'URL contient ?from=mini → afficher bouton fermer
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("from") === "mini") {
+      closeBtn.style.display = "block";
+      closeBtn.addEventListener("click", () => {
+        window.history.back(); // retour à la salle (authentique/amicale/fun)
+      });
+    }
+
     onAuthStateChanged(auth, async user => {
       if (!user) {
-        alert("Vous devez être connecté !");
         window.location.href = "inscription.html";
         return;
       }
@@ -208,4 +239,4 @@
     });
   </script>
 </body>
-</html>
+</html>i
