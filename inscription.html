@@ -5,46 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inscription</title>
 <style>
+  /* === FOND ET STYLE ORIGINAL === */
   body {
     margin: 0;
     overflow: hidden;
     font-family: Arial, sans-serif;
   }
 
-  /* PAGE PROFIL DERRIERE */
-  #page2 {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #f0f0f0;
-    z-index: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  #page2 h1 {
-    font-size: 2.5em;
-    color: #333;
-  }
-
-  #page2 p {
-    font-size: 1.2em;
-    color: #555;
-  }
-
-  /* PAGE INSCRIPTION AU DESSUS */
+  /* PAGE INSCRIPTION */
   #inscription {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #ffcc00, #ff9900);
-    z-index: 1;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: linear-gradient(135deg, #ffcc00, #ff9900); /* ton fond */
+    z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -87,7 +63,6 @@
     margin-top: 10px;
   }
 
-  /* Upload photos */
   #photoPreview {
     display: flex;
     flex-wrap: wrap;
@@ -103,7 +78,7 @@
     border: 2px solid #fff;
   }
 
-  /* Bouton néon */
+  /* BOUTON NEON */
   #inscrireBtn {
     padding: 15px 30px;
     font-size: 1.2em;
@@ -121,19 +96,39 @@
     box-shadow: 0 0 20px #ff3399, 0 0 40px #ff3399, 0 0 60px #ff3399;
   }
 
-  /* Salles */
+  /* CHECKBOX SALLES */
   .salle-checkbox {
     margin-right: 10px;
   }
 
+  /* PAGE PROFIL DERRIERE */
+  #page2 {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: #f0f0f0; /* ton fond profil */
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity:0;
+    transition: opacity 1s ease;
+  }
+
+  #page2.show {
+    opacity:1;
+  }
 </style>
 </head>
 <body>
 
-<!-- PAGE PROFIL DERRIERE -->
+<!-- PAGE PROFIL PRECHARGEE -->
 <div id="page2">
-  <h1>Bienvenue sur votre profil !</h1>
-  <p id="profilInfo">Vos infos apparaîtront ici.</p>
+  <h1>Bienvenue sur votre profil</h1>
+  <p id="profilInfo"></p>
   <div id="profilPhotos" style="display:flex; gap:10px; margin-top:10px;"></div>
 </div>
 
@@ -168,29 +163,26 @@
 <script>
   const inscrireBtn = document.getElementById('inscrireBtn');
   const inscription = document.getElementById('inscription');
-  const form = document.getElementById('inscriptionForm');
+  const page2 = document.getElementById('page2');
   const photoInput = document.getElementById('photos');
   const photoPreview = document.getElementById('photoPreview');
-
   let photosArray = [];
 
-  // Prévisualisation des photos et limite 5
-  photoInput.addEventListener('change', (e) => {
+  // PREVIEW PHOTOS (max 5)
+  photoInput.addEventListener('change', e => {
     const files = Array.from(e.target.files);
     if (files.length > 5) {
-      alert("Vous ne pouvez sélectionner que 5 photos maximum.");
+      alert("Maximum 5 photos autorisées.");
       photoInput.value = "";
       photoPreview.innerHTML = "";
       photosArray = [];
       return;
     }
-
     photoPreview.innerHTML = "";
     photosArray = files;
-
     files.forEach(file => {
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = e => {
         const img = document.createElement('img');
         img.src = e.target.result;
         photoPreview.appendChild(img);
@@ -200,18 +192,17 @@
   });
 
   inscrireBtn.addEventListener('click', () => {
-    // Récupération infos
     const nom = document.getElementById('nom').value;
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     const salles = Array.from(document.querySelectorAll('.salle-checkbox:checked')).map(cb => cb.value);
 
     if (!nom || !email || !password) {
-      alert("Veuillez remplir tous les champs obligatoires.");
+      alert("Veuillez remplir tous les champs.");
       return;
     }
 
-    // On met à jour le profil
+    // Mettre à jour le profil
     document.getElementById('profilInfo').innerText =
       `Nom: ${nom}, Email: ${email}, Salles: ${salles.join(', ')}`;
 
@@ -219,7 +210,7 @@
     profilPhotos.innerHTML = "";
     photosArray.forEach(file => {
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = e => {
         const img = document.createElement('img');
         img.src = e.target.result;
         img.style.width = "70px";
@@ -231,8 +222,9 @@
       reader.readAsDataURL(file);
     });
 
-    // Zoom et disparition inscription
+    // ZOOM page inscription + montrer page profil
     inscription.classList.add('zoom');
+    page2.classList.add('show');
     setTimeout(() => {
       inscription.style.display = 'none';
     }, 1000);
