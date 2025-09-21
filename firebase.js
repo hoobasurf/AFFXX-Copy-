@@ -5,11 +5,10 @@ const firebaseConfig = {
   authDomain: "affxx-copy.firebaseapp.com",
   databaseURL: "https://affxx-copy-default-rtdb.firebaseio.com",
   projectId: "affxx-copy",
-  storageBucket: "affxx-copy.firebasestorage.app",
+  storageBucket: "affxx-copy.appspot.com",   // ✅ corrigé
   messagingSenderId: "763273288933",
   appId: "1:763273288933:web:d0083f5f6ab7284661c80c"
 };
-
 // Initialise Firebase
 const app = initializeApp(firebaseConfig);
 
