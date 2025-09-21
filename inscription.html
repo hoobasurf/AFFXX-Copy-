@@ -1,303 +1,141 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inscription</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    height: 100%;
-    width: 100%;
-    font-family: 'Orbitron', sans-serif;
-    background: url("ville.jpg") no-repeat center center/cover;
-    color: #fff;
-    overflow: hidden; /* pas de scroll global */
-  }
-
-  .container {
-    background: rgba(0,0,0,0.4);
-    padding: 20px;
-    border-radius: 15px;
-    width: 95%;
-    max-width: 500px;
-    margin: 40px auto;
-    box-shadow: 0 0 20px #ff66cc;
-    text-align: center;
-    position: relative;
-    z-index: 1;
-
-    max-height: 90vh;      /* limite hauteur */
-    overflow-y: auto;      /* scroll interne */
-  }
-  .container::-webkit-scrollbar { width: 8px; }
-  .container::-webkit-scrollbar-thumb { background-color: #ff66cc; border-radius: 4px; }
-
-  h1 {
-    color: #ff66cc;
-    text-shadow: 0 0 10px #ff66cc;
-    margin-bottom: 15px;
-  }
-
-  input, textarea {
-    width: 100%;
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 8px;
-    border: 2px solid #ff66cc;
-    background: rgba(0,0,0,0.5);
-    color: #fff;
-  }
-
-  .salles {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 10px 0;
-  }
-  .salle-btn {
-    padding: 8px 15px;
-    border: 2px solid #ff66cc;
-    border-radius: 10px;
-    background: rgba(0,0,0,0.4);
-    color: #fff;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
-  }
-  .salle-btn.active {
-    box-shadow: 0 0 15px #ff66cc, 0 0 25px #ff66cc inset;
-    background: rgba(255, 102, 204,0.8);
-  }
-
-  .photos-preview {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 10px;
-  }
-  .photos-preview img {
-    width: 70px;
-    height: 70px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid #ff66cc;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-  .photos-preview img:hover { transform: scale(1.2); }
-
-  button.signup-btn, button.login-btn {
-    margin: 10px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: 2px solid #ff66cc;
-    background: rgba(0,0,0,0.4);
-    color: #fff;
-    cursor: pointer;
-    font-size: 1em;
-    text-transform: uppercase;
-    box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
-    transition: 0.3s;
-  }
-  button.signup-btn:hover, button.login-btn:hover {
-    box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
-  }
-
-  /* Lightbox */
-  .lightbox {
-    display: none;
-    position: fixed;
-    z-index: 10000;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9);
-    justify-content: center;
-    align-items: center;
-  }
-  .lightbox img {
-    max-width: 90%;
-    max-height: 90%;
-    border-radius: 10px;
-    box-shadow: 0 0 25px #ff66cc;
-  }
-
-  /* Vortex CSS */
-  #vortexOverlay {
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    background: transparent;
-    z-index: 2000;
-    overflow: hidden;
-  }
-  .vortex {
-    width: 200vw;
-    height: 200vw;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,102,204,0.2) 20%, transparent 70%);
-    animation: spinZoom 2s ease-in-out forwards;
-  }
-  @keyframes spinZoom {
-    0% { transform: scale(0) rotate(0deg); opacity: 1; }
-    70% { transform: scale(2) rotate(720deg); opacity: 1; }
-    100% { transform: scale(4) rotate(1440deg); opacity: 0; }
-  }
-
-  /* Flash blanc */
-  #whiteFlash {
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background:white;
-    opacity:0;
-    z-index:3000;
-    pointer-events:none;
-    transition: opacity 0.4s ease-in-out;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Inscription</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: url('fond-galactique.jpg') no-repeat center center / cover;
+      color: white;
+      overflow-y: auto;
+    }
+    .container {
+      max-width: 400px;
+      margin: 50px auto;
+      background: rgba(0,0,0,0.6);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #ff66cc;
+      text-align: center;
+    }
+    h1 {
+      color: #ff66cc;
+      text-shadow: 0 0 8px #ff66cc;
+      margin-bottom: 20px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ff66cc;
+      font-size: 1em;
+    }
+    button {
+      cursor: pointer;
+      background: #ff66cc;
+      color: white;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #ff33aa;
+    }
+    .google-btn {
+      background: #fff;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+    .google-btn:hover {
+      background: #f5f5f5;
+    }
+  </style>
 </head>
 <body>
-
-<div class="container">
-  <h1>Inscription</h1>
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Mot de passe">
-  <input type="text" id="pseudo" placeholder="Pseudo">
-  <input type="number" id="age" placeholder="Âge">
-  <input type="text" id="location" placeholder="Lieu">
-  <textarea id="description" placeholder="Description..."></textarea>
-
-  <div class="salles">
-    <div class="salle-btn" data-value="serieux">Sérieux</div>
-    <div class="salle-btn" data-value="amicale">Amicale</div>
-    <div class="salle-btn" data-value="fun">Fun</div>
+  <div class="container">
+    <h1>Inscription</h1>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Mot de passe" />
+    <button id="signupBtn">S'inscrire</button>
+    <button id="loginBtn">Se connecter</button>
+    <button class="google-btn" id="googleBtn">Connexion avec Google</button>
   </div>
 
-  <label for="photos">Ajoute jusqu’à 5 photos :</label>
-  <input type="file" id="photos" accept="image/*" multiple>
-  <div class="photos-preview" id="photosPreview"></div>
+  <script type="module">
+    import { 
+      getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, 
+      GoogleAuthProvider, signInWithPopup, onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-  <button class="signup-btn" id="signupBtn">S’inscrire</button>
-  <button class="login-btn" id="loginBtn">Se connecter</button>
-</div>
+    import { 
+      getDatabase, ref, set, get 
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
-<div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
-<div id="vortexOverlay"><div class="vortex"></div></div>
-<div id="whiteFlash"></div>
+    import { app } from "./firebase.js";
 
-<script type="module">
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-import { app } from "./firebase.js";
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-const auth = getAuth(app);
-const db = getDatabase(app);
+    const signupBtn = document.getElementById("signupBtn");
+    const loginBtn = document.getElementById("loginBtn");
+    const googleBtn = document.getElementById("googleBtn");
 
-const email = document.getElementById("email");
-const password = document.getElementById("password");
-const pseudo = document.getElementById("pseudo");
-const age = document.getElementById("age");
-const locationInput = document.getElementById("location");
-const description = document.getElementById("description");
-const photosInput = document.getElementById("photos");
-const preview = document.getElementById("photosPreview");
-const signupBtn = document.getElementById("signupBtn");
-const loginBtn = document.getElementById("loginBtn");
-const lightbox = document.getElementById("lightbox");
-const lightboxImg = document.getElementById("lightboxImg");
-const vortexOverlay = document.getElementById("vortexOverlay");
-const whiteFlash = document.getElementById("whiteFlash");
-
-let uploadedPhotos = [];
-
-// Gestion du zoom photos
-photosInput.addEventListener("change", e=>{
-  preview.innerHTML = "";
-  uploadedPhotos=[];
-  [...e.target.files].slice(0,5).forEach(file=>{
-    const reader = new FileReader();
-    reader.onload=ev=>{
-      const img=document.createElement("img");
-      img.src=ev.target.result;
-      img.addEventListener("click", ()=> {
-        lightboxImg.src = ev.target.result;
-        lightbox.style.display = "flex";
-      });
-      preview.appendChild(img);
-    }
-    reader.readAsDataURL(file);
-    uploadedPhotos.push(file);
-  });
-});
-
-lightbox.addEventListener("click", ()=>{
-  lightbox.style.display="none";
-  lightboxImg.src="";
-});
-
-// Gestion boutons salles
-const salleBtns = document.querySelectorAll(".salle-btn");
-let selectedRooms = [];
-salleBtns.forEach(btn=>{
-  btn.addEventListener("click", ()=>{
-    const val = btn.dataset.value;
-    if(selectedRooms.includes(val)){
-      selectedRooms = selectedRooms.filter(r=>r!==val);
-      btn.classList.remove("active");
-    } else {
-      selectedRooms.push(val);
-      btn.classList.add("active");
-    }
-  });
-});
-
-// Fonction animation vortex + flash + redirection
-function playVortexAndRedirect() {
-  vortexOverlay.style.display = "flex";
-  setTimeout(()=>{
-    whiteFlash.style.opacity = "1";
-    setTimeout(()=> window.location.href="page2.html", 400);
-  },1800);
-}
-
-// Inscription
-signupBtn.addEventListener("click", async ()=>{
-  if(!email.value || !password.value) { alert("Email et mot de passe requis"); return; }
-  try{
-    const userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
-    const user = userCred.user;
-    const photoURLs = uploadedPhotos.map(file=>URL.createObjectURL(file));
-    await set(ref(db,"users/"+user.uid),{
-      email: email.value,
-      pseudo: pseudo.value,
-      age: age.value,
-      location: locationInput.value,
-      description: description.value,
-      rooms: selectedRooms,
-      photos: photoURLs
+    // Inscription par email
+    signupBtn.addEventListener("click", async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        alert(err.message);
+      }
     });
-    playVortexAndRedirect();
-  } catch(e){
-    alert("Erreur: "+e.message);
-  }
-});
 
-// Connexion
-loginBtn.addEventListener("click", async ()=>{
-  try{
-    await signInWithEmailAndPassword(auth,email.value,password.value);
-    playVortexAndRedirect();
-  }catch(e){
-    alert("Erreur: "+e.message);
-  }
-});
-</script>
+    // Connexion par email
+    loginBtn.addEventListener("click", async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    // Connexion Google
+    googleBtn.addEventListener("click", async () => {
+      try {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    // Sauvegarde automatique dans Firebase DB
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userRef = ref(db, "users/" + user.uid);
+        const snap = await get(userRef);
+
+        if (!snap.exists()) {
+          await set(userRef, {
+            email: user.email,
+            pseudo: user.displayName || "Nouvel utilisateur",
+            photos: user.photoURL ? [user.photoURL] : [],
+            gender: "unknown",
+            rooms: []
+          });
+        }
+
+        // Redirection après connexion/inscription
+        window.location.href = "page2.html";
+      }
+    });
+  </script>
 </body>
 </html>
