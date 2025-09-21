@@ -25,54 +25,20 @@ body {
   box-shadow: 0 0 20px #ff66cc;
   text-align: center;
 }
-h1 {
-  color: #ff66cc;
-  text-shadow: 0 0 10px #ff66cc;
+h1 { color: #ff66cc; text-shadow:0 0 10px #ff66cc; }
+input, textarea { width: 100%; margin: 10px 0; padding: 10px; border-radius:8px; border:2px solid #ff66cc; background: rgba(0,0,0,0.5); color:#fff; }
+button.room-btn {
+  padding: 10px 20px; margin:5px; border:2px solid #ff66cc; background: rgba(0,0,0,0.4);
+  color:#fff; border-radius:8px; cursor:pointer; text-transform:uppercase;
+  box-shadow:0 0 10px #ff66cc,0 0 20px #ff66cc inset; transition:0.3s;
 }
-input, select, textarea {
-  width: 100%;
-  margin: 10px 0;
-  padding: 10px;
-  border-radius: 8px;
-  border: 2px solid #ff66cc;
-  background: rgba(0,0,0,0.5);
-  color: #fff;
-}
-button {
-  margin: 10px;
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: 2px solid #ff66cc;
-  background: rgba(0,0,0,0.4);
-  color: #fff;
-  cursor: pointer;
-  font-size: 1em;
-  text-transform: uppercase;
-  box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
-  transition: 0.3s;
-}
-button:hover {
-  box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
-}
-.photos-preview {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 10px;
-}
-.photos-preview img {
-  width: 70px;
-  height: 70px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 2px solid #ff66cc;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.photos-preview img:hover {
-  transform: scale(1.2);
-}
+button.room-btn:hover { box-shadow:0 0 20px #ff66cc,0 0 30px #ff66cc inset; }
+.photos-preview { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:10px; }
+.photos-preview img { width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc; cursor:pointer; transition: transform 0.2s; }
+.photos-preview img:hover { transform: scale(1.2); }
+/* Lightbox */
+.lightbox { display:none; position:fixed; z-index:1000; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center; }
+.lightbox img { max-width:90%; max-height:90%; border-radius:10px; box-shadow:0 0 25px #ff66cc; }
 </style>
 </head>
 <body>
@@ -85,22 +51,27 @@ button:hover {
   <input type="text" id="location" placeholder="Lieu">
   <textarea id="description" placeholder="Description..."></textarea>
 
-  <label for="rooms">Choisis tes salles :</label><br>
-  <select id="rooms" multiple>
-    <option value="serieux">Sérieux</option>
-    <option value="amicale">Amicale</option>
-    <option value="fun">Fun</option>
-  </select>
+  <div id="roomsContainer">
+    <label>Choisis tes salles :</label><br>
+    <button class="room-btn" data-room="serieux">Sérieux</button>
+    <button class="room-btn" data-room="amicale">Amicale</button>
+    <button class="room-btn" data-room="fun">Fun</button>
+  </div>
 
-  <label for="photos">Ajoute jusqu’à 5 photos :</label>
+  <label>Ajoute jusqu’à 5 photos :</label>
   <input type="file" id="photos" accept="image/*" multiple>
   <div class="photos-preview" id="photosPreview"></div>
 
   <button id="signupBtn">S’inscrire</button>
+  <button id="loginBtn">Se connecter</button>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <img id="lightboxImg" src="">
 </div>
 
 <script type="module">
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { app } from "./firebase.js";
 
@@ -113,49 +84,73 @@ const pseudo = document.getElementById("pseudo");
 const age = document.getElementById("age");
 const locationInput = document.getElementById("location");
 const description = document.getElementById("description");
-const roomsSelect = document.getElementById("rooms");
 const photosInput = document.getElementById("photos");
 const preview = document.getElementById("photosPreview");
 
-let uploadedPhotos = [];
-
-photosInput.addEventListener("change", e => {
-  preview.innerHTML = "";
-  uploadedPhotos = [];
-  [...e.target.files].slice(0,5).forEach(file => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const img = document.createElement("img");
-      img.src = ev.target.result;
-      preview.appendChild(img);
-      uploadedPhotos.push(ev.target.result); // stocker base64
-    };
-    reader.readAsDataURL(file);
+const roomsButtons = document.querySelectorAll(".room-btn");
+let selectedRooms = [];
+roomsButtons.forEach(btn => {
+  btn.addEventListener("click", ()=>{
+    btn.classList.toggle("active");
+    const room = btn.dataset.room;
+    if(selectedRooms.includes(room)) selectedRooms = selectedRooms.filter(r=>r!==room);
+    else selectedRooms.push(room);
   });
 });
 
-signupBtn.addEventListener("click", async () => {
-  try {
-    const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
+let uploadedPhotos = [];
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
+photosInput.addEventListener("change", e=>{
+  preview.innerHTML="";
+  uploadedPhotos=[];
+  [...e.target.files].slice(0,5).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const img=document.createElement("img");
+      img.src=ev.target.result;
+      img.addEventListener("click", ()=>{ lightboxImg.src=ev.target.result; lightbox.style.display="flex"; });
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+    uploadedPhotos.push(file);
+  });
+});
+
+signupBtn.addEventListener("click", async ()=>{
+  try{
+    const userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
     const user = userCred.user;
-
-    const rooms = [...roomsSelect.selectedOptions].map(opt => opt.value);
-
-    await set(ref(db, "users/" + user.uid), {
+    // Convertir les photos en Base64 pour ne pas utiliser Storage
+    const photosData = [];
+    for(let i=0;i<uploadedPhotos.length;i++){
+      const file=uploadedPhotos[i];
+      const base64 = await new Promise(res=>{
+        const reader = new FileReader();
+        reader.onload = e=>res(e.target.result);
+        reader.readAsDataURL(file);
+      });
+      photosData.push(base64);
+    }
+    await set(ref(db,"users/"+user.uid),{
       email: email.value,
       pseudo: pseudo.value,
       age: age.value,
       location: locationInput.value,
       description: description.value,
-      rooms: rooms,
-      photos: uploadedPhotos
+      rooms: selectedRooms,
+      photos: photosData
     });
-
-    window.location.href = "page2.html";
-  } catch (e) {
-    alert("Erreur : " + e.message);
-  }
+    window.location.href="page2.html";
+  }catch(e){ alert("Erreur : "+e.message); }
 });
+
+loginBtn.addEventListener("click", async ()=>{
+  try{ await signInWithEmailAndPassword(auth,email.value,password.value); window.location.href="profil2.html"; }
+  catch(e){ alert("Erreur : "+e.message); }
+});
+
+lightbox.addEventListener("click", ()=>{ lightbox.style.display="none"; lightboxImg.src=""; });
 </script>
 </body>
 </html>
