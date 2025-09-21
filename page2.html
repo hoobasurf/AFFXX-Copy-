@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -96,21 +96,24 @@ onAuthStateChanged(auth, async user => {
       photosContainer.appendChild(img);
     });
 
-    // ...
-// Boutons salles
-roomButtons.innerHTML="";
-(data.rooms||[]).forEach(room=>{
-  const btn = document.createElement("button");
-  btn.className="room-btn selected";
-  btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
-  
-  // Redirection vers la salle correspondante
-  btn.addEventListener("click", ()=>{
-    window.location.href = `salle.html?room=${encodeURIComponent(room)}`;
-  });
+    // Boutons salles avec redirection vers la page correspondante
+    roomButtons.innerHTML="";
+    (data.rooms||[]).forEach(room=>{
+      const btn = document.createElement("button");
+      btn.className="room-btn selected";
+      btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
 
-  roomButtons.appendChild(btn);
-});
+      let page = "";
+      if(room === "serieux") page = "serieux.html";
+      if(room === "amicale") page = "amicale.html";
+      if(room === "fun") page = "fun.html";
+
+      btn.addEventListener("click", ()=> {
+        if(page) window.location.href = page;
+      });
+
+      roomButtons.appendChild(btn);
+    });
   }
 });
 
