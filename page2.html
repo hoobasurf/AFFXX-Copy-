@@ -11,6 +11,7 @@ body {
   background:url('ville.jpg') no-repeat center center/cover;
   color:#fff; display:flex; justify-content:center; align-items:flex-start;
   min-height:100vh; padding:20px 0;
+  overflow-y: auto;
 }
 .container {
   background: rgba(0,0,0,0.6); padding:25px; border-radius:15px;
@@ -25,6 +26,7 @@ h1 { color:#ff66cc; text-shadow:0 0 10px #ff66cc; margin-bottom:20px; }
 .lightbox { display:none; position:fixed; z-index:1000; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center; }
 .lightbox img { max-width:90%; max-height:90%; border-radius:10px; box-shadow:0 0 25px #ff66cc; }
 /* Boutons salles néon */
+#roomButtons { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:15px; }
 .room-btn { padding:10px 20px; margin:5px; border:2px solid #ff66cc; background:rgba(0,0,0,0.4); color:#fff; border-radius:8px; cursor:pointer; font-size:0.9em; box-shadow:0 0 10px #ff66cc,0 0 20px #ff66cc inset; transition:0.3s; }
 .room-btn.selected { box-shadow:0 0 20px #ff66cc,0 0 30px #ff66cc inset; background: rgba(255,102,204,0.8);}
 .room-btn:hover { box-shadow:0 0 20px #ff66cc,0 0 30px #ff66cc inset; }
@@ -96,22 +98,19 @@ onAuthStateChanged(auth, async user => {
       photosContainer.appendChild(img);
     });
 
-    // Boutons salles avec redirection vers la page correspondante
+    // Boutons salles fonctionnels
     roomButtons.innerHTML="";
     (data.rooms||[]).forEach(room=>{
       const btn = document.createElement("button");
       btn.className="room-btn selected";
       btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
-
-      let page = "";
-      if(room === "serieux") page2 = "serieux.html";
-      if(room === "amicale") page2 = "amicale.html";
-      if(room === "fun") page2 = "fun.html";
-
-      btn.addEventListener("click", ()=> {
-        if(page) window.location.href = page;
+      btn.addEventListener("click", ()=>{
+        let page = "";
+        if(room === "serieux") page = "serieux.html";
+        if(room === "amicale") page = "amicale.html";
+        if(room === "fun") page = "fun.html";
+        window.location.href = page;
       });
-
       roomButtons.appendChild(btn);
     });
   }
