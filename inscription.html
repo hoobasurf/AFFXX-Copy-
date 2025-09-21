@@ -4,240 +4,249 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inscription</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
-  body {
-    margin: 0;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
-  }
+body {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  background: url("ville.jpg") no-repeat center center/cover;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+.container {
+  background: rgba(0,0,0,0.4);
+  padding: 20px;
+  border-radius: 15px;
+  width: 95%;
+  max-width: 500px;
+  box-shadow: 0 0 20px #ff66cc;
+  text-align: center;
+  transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
+}
+h1 {
+  color: #ff66cc;
+  text-shadow: 0 0 10px #ff66cc;
+}
+input, textarea {
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid #ff66cc;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+}
+button {
+  margin: 10px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 2px solid #ff66cc;
+  background: rgba(0,0,0,0.4);
+  color: #fff;
+  cursor: pointer;
+  font-size: 1em;
+  text-transform: uppercase;
+  box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
+  transition: 0.3s;
+}
+button:hover { box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset; }
 
-  /* PAGE PROFIL DERRIERE */
-  #page2 {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #f0f0f0;
-    z-index: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
+.rooms-btns {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+.rooms-btns button {
+  background: rgba(0,0,0,0.4);
+  border: 2px solid #ff66cc;
+  color: #fff;
+  padding: 8px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.rooms-btns button.selected {
+  background: #ff66cc;
+  color: #000;
+  box-shadow: 0 0 15px #ff66cc;
+}
 
-  #page2 h1 {
-    font-size: 2.5em;
-    color: #333;
-  }
+.photos-preview {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+.photos-preview img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #ff66cc;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.photos-preview img:hover { transform: scale(1.2); }
 
-  #page2 p {
-    font-size: 1.2em;
-    color: #555;
-  }
-
-  /* PAGE INSCRIPTION AU DESSUS */
-  #inscription {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #ffcc00, #ff9900);
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: transform 1s ease, opacity 1s ease;
-    overflow-y: auto;
-    padding: 20px;
-    box-sizing: border-box;
-  }
-
-  #inscription.zoom {
-    transform: scale(0);
-    opacity: 0;
-  }
-
-  h1 {
-    margin-bottom: 20px;
-  }
-
-  form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 400px;
-  }
-
-  input, select {
-    padding: 10px;
-    margin: 10px 0;
-    width: 100%;
-    font-size: 1em;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-  }
-
-  label {
-    align-self: flex-start;
-    font-weight: bold;
-    margin-top: 10px;
-  }
-
-  /* Upload photos */
-  #photoPreview {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 10px;
-  }
-
-  #photoPreview img {
-    width: 70px;
-    height: 70px;
-    object-fit: cover;
-    border-radius: 5px;
-    border: 2px solid #fff;
-  }
-
-  /* Bouton néon */
-  #inscrireBtn {
-    padding: 15px 30px;
-    font-size: 1.2em;
-    color: #fff;
-    background: #ff0066;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    box-shadow: 0 0 10px #ff0066, 0 0 20px #ff0066, 0 0 40px #ff0066;
-    transition: all 0.3s ease;
-    margin-top: 20px;
-  }
-
-  #inscrireBtn:hover {
-    box-shadow: 0 0 20px #ff3399, 0 0 40px #ff3399, 0 0 60px #ff3399;
-  }
-
-  /* Salles */
-  .salle-checkbox {
-    margin-right: 10px;
-  }
-
+.lightbox {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.9);
+  justify-content: center;
+  align-items: center;
+}
+.lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+  box-shadow: 0 0 25px #ff66cc;
+}
 </style>
 </head>
 <body>
-
-<!-- PAGE PROFIL DERRIERE -->
-<div id="page2">
-  <h1>Bienvenue sur votre profil !</h1>
-  <p id="profilInfo">Vos infos apparaîtront ici.</p>
-  <div id="profilPhotos" style="display:flex; gap:10px; margin-top:10px;"></div>
-</div>
-
-<!-- PAGE INSCRIPTION -->
-<div id="inscription">
+<div class="container" id="container">
   <h1>Inscription</h1>
-  <form id="inscriptionForm">
-    <label>Nom :</label>
-    <input type="text" id="nom" required>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Mot de passe">
+  <input type="text" id="pseudo" placeholder="Pseudo">
+  <input type="number" id="age" placeholder="Âge">
+  <input type="text" id="location" placeholder="Lieu">
+  <textarea id="description" placeholder="Description..."></textarea>
 
-    <label>Email :</label>
-    <input type="email" id="email" required>
+  <div class="rooms-btns" id="roomsBtns">
+    <button data-value="serieux">Sérieux</button>
+    <button data-value="amicale">Amicale</button>
+    <button data-value="fun">Fun</button>
+  </div>
 
-    <label>Mot de passe :</label>
-    <input type="password" id="password" required>
+  <label for="photos">Ajoute jusqu’à 5 photos :</label>
+  <input type="file" id="photos" accept="image/*" multiple>
+  <div class="photos-preview" id="photosPreview"></div>
 
-    <label>Choisir vos salles :</label>
-    <div>
-      <label><input type="checkbox" class="salle-checkbox" value="Salle A"> Salle A</label>
-      <label><input type="checkbox" class="salle-checkbox" value="Salle B"> Salle B</label>
-      <label><input type="checkbox" class="salle-checkbox" value="Salle C"> Salle C</label>
-    </div>
-
-    <label>Photos de profil (max 5) :</label>
-    <input type="file" id="photos" accept="image/*" multiple>
-    <div id="photoPreview"></div>
-
-    <button type="button" id="inscrireBtn">S'inscrire</button>
-  </form>
+  <button id="signupBtn">S’inscrire</button>
+  <button id="loginBtn">Se connecter</button>
 </div>
 
-<script>
-  const inscrireBtn = document.getElementById('inscrireBtn');
-  const inscription = document.getElementById('inscription');
-  const form = document.getElementById('inscriptionForm');
-  const photoInput = document.getElementById('photos');
-  const photoPreview = document.getElementById('photoPreview');
+<div class="lightbox" id="lightbox">
+  <img id="lightboxImg" src="">
+</div>
 
-  let photosArray = [];
+<script type="module">
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { app } from "./firebase.js";
 
-  // Prévisualisation des photos et limite 5
-  photoInput.addEventListener('change', (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length > 5) {
-      alert("Vous ne pouvez sélectionner que 5 photos maximum.");
-      photoInput.value = "";
-      photoPreview.innerHTML = "";
-      photosArray = [];
-      return;
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+const container = document.getElementById("container");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const pseudo = document.getElementById("pseudo");
+const age = document.getElementById("age");
+const locationInput = document.getElementById("location");
+const description = document.getElementById("description");
+const photosInput = document.getElementById("photos");
+const photosPreview = document.getElementById("photosPreview");
+
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
+
+const roomsBtns = document.querySelectorAll("#roomsBtns button");
+let selectedRooms = [];
+roomsBtns.forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const value = btn.dataset.value;
+    if(selectedRooms.includes(value)){
+      selectedRooms = selectedRooms.filter(r=>r!==value);
+      btn.classList.remove("selected");
+    } else if(selectedRooms.length<3){
+      selectedRooms.push(value);
+      btn.classList.add("selected");
     }
-
-    photoPreview.innerHTML = "";
-    photosArray = files;
-
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        photoPreview.appendChild(img);
-      };
-      reader.readAsDataURL(file);
-    });
   });
+});
 
-  inscrireBtn.addEventListener('click', () => {
-    // Récupération infos
-    const nom = document.getElementById('nom').value;
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const salles = Array.from(document.querySelectorAll('.salle-checkbox:checked')).map(cb => cb.value);
+let uploadedPhotos = [];
+photosInput.addEventListener("change", e=>{
+  photosPreview.innerHTML="";
+  uploadedPhotos=[];
+  [...e.target.files].slice(0,5).forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      const img = document.createElement("img");
+      img.src = ev.target.result;
+      img.addEventListener("click", ()=>{
+        lightboxImg.src = ev.target.result;
+        lightbox.style.display="flex";
+      });
+      photosPreview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+    uploadedPhotos.push(file);
+  });
+});
 
-    if (!nom || !email || !password) {
-      alert("Veuillez remplir tous les champs obligatoires.");
-      return;
+lightbox.addEventListener("click", ()=>{
+  lightbox.style.display="none";
+  lightboxImg.src="";
+});
+
+signupBtn.addEventListener("click", ()=>{
+  if(selectedRooms.length===0){ alert("Choisis au moins une salle"); return; }
+
+  // Zoom avant
+  container.style.transform="scale(2)";
+  container.style.opacity="0";
+
+  setTimeout(async ()=>{
+    try{
+      const userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
+      const user = userCred.user;
+
+      // Stocker les photos localement (DataURL) pour éviter Storage
+      const photosData = await Promise.all(uploadedPhotos.map(file=>{
+        return new Promise(res=>{
+          const reader = new FileReader();
+          reader.onload = e=>res(e.target.result);
+          reader.readAsDataURL(file);
+        });
+      }));
+
+      await set(ref(db,"users/"+user.uid),{
+        email: email.value,
+        pseudo: pseudo.value,
+        age: age.value,
+        location: locationInput.value,
+        description: description.value,
+        rooms: selectedRooms,
+        photos: photosData
+      });
+
+      window.location.replace("page2.html"); // direct page2 sans flash
+    } catch(e){
+      alert("Erreur : "+e.message);
+      container.style.transform="scale(1)";
+      container.style.opacity="1";
     }
+  }, 0);
+});
 
-    // On met à jour le profil
-    document.getElementById('profilInfo').innerText =
-      `Nom: ${nom}, Email: ${email}, Salles: ${salles.join(', ')}`;
-
-    const profilPhotos = document.getElementById('profilPhotos');
-    profilPhotos.innerHTML = "";
-    photosArray.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        img.style.width = "70px";
-        img.style.height = "70px";
-        img.style.objectFit = "cover";
-        img.style.borderRadius = "5px";
-        profilPhotos.appendChild(img);
-      };
-      reader.readAsDataURL(file);
-    });
-
-    // Zoom et disparition inscription
-    inscription.classList.add('zoom');
-    setTimeout(() => {
-      inscription.style.display = 'none';
-    }, 1000);
-  });
+loginBtn.addEventListener("click", async ()=>{
+  try{
+    await signInWithEmailAndPassword(auth,email.value,password.value);
+    window.location.replace("page2.html");
+  }catch(e){ alert("Erreur : "+e.message);}
+});
 </script>
-
 </body>
 </html>
