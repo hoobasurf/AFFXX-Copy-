@@ -1,36 +1,43 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inscription</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
-  body {
-    margin: 0;
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    width: 100%;
     font-family: 'Orbitron', sans-serif;
     background: url("ville.jpg") no-repeat center center/cover;
     color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
     overflow-y: auto;
   }
+  body::-webkit-scrollbar { width: 8px; }
+  body::-webkit-scrollbar-thumb { background-color: #ff66cc; border-radius: 4px; }
+
   .container {
     background: rgba(0,0,0,0.4);
     padding: 20px;
     border-radius: 15px;
     width: 95%;
     max-width: 500px;
+    margin: 40px auto;
     box-shadow: 0 0 20px #ff66cc;
     text-align: center;
+    position: relative;
+    z-index: 1;
   }
+
   h1 {
     color: #ff66cc;
     text-shadow: 0 0 10px #ff66cc;
+    margin-bottom: 15px;
   }
-  input, select, textarea {
+
+  input, textarea {
     width: 100%;
     margin: 10px 0;
     padding: 10px;
@@ -39,23 +46,30 @@
     background: rgba(0,0,0,0.5);
     color: #fff;
   }
-  .neon-btns button {
-    margin: 5px;
-    padding: 10px 15px;
-    border-radius: 8px;
+
+  .salles {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 10px 0;
+  }
+
+  .salle-btn {
+    padding: 8px 15px;
     border: 2px solid #ff66cc;
+    border-radius: 10px;
     background: rgba(0,0,0,0.4);
     color: #fff;
     cursor: pointer;
-    text-transform: uppercase;
-    box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
+    font-weight: bold;
     transition: 0.3s;
   }
-  .neon-btns button.active {
-    box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
-    background: #ff66cc;
-    color: #000;
+  .salle-btn.active {
+    box-shadow: 0 0 15px #ff66cc, 0 0 25px #ff66cc inset;
+    background: rgba(255, 102, 204,0.8);
   }
+
   .photos-preview {
     display: flex;
     flex-wrap: wrap;
@@ -73,12 +87,31 @@
     transition: transform 0.2s;
   }
   .photos-preview img:hover { transform: scale(1.2); }
+
+  button.signup-btn, button.login-btn {
+    margin: 10px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 2px solid #ff66cc;
+    background: rgba(0,0,0,0.4);
+    color: #fff;
+    cursor: pointer;
+    font-size: 1em;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
+    transition: 0.3s;
+  }
+  button.signup-btn:hover, button.login-btn:hover {
+    box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
+  }
+
+  /* Lightbox */
   .lightbox {
     display: none;
     position: fixed;
-    z-index: 1000;
-    top:0; left:0;
-    width:100%; height:100%;
+    z-index: 10000;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     background: rgba(0,0,0,0.9);
     justify-content: center;
     align-items: center;
@@ -90,25 +123,41 @@
     box-shadow: 0 0 25px #ff66cc;
   }
 
-  /* Vortex overlay semi-transparent */
+  /* Vortex CSS */
   #vortexOverlay {
     position: fixed;
     top:0; left:0;
-    width:100vw;
-    height:100vh;
-    display: flex;
-    justify-content:center;
-    align-items:center;
-    z-index: 9999;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
-    background: rgba(0,0,0,0.3);
+    width:100%; height:100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    z-index: 2000;
+    overflow: hidden;
   }
-  #vortexOverlay video {
-    width:100vw;
-    height:100vh;
-    object-fit: cover;
+  .vortex {
+    width: 200vw;
+    height: 200vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,102,204,0.2) 20%, transparent 70%);
+    animation: spinZoom 2s ease-in-out forwards;
+  }
+  @keyframes spinZoom {
+    0% { transform: scale(0) rotate(0deg); opacity: 1; }
+    70% { transform: scale(2) rotate(720deg); opacity: 1; }
+    100% { transform: scale(4) rotate(1440deg); opacity: 0; }
+  }
+
+  /* Flash blanc */
+  #whiteFlash {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:white;
+    opacity:0;
+    z-index:3000;
+    pointer-events:none;
+    transition: opacity 0.4s ease-in-out;
   }
 </style>
 </head>
@@ -123,29 +172,23 @@
   <input type="text" id="location" placeholder="Lieu">
   <textarea id="description" placeholder="Description..."></textarea>
 
-  <div class="neon-btns">
-    <button data-room="serieux">Sérieux</button>
-    <button data-room="amicale">Amicale</button>
-    <button data-room="fun">Fun</button>
+  <div class="salles">
+    <div class="salle-btn" data-value="serieux">Sérieux</div>
+    <div class="salle-btn" data-value="amicale">Amicale</div>
+    <div class="salle-btn" data-value="fun">Fun</div>
   </div>
 
   <label for="photos">Ajoute jusqu’à 5 photos :</label>
   <input type="file" id="photos" accept="image/*" multiple>
   <div class="photos-preview" id="photosPreview"></div>
 
-  <button id="signupBtn">S’inscrire</button>
-  <button id="loginBtn">Se connecter</button>
+  <button class="signup-btn" id="signupBtn">S’inscrire</button>
+  <button class="login-btn" id="loginBtn">Se connecter</button>
 </div>
 
-<div class="lightbox" id="lightbox">
-  <img id="lightboxImg" src="">
-</div>
-
-<div id="vortexOverlay">
-  <video autoplay muted playsinline id="vortexVideo">
-    <source src="vortex.mov" type="video/quicktime"/>
-  </video>
-</div>
+<div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
+<div id="vortexOverlay"><div class="vortex"></div></div>
+<div id="whiteFlash"></div>
 
 <script type="module">
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
@@ -163,88 +206,95 @@ const locationInput = document.getElementById("location");
 const description = document.getElementById("description");
 const photosInput = document.getElementById("photos");
 const preview = document.getElementById("photosPreview");
+const signupBtn = document.getElementById("signupBtn");
+const loginBtn = document.getElementById("loginBtn");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
+const vortexOverlay = document.getElementById("vortexOverlay");
+const whiteFlash = document.getElementById("whiteFlash");
 
 let uploadedPhotos = [];
-let selectedRooms = [];
 
-photosInput.addEventListener("change", e => {
+// Gestion du zoom photos
+photosInput.addEventListener("change", e=>{
   preview.innerHTML = "";
-  uploadedPhotos = [];
-  [...e.target.files].slice(0,5).forEach(file => {
+  uploadedPhotos=[];
+  [...e.target.files].slice(0,5).forEach(file=>{
     const reader = new FileReader();
-    reader.onload = ev => {
-      const img = document.createElement("img");
-      img.src = ev.target.result;
-      img.addEventListener("click", () => {
+    reader.onload=ev=>{
+      const img=document.createElement("img");
+      img.src=ev.target.result;
+      img.addEventListener("click", ()=> {
         lightboxImg.src = ev.target.result;
         lightbox.style.display = "flex";
       });
       preview.appendChild(img);
-    };
+    }
     reader.readAsDataURL(file);
     uploadedPhotos.push(file);
   });
 });
 
-const neonButtons = document.querySelectorAll(".neon-btns button");
-neonButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    btn.classList.toggle("active");
-    const room = btn.dataset.room;
-    if(selectedRooms.includes(room)) {
-      selectedRooms = selectedRooms.filter(r => r!==room);
+lightbox.addEventListener("click", ()=>{
+  lightbox.style.display="none";
+  lightboxImg.src="";
+});
+
+// Gestion boutons salles
+const salleBtns = document.querySelectorAll(".salle-btn");
+let selectedRooms = [];
+salleBtns.forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const val = btn.dataset.value;
+    if(selectedRooms.includes(val)){
+      selectedRooms = selectedRooms.filter(r=>r!==val);
+      btn.classList.remove("active");
     } else {
-      selectedRooms.push(room);
+      selectedRooms.push(val);
+      btn.classList.add("active");
     }
   });
 });
 
-const vortexOverlay = document.getElementById("vortexOverlay");
-const lightboxImg = document.getElementById("lightboxImg");
-const lightbox = document.getElementById("lightbox");
-
-lightbox.addEventListener("click", () => {
-  lightbox.style.display = "none";
-  lightboxImg.src = "";
-});
-
-function playVortexAndRedirect(callback) {
-  vortexOverlay.style.opacity = "1";
-  vortexOverlay.style.pointerEvents = "all";
-  const video = document.getElementById("vortexVideo");
-  video.currentTime = 0;
-  video.play();
-  video.onended = () => {
-    callback();
-  };
+// Fonction animation vortex + flash + redirection
+function playVortexAndRedirect() {
+  vortexOverlay.style.display = "flex";
+  setTimeout(()=>{
+    whiteFlash.style.opacity = "1";
+    setTimeout(()=> window.location.href="page2.html", 400);
+  },1800);
 }
 
-signupBtn.addEventListener("click", async () => {
-  playVortexAndRedirect(async () => {
-    try {
-      const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
-      const user = userCred.user;
-      const rooms = selectedRooms;
-      await set(ref(db, "users/" + user.uid), {
-        email: email.value,
-        pseudo: pseudo.value,
-        age: age.value,
-        location: locationInput.value,
-        description: description.value,
-        rooms: rooms
-      });
-      window.location.href = "page2.html";
-    } catch(e){ alert("Erreur : "+e.message); }
-  });
+// Inscription
+signupBtn.addEventListener("click", async ()=>{
+  if(!email.value || !password.value) { alert("Email et mot de passe requis"); return; }
+  try{
+    const userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
+    const user = userCred.user;
+    const photoURLs = uploadedPhotos.map(file=>URL.createObjectURL(file));
+    await set(ref(db,"users/"+user.uid),{
+      email: email.value,
+      pseudo: pseudo.value,
+      age: age.value,
+      location: locationInput.value,
+      description: description.value,
+      rooms: selectedRooms,
+      photos: photoURLs
+    });
+    playVortexAndRedirect();
+  } catch(e){
+    alert("Erreur: "+e.message);
+  }
 });
 
-loginBtn.addEventListener("click", () => {
-  playVortexAndRedirect(async () => {
-    try {
-      await signInWithEmailAndPassword(auth, email.value, password.value);
-      window.location.href = "page2.html";
-    } catch(e){ alert("Erreur : "+e.message); }
-  });
+// Connexion
+loginBtn.addEventListener("click", async ()=>{
+  try{
+    await signInWithEmailAndPassword(auth,email.value,password.value);
+    playVortexAndRedirect();
+  }catch(e){
+    alert("Erreur: "+e.message);
+  }
 });
 </script>
 </body>
