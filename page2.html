@@ -106,7 +106,7 @@ onAuthStateChanged(auth, async user => {
       btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
       btn.addEventListener("click", ()=>{
         let page = "";
-        if(room === "serieux") page = "serieux.html";
+        if(room === "serieux") page = "authentique.html";
         if(room === "amicale") page = "amicale.html";
         if(room === "fun") page = "fun.html";
         window.location.href = page;
