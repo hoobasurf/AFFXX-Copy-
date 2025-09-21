@@ -6,7 +6,6 @@
 <title>Inscription</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
-  /* --- Styles formulaire --- */
   body {
     margin: 0;
     font-family: 'Orbitron', sans-serif;
@@ -16,7 +15,7 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    overflow-y: auto; /* Scroll si besoin */
+    overflow-y: auto;
   }
   .container {
     background: rgba(0,0,0,0.4);
@@ -91,20 +90,20 @@
     box-shadow: 0 0 25px #ff66cc;
   }
 
-  /* --- Vortex overlay --- */
+  /* Vortex overlay semi-transparent */
   #vortexOverlay {
     position: fixed;
     top:0; left:0;
     width:100vw;
     height:100vh;
-    background: black;
     display: flex;
     justify-content:center;
     align-items:center;
     z-index: 9999;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.5s;
+    transition: opacity 0.3s;
+    background: rgba(0,0,0,0.3);
   }
   #vortexOverlay video {
     width:100vw;
@@ -114,6 +113,7 @@
 </style>
 </head>
 <body>
+
 <div class="container">
   <h1>Inscription</h1>
   <input type="email" id="email" placeholder="Email">
@@ -144,7 +144,6 @@
 <div id="vortexOverlay">
   <video autoplay muted playsinline id="vortexVideo">
     <source src="vortex.mov" type="video/quicktime"/>
-    Votre navigateur ne supporte pas la lecture de cette vidéo.
   </video>
 </div>
 
@@ -221,9 +220,8 @@ function playVortexAndRedirect(callback) {
 }
 
 signupBtn.addEventListener("click", async () => {
-  try {
-    // 🔹 Play vortex then register
-    playVortexAndRedirect(async () => {
+  playVortexAndRedirect(async () => {
+    try {
       const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
       const user = userCred.user;
       const rooms = selectedRooms;
@@ -236,8 +234,8 @@ signupBtn.addEventListener("click", async () => {
         rooms: rooms
       });
       window.location.href = "page2.html";
-    });
-  } catch(e) { alert("Erreur : "+e.message); }
+    } catch(e){ alert("Erreur : "+e.message); }
+  });
 });
 
 loginBtn.addEventListener("click", () => {
