@@ -96,14 +96,21 @@ onAuthStateChanged(auth, async user => {
       photosContainer.appendChild(img);
     });
 
-    // Boutons salles
-    roomButtons.innerHTML="";
-    (data.rooms||[]).forEach(room=>{
-      const btn = document.createElement("button");
-      btn.className="room-btn selected";
-      btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
-      roomButtons.appendChild(btn);
-    });
+    // ...
+// Boutons salles
+roomButtons.innerHTML="";
+(data.rooms||[]).forEach(room=>{
+  const btn = document.createElement("button");
+  btn.className="room-btn selected";
+  btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
+  
+  // Redirection vers la salle correspondante
+  btn.addEventListener("click", ()=>{
+    window.location.href = `salle.html?room=${encodeURIComponent(room)}`;
+  });
+
+  roomButtons.appendChild(btn);
+});
   }
 });
 
