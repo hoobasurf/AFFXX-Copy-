@@ -27,17 +27,13 @@
       text-shadow: 0 0 8px #ff66cc;
       margin-bottom: 20px;
     }
-    input, button, textarea {
+    input, button {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
       border-radius: 8px;
       border: 1px solid #ff66cc;
       font-size: 1em;
-      font-family: 'Orbitron', sans-serif;
-    }
-    textarea {
-      resize: none;
     }
     button {
       cursor: pointer;
@@ -46,28 +42,47 @@
       font-weight: bold;
       transition: 0.3s;
     }
-    button:hover {
-      background: #ff33aa;
-    }
+    button:hover { background: #ff33aa; }
     .google-btn {
       background: #fff;
       color: #333;
       border: 1px solid #ddd;
     }
-    .google-btn:hover {
-      background: #f5f5f5;
+    .google-btn:hover { background: #f5f5f5; }
+
+    /* Preview photos */
+    #photosPreview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
     }
+    #photosPreview img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #ff66cc;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    #photosPreview img:hover { transform: scale(1.2); }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Inscription</h1>
-    <input type="text" id="pseudo" placeholder="Pseudo" required />
-    <input type="number" id="age" placeholder="Âge" min="16" max="99" />
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Mot de passe" />
+    <input type="text" id="pseudo" placeholder="Pseudo" />
+    <input type="number" id="age" placeholder="Âge" />
     <input type="text" id="location" placeholder="Lieu" />
-    <textarea id="description" placeholder="Description..." rows="3"></textarea>
-    <input type="email" id="email" placeholder="Email" required />
-    <input type="password" id="password" placeholder="Mot de passe" required />
+    <textarea id="description" placeholder="Description..."></textarea>
+
+    <input type="file" id="photos" accept="image/*" multiple />
+    <div id="photosPreview"></div>
+
     <button id="signupBtn">S'inscrire</button>
     <button id="loginBtn">Se connecter</button>
     <button class="google-btn" id="googleBtn">Connexion avec Google</button>
@@ -78,11 +93,7 @@
       getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, 
       GoogleAuthProvider, signInWithPopup, onAuthStateChanged 
     } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-
-    import { 
-      getDatabase, ref, set, get 
-    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { app } from "./firebase.js";
 
     const auth = getAuth(app);
@@ -91,39 +102,70 @@
     const signupBtn = document.getElementById("signupBtn");
     const loginBtn = document.getElementById("loginBtn");
     const googleBtn = document.getElementById("googleBtn");
+    const photosInput = document.getElementById("photos");
+    const photosPreview = document.getElementById("photosPreview");
+    const pseudoInput = document.getElementById("pseudo");
+    const ageInput = document.getElementById("age");
+    const locationInput = document.getElementById("location");
+    const descInput = document.getElementById("description");
 
-    // Inscription par email
-    signupBtn.addEventListener("click", async () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      try {
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        const user = cred.user;
+    let uploadedPhotos = [];
 
-        await set(ref(db, "users/" + user.uid), {
+    // Prévisualisation des photos
+    photosInput.addEventListener("change", e => {
+      photosPreview.innerHTML = "";
+      uploadedPhotos = [];
+      [...e.target.files].slice(0,5).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = document.createElement("img");
+          img.src = ev.target.result;
+          photosPreview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+        uploadedPhotos.push(file);
+      });
+    });
+
+    async function saveUserData(user) {
+      const photoURLs = uploadedPhotos.map(file => URL.createObjectURL(file));
+      const userRef = ref(db, "users/" + user.uid);
+      const snap = await get(userRef);
+      if(!snap.exists()) {
+        await set(userRef, {
           email: user.email,
-          pseudo: document.getElementById("pseudo").value,
-          age: document.getElementById("age").value,
-          location: document.getElementById("location").value,
-          description: document.getElementById("description").value,
-          photos: [],
+          pseudo: pseudoInput.value || user.displayName || "Nouvel utilisateur",
+          age: ageInput.value || "",
+          location: locationInput.value || "",
+          description: descInput.value || "",
+          photos: photoURLs,
           gender: "unknown",
           rooms: []
         });
-      } catch (err) {
-        alert(err.message);
       }
+      window.location.href = "page2.html";
+    }
+
+    // Inscription email
+    signupBtn.addEventListener("click", async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      if(!email || !password) { alert("Email et mot de passe requis"); return; }
+      try {
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        await saveUserData(userCred.user);
+      } catch(err) { alert(err.message); }
     });
 
-    // Connexion par email
+    // Connexion email
     loginBtn.addEventListener("click", async () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
+      if(!email || !password) { alert("Email et mot de passe requis"); return; }
       try {
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (err) {
-        alert(err.message);
-      }
+        const userCred = await signInWithEmailAndPassword(auth, email, password);
+        await saveUserData(userCred.user); // on peut garder update si jamais photos déjà ajoutées
+      } catch(err) { alert(err.message); }
     });
 
     // Connexion Google
@@ -131,33 +173,8 @@
       try {
         const provider = new GoogleAuthProvider();
         const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-
-        const userRef = ref(db, "users/" + user.uid);
-        const snap = await get(userRef);
-
-        if (!snap.exists()) {
-          await set(userRef, {
-            email: user.email,
-            pseudo: user.displayName || "Nouvel utilisateur",
-            age: "",
-            location: "",
-            description: "",
-            photos: user.photoURL ? [user.photoURL] : [],
-            gender: "unknown",
-            rooms: []
-          });
-        }
-      } catch (err) {
-        alert(err.message);
-      }
-    });
-
-    // Redirection après connexion
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        window.location.href = "page2.html";
-      }
+        await saveUserData(result.user);
+      } catch(err) { alert(err.message); }
     });
   </script>
 </body>
