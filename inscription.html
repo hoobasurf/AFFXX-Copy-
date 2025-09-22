@@ -27,13 +27,17 @@
       text-shadow: 0 0 8px #ff66cc;
       margin-bottom: 20px;
     }
-    input, button {
+    input, button, textarea {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
       border-radius: 8px;
       border: 1px solid #ff66cc;
       font-size: 1em;
+      font-family: 'Orbitron', sans-serif;
+    }
+    textarea {
+      resize: none;
     }
     button {
       cursor: pointer;
@@ -58,8 +62,12 @@
 <body>
   <div class="container">
     <h1>Inscription</h1>
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Mot de passe" />
+    <input type="text" id="pseudo" placeholder="Pseudo" required />
+    <input type="number" id="age" placeholder="Âge" min="16" max="99" />
+    <input type="text" id="location" placeholder="Lieu" />
+    <textarea id="description" placeholder="Description..." rows="3"></textarea>
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Mot de passe" required />
     <button id="signupBtn">S'inscrire</button>
     <button id="loginBtn">Se connecter</button>
     <button class="google-btn" id="googleBtn">Connexion avec Google</button>
@@ -72,7 +80,7 @@
     } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
     import { 
-      getDatabase, ref, set, get, update 
+      getDatabase, ref, set, get 
     } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
     import { app } from "./firebase.js";
@@ -84,25 +92,37 @@
     const loginBtn = document.getElementById("loginBtn");
     const googleBtn = document.getElementById("googleBtn");
 
-    // Création compte avec email
+    // Inscription par email
     signupBtn.addEventListener("click", async () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       try {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        const user = cred.user;
+
+        await set(ref(db, "users/" + user.uid), {
+          email: user.email,
+          pseudo: document.getElementById("pseudo").value,
+          age: document.getElementById("age").value,
+          location: document.getElementById("location").value,
+          description: document.getElementById("description").value,
+          photos: [],
+          gender: "unknown",
+          rooms: []
+        });
       } catch (err) {
-        alert("Erreur : " + err.message);
+        alert(err.message);
       }
     });
 
-    // Connexion email
+    // Connexion par email
     loginBtn.addEventListener("click", async () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       try {
         await signInWithEmailAndPassword(auth, email, password);
       } catch (err) {
-        alert("Erreur : " + err.message);
+        alert(err.message);
       }
     });
 
@@ -110,40 +130,32 @@
     googleBtn.addEventListener("click", async () => {
       try {
         const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
-      } catch (err) {
-        alert("Erreur : " + err.message);
-      }
-    });
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
 
-    // Quand l’utilisateur est connecté
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
         const userRef = ref(db, "users/" + user.uid);
         const snap = await get(userRef);
 
         if (!snap.exists()) {
-          // Premier enregistrement
           await set(userRef, {
             email: user.email,
             pseudo: user.displayName || "Nouvel utilisateur",
-            photos: user.photoURL ? [user.photoURL] : [],
             age: "",
             location: "",
             description: "",
+            photos: user.photoURL ? [user.photoURL] : [],
             gender: "unknown",
             rooms: []
           });
-        } else {
-          // Mise à jour si données manquantes
-          await update(userRef, {
-            email: user.email,
-            pseudo: snap.val().pseudo || user.displayName || "Utilisateur",
-            photos: snap.val().photos || (user.photoURL ? [user.photoURL] : []),
-          });
         }
+      } catch (err) {
+        alert(err.message);
+      }
+    });
 
-        // Redirection vers ton profil
+    // Redirection après connexion
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
         window.location.href = "page2.html";
       }
     });
