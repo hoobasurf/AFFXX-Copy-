@@ -1,111 +1,68 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Connexion Affinix</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Affinix - Introduction</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
   <style>
     body {
       margin: 0;
       padding: 0;
-      background: url('fond-galactique.jpg') no-repeat center center/cover;
-      font-family: 'Orbitron', sans-serif;
       height: 100vh;
-      color: white;
       overflow: hidden;
-    }
-
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      height: 100vh;
-      padding-top: 40px;
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(4px);
-      animation: fadeIn 2s ease-in;
-      position: relative;
-      z-index: 2; /* container au-dessus de la vidéo */
-    }
-
-    #logo {
-      width: 180px;
-      max-width: 80%;
-      margin-bottom: 20px;
-      filter: drop-shadow(0 0 5px #ff00ff) drop-shadow(0 0 15px #ff66cc);
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      width: 100%;
-      max-width: 400px;
-    }
-
-    .box {
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px;
-      padding: 16px;
-      animation: slideIn 1.5s ease;
-      box-shadow: 0 0 12px rgba(255, 0, 255, 0.3);
-    }
-
-    .box h2 {
-      text-align: center;
-      font-size: 1.2rem;
-      margin-bottom: 10px;
-    }
-
-    input {
-      width: 100%;
-      padding: 8px;
-      margin: 6px 0;
-      border: none;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.1);
+      font-family: 'Orbitron', sans-serif;
+      background: url('fond-galactique.jpg') no-repeat center center/cover;
       color: white;
-      font-size: 0.9rem;
     }
 
-    input::placeholder {
-      color: #ccc;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 6px;
-      background: transparent;
-      color: white;
-      font-size: 0.95rem;
-      cursor: pointer;
-      position: relative;
-      z-index: 1;
-    }
-
-    button::before {
-      content: '';
+    .intro {
       position: absolute;
-      top: -4px;
-      left: -4px;
-      right: -4px;
-      bottom: -4px;
-      z-index: -1;
-      background: radial-gradient(circle, #ff66cc, #cc33ff, #ff00ff);
-      filter: blur(10px);
-      opacity: 0.7;
-      border-radius: 10px;
-      animation: neonPulse 2s infinite alternate;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      animation: fadeIn 3s ease-in-out;
     }
 
-    @keyframes neonPulse {
-      from { opacity: 0.4; }
-      to { opacity: 0.9; }
+    .intro h1 {
+      font-size: 3em;
+      text-shadow: 0 0 20px #ff00ff, 0 0 40px #cc33ff;
+      animation: zoomIn 5s ease-in-out;
+    }
+
+    .intro p {
+      margin-top: 20px;
+      font-size: 1.5em;
+      opacity: 0;
+      animation: fadeInText 5s ease-in-out 3s forwards;
+    }
+
+    /* Vortex vidéo */
+    #vortex {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      pointer-events: none;
+      animation: showVortex 6s ease-in-out 5s forwards;
+    }
+
+    /* Flash blanc */
+    .flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+      animation: flashEffect 2s ease-in-out 11s forwards;
     }
 
     @keyframes fadeIn {
@@ -113,97 +70,50 @@
       to { opacity: 1; }
     }
 
-    @keyframes slideIn {
-      from { transform: translateY(40px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+    @keyframes zoomIn {
+      from { transform: scale(0.7) translate(-50%, -50%); opacity: 0; }
+      to { transform: scale(1) translate(-50%, -50%); opacity: 1; }
     }
 
-    @media (min-width: 768px) {
-      .form-group {
-        flex-direction: row;
-        justify-content: center;
-        gap: 40px;
-      }
-
-      .box {
-        width: 300px;
-      }
+    @keyframes fadeInText {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
-    /* Vortex vidéo */
-    #vortex {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 60%;
-      height: auto;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0.5;
+    @keyframes showVortex {
+      from { opacity: 0; }
+      to { opacity: 0.8; }
     }
 
-    /* Flash blanc */
-    #flash {
-      position: fixed;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
-      background:white;
-      opacity:0;
-      pointer-events:none;
-      z-index: 999;
+    @keyframes flashEffect {
+      0% { opacity: 0; }
+      50% { opacity: 1; }
+      100% { opacity: 0; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Vortex vidéo en arrière-plan -->
-  <video id="vortex" autoplay muted playsinline loop>
-    <source src="vortex.mp4" type="video/mp4">
+  <!-- Texte d'introduction -->
+  <div class="intro">
+    <h1>AFFINIX</h1>
+    <p>Prépare-toi au voyage...</p>
+  </div>
+
+  <!-- Vortex en transparence -->
+  <video id="vortex" autoplay muted playsinline>
+    <source src="Vortex.mov" type="video/mp4">
+    Votre navigateur ne supporte pas la vidéo.
   </video>
 
   <!-- Flash blanc -->
-  <div id="flash"></div>
-
-  <div class="container">
-    <!-- Logo coeur Affinix -->
-    <img id="logo" src="AAFFXX.png" alt="Logo Affinix Cœur" />
-
-    <div class="form-group">
-      <!-- Connexion -->
-      <div class="box">
-        <h2>Connexion</h2>
-        <input type="email" placeholder="Email" />
-        <input type="password" placeholder="Mot de passe" />
-        <button onclick="goToPage2()">Se connecter</button>
-      </div>
-
-      <!-- Inscription -->
-      <div class="box">
-        <h2>Inscription</h2>
-        <input type="text" placeholder="Pseudo" />
-        <input type="email" placeholder="Email" />
-        <input type="password" placeholder="Mot de passe" />
-        <button onclick="goToPage2()">S’inscrire</button>
-      </div>
-    </div>
-  </div>
+  <div class="flash"></div>
 
   <script>
-    const flash = document.getElementById('flash');
-
-    function goToPage2() {
-      // Animation du flash blanc
-      flash.style.transition = 'opacity 0.3s ease';
-      flash.style.opacity = 1;
-
-      // Redirection après 300ms
-      setTimeout(() => {
-        window.location.href = "inscription.html";
-      }, 300);
-    }
+    // Redirection vers inscription après l’animation
+    setTimeout(() => {
+      window.location.href = "inscription.html";
+    }, 13000); // 13 secondes pour laisser le temps au vortex + flash
   </script>
 
 </body>
