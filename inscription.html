@@ -1,214 +1,303 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inscription</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;width:100%;font-family:'Orbitron',sans-serif;background:url('ville.jpg') no-repeat center center/cover;background-attachment:fixed;color:#fff;overflow-y:auto}
-  .container{max-width:500px;margin:40px auto;background:rgba(0,0,0,0.4);padding:24px;border-radius:15px;box-shadow:0 0 20px #ff66cc;text-align:center;position:relative;z-index:1}
-  h1{color:#ff66cc;text-shadow:0 0 10px #ff66cc;margin-bottom:16px}
-  input,textarea,button{width:100%;margin:10px 0;padding:10px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.5);color:#fff;font-family:'Orbitron'}
-  textarea{resize:vertical;min-height:70px}
-  .salles{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin:8px 0}
-  .salle-btn{padding:8px 14px;border:2px solid #ff66cc;border-radius:10px;background:rgba(0,0,0,0.35);color:#fff;cursor:pointer;font-weight:bold;transition:.2s}
-  .salle-btn.active{box-shadow:0 0 20px #ff66cc,0 0 30px #ff66cc inset;background:rgba(255,102,204,0.85)}
-  .photos-preview{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:8px}
-  .photos-preview img{width:70px;height:70px;object-fit:cover;border-radius:8px;border:2px solid #ff66cc;cursor:pointer;transition:transform .15s}
-  .photos-preview img:hover{transform:scale(1.15)}
-  .lightbox{display:none;position:fixed;z-index:10000;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center}
-  .lightbox img{max-width:92%;max-height:92%;border-radius:10px;box-shadow:0 0 25px #ff66cc}
-  /* Vortex + flash */
-  #vortexOverlay{position:fixed;top:0;left:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:transparent;z-index:2000;overflow:hidden}
-  .vortex{width:200vw;height:200vw;border-radius:50%;background:radial-gradient(circle, rgba(255,102,204,0.2) 20%, transparent 70%);animation:spinZoom 1.8s ease-in-out forwards}
-  @keyframes spinZoom{0%{transform:scale(0) rotate(0deg);opacity:1}70%{transform:scale(2) rotate(720deg);opacity:1}100%{transform:scale(4) rotate(1440deg);opacity:0}}
-  #whiteFlash{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;opacity:0;z-index:3000;pointer-events:none;transition:opacity .35s ease-in-out}
-  /* boutons bas */
-  .row{display:flex;gap:10px}
-  .btn-half{flex:1;padding:10px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff;cursor:pointer}
-  .google-btn{background:#fff;color:#333;border-color:#ddd}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    width: 100%;
+    font-family: 'Orbitron', sans-serif;
+    background: url("ville.jpg") no-repeat center center/cover;
+    color: #fff;
+    overflow: hidden; /* pas de scroll global */
+  }
+
+  .container {
+    background: rgba(0,0,0,0.4);
+    padding: 20px;
+    border-radius: 15px;
+    width: 95%;
+    max-width: 500px;
+    margin: 40px auto;
+    box-shadow: 0 0 20px #ff66cc;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+
+    max-height: 90vh;      /* limite hauteur */
+    overflow-y: auto;      /* scroll interne */
+  }
+  .container::-webkit-scrollbar { width: 8px; }
+  .container::-webkit-scrollbar-thumb { background-color: #ff66cc; border-radius: 4px; }
+
+  h1 {
+    color: #ff66cc;
+    text-shadow: 0 0 10px #ff66cc;
+    margin-bottom: 15px;
+  }
+
+  input, textarea {
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 8px;
+    border: 2px solid #ff66cc;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+  }
+
+  .salles {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 10px 0;
+  }
+  .salle-btn {
+    padding: 8px 15px;
+    border: 2px solid #ff66cc;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.4);
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+  }
+  .salle-btn.active {
+    box-shadow: 0 0 15px #ff66cc, 0 0 25px #ff66cc inset;
+    background: rgba(255, 102, 204,0.8);
+  }
+
+  .photos-preview {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .photos-preview img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #ff66cc;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .photos-preview img:hover { transform: scale(1.2); }
+
+  button.signup-btn, button.login-btn {
+    margin: 10px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 2px solid #ff66cc;
+    background: rgba(0,0,0,0.4);
+    color: #fff;
+    cursor: pointer;
+    font-size: 1em;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
+    transition: 0.3s;
+  }
+  button.signup-btn:hover, button.login-btn:hover {
+    box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
+  }
+
+  /* Lightbox */
+  .lightbox {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+  }
+  .lightbox img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
+    box-shadow: 0 0 25px #ff66cc;
+  }
+
+  /* Vortex CSS */
+  #vortexOverlay {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    z-index: 2000;
+    overflow: hidden;
+  }
+  .vortex {
+    width: 200vw;
+    height: 200vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,102,204,0.2) 20%, transparent 70%);
+    animation: spinZoom 2s ease-in-out forwards;
+  }
+  @keyframes spinZoom {
+    0% { transform: scale(0) rotate(0deg); opacity: 1; }
+    70% { transform: scale(2) rotate(720deg); opacity: 1; }
+    100% { transform: scale(4) rotate(1440deg); opacity: 0; }
+  }
+
+  /* Flash blanc */
+  #whiteFlash {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:white;
+    opacity:0;
+    z-index:3000;
+    pointer-events:none;
+    transition: opacity 0.4s ease-in-out;
+  }
 </style>
 </head>
 <body>
-  <div class="container" id="formContainer">
-    <h1>Inscription</h1>
 
-    <input id="pseudo" placeholder="Pseudo" type="text" />
-    <input id="age" placeholder="Âge" type="number" min="16" max="99" />
-    <input id="location" placeholder="Lieu" type="text" />
-    <textarea id="description" placeholder="Description..."></textarea>
+<div class="container">
+  <h1>Inscription</h1>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Mot de passe">
+  <input type="text" id="pseudo" placeholder="Pseudo">
+  <input type="number" id="age" placeholder="Âge">
+  <input type="text" id="location" placeholder="Lieu">
+  <textarea id="description" placeholder="Description..."></textarea>
 
-    <div class="salles">
-      <div class="salle-btn" data-value="serieux">Sérieux</div>
-      <div class="salle-btn" data-value="amicale">Amicale</div>
-      <div class="salle-btn" data-value="fun">Fun</div>
-    </div>
-
-    <label style="display:block;text-align:left;margin-top:8px">Ajoute jusqu'à 5 photos :</label>
-    <input id="photos" type="file" accept="image/*" multiple />
-    <div class="photos-preview" id="photosPreview"></div>
-
-    <input id="email" placeholder="Email" type="email" />
-    <input id="password" placeholder="Mot de passe" type="password" />
-
-    <div class="row" style="margin-top:8px">
-      <button class="btn-half" id="signupBtn">S'inscrire</button>
-      <button class="btn-half" id="loginBtn">Se connecter</button>
-    </div>
-
-    <button id="googleBtn" class="google-btn" style="margin-top:8px">Connexion avec Google</button>
+  <div class="salles">
+    <div class="salle-btn" data-value="serieux">Sérieux</div>
+    <div class="salle-btn" data-value="amicale">Amicale</div>
+    <div class="salle-btn" data-value="fun">Fun</div>
   </div>
 
-  <div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
-  <div id="vortexOverlay"><div class="vortex"></div></div>
-  <div id="whiteFlash"></div>
+  <label for="photos">Ajoute jusqu’à 5 photos :</label>
+  <input type="file" id="photos" accept="image/*" multiple>
+  <div class="photos-preview" id="photosPreview"></div>
+
+  <button class="signup-btn" id="signupBtn">S’inscrire</button>
+  <button class="login-btn" id="loginBtn">Se connecter</button>
+</div>
+
+<div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
+<div id="vortexOverlay"><div class="vortex"></div></div>
+<div id="whiteFlash"></div>
 
 <script type="module">
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-  import { app } from "./firebase.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { app } from "./firebase.js";
 
-  const auth = getAuth(app);
-  const db = getDatabase(app);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-  const pseudoEl = document.getElementById('pseudo');
-  const ageEl = document.getElementById('age');
-  const locationEl = document.getElementById('location');
-  const descEl = document.getElementById('description');
-  const photosInput = document.getElementById('photos');
-  const photosPreview = document.getElementById('photosPreview');
-  const emailEl = document.getElementById('email');
-  const passwordEl = document.getElementById('password');
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const pseudo = document.getElementById("pseudo");
+const age = document.getElementById("age");
+const locationInput = document.getElementById("location");
+const description = document.getElementById("description");
+const photosInput = document.getElementById("photos");
+const preview = document.getElementById("photosPreview");
+const signupBtn = document.getElementById("signupBtn");
+const loginBtn = document.getElementById("loginBtn");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
+const vortexOverlay = document.getElementById("vortexOverlay");
+const whiteFlash = document.getElementById("whiteFlash");
 
-  const salleBtns = document.querySelectorAll('.salle-btn');
-  let selectedRooms = [];
+let uploadedPhotos = [];
 
-  // toggles salles
-  salleBtns.forEach(btn=>{
-    btn.addEventListener('click', ()=> {
-      const v = btn.dataset.value;
-      if(selectedRooms.includes(v)){ selectedRooms = selectedRooms.filter(r=>r!==v); btn.classList.remove('active'); }
-      else { selectedRooms.push(v); btn.classList.add('active'); }
-    });
-  });
-
-  // preview images (store files locally until signup)
-  let stagedFiles = []; // File objects
-  photosInput.addEventListener('change', e=>{
-    const files = Array.from(e.target.files || []).slice(0,5);
-    photosPreview.innerHTML = ''; stagedFiles = [];
-    files.forEach(file=>{
-      const reader = new FileReader();
-      reader.onload = ev => {
-        const img = document.createElement('img');
-        img.src = ev.target.result;
-        img.addEventListener('click', ()=> openLightbox(ev.target.result));
-        photosPreview.appendChild(img);
-      };
-      reader.readAsDataURL(file);
-      stagedFiles.push(file);
-    });
-  });
-
-  // lightbox
-  const lightbox = document.getElementById('lightbox');
-  const lightboxImg = document.getElementById('lightboxImg');
-  function openLightbox(src){ lightboxImg.src = src; lightbox.style.display = 'flex'; }
-  lightbox.addEventListener('click', ()=> { lightbox.style.display = 'none'; lightboxImg.src = ''; });
-
-  // vortex + flash
-  const vortexOverlay = document.getElementById('vortexOverlay');
-  const whiteFlash = document.getElementById('whiteFlash');
-  function playVortexAndRedirect(){
-    vortexOverlay.style.display = 'flex';
-    // after the spin show white flash and redirect
-    setTimeout(()=>{
-      whiteFlash.style.opacity = '1';
-      setTimeout(()=> window.location.href = 'page2.html', 350);
-    }, 1000); // wait some spin time
-  }
-
-  // read files to DataURL (returns Promise<string[]> limited to 5)
-  function filesToDataURLs(files){
-    const limited = (files||[]).slice(0,5);
-    return Promise.all(limited.map(f => new Promise((res,rej)=>{
-      const r = new FileReader();
-      r.onload = e => res(e.target.result);
-      r.onerror = rej;
-      r.readAsDataURL(f);
-    })));
-  }
-
-  // SIGNUP
-  document.getElementById('signupBtn').addEventListener('click', async ()=>{
-    const email = emailEl.value.trim();
-    const pass = passwordEl.value;
-    if(!email || !pass){ alert('Email et mot de passe requis'); return; }
-    try{
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      const uid = cred.user.uid;
-      // convert stagedFiles to data URLs
-      const photoDataURLs = await filesToDataURLs(stagedFiles);
-      await set(ref(db, 'users/' + uid), {
-        email,
-        pseudo: pseudoEl.value.trim() || '',
-        age: ageEl.value || '',
-        location: locationEl.value.trim() || '',
-        description: descEl.value.trim() || '',
-        rooms: selectedRooms,
-        photos: photoDataURLs
+// Gestion du zoom photos
+photosInput.addEventListener("change", e=>{
+  preview.innerHTML = "";
+  uploadedPhotos=[];
+  [...e.target.files].slice(0,5).forEach(file=>{
+    const reader = new FileReader();
+    reader.onload=ev=>{
+      const img=document.createElement("img");
+      img.src=ev.target.result;
+      img.addEventListener("click", ()=> {
+        lightboxImg.src = ev.target.result;
+        lightbox.style.display = "flex";
       });
-      playVortexAndRedirect();
-    }catch(e){
-      alert(e.message || e);
+      preview.appendChild(img);
     }
+    reader.readAsDataURL(file);
+    uploadedPhotos.push(file);
   });
+});
 
-  // LOGIN (email)
-  document.getElementById('loginBtn').addEventListener('click', async ()=>{
-    const email = emailEl.value.trim();
-    const pass = passwordEl.value;
-    if(!email || !pass){ alert('Email et mot de passe requis'); return; }
-    try{
-      await signInWithEmailAndPassword(auth, email, pass);
-      playVortexAndRedirect();
-    }catch(e){
-      alert(e.message || e);
-    }
-  });
+lightbox.addEventListener("click", ()=>{
+  lightbox.style.display="none";
+  lightboxImg.src="";
+});
 
-  // GOOGLE
-  document.getElementById('googleBtn').addEventListener('click', async ()=>{
-    try{
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      // ensure user saved in DB
-      const userRef = ref(db, 'users/' + user.uid);
-      await set(userRef, {
-        email: user.email,
-        pseudo: user.displayName || '',
-        age: '',
-        location: '',
-        description: '',
-        rooms: [],
-        photos: user.photoURL ? [user.photoURL] : []
-      });
-      playVortexAndRedirect();
-    }catch(e){
-      alert(e.message || e);
+// Gestion boutons salles
+const salleBtns = document.querySelectorAll(".salle-btn");
+let selectedRooms = [];
+salleBtns.forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const val = btn.dataset.value;
+    if(selectedRooms.includes(val)){
+      selectedRooms = selectedRooms.filter(r=>r!==val);
+      btn.classList.remove("active");
+    } else {
+      selectedRooms.push(val);
+      btn.classList.add("active");
     }
   });
+});
 
-  // if already logged in (rare) redirect to page2
-  onAuthStateChanged(auth, user => {
-    if(user){
-      // don't auto-redirect here if you prefer — but keep consistent behavior: go to page2
-      // window.location.href = 'page2.html';
-    }
-  });
+// Fonction animation vortex + flash + redirection
+function playVortexAndRedirect() {
+  vortexOverlay.style.display = "flex";
+  setTimeout(()=>{
+    whiteFlash.style.opacity = "1";
+    setTimeout(()=> window.location.href="page2.html", 400);
+  },1800);
+}
+
+// Inscription
+signupBtn.addEventListener("click", async ()=>{
+  if(!email.value || !password.value) { alert("Email et mot de passe requis"); return; }
+  try{
+    const userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
+    const user = userCred.user;
+    const photoURLs = uploadedPhotos.map(file=>URL.createObjectURL(file));
+    await set(ref(db,"users/"+user.uid),{
+      email: email.value,
+      pseudo: pseudo.value,
+      age: age.value,
+      location: locationInput.value,
+      description: description.value,
+      rooms: selectedRooms,
+      photos: photoURLs
+    });
+    playVortexAndRedirect();
+  } catch(e){
+    alert("Erreur: "+e.message);
+  }
+});
+
+// Connexion
+loginBtn.addEventListener("click", async ()=>{
+  try{
+    await signInWithEmailAndPassword(auth,email.value,password.value);
+    playVortexAndRedirect();
+  }catch(e){
+    alert("Erreur: "+e.message);
+  }
+});
 </script>
 </body>
 </html>
