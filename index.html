@@ -129,7 +129,11 @@
 </head>
 <body>
 
-<video id="video-vortex" src="/vortex.mov" autoplay muted loop></video>
+<!-- Vidéo du vortex avec fallback -->
+<video id="video-vortex" autoplay muted loop playsinline>
+  <source src="/vortex.mp4" type="video/mp4" />
+  <source src="/vortex.webm" type="video/webm" />
+</video>
 
 <div id="container">
   <img id="logo" src="/AAFFXX.png" alt="Logo Néon AFFINIX" />
