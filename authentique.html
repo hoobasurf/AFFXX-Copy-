@@ -44,7 +44,7 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, set, onDisconnect, onValue, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
@@ -64,11 +64,11 @@ onAuthStateChanged(auth, async user => {
   const userRef = ref(db, "users/" + user.uid);
 
   // ⚡ Marquer comme connecté
-  await set(userRef + "/online", true);
-  // ⚡ Marquer offline automatiquement à la déconnexion
+  await update(userRef, { online: true });
+  // ⚡ Automatiquement offline si l’utilisateur ferme ou perd connexion
   onDisconnect(ref(db, "users/" + user.uid + "/online")).set(false);
 
-  // Ton mini-profil
+  // Mini-profil mis à jour en direct
   onValue(userRef, snap => {
     if (snap.exists()) {
       const data = snap.val();
@@ -80,14 +80,14 @@ onAuthStateChanged(auth, async user => {
     }
   });
 
-  // ⚡ Carrousel des utilisateurs connectés
+  // ⚡ Carrousel utilisateurs connectés
   const allUsersRef = ref(db, "users");
   onValue(allUsersRef, snap => {
     carousel.innerHTML = "";
     if (snap.exists()) {
       const allUsers = snap.val();
       Object.entries(allUsers).forEach(([uid, u]) => {
-        if (u.email !== user.email && u.online === true) {
+        if (uid !== user.uid && u.online === true) {
           const card = document.createElement("div");
           card.className = "card " + (u.gender || "girl");
           card.innerHTML = `
