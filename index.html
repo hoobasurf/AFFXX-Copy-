@@ -17,14 +17,11 @@
     }
 
     #video-vortex {
-      position: absolute;
+      position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
       object-fit: cover;
-      opacity: 0;
-      transition: opacity 1.5s ease-in;
-      z-index: 1;
-      pointer-events: none;
+      z-index: -1; /* Derrière tout */
     }
 
     #container {
@@ -43,7 +40,6 @@
       animation: zoomFade 2s ease-out forwards;
       opacity: 0;
       transform: scale(2);
-      transition: transform 1.2s ease-in-out, opacity 1s ease-in-out;
     }
 
     #phrase, #phrase2 {
@@ -129,16 +125,11 @@
 </head>
 <body>
 
-<!-- Vidéo du vortex avec fallback -->
-<video id="video-vortex"
-  autoplay
-  muted
-  loop
-  playsinline
-  webkit-playsinline
-  preload="auto">
+<!-- Vidéo du vortex -->
+<video id="video-vortex" autoplay muted loop playsinline webkit-playsinline>
   <source src="vortex.mp4" type="video/mp4" />
   <source src="vortex.webm" type="video/webm" />
+  <source src="vortex.mov" type="video/quicktime" />
 </video>
 
 <div id="container">
@@ -154,15 +145,8 @@
   const logo = document.getElementById('logo');
   const phrase = document.getElementById('phrase');
   const phrase2 = document.getElementById('phrase2');
-  const vortex = document.getElementById('video-vortex');
   const flash = document.getElementById('flash');
   const explosion = document.getElementById('explosion');
-
-  // Forcer iOS à lancer la vidéo en autoplay
-  vortex.muted = true;
-  vortex.play().catch(err => {
-    console.warn("Autoplay bloqué :", err);
-  });
 
   // Logo entre
   logo.style.animation = 'zoomFade 2s ease-out forwards';
@@ -176,11 +160,6 @@
   setTimeout(() => {
     phrase.style.animation = 'zoomBig 2s forwards ease-in';
   }, 3500);
-
-  // Vortex visible
-  setTimeout(() => {
-    vortex.style.opacity = '0.5';
-  }, 4800);
 
   // Phrase 2 apparaît
   setTimeout(() => {
@@ -211,7 +190,6 @@
     window.location.href = "inscription.html";
   }, 10100);
 </script>
-
 <script type="module" src="firebase.js"></script>
 </body>
 </html>
