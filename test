@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Test Vortex</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      background: black;
+    }
+    video {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      display: block;
+      background: black;
+    }
+  </style>
+</head>
+<body>
+  <video id="vortex" autoplay muted playsinline loop preload="auto" webkit-playsinline>
+    <source src="vortex.mp4" type="video/mp4">
+    <source src="vortex.webm" type="video/webm">
+  </video>
+
+  <script>
+    const video = document.getElementById('vortex');
+
+    // 🌀 iPhone Safari a parfois besoin de forcer la lecture après un court délai
+    video.addEventListener('loadeddata', () => {
+      setTimeout(() => {
+        video.play().catch(err => console.log('Lecture bloquée :', err));
+      }, 50);
+    });
+  </script>
+</body>
+</html>
