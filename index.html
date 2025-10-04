@@ -21,7 +21,9 @@
       top: 0; left: 0;
       width: 100vw; height: 100vh;
       object-fit: cover;
-      z-index: -1; /* Derrière tout */
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 1.8s ease-in;
     }
 
     #container {
@@ -145,8 +147,14 @@
   const logo = document.getElementById('logo');
   const phrase = document.getElementById('phrase');
   const phrase2 = document.getElementById('phrase2');
+  const vortex = document.getElementById('video-vortex');
   const flash = document.getElementById('flash');
   const explosion = document.getElementById('explosion');
+
+  // Apparition progressive du vortex dès que la vidéo est prête
+  vortex.addEventListener('loadeddata', () => {
+    vortex.style.opacity = '0.5';
+  });
 
   // Logo entre
   logo.style.animation = 'zoomFade 2s ease-out forwards';
