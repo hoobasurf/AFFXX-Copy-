@@ -56,37 +56,160 @@
         -1px -1px 0 #000,
         1px -1px 0 #000,
         -1px 1px 0 #000,
-        1px 1px 0 #000;
+        1px 1px 0 #000,
+        0 0 10px #ff66cc,
+        0 0 20px #d600d6;
+      opacity: 0;
     }
 
     @keyframes zoomFade {
-      0% { transform: scale(2); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
 
-    @keyframes fadeOutText {
+    @keyframes fadeZoomIn {
+      from { opacity: 0; transform: scale(0.3); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes zoomBig {
+      from { transform: scale(1); opacity: 1; }
+      to { transform: scale(25); opacity: 0; }
+    }
+
+    @keyframes shrinkAndFade {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.01); }
+    }
+
+    @keyframes logoToCenter {
+      0% { transform: scale(1) translate(0, 0); opacity: 1; }
+      100% {
+        transform: scale(0.05) translate(calc(-50vw + 50%), calc(-50vh + 50%));
+        opacity: 0;
+      }
+    }
+
+    .flash-light {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(200,160,255,0.5) 100%);
+      z-index: 999;
+      animation: flash 0.8s ease-out forwards;
+      opacity: 0;
+      display: none;
+    }
+
+    .final-explosion {
+      background: white;
+      z-index: 1000;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      opacity: 0;
+      animation: explosion 1.2s ease-out forwards;
+    }
+
+    @keyframes flash {
       0% { opacity: 1; }
-      80% { opacity: 1; }
       100% { opacity: 0; }
     }
 
+    @keyframes explosion {
+      0% { opacity: 0; }
+      50% { opacity: 0.9; }
+      100% { opacity: 1; }
+    }
   </style>
 </head>
 <body>
-  <div id="container">
-    <img id="logo" src="AAFFXX.png" alt="Affinix Logo" />
-    <h1 id="phrase">Prépare-toi au voyage</h1>
-  </div>
 
-  <!-- 🔽 Ajout minimal : déclenchement du vortex à la fin de la disparition du texte -->
-  <script>
-    const phrase = document.getElementById('phrase');
-    if (phrase) {
-      phrase.addEventListener('animationend', () => {
-        // Quand "Prépare-toi au voyage" finit de disparaître, lancer le vortex
+<!-- Vidéo du vortex -->
+<video id="video-vortex" autoplay muted loop playsinline webkit-playsinline>
+  <source src="vortex.mp4" type="video/mp4" />
+  <source src="vortex.webm" type="video/webm" />
+  <source src="vortex.mov" type="video/quicktime" />
+</video>
+
+<div id="container">
+  <img id="logo" src="/AAFFXX.png" alt="Logo Néon AFFINIX" />
+  <div id="phrase">Prépare-toi au voyage</div>
+  <div id="phrase2">Avec une Connexion interdimensionnelle…</div>
+</div>
+
+<div id="flash" class="flash-light"></div>
+<div id="explosion" class="final-explosion" style="display: none;"></div>
+
+<script>
+  const logo = document.getElementById('logo');
+  const phrase = document.getElementById('phrase');
+  const phrase2 = document.getElementById('phrase2');
+  const vortex = document.getElementById('video-vortex');
+  const flash = document.getElementById('flash');
+  const explosion = document.getElementById('explosion');
+
+  // Apparition progressive du vortex dès que la vidéo est prête
+  vortex.addEventListener('loadeddata', () => {
+    vortex.style.opacity = '0.5';
+  });
+
+  // Logo entre
+  logo.style.animation = 'zoomFade 2s ease-out forwards';
+
+  // Phrase 1
+  setTimeout(() => {
+    phrase.style.animation = 'fadeZoomIn 1s forwards ease-out';
+  }, 2000);
+
+  // Phrase 1 disparaît
+  setTimeout(() => {
+    phrase.style.animation = 'zoomBig 2s forwards ease-in';
+  }, 3500);
+
+  // Phrase 2 apparaît
+  setTimeout(() => {
+    phrase2.style.animation = 'fadeZoomIn 1.2s forwards ease-out';
+  }, 5500);
+
+  // Phrase 2 rétrécit et disparaît
+  setTimeout(() => {
+    phrase2.style.animation = 'shrinkAndFade 1.3s forwards ease-in';
+  }, 7000);
+
+  // Logo aspiré dans le vortex
+  setTimeout(() => {
+    logo.style.animation = 'logoToCenter 1.2s forwards ease-in';
+  }, 7600);
+
+  // Flash + explosion blanche
+  setTimeout(() => {
+    flash.style.display = 'block';
+  }, 8500);
+
+  setTimeout(() => {
+    explosion.style.display = 'block';
+  }, 8900);
+
+  // Redirection
+  setTimeout(() => {
+    window.location.href = "inscription.html";
+  }, 10100);
+</script>
+<script type="module" src="firebase.js"></script>
+<script>
+  const phrase = document.getElementById('phrase');
+  if (phrase) {
+    phrase.addEventListener('animationend', () => {
+      setTimeout(() => {
         window.location.href = "vortex.html";
-      });
-    }
-  </script>
+      }, 300); // le vortex démarre juste après la disparition du texte
+    });
+  }
+</script>
+</body>
+</html>
 </body>
 </html>
