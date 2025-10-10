@@ -26,6 +26,13 @@
   .modal input, .modal textarea{width:100%;margin:8px 0;padding:8px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff}
   .modal .row{display:flex;gap:8px}
   .modal button{flex:1;padding:10px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff;cursor:pointer}
+
+  /* carrousel online users */
+  #onlineCarouselContainer{max-width:600px;margin:30px auto;background:rgba(0,0,0,0.6);padding:16px;border-radius:15px;box-shadow:0 0 20px #ff66cc;text-align:left}
+  #onlineCarousel{display:flex;overflow-x:auto;gap:10px;padding-top:8px;padding-bottom:8px}
+  .onlineCard{min-width:100px;text-align:center;color:#fff;font-family:'Orbitron',sans-serif}
+  .onlineCard img{width:100px;height:100px;object-fit:cover;border-radius:10px;border:2px solid #ff66cc;cursor:pointer}
+  .onlineCard span{display:block;margin-top:4px;font-size:0.9em}
 </style>
 </head>
 <body>
@@ -48,6 +55,12 @@
     <button id="editBtn" class="edit-btn">Modifier</button>
   </div>
 
+  <!-- Carrousel utilisateurs en ligne -->
+  <div id="onlineCarouselContainer">
+    <h2 style="color:#ff66cc;text-shadow:0 0 10px #ff66cc;margin-bottom:8px">Utilisateurs en ligne</h2>
+    <div id="onlineCarousel"></div>
+  </div>
+
   <div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
 
   <!-- Modal Modifier -->
@@ -65,167 +78,188 @@
   </div>
 
 <script type="module">
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-  import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-  import { app } from "./firebase.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getDatabase, ref, get, update, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { app } from "./firebase.js";
 
-  const auth = getAuth(app);
-  const db = getDatabase(app);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-  const pseudoSpan = document.getElementById('pseudo');
-  const ageSpan = document.getElementById('age');
-  const locationSpan = document.getElementById('location');
-  const descSpan = document.getElementById('description');
-  const mainPhoto = document.getElementById('mainPhoto');
-  const photosContainer = document.getElementById('photosContainer');
-  const roomButtons = document.getElementById('roomButtons');
+const pseudoSpan = document.getElementById('pseudo');
+const ageSpan = document.getElementById('age');
+const locationSpan = document.getElementById('location');
+const descSpan = document.getElementById('description');
+const mainPhoto = document.getElementById('mainPhoto');
+const photosContainer = document.getElementById('photosContainer');
+const roomButtons = document.getElementById('roomButtons');
 
-  const lightbox = document.getElementById('lightbox');
-  const lightboxImg = document.getElementById('lightboxImg');
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
 
-  const modalEdit = document.getElementById('modalEdit');
-  const editDescription = document.getElementById('editDescription');
-  const editPhotos = document.getElementById('editPhotos');
-  const editPreview = document.getElementById('editPreview');
-  const saveEdit = document.getElementById('saveEdit');
-  const cancelEdit = document.getElementById('cancelEdit');
-  const editBtn = document.getElementById('editBtn');
+const modalEdit = document.getElementById('modalEdit');
+const editDescription = document.getElementById('editDescription');
+const editPhotos = document.getElementById('editPhotos');
+const editPreview = document.getElementById('editPreview');
+const saveEdit = document.getElementById('saveEdit');
+const cancelEdit = document.getElementById('cancelEdit');
+const editBtn = document.getElementById('editBtn');
 
-  let currentUid = null;
-  let currentPhotos = [];
+const onlineCarousel = document.getElementById("onlineCarousel");
 
-  onAuthStateChanged(auth, async user => {
-    if(!user){
-      alert('Vous devez être connecté !');
-      window.location.href = 'inscription.html';
-      return;
-    }
-    currentUid = user.uid;
-    const snap = await get(ref(db, 'users/' + user.uid));
-    if(snap.exists()){
-      const data = snap.val();
-      pseudoSpan.textContent = data.pseudo || 'Non renseigné';
-      ageSpan.textContent = data.age || 'Non renseigné';
-      locationSpan.textContent = data.location || 'Non renseigné';
-      descSpan.textContent = data.description || 'Non renseignée';
+let currentUid = null;
+let currentPhotos = [];
 
-      currentPhotos = data.photos || [];
-      if(currentPhotos.length>0){
-        mainPhoto.src = currentPhotos[0];
-      } else {
-        mainPhoto.src = 'https://via.placeholder.com/800x360?text=Photo';
+// Mettre utilisateur en ligne
+onAuthStateChanged(auth, async user => {
+  if(!user){
+    alert('Vous devez être connecté !');
+    window.location.href = 'inscription.html';
+    return;
+  }
+  currentUid = user.uid;
+
+  const userStatusRef = ref(db, "users/" + currentUid + "/online");
+  set(userStatusRef, true);
+  onDisconnect(userStatusRef).set(false);
+
+  // Charger profil
+  const snap = await get(ref(db, 'users/' + currentUid));
+  if(snap.exists()){
+    const data = snap.val();
+    pseudoSpan.textContent = data.pseudo || 'Non renseigné';
+    ageSpan.textContent = data.age || 'Non renseigné';
+    locationSpan.textContent = data.location || 'Non renseigné';
+    descSpan.textContent = data.description || 'Non renseignée';
+
+    currentPhotos = data.photos || [];
+    mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
+
+    photosContainer.innerHTML = '';
+    (currentPhotos||[]).forEach(url=>{
+      const img = document.createElement('img');
+      img.src = url;
+      img.addEventListener("click", ()=> openLightbox(url));
+      photosContainer.appendChild(img);
+    });
+
+    // room buttons
+    roomButtons.innerHTML = '';
+    (data.rooms||[]).forEach(room=>{
+      const btn = document.createElement('button');
+      btn.className = 'room-btn';
+      btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
+      btn.addEventListener('click', ()=>{
+        let page='';
+        if(room==='serieux') page='authentique.html';
+        if(room==='amicale') page='amicale.html';
+        if(room==='fun') page='fun.html';
+        window.location.href = page;
+      });
+      roomButtons.appendChild(btn);
+    });
+  }
+
+  // Carrousel utilisateurs en ligne
+  const usersRef = ref(db,"users");
+  onValue(usersRef, snapshot=>{
+    const users = snapshot.val();
+    onlineCarousel.innerHTML = "";
+    if(!users) return;
+    Object.keys(users).forEach(uid=>{
+      const u = users[uid];
+      if(u.online && uid !== currentUid){ // exclure moi-même
+        const card = document.createElement("div");
+        card.className = "onlineCard";
+
+        const img = document.createElement("img");
+        img.src = u.photos && u.photos[0] ? u.photos[0] : "https://via.placeholder.com/100";
+        img.alt = u.pseudo || "Utilisateur";
+
+        const span = document.createElement("span");
+        span.textContent = u.pseudo || "Utilisateur";
+
+        img.addEventListener("click", ()=> alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age || "Non renseigné"}\nLieu: ${u.location || "Non renseigné"}`));
+
+        card.appendChild(img);
+        card.appendChild(span);
+        onlineCarousel.appendChild(card);
       }
-
-      // thumbnails
-      photosContainer.innerHTML = '';
-      (currentPhotos||[]).forEach(url=>{
-        const img = document.createElement('img');
-        img.src = url;
-        img.addEventListener('click', ()=> { openLightbox(url); });
-        photosContainer.appendChild(img);
-      });
-
-      // room buttons (functional)
-      roomButtons.innerHTML = '';
-      (data.rooms||[]).forEach(room=>{
-        const btn = document.createElement('button');
-        btn.className = 'room-btn';
-        btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
-        btn.addEventListener('click', ()=>{
-          let page = '';
-          if(room === 'serieux') page = 'authentique.html';
-          if(room === 'amicale') page = 'amicale.html';
-          if(room === 'fun') page = 'fun.html';
-          // redirection -> assumes files at root
-          window.location.href = page;
-        });
-        roomButtons.appendChild(btn);
-      });
-    }
-  });
-
-  function openLightbox(src){ lightboxImg.src = src; lightbox.style.display = 'flex'; }
-  lightbox.addEventListener('click', ()=>{ lightbox.style.display = 'none'; lightboxImg.src = ''; });
-
-  // EDIT modal open
-  editBtn.addEventListener('click', async ()=> {
-    // preload current description and photos
-    const snap = await get(ref(db, 'users/' + currentUid));
-    if(snap.exists()){
-      const data = snap.val();
-      editDescription.value = data.description || '';
-      editPreview.innerHTML = '';
-      (data.photos || []).forEach(url=>{
-        const img = document.createElement('img');
-        img.src = url;
-        img.style.width='60px'; img.style.height='60px';
-        img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
-        editPreview.appendChild(img);
-      });
-    }
-    modalEdit.style.display = 'flex';
-  });
-
-  // preview selected files in modal
-  let stagedEditFiles = [];
-  editPhotos.addEventListener('change', e=>{
-    const files = Array.from(e.target.files||[]).slice(0,5);
-    stagedEditFiles = files;
-    editPreview.innerHTML = '';
-    files.forEach(file=>{
-      const r = new FileReader();
-      r.onload = ev => {
-        const img = document.createElement('img');
-        img.src = ev.target.result;
-        img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
-        editPreview.appendChild(img);
-      };
-      r.readAsDataURL(file);
     });
   });
+});
 
-  cancelEdit.addEventListener('click', ()=>{ modalEdit.style.display = 'none'; stagedEditFiles = []; editPhotos.value = ''; editPreview.innerHTML=''; });
+function openLightbox(src){ lightboxImg.src = src; lightbox.style.display='flex'; }
+lightbox.addEventListener("click", ()=>{ lightbox.style.display='none'; lightboxImg.src=''; });
 
-  // save edited description/photos
-  saveEdit.addEventListener('click', async ()=>{
-    const newDesc = editDescription.value.trim();
-    // convert stagedEditFiles to DataURL if any, else keep currentPhotos
-    function filesToDataURLs(files){
-      return Promise.all((files||[]).slice(0,5).map(f=>new Promise((res,rej)=>{
-        const fr = new FileReader();
-        fr.onload = e => res(e.target.result);
-        fr.onerror = rej;
-        fr.readAsDataURL(f);
-      })));
+// EDIT modal
+editBtn.addEventListener("click", async ()=>{
+  const snap = await get(ref(db,'users/'+currentUid));
+  if(snap.exists()){
+    const data = snap.val();
+    editDescription.value = data.description || '';
+    editPreview.innerHTML='';
+    (data.photos||[]).forEach(url=>{
+      const img = document.createElement("img");
+      img.src=url;
+      img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
+      editPreview.appendChild(img);
+    });
+  }
+  modalEdit.style.display='flex';
+});
+
+let stagedEditFiles=[];
+editPhotos.addEventListener("change", e=>{
+  const files=Array.from(e.target.files||[]).slice(0,5);
+  stagedEditFiles=files;
+  editPreview.innerHTML='';
+  files.forEach(file=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      const img=document.createElement("img");
+      img.src=ev.target.result;
+      img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
+      editPreview.appendChild(img);
     }
-    try{
-      let photosToSave = currentPhotos;
-      if(stagedEditFiles && stagedEditFiles.length>0){
-        photosToSave = await filesToDataURLs(stagedEditFiles);
-      }
-      await update(ref(db, 'users/' + currentUid), { description: newDesc, photos: photosToSave });
-      // update UI
-      descSpan.textContent = newDesc || 'Non renseignée';
-      currentPhotos = photosToSave;
-      if(currentPhotos.length>0) mainPhoto.src = currentPhotos[0];
-      photosContainer.innerHTML = '';
-      (currentPhotos||[]).forEach(url=>{
-        const img = document.createElement('img');
-        img.src = url;
-        img.addEventListener('click', ()=> openLightbox(url));
-        photosContainer.appendChild(img);
-      });
-      // close modal
-      modalEdit.style.display = 'none';
-      stagedEditFiles = [];
-      editPhotos.value = '';
-      editPreview.innerHTML = '';
-      alert('Profil mis à jour !');
-    }catch(e){
-      alert(e.message || e);
-    }
+    r.readAsDataURL(file);
   });
+});
 
+cancelEdit.addEventListener("click", ()=>{
+  modalEdit.style.display='none'; stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
+});
+
+saveEdit.addEventListener("click", async ()=>{
+  const newDesc = editDescription.value.trim();
+  async function filesToDataURLs(files){
+    return Promise.all((files||[]).slice(0,5).map(f=>new Promise((res,rej)=>{
+      const fr=new FileReader();
+      fr.onload=e=>res(e.target.result);
+      fr.onerror=rej;
+      fr.readAsDataURL(f);
+    })));
+  }
+  try{
+    let photosToSave=currentPhotos;
+    if(stagedEditFiles && stagedEditFiles.length>0){
+      photosToSave = await filesToDataURLs(stagedEditFiles);
+    }
+    await update(ref(db,'users/'+currentUid),{description:newDesc,photos:photosToSave});
+    descSpan.textContent=newDesc||'Non renseignée';
+    currentPhotos=photosToSave;
+    if(currentPhotos.length>0) mainPhoto.src=currentPhotos[0];
+    photosContainer.innerHTML='';
+    (currentPhotos||[]).forEach(url=>{
+      const img=document.createElement('img');
+      img.src=url;
+      img.addEventListener('click',()=>openLightbox(url));
+      photosContainer.appendChild(img);
+    });
+    modalEdit.style.display='none';
+    stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
+    alert('Profil mis à jour !');
+  }catch(e){alert(e.message||e);}
+});
 </script>
 </body>
 </html>
