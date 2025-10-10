@@ -23,7 +23,8 @@
       object-fit: cover;
       z-index: -1;
       opacity: 0;
-      transition: opacity 1.8s ease-in;
+      transition: opacity 3s ease-in;
+      pointer-events: none;
     }
 
     #container {
@@ -151,37 +152,55 @@
   const flash = document.getElementById('flash');
   const explosion = document.getElementById('explosion');
 
-  vortex.addEventListener('loadeddata', () => {
-    vortex.style.opacity = '0.5';
-  });
+  // Le vortex commence invisible
+  vortex.style.opacity = '0';
 
+  // Logo
   logo.style.animation = 'zoomFade 2s ease-out forwards';
 
-  setTimeout(() => { phrase.style.animation = 'fadeZoomIn 1s forwards ease-out'; }, 2000);
-  setTimeout(() => { phrase.style.animation = 'zoomBig 2s forwards ease-in'; }, 3500);
-  setTimeout(() => { phrase2.style.animation = 'fadeZoomIn 1.2s forwards ease-out'; }, 5500);
-  setTimeout(() => { phrase2.style.animation = 'shrinkAndFade 1.3s forwards ease-in'; }, 7000);
-  setTimeout(() => { logo.style.animation = 'logoToCenter 1.2s forwards ease-in'; }, 7600);
-  setTimeout(() => { flash.style.display = 'block'; }, 8500);
-  setTimeout(() => { explosion.style.display = 'block'; }, 8900);
-  setTimeout(() => { window.location.href = "inscription.html"; }, 10100);
+  // Phrase 1
+  setTimeout(() => {
+    phrase.style.animation = 'fadeZoomIn 1s forwards ease-out';
+  }, 2000);
+
+  // Phrase 1 disparaît
+  setTimeout(() => {
+    phrase.style.animation = 'zoomBig 2s forwards ease-in';
+  }, 3500);
+
+  // Phrase 2 apparaît + le vortex commence à devenir visible en transparence
+  setTimeout(() => {
+    phrase2.style.animation = 'fadeZoomIn 1.2s forwards ease-out';
+    vortex.style.opacity = '0.4'; // effet de fond galactique doux
+  }, 5500);
+
+  // Phrase 2 disparaît
+  setTimeout(() => {
+    phrase2.style.animation = 'shrinkAndFade 1.3s forwards ease-in';
+  }, 7000);
+
+  // Logo aspiré dans le vortex
+  setTimeout(() => {
+    logo.style.animation = 'logoToCenter 1.2s forwards ease-in';
+  }, 7600);
+
+  // Flash blanc
+  setTimeout(() => {
+    flash.style.display = 'block';
+  }, 8500);
+
+  // Explosion finale
+  setTimeout(() => {
+    explosion.style.display = 'block';
+  }, 8900);
+
+  // Redirection vers la page d'inscription
+  setTimeout(() => {
+    window.location.href = "inscription.html";
+  }, 10100);
 </script>
 
 <script type="module" src="firebase.js"></script>
-
-<!-- ✅ Correction : relance du vortex à la fin de la disparition de la phrase -->
-<script>
-  const phraseIntro = document.getElementById('phrase');
-  if (phraseIntro) {
-    phraseIntro.addEventListener('animationend', (e) => {
-      if (e.animationName === 'zoomBig') {
-        setTimeout(() => {
-          window.location.href = "vortex.html";
-        }, 300);
-      }
-    });
-  }
-</script>
 
 </body>
 </html>
