@@ -274,6 +274,8 @@ signupBtn.addEventListener("click", async ()=>{
     const userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
     const user = userCred.user;
     const photoURLs = uploadedPhotos.map(file=>URL.createObjectURL(file));
+
+    // ⚡ Ajout online par défaut + gender (par défaut "girl", tu peux adapter)
     await set(ref(db,"users/"+user.uid),{
       email: email.value,
       pseudo: pseudo.value,
@@ -281,8 +283,11 @@ signupBtn.addEventListener("click", async ()=>{
       location: locationInput.value,
       description: description.value,
       rooms: selectedRooms,
-      photos: photoURLs
+      photos: photoURLs,
+      online: false,
+      gender: "girl"
     });
+
     playVortexAndRedirect();
   } catch(e){
     alert("Erreur: "+e.message);
