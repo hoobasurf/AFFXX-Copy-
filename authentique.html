@@ -90,7 +90,8 @@ onAuthStateChanged(auth, async user => {
     Object.entries(allUsers).forEach(([uid, u]) => {
       if (uid !== user.uid && u.online === true) {
         const card = document.createElement("div");
-        card.className = "card " + (u.gender || "girl");
+        // ⚡ Vérifier gender pour éviter les erreurs
+        card.className = "card " + ((u.gender === "boy" || u.gender === "girl") ? u.gender : "girl");
         card.dataset.uid = uid;
         card.innerHTML = `
           <img src="${u.photos && u.photos.length > 0 ? u.photos[0] : 'https://i.pravatar.cc/150?img=12'}" alt="${u.pseudo}">
@@ -121,13 +122,13 @@ carousel.addEventListener("click", (e) => {
   }
 
   // Like
-  if (e.target.closest(".btn-like")) {
+  if (e.target.closest(".btn-like") && !e.target.classList.contains("active")) {
     update(ref(db, `users/${targetUid}/likes/${currentUser.uid}`), true);
     e.target.classList.add("active");
   }
 
   // Favoris
-  if (e.target.closest(".btn-fav")) {
+  if (e.target.closest(".btn-fav") && !e.target.classList.contains("active")) {
     update(ref(db, `users/${currentUser.uid}/favoris/${targetUid}`), true);
     e.target.classList.add("active");
   }
