@@ -64,12 +64,12 @@ onAuthStateChanged(auth, async user => {
 
   const userRef = ref(db, "users/" + user.uid);
 
-  // ⚡ Marquer comme connecté
+  // ✅ Marquer comme connecté dès que la page s'ouvre
   await update(userRef, { online: true });
-  // ⚡ Automatiquement offline si l’utilisateur quitte
+  // ✅ Automatiquement offline si l’utilisateur quitte
   onDisconnect(ref(db, "users/" + user.uid + "/online")).set(false);
 
-  // ⚡ Mini-profil dynamique
+  // ✅ Affichage du mini-profil
   onValue(userRef, snap => {
     if (snap.exists()) {
       const data = snap.val();
@@ -80,7 +80,7 @@ onAuthStateChanged(auth, async user => {
     }
   });
 
-  // ⚡ Carrousel des utilisateurs connectés
+  // ✅ Carrousel des utilisateurs connectés
   const allUsersRef = ref(db, "users");
   onValue(allUsersRef, snap => {
     carousel.innerHTML = "";
@@ -88,14 +88,14 @@ onAuthStateChanged(auth, async user => {
     const allUsers = snap.val();
 
     Object.entries(allUsers).forEach(([uid, u]) => {
+      // Affiche seulement les autres utilisateurs en ligne
       if (uid !== user.uid && u.online === true) {
         const card = document.createElement("div");
-        // ⚡ Vérifier gender pour éviter les erreurs
-        card.className = "card " + ((u.gender === "boy" || u.gender === "girl") ? u.gender : "girl");
+        card.className = "card " + (u.gender || "girl");
         card.dataset.uid = uid;
         card.innerHTML = `
           <img src="${u.photos && u.photos.length > 0 ? u.photos[0] : 'https://i.pravatar.cc/150?img=12'}" alt="${u.pseudo}">
-          <div class="name">${u.pseudo}</div>
+          <div class="name">${u.pseudo || 'Utilisateur'}</div>
           <div class="btns">
             <div class="btn-chat" title="Chat">💬</div>
             <div class="btn-like" title="Like">💖</div>
@@ -105,10 +105,20 @@ onAuthStateChanged(auth, async user => {
         carousel.appendChild(card);
       }
     });
+
+    // Si aucun utilisateur connecté
+    if (carousel.innerHTML.trim() === "") {
+      const emptyMsg = document.createElement("div");
+      emptyMsg.style.textAlign = "center";
+      emptyMsg.style.width = "100%";
+      emptyMsg.style.color = "#ff66cc";
+      emptyMsg.textContent = "Aucun utilisateur en ligne pour le moment...";
+      carousel.appendChild(emptyMsg);
+    }
   });
 });
 
-// --- Écoute des actions du carrousel ---
+// --- Gestion des boutons du carrousel ---
 carousel.addEventListener("click", (e) => {
   const card = e.target.closest(".card");
   if (!card) return;
@@ -122,19 +132,19 @@ carousel.addEventListener("click", (e) => {
   }
 
   // Like
-  if (e.target.closest(".btn-like") && !e.target.classList.contains("active")) {
+  if (e.target.closest(".btn-like")) {
     update(ref(db, `users/${targetUid}/likes/${currentUser.uid}`), true);
     e.target.classList.add("active");
   }
 
   // Favoris
-  if (e.target.closest(".btn-fav") && !e.target.classList.contains("active")) {
+  if (e.target.closest(".btn-fav")) {
     update(ref(db, `users/${currentUser.uid}/favoris/${targetUid}`), true);
     e.target.classList.add("active");
   }
 });
 
-// Cliquer sur mini-profil → page2.html
+// --- Clic sur la photo du mini profil ---
 miniProfilePic.addEventListener("click", () => {
   window.location.href = "page2.html";
 });
