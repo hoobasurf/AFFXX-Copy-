@@ -151,65 +151,37 @@
   const flash = document.getElementById('flash');
   const explosion = document.getElementById('explosion');
 
-  // Apparition progressive du vortex dès que la vidéo est prête
   vortex.addEventListener('loadeddata', () => {
     vortex.style.opacity = '0.5';
   });
 
-  // Logo entre
   logo.style.animation = 'zoomFade 2s ease-out forwards';
 
-  // Phrase 1
-  setTimeout(() => {
-    phrase.style.animation = 'fadeZoomIn 1s forwards ease-out';
-  }, 2000);
-
-  // Phrase 1 disparaît
-  setTimeout(() => {
-    phrase.style.animation = 'zoomBig 2s forwards ease-in';
-  }, 3500);
-
-  // Phrase 2 apparaît
-  setTimeout(() => {
-    phrase2.style.animation = 'fadeZoomIn 1.2s forwards ease-out';
-  }, 5500);
-
-  // Phrase 2 rétrécit et disparaît
-  setTimeout(() => {
-    phrase2.style.animation = 'shrinkAndFade 1.3s forwards ease-in';
-  }, 7000);
-
-  // Logo aspiré dans le vortex
-  setTimeout(() => {
-    logo.style.animation = 'logoToCenter 1.2s forwards ease-in';
-  }, 7600);
-
-  // Flash + explosion blanche
-  setTimeout(() => {
-    flash.style.display = 'block';
-  }, 8500);
-
-  setTimeout(() => {
-    explosion.style.display = 'block';
-  }, 8900);
-
-  // Redirection
-  setTimeout(() => {
-    window.location.href = "inscription.html";
-  }, 10100);
+  setTimeout(() => { phrase.style.animation = 'fadeZoomIn 1s forwards ease-out'; }, 2000);
+  setTimeout(() => { phrase.style.animation = 'zoomBig 2s forwards ease-in'; }, 3500);
+  setTimeout(() => { phrase2.style.animation = 'fadeZoomIn 1.2s forwards ease-out'; }, 5500);
+  setTimeout(() => { phrase2.style.animation = 'shrinkAndFade 1.3s forwards ease-in'; }, 7000);
+  setTimeout(() => { logo.style.animation = 'logoToCenter 1.2s forwards ease-in'; }, 7600);
+  setTimeout(() => { flash.style.display = 'block'; }, 8500);
+  setTimeout(() => { explosion.style.display = 'block'; }, 8900);
+  setTimeout(() => { window.location.href = "inscription.html"; }, 10100);
 </script>
+
 <script type="module" src="firebase.js"></script>
+
+<!-- ✅ Correction : relance du vortex à la fin de la disparition de la phrase -->
 <script>
-  const phrase = document.getElementById('phrase');
-  if (phrase) {
-    phrase.addEventListener('animationend', () => {
-      setTimeout(() => {
-        window.location.href = "vortex.html";
-      }, 300); // le vortex démarre juste après la disparition du texte
+  const phraseIntro = document.getElementById('phrase');
+  if (phraseIntro) {
+    phraseIntro.addEventListener('animationend', (e) => {
+      if (e.animationName === 'zoomBig') {
+        setTimeout(() => {
+          window.location.href = "vortex.html";
+        }, 300);
+      }
     });
   }
 </script>
-</body>
-</html>
+
 </body>
 </html>
