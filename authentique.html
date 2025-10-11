@@ -30,18 +30,22 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 
 /* Mini-profils circulaires draggable */
 #miniProfilesContainer { position:fixed; top:80px; right:20px; z-index:99; display:flex; flex-wrap:wrap; gap:10px; }
-.miniProfileCircle { width:50px; height:50px; border-radius:50%; overflow:hidden; border:2px solid #ff66cc; box-shadow:0 0 12px #ff66cc; cursor:grab; position:relative; background:#000; }
+.miniProfileCircle { width:50px; height:50px; border-radius:50%; overflow:hidden; border:2px solid #ff66cc; box-shadow:0 0 12px #ff66cc; cursor:grab; position:fixed; }
 .miniProfileCircle img { width:100%; height:100%; object-fit:cover; }
 .miniRemove { position:absolute; top:-5px; right:-5px; background:#ff66cc; color:#fff; font-size:0.6em; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 6px #ff66cc; }
 
-/* Mes Crush / Favoris bouton */
+/* Bouton Mes Crush */
 #favoritesBtn { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#ffea00; color:#333; border:none; border-radius:30px; padding:10px 20px; font-weight:bold; cursor:pointer; z-index:100; box-shadow:0 0 12px #ffea00; }
 
-/* Message popup */
-#messagePopup { position:fixed; bottom:80px; right:20px; background:rgba(0,0,0,0.7); border:1px solid #ff66cc; border-radius:12px; padding:10px; z-index:100; width:220px; display:none; flex-direction:column; }
-#messagePopup h4 { margin-bottom:5px; font-size:0.9em; color:#ff66cc; }
-#messagePopup textarea { width:100%; height:50px; resize:none; border-radius:6px; border:1px solid #ff66cc; background:rgba(0,0,0,0.4); color:white; padding:5px; }
-#messagePopup button { margin-top:5px; background:#ff66cc; color:#fff; border:none; border-radius:6px; padding:5px; cursor:pointer; }
+/* Modales */
+.modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; flex-direction:column; align-items:center; justify-content:flex-start; padding:20px; z-index:200; }
+.modal .closeBtn { position:absolute; top:10px; right:10px; width:24px; height:24px; background:#ff66cc; color:white; font-size:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 8px #ff66cc; }
+.modal h2 { color:#ff66cc; margin-bottom:20px; }
+.modal .modalContent { display:flex; flex-wrap:wrap; gap:15px; justify-content:center; overflow-y:auto; width:100%; }
+
+/* Message modal textarea */
+.modal textarea { width:90%; height:80px; resize:none; border-radius:6px; border:1px solid #ff66cc; background:rgba(0,0,0,0.4); color:white; padding:5px; margin-top:auto; }
+.modal button { margin-top:10px; background:#ff66cc; color:white; border:none; border-radius:6px; padding:8px 12px; cursor:pointer; align-self:flex-end; }
 </style>
 </head>
 <body>
@@ -60,19 +64,28 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 <!-- Mini-profils circulaires -->
 <div id="miniProfilesContainer"></div>
 
-<!-- Bouton Mes Crush / Favoris -->
-<button id="favoritesBtn">Mes Crush / Favoris</button>
+<!-- Bouton Mes Crush -->
+<button id="favoritesBtn">Mes Crush</button>
 
-<!-- Message popup -->
-<div id="messagePopup">
-  <h4 id="msgTo">Message à : </h4>
+<!-- Modale Mes Crush -->
+<div id="crushModal" class="modal">
+  <div class="closeBtn">×</div>
+  <h2>Mes Crush</h2>
+  <div class="modalContent" id="crushContent"></div>
+</div>
+
+<!-- Modale Message -->
+<div id="messageModal" class="modal">
+  <div class="closeBtn">×</div>
+  <h2 id="msgTo">Message à : </h2>
+  <div class="modalContent" id="msgContent"></div>
   <textarea id="msgText"></textarea>
   <button id="sendMsgBtn">Envoyer</button>
 </div>
 
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, set, update, onDisconnect, onValue, push } 
+import { getDatabase, ref, set, update, onDisconnect, onValue, push, get } 
   from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { app } from "./firebase.js";
 
@@ -85,41 +98,40 @@ const carousel = document.getElementById("carousel");
 const miniProfilesContainer = document.getElementById("miniProfilesContainer");
 const favoritesBtn = document.getElementById("favoritesBtn");
 
-const messagePopup = document.getElementById("messagePopup");
+const crushModal = document.getElementById("crushModal");
+const crushContent = document.getElementById("crushContent");
+
+const messageModal = document.getElementById("messageModal");
 const msgTo = document.getElementById("msgTo");
 const msgText = document.getElementById("msgText");
+const msgContent = document.getElementById("msgContent");
 const sendMsgBtn = document.getElementById("sendMsgBtn");
 
 let currentUserUid = null;
 
 onAuthStateChanged(auth, async user => {
-  if (!user) {
-    alert("Vous devez être connecté !");
-    window.location.href = "inscription.html";
-    return;
-  }
+  if (!user) { alert("Vous devez être connecté !"); window.location.href="inscription.html"; return; }
   currentUserUid = user.uid;
 
-  const userRef = ref(db, "users/" + user.uid);
-  await update(userRef, { online: true });
-  onDisconnect(ref(db, "users/" + user.uid + "/online")).set(false);
+  const userRef = ref(db,"users/"+currentUserUid);
+  await update(userRef,{online:true});
+  onDisconnect(ref(db,"users/"+currentUserUid+"/online")).set(false);
 
-  onValue(userRef, snap => {
+  onValue(userRef,snap=>{
     if(snap.exists()){
       const data = snap.val();
-      pseudoMini.textContent = data.pseudo || "Utilisateur";
-      miniProfilePic.src = (data.photos && data.photos.length>0) ? data.photos[0] : "https://i.pravatar.cc/150?img=12";
+      pseudoMini.textContent = data.pseudo||"Utilisateur";
+      miniProfilePic.src = (data.photos && data.photos.length>0)?data.photos[0]:"https://i.pravatar.cc/150?img=12";
     }
   });
 
-  // Carrousel
-  const allUsersRef = ref(db, "users");
-  onValue(allUsersRef, snap => {
+  const allUsersRef = ref(db,"users");
+  onValue(allUsersRef,snap=>{
     carousel.innerHTML="";
     if(!snap.exists()) return;
     const allUsers = snap.val();
     Object.entries(allUsers).forEach(([uid,u])=>{
-      if(uid !== currentUserUid && u.online===true){
+      if(uid!==currentUserUid && u.online===true){
         const card = document.createElement("div");
         card.className="card "+(u.gender||"girl");
         card.dataset.uid=uid;
@@ -137,98 +149,110 @@ onAuthStateChanged(auth, async user => {
     });
     if(carousel.innerHTML.trim()===""){
       const emptyMsg = document.createElement("div");
-      emptyMsg.style.textAlign="center";
-      emptyMsg.style.width="100%";
-      emptyMsg.style.color="#ff66cc";
+      emptyMsg.style.textAlign="center"; emptyMsg.style.width="100%"; emptyMsg.style.color="#ff66cc";
       emptyMsg.textContent="Aucun utilisateur en ligne pour le moment...";
       carousel.appendChild(emptyMsg);
     }
   });
 });
 
-// --- Gestion clic sur carrousel ---
-carousel.addEventListener("click", e=>{
+// --- Gestion carrousel ---
+carousel.addEventListener("click", async e=>{
   const card = e.target.closest(".card");
   if(!card) return;
   const targetUid = card.dataset.uid;
-  const currentUser = auth.currentUser;
-  if(!currentUser || !targetUid) return;
+  if(!currentUserUid || !targetUid) return;
 
   // Chat
   if(e.target.closest(".btn-chat")){
-    msgTo.textContent = `Message à : ${card.querySelector(".name").textContent}`;
-    messagePopup.style.display="flex";
-    messagePopup.dataset.uid = targetUid;
+    const name = card.querySelector(".name").textContent;
+    msgTo.textContent=`Message à : ${name}`;
+    messageModal.style.display="flex";
+    messageModal.dataset.uid=targetUid;
   }
 
   // Like
   if(e.target.closest(".btn-like")){
     e.target.classList.add("active");
     addMiniProfile(card);
-    // Enregistrement like dans Firebase
-    update(ref(db, `users/${targetUid}/likes/${currentUser.uid}`), true);
+    await update(ref(db,`users/${targetUid}/likes/${currentUserUid}`),true);
   }
 
   // Favoris
   if(e.target.closest(".btn-fav")){
     e.target.classList.add("active");
     addMiniProfile(card);
-    update(ref(db, `users/${currentUser.uid}/favoris/${targetUid}`), true);
+    await update(ref(db,`users/${currentUserUid}/favoris/${targetUid}`),true);
   }
 });
 
-// --- Ajouter mini-profil circulaire ---
+// --- Ajouter mini-profil circulaire fluide ---
 function addMiniProfile(card){
   const uid = card.dataset.uid;
-  if(document.querySelector(`#miniProfilesContainer .miniProfileCircle[data-uid='${uid}']`)) return; // déjà présent
+  if(document.querySelector(`#miniProfilesContainer .miniProfileCircle[data-uid='${uid}']`)) return;
   const circle = document.createElement("div");
   circle.className="miniProfileCircle";
-  circle.dataset.uid = uid;
+  circle.dataset.uid=uid;
   const img = card.querySelector("img").cloneNode();
   circle.appendChild(img);
 
   const removeBtn = document.createElement("div");
-  removeBtn.className="miniRemove";
-  removeBtn.textContent="×";
-  removeBtn.addEventListener("click", ()=>{ circle.remove(); });
+  removeBtn.className="miniRemove"; removeBtn.textContent="×";
+  removeBtn.addEventListener("click",()=>{ circle.remove(); });
   circle.appendChild(removeBtn);
 
+  circle.style.left="20px"; circle.style.top="80px"; // initial position
   // draggable
-  circle.onmousedown = function(e){
-    let shiftX = e.clientX - circle.getBoundingClientRect().left;
-    let shiftY = e.clientY - circle.getBoundingClientRect().top;
-    function moveAt(pageX, pageY){
+  circle.onmousedown=function(e){
+    e.preventDefault();
+    let shiftX=e.clientX-circle.getBoundingClientRect().left;
+    let shiftY=e.clientY-circle.getBoundingClientRect().top;
+    function moveAt(pageX,pageY){
       circle.style.left=pageX-shiftX+"px";
       circle.style.top=pageY-shiftY+"px";
-      circle.style.position="fixed";
     }
-    function onMouseMove(e){ moveAt(e.pageX, e.pageY); }
-    document.addEventListener("mousemove", onMouseMove);
-    circle.onmouseup = function(){ document.removeEventListener("mousemove", onMouseMove); circle.onmouseup=null; };
+    function onMouseMove(e){ moveAt(e.pageX,e.pageY); }
+    document.addEventListener("mousemove",onMouseMove);
+    document.onmouseup=function(){ document.removeEventListener("mousemove",onMouseMove); document.onmouseup=null; };
   };
-  circle.ondragstart = ()=>false;
-
+  circle.ondragstart=()=>false;
   miniProfilesContainer.appendChild(circle);
 }
 
-// --- Envoi message ---
-sendMsgBtn.addEventListener("click", ()=>{
-  const uid = messagePopup.dataset.uid;
-  const text = msgText.value.trim();
-  if(!text) return;
-  const newMsgRef = push(ref(db, `messages/${uid}`));
-  set(newMsgRef, {
-    from: currentUserUid,
-    text: text,
-    timestamp: Date.now()
-  });
-  msgText.value="";
-  messagePopup.style.display="none";
+// --- Bouton Mes Crush ---
+favoritesBtn.addEventListener("click", async ()=>{
+  crushModal.style.display="flex";
+  crushContent.innerHTML="";
+  const favSnap = await get(ref(db,`users/${currentUserUid}/favoris`));
+  if(favSnap.exists()){
+    const favs = favSnap.val();
+    for(const uid in favs){
+      const userSnap = await get(ref(db,`users/${uid}`));
+      if(userSnap.exists()){
+        const data = userSnap.val();
+        const prof = document.createElement("div");
+        prof.style.display="flex"; prof.style.flexDirection="column"; prof.style.alignItems="center";
+        prof.innerHTML=`<img src="${data.photos && data.photos.length>0?data.photos[0]:'https://i.pravatar.cc/150?img=12'}" style="width:70px;height:70px;border-radius:50%;margin-bottom:5px;"><span>${data.pseudo||'Utilisateur'}</span>`;
+        crushContent.appendChild(prof);
+      }
+    }
+  } else {
+    crushContent.textContent="Aucun crush pour le moment.";
+  }
 });
 
-// --- Clic sur mini-profil pour page perso (profilcard.html) ---
-miniProfilePic.addEventListener("click", ()=>{
-  window.location.href="page2.html";
+// --- Fermer modales ---
+document.querySelectorAll(".modal .closeBtn").forEach(btn=>{
+  btn.addEventListener("click",()=>{ btn.parentElement.style.display="none"; });
+});
+
+// --- Envoyer message ---
+sendMsgBtn.addEventListener("click", async ()=>{
+  const text=msgText.value.trim(); if(!text) return;
+  const toUid=messageModal.dataset.uid;
+  const msgRef=push(ref(db,`messages/${toUid}`));
+  await set(msgRef,{from:currentUserUid,text: text,timestamp:Date.now()});
+  msgText.value=""; messageModal.style.display="none";
 });
 </script>
 </body>
