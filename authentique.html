@@ -27,6 +27,16 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 .btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
 .btn-like.active { background-color:#ff66cc; border-color:#ff66cc; color:white; box-shadow:0 0 12px #ff66cc; }
 .btn-fav.active { background-color:#ffea00; border-color:#ffea00; color:#333; box-shadow:0 0 12px #ffea00; }
+/* Favoris bouton bas */
+#favorisBtn { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:50px; height:50px; border-radius:50%; background-color:#ffea00; border:2px solid #ffcc00; display:flex; align-items:center; justify-content:center; font-size:1.2em; cursor:pointer; z-index:10; box-shadow:0 0 12px #ffea00; }
+#miniProfilesContainer { position:fixed; top:100px; left:50px; z-index:9; pointer-events:none; }
+/* Chaque mini-profil positionné en absolute et pointer-events auto pour permettre interactions */
+.mini-profile { position:absolute; width:50px; height:50px; border-radius:50%; border:2px solid #ff66cc; cursor:grab; display:flex; align-items:center; justify-content:center; overflow:hidden; pointer-events:auto; background:rgba(0,0,0,0.2); transition: transform .12s; }
+.mini-profile img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.close-mini { position:absolute; top:-6px; right:-6px; width:14px; height:14px; border-radius:50%; background:#ff66cc; color:white; font-size:10px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:11; box-shadow:0 0 6px #ff66cc; }
+/* légère animation d'apparition */
+.mini-profile.show { transform: scale(1); opacity:1; }
+.mini-profile.init { transform: scale(.6); opacity:0; transition: transform .15s, opacity .15s; }
 </style>
 </head>
 <body>
@@ -42,9 +52,15 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
   <div class="carousel" id="carousel"></div>
 </div>
 
+<!-- Favoris bouton bas -->
+<div id="favorisBtn" title="Favoris">⭐</div>
+
+<!-- Mini-profiles draggable container -->
+<div id="miniProfilesContainer"></div>
+
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, update, onDisconnect, onValue } 
+import { getDatabase, ref, update, onDisconnect, onValue, push, set, remove } 
   from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { app } from "./firebase.js";
 
@@ -54,6 +70,178 @@ const db = getDatabase(app);
 const miniProfilePic = document.getElementById("miniProfilePic");
 const pseudoMini = document.getElementById("pseudoMini");
 const carousel = document.getElementById("carousel");
+const miniProfilesContainer = document.getElementById("miniProfilesContainer");
+const favorisBtn = document.getElementById("favorisBtn");
+
+let favorisList = []; // favoris uid list (from Firebase)
+const LOCAL_KEY = "authentique_miniProfiles_v1"; // localStorage key for mini profiles
+
+// utilitaires localStorage pour mini-profiles
+function loadLocalMiniProfiles() {
+  try {
+    const raw = localStorage.getItem(LOCAL_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { return []; }
+}
+function saveLocalMiniProfiles(list) {
+  try { localStorage.setItem(LOCAL_KEY, JSON.stringify(list)); } catch(e){}
+}
+function addLocalMiniProfile(obj) {
+  const arr = loadLocalMiniProfiles();
+  arr.push(obj);
+  saveLocalMiniProfiles(arr);
+}
+function removeLocalMiniProfilesByUid(uid) {
+  let arr = loadLocalMiniProfiles();
+  arr = arr.filter(x => x.uid !== uid);
+  saveLocalMiniProfiles(arr);
+}
+function removeLocalMiniProfileById(id) {
+  let arr = loadLocalMiniProfiles();
+  arr = arr.filter(x => x.id !== id);
+  saveLocalMiniProfiles(arr);
+}
+
+// crée un id simple
+function makeId() {
+  return 'mp_' + Math.random().toString(36).slice(2,10);
+}
+
+// restaure mini-profiles depuis localStorage
+function restoreMiniProfiles() {
+  const list = loadLocalMiniProfiles();
+  list.forEach(item => {
+    createMiniProfileElement(item, false);
+  });
+}
+
+// crée l'élément DOM et le rend draggable
+function createMiniProfileElement(data, saveLocal = true) {
+  // data: { id, uid, img, left, top }
+  const mini = document.createElement("div");
+  mini.className = "mini-profile init";
+  mini.dataset.id = data.id;
+  mini.dataset.uid = data.uid;
+  mini.style.left = (data.left || 0) + "px";
+  mini.style.top = (data.top || 0) + "px";
+  mini.innerHTML = `<img src="${data.img}"><div class="close-mini">×</div>`;
+  miniProfilesContainer.appendChild(mini);
+
+  // small timeout to trigger show class (animation)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      mini.classList.remove("init");
+      mini.classList.add("show");
+    });
+  });
+
+  // pointer-based dragging (works for mouse & touch)
+  let isDragging = false;
+  let startX = 0, startY = 0, startLeft = 0, startTop = 0;
+
+  function onPointerDown(e) {
+    e.preventDefault();
+    isDragging = true;
+    mini.style.cursor = "grabbing";
+    startX = e.clientX;
+    startY = e.clientY;
+    const rect = mini.getBoundingClientRect();
+    startLeft = rect.left;
+    startTop = rect.top;
+    // capture pointer
+    mini.setPointerCapture && mini.setPointerCapture(e.pointerId);
+  }
+
+  function onPointerMove(e) {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    let newLeft = startLeft + dx;
+    let newTop = startTop + dy;
+    // clamp inside viewport (optional)
+    const maxLeft = window.innerWidth - mini.offsetWidth - 4;
+    const maxTop = window.innerHeight - mini.offsetHeight - 4;
+    if (newLeft < 0) newLeft = 0;
+    if (newTop < 0) newTop = 0;
+    if (newLeft > maxLeft) newLeft = maxLeft;
+    if (newTop > maxTop) newTop = maxTop;
+    mini.style.left = newLeft + "px";
+    mini.style.top = newTop + "px";
+  }
+
+  function onPointerUp(e) {
+    if (!isDragging) return;
+    isDragging = false;
+    mini.style.cursor = "grab";
+    // save position to localStorage
+    const id = mini.dataset.id;
+    const left = parseInt(mini.style.left || 0, 10);
+    const top = parseInt(mini.style.top || 0, 10);
+    const arr = loadLocalMiniProfiles();
+    const idx = arr.findIndex(x => x.id === id);
+    if (idx !== -1) {
+      arr[idx].left = left;
+      arr[idx].top = top;
+      saveLocalMiniProfiles(arr);
+    }
+    // release pointer
+    try { mini.releasePointerCapture && mini.releasePointerCapture(e.pointerId); } catch(e){}
+  }
+
+  mini.addEventListener("pointerdown", onPointerDown);
+  window.addEventListener("pointermove", onPointerMove);
+  window.addEventListener("pointerup", onPointerUp);
+
+  // croix pour supprimer mini-profile
+  const closeBtn = mini.querySelector(".close-mini");
+  closeBtn.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    const id = mini.dataset.id;
+    mini.remove();
+    removeLocalMiniProfileById(id);
+  });
+
+  if (saveLocal) {
+    addLocalMiniProfile(data);
+  }
+}
+
+// supprime mini-profiles DOM et local pour un uid donné
+function removeMiniProfilesForUid(uid) {
+  // remove from DOM
+  const nodes = miniProfilesContainer.querySelectorAll(`.mini-profile`);
+  nodes.forEach(n => {
+    if (n.dataset.uid === uid) n.remove();
+  });
+  // remove from localStorage
+  removeLocalMiniProfilesByUid(uid);
+}
+
+// charger favoris du user et conserver en mémoire
+function watchUserFavoris(currentUid) {
+  const favRef = ref(db, `users/${currentUid}/favoris`);
+  onValue(favRef, snap => {
+    favorisList = [];
+    if (snap.exists()) {
+      const favObj = snap.val();
+      favorisList = Object.keys(favObj);
+    }
+    // après mise à jour, on peut mettre à jour l'état visuel des cards s'ils sont rendus
+    updateCardsFavorisState();
+  });
+}
+
+// helper pour update style des boutons fav dans carousel
+function updateCardsFavorisState() {
+  const cards = carousel.querySelectorAll(".card");
+  cards.forEach(card => {
+    const targetUid = card.dataset.uid;
+    const favBtn = card.querySelector(".btn-fav");
+    if (!favBtn) return;
+    if (favorisList.includes(targetUid)) favBtn.classList.add("active");
+    else favBtn.classList.remove("active");
+  });
+}
 
 onAuthStateChanged(auth, async user => {
   if (!user) {
@@ -64,12 +252,10 @@ onAuthStateChanged(auth, async user => {
 
   const userRef = ref(db, "users/" + user.uid);
 
-  // ✅ Marquer comme connecté dès que la page s'ouvre
   await update(userRef, { online: true });
-  // ✅ Automatiquement offline si l’utilisateur quitte
   onDisconnect(ref(db, "users/" + user.uid + "/online")).set(false);
 
-  // ✅ Affichage du mini-profil
+  // affichage du mini-profil principal
   onValue(userRef, snap => {
     if (snap.exists()) {
       const data = snap.val();
@@ -80,7 +266,10 @@ onAuthStateChanged(auth, async user => {
     }
   });
 
-  // ✅ Carrousel des utilisateurs connectés
+  // surveiller favoris du user
+  watchUserFavoris(user.uid);
+
+  // carrousel des utilisateurs connectés
   const allUsersRef = ref(db, "users");
   onValue(allUsersRef, snap => {
     carousel.innerHTML = "";
@@ -88,7 +277,6 @@ onAuthStateChanged(auth, async user => {
     const allUsers = snap.val();
 
     Object.entries(allUsers).forEach(([uid, u]) => {
-      // Affiche seulement les autres utilisateurs en ligne
       if (uid !== user.uid && u.online === true) {
         const card = document.createElement("div");
         card.className = "card " + (u.gender || "girl");
@@ -106,7 +294,6 @@ onAuthStateChanged(auth, async user => {
       }
     });
 
-    // Si aucun utilisateur connecté
     if (carousel.innerHTML.trim() === "") {
       const emptyMsg = document.createElement("div");
       emptyMsg.style.textAlign = "center";
@@ -115,39 +302,162 @@ onAuthStateChanged(auth, async user => {
       emptyMsg.textContent = "Aucun utilisateur en ligne pour le moment...";
       carousel.appendChild(emptyMsg);
     }
+
+    // une fois les cards ajoutées, synchroniser l'état des favoris visuellement
+    updateCardsFavorisState();
   });
 });
 
-// --- Gestion des boutons du carrousel ---
-carousel.addEventListener("click", (e) => {
+// Gestion boutons carrousel
+carousel.addEventListener("click", async (e) => {
   const card = e.target.closest(".card");
   if (!card) return;
   const targetUid = card.dataset.uid;
   const currentUser = auth.currentUser;
   if (!currentUser || !targetUid) return;
 
-  // Chat
-  if (e.target.closest(".btn-chat")) {
-    window.location.href = `Chat.html?uid=${targetUid}`;
+  // Clic sur image → page2.html
+  if (e.target.tagName === "IMG") {
+    window.location.href = "page2.html";
+    return;
   }
 
-  // Like
+  // Chat (écrire et envoyer)
+  if (e.target.closest(".btn-chat")) {
+    // prompt d'écriture (simple)
+    const messageText = prompt("Écrire un message :");
+    if (!messageText) return;
+
+    // Enregistrer le message dans Firebase (convention: messages/{conversationId} - push)
+    const convId = `${currentUser.uid}_${targetUid}`; // simple convention
+    const chatRef = ref(db, `messages/${convId}`);
+    await push(chatRef, {
+      text: messageText,
+      from: currentUser.uid,
+      to: targetUid,
+      timestamp: Date.now()
+    });
+
+    // Ajouter notification côté destinataire
+    const notifRef = ref(db, `notifications/${targetUid}`);
+    await push(notifRef, {
+      type: "message",
+      from: currentUser.uid,
+      text: messageText.slice(0, 120),
+      timestamp: Date.now(),
+      read: false
+    });
+
+    // Créer un mini-profil draggable et le sauvegarder localement
+    const imgSrc = card.querySelector("img").src;
+    const id = makeId();
+    // position initiale: empilé avec offset pour éviter superposition exacte
+    const existing = loadLocalMiniProfiles();
+    const offset = (existing.length % 6) * 20; // simple offset
+    const left = 30 + offset;
+    const top = 100 + offset;
+    const miniData = { id, uid: targetUid, img: imgSrc, left, top };
+    createMiniProfileElement(miniData, true);
+
+    alert("Message envoyé !");
+    return;
+  }
+
+  // Like (Mike)
   if (e.target.closest(".btn-like")) {
-    update(ref(db, `users/${targetUid}/likes/${currentUser.uid}`), true);
+    // enregistrer le like côté destinataire (pour qu'il voie qui a liké)
+    await update(ref(db, `users/${targetUid}/likes/${currentUser.uid}`), true);
     e.target.classList.add("active");
+
+    // notification côté destinataire
+    const notifRef = ref(db, `notifications/${targetUid}`);
+    await push(notifRef, {
+      type: "like",
+      from: currentUser.uid,
+      text: "Vous avez reçu un like 💖",
+      timestamp: Date.now(),
+      read: false
+    });
+
+    return;
   }
 
   // Favoris
   if (e.target.closest(".btn-fav")) {
-    update(ref(db, `users/${currentUser.uid}/favoris/${targetUid}`), true);
-    e.target.classList.add("active");
+    const favBtn = e.target.closest(".btn-fav");
+    // toggle: si déjà dans favoris -> supprimer, sinon ajouter
+    const currentUid = auth.currentUser.uid;
+    const favRef = ref(db, `users/${currentUid}/favoris/${targetUid}`);
+
+    if (favorisList.includes(targetUid)) {
+      // supprimer
+      await remove(favRef);
+      favBtn.classList.remove("active");
+      // mettre à jour local array: favorisList sera mis à jour par onValue watcher
+      // supprimer mini-profiles liés
+      removeMiniProfilesForUid(targetUid);
+      alert("Favori supprimé.");
+    } else {
+      // ajouter
+      await set(favRef, true);
+      favBtn.classList.add("active");
+      // ajout local se fera via watcher onValue
+      alert("Ajouté aux favoris.");
+    }
+    return;
   }
 });
 
-// --- Clic sur la photo du mini profil ---
+// clic sur mini-profile principal -> page2.html
 miniProfilePic.addEventListener("click", () => {
   window.location.href = "page2.html";
 });
+
+// Favoris bouton bas -> affiche liste interactive (possibilité de supprimer)
+favorisBtn.addEventListener("click", async () => {
+  const currentUser = auth.currentUser;
+  if (!currentUser) return alert("Utilisateur non connecté.");
+
+  // récupérer favoris depuis Firebase (au cas où watcher n'a pas reçu)
+  const favRef = ref(db, `users/${currentUser.uid}/favoris`);
+  let favObj = null;
+  await new Promise(resolve => {
+    onValue(favRef, snap => {
+      favObj = snap.exists() ? snap.val() : null;
+      resolve();
+    }, { onlyOnce: true });
+  });
+
+  const favUids = favObj ? Object.keys(favObj) : [];
+
+  if (favUids.length === 0) {
+    alert("Aucun favori enregistré !");
+    return;
+  }
+
+  // Construire un petit menu textuel simple (prompt) ; tu peux remplacer par un modal HTML si tu veux plus tard
+  let msg = "Favoris enregistrés :\n";
+  favUids.forEach((uid, i) => {
+    msg += `${i+1}. ${uid}\n`;
+  });
+  msg += "\nEntrez le numéro pour supprimer ce favori, ou annuler.";
+  const choice = prompt(msg);
+  if (!choice) return;
+  const idx = parseInt(choice, 10) - 1;
+  if (isNaN(idx) || idx < 0 || idx >= favUids.length) {
+    alert("Choix invalide.");
+    return;
+  }
+  const toRemoveUid = favUids[idx];
+  // supprimer dans Firebase
+  await remove(ref(db, `users/${currentUser.uid}/favoris/${toRemoveUid}`));
+  // supprimer mini-profiles liés
+  removeMiniProfilesForUid(toRemoveUid);
+  alert("Favori supprimé et profils mini associés supprimés.");
+});
+
+// restaurer mini profiles au chargement
+restoreMiniProfiles();
 </script>
 </body>
 </html>
