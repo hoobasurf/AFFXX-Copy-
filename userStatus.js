@@ -1,4 +1,4 @@
-import { getDatabase, ref, onDisconnect, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, onDisconnect, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { app } from "./firebase.js";
 
@@ -7,12 +7,18 @@ const auth = getAuth(app);
 
 onAuthStateChanged(auth, user => {
   if(user){
-    const userStatusRef = ref(db, "users/" + user.uid + "/online");
-    
-    // Mettre online à true
-    set(userStatusRef, true);
+    const userRef = ref(db, "users/" + user.uid);
+
+    // ✅ Mettre online à true ET lastActive en même temps
+    update(userRef, {
+      online: true,
+      lastActive: Date.now()  // <- ici
+    });
 
     // Quand l'utilisateur se déconnecte ou ferme le navigateur
-    onDisconnect(userStatusRef).set(false);
+    onDisconnect(userRef).update({
+      online: false,
+      lastActive: Date.now()
+    });
   }
 });
