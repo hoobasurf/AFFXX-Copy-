@@ -144,6 +144,12 @@ onAuthStateChanged(auth, async user => {
             <div class="btn-fav" title="Favoris">⭐️</div>
           </div>
         `;
+        // 🔹 Clic sur la photo pour ouvrir la page du profil
+card.querySelector("img").addEventListener("click", (e) => {
+  e.stopPropagation(); // évite de cliquer aussi sur le like ou favoris
+  const targetUid = card.dataset.uid;
+  window.location.href = `profilcard.html?uid=${targetUid}`;
+});
         carousel.appendChild(card);
       }
     });
@@ -171,19 +177,41 @@ carousel.addEventListener("click", async e=>{
     messageModal.dataset.uid=targetUid;
   }
 
-  // Like
-  if(e.target.closest(".btn-like")){
-    e.target.classList.add("active");
-    addMiniProfile(card);
-    await update(ref(db,`users/${targetUid}/likes/${currentUserUid}`),true);
-  }
+  // --- LIKE ---
+if (e.target.closest(".btn-like")) {
+  const btn = e.target.closest(".btn-like");
+  btn.classList.add("active");
+  addMiniProfile(card);
 
-  // Favoris
-  if(e.target.closest(".btn-fav")){
-    e.target.classList.add("active");
-    addMiniProfile(card);
-    await update(ref(db,`users/${currentUserUid}/favoris/${targetUid}`),true);
-  }
+  const targetUid = card.dataset.uid;
+  const pseudo = card.querySelector(".name").textContent;
+  const photo = card.querySelector("img").src;
+
+  // 🔹 Enregistre le crush (type: like)
+  await update(ref(db, `users/${currentUserUid}/crush/${targetUid}`), {
+    type: "like",
+    pseudo,
+    photo
+  });
+}
+
+// --- FAVORIS ---
+if (e.target.closest(".btn-fav")) {
+  const btn = e.target.closest(".btn-fav");
+  btn.classList.add("active");
+  addMiniProfile(card);
+
+  const targetUid = card.dataset.uid;
+  const pseudo = card.querySelector(".name").textContent;
+  const photo = card.querySelector("img").src;
+
+  // 🔹 Enregistre le crush (type: favoris)
+  await update(ref(db, `users/${currentUserUid}/crush/${targetUid}`), {
+    type: "favoris",
+    pseudo,
+    photo
+  });
+}
 });
 
 // --- Ajouter mini-profil circulaire fluide ---
@@ -223,7 +251,7 @@ function addMiniProfile(card){
 favoritesBtn.addEventListener("click", async ()=>{
   crushModal.style.display="flex";
   crushContent.innerHTML="";
-  const favSnap = await get(ref(db,`users/${currentUserUid}/favoris`));
+  const favSnap = await get(ref(db,`users/${currentUserUid}/crush`));
   if(favSnap.exists()){
     const favs = favSnap.val();
     for(const uid in favs){
@@ -253,6 +281,10 @@ sendMsgBtn.addEventListener("click", async ()=>{
   const msgRef=push(ref(db,`messages/${toUid}`));
   await set(msgRef,{from:currentUserUid,text: text,timestamp:Date.now()});
   msgText.value=""; messageModal.style.display="none";
+});
+  // --- Clic sur ma photo de profil perso ---
+miniProfilePic.addEventListener("click", () => {
+  window.location.href = "page2.html";
 });
 </script>
 </body>
