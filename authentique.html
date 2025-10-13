@@ -212,44 +212,10 @@ if (e.target.closest(".btn-fav")) {
 }
 });
 
-// --- Ajouter mini-profil circulaire fluide ---
-function addMiniProfile(card){
-  const uid = card.dataset.uid;
-  if(document.querySelector(`#miniProfilesContainer .miniProfileCircle[data-uid='${uid}']`)) return;
-  const circle = document.createElement("div");
-  circle.className="miniProfileCircle";
-  circle.dataset.uid=uid;
-  const img = card.querySelector("img").cloneNode();
-  circle.appendChild(img);
-
-  const removeBtn = document.createElement("div");
-  removeBtn.className="miniRemove"; removeBtn.textContent="×";
-  removeBtn.addEventListener("click",()=>{ circle.remove(); });
-  circle.appendChild(removeBtn);
-
-  circle.style.left="20px"; circle.style.top="80px"; // initial position
-  // draggable fluide
-  let shiftX, shiftY;
-  circle.onmousedown=function(e){
-    e.preventDefault();
-    shiftX=e.clientX-circle.getBoundingClientRect().left;
-    shiftY=e.clientY-circle.getBoundingClientRect().top;
-
-    function moveAt(pageX,pageY){ 
-      circle.style.left=(pageX-shiftX)+"px"; 
-      circle.style.top=(pageY-shiftY)+"px"; 
-    }
-
-    function onMouseMove(e){ moveAt(e.pageX,e.pageY); }
-    document.addEventListener("mousemove",onMouseMove);
-    document.onmouseup=function(){ 
-      document.removeEventListener("mousemove",onMouseMove); 
-      document.onmouseup=null; 
-    };
-  };
-  circle.ondragstart=()=>false;
-  miniProfilesContainer.appendChild(circle);
+card);
 }
+});
+
 
 // --- Bouton Mes Crush ---
 favoritesBtn.addEventListener("click", async ()=>{
