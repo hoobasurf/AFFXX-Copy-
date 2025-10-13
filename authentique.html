@@ -7,290 +7,151 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 <style>
 * { box-sizing:border-box; margin:0; padding:0; }
-html, body { height:100%; width:100%; font-family:'Orbitron',sans-serif; background:url('planete-romantique.jpg') no-repeat center center/cover; color:white; overflow:hidden; }
-body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%); z-index:1; pointer-events:none; }
-.header { position: relative; z-index:2; padding:20px; }
-#myProfile { z-index:3; position: relative; text-align:center; margin-top:10px; cursor:pointer; }
-#myProfile img { width:100px; height:100px; border-radius:50%; border:3px solid #ff66cc; box-shadow:0 0 15px #ff66cc; object-fit:cover; }
-#myProfile div { margin-top:8px; font-size:1.2em; color:#ff66cc; }
-/* Carrousel */
-.carousel-container { z-index:2; position: relative; width:100%; height:calc(100% - 180px); overflow:hidden; display:flex; align-items:center; }
-.carousel { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; gap:40px; padding:40px; }
-.carousel::-webkit-scrollbar { display:none; }
-.card { scroll-snap-align:center; flex:0 0 150px; background:rgba(0,0,0,0.5); border-radius:16px; padding:15px; text-align:center; transition: transform .3s, box-shadow .3s; cursor:pointer; position:relative; }
-.card img { width:90px; height:90px; border-radius:50%; object-fit:cover; margin-bottom:10px; border:3px solid; }
-.girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
-.boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
-.name { font-size:1.1em; margin-bottom:5px; }
-.btns { display:flex; justify-content:center; gap:8px; margin-top:6px; }
-.btn-like, .btn-chat, .btn-fav { width:30px; height:30px; border-radius:50%; background-color:rgba(255,255,255,0.1); border:1px solid #ff66cc; color:#ff66cc; display:flex; align-items:center; justify-content:center; font-size:1em; cursor:pointer; transition: transform .2s, background-color .3s, color .3s; user-select:none; }
-.btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
-.btn-like.active { background-color:#ff66cc; border-color:#ff66cc; color:white; box-shadow:0 0 12px #ff66cc; }
-.btn-fav.active { background-color:#ffea00; border-color:#ffea00; color:#333; box-shadow:0 0 12px #ffea00; }
+html,body { height:100%; width:100%; font-family:'Orbitron',sans-serif; background:#000 url('planete-romantique.jpg') no-repeat center/cover; color:white; overflow:hidden; }
+#myProfile { text-align:center; margin-top:15px; cursor:pointer; }
+#myProfile img { width:90px; height:90px; border-radius:50%; border:3px solid #ff66cc; box-shadow:0 0 15px #ff66cc; object-fit:cover; }
+#myProfile div { color:#ff66cc; margin-top:8px; }
 
-/* Mini-profils circulaires draggable */
-#miniProfilesContainer { position:fixed; top:80px; right:20px; z-index:99; display:flex; flex-wrap:wrap; gap:10px; }
-.miniProfileCircle { width:50px; height:50px; border-radius:50%; overflow:hidden; border:2px solid #ff66cc; box-shadow:0 0 12px #ff66cc; cursor:grab; position:fixed; transition:left 0.1s linear, top 0.1s linear; }
+/* Carousel */
+.carousel-container { height:calc(100% - 180px); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.carousel { display:flex; overflow-x:auto; gap:30px; padding:20px; scroll-snap-type:x mandatory; }
+.carousel::-webkit-scrollbar { display:none; }
+.card { flex:0 0 140px; background:rgba(0,0,0,0.5); border-radius:15px; padding:10px; text-align:center; position:relative; scroll-snap-align:center; transition:transform .2s; }
+.card img { width:90px; height:90px; border-radius:50%; object-fit:cover; margin-bottom:8px; border:3px solid #ff66cc; box-shadow:0 0 10px #ff66cc; cursor:pointer; }
+.card .name { font-size:1.1em; color:#ff66cc; margin-bottom:5px; }
+.btns { display:flex; justify-content:center; gap:6px; }
+.btn-like,.btn-fav,.btn-chat { width:28px; height:28px; border-radius:50%; border:1px solid #ff66cc; display:flex; align-items:center; justify-content:center; color:#ff66cc; background:rgba(255,255,255,0.1); cursor:pointer; transition:transform .1s; }
+.btn-like.active { background:#ff66cc; color:white; box-shadow:0 0 10px #ff66cc; }
+.btn-fav.active { background:#ffea00; color:#333; box-shadow:0 0 10px #ffea00; }
+.btn-like:hover,.btn-fav:hover,.btn-chat:hover { transform:scale(1.2); }
+
+/* Mini profils */
+#miniProfilesContainer { position:fixed; top:80px; left:10px; z-index:99; display:flex; flex-wrap:wrap; gap:10px; }
+.miniProfileCircle { width:55px; height:55px; border-radius:50%; overflow:hidden; border:2px solid #ff66cc; box-shadow:0 0 12px #ff66cc; position:absolute; cursor:grab; transition:none; }
 .miniProfileCircle img { width:100%; height:100%; object-fit:cover; }
-.miniRemove { position:absolute; top:-5px; right:-5px; background:#ff66cc; color:#fff; font-size:0.6em; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 6px #ff66cc; }
+.miniRemove { position:absolute; top:-6px; right:-6px; background:#ff66cc; color:white; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.6em; cursor:pointer; }
 
 /* Bouton Mes Crush */
-#favoritesBtn { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#ffea00; color:#333; border:none; border-radius:30px; padding:10px 20px; font-weight:bold; cursor:pointer; z-index:100; box-shadow:0 0 12px #ffea00; }
-
-/* Modales */
-.modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; flex-direction:column; align-items:center; justify-content:flex-start; padding:20px; z-index:200; }
-.modal .closeBtn { position:absolute; top:10px; right:10px; width:24px; height:24px; background:#ff66cc; color:white; font-size:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 8px #ff66cc; }
-.modal h2 { color:#ff66cc; margin-bottom:20px; }
-.modal .modalContent { display:flex; flex-wrap:wrap; gap:15px; justify-content:center; overflow-y:auto; width:100%; }
-
-/* Message modal textarea */
-.modal textarea { width:90%; height:80px; resize:none; border-radius:6px; border:1px solid #ff66cc; background:rgba(0,0,0,0.4); color:white; padding:5px; margin-top:auto; }
-.modal button { margin-top:10px; background:#ff66cc; color:white; border:none; border-radius:6px; padding:8px 12px; cursor:pointer; align-self:flex-end; }
+#favoritesBtn { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#ffea00; color:#333; border:none; border-radius:25px; padding:10px 20px; cursor:pointer; font-weight:bold; box-shadow:0 0 10px #ffea00; }
 </style>
 </head>
 <body>
 
-<!-- MINI-PROFIL -->
 <div id="myProfile">
-  <img id="miniProfilePic" src="" alt="Mon profil">
+  <img id="miniProfilePic" src="" alt="Moi">
   <div id="pseudoMini">Utilisateur</div>
 </div>
 
-<!-- Carrousel -->
 <div class="carousel-container">
-  <div class="carousel" id="carousel"></div>
+  <div id="carousel" class="carousel"></div>
 </div>
 
-<!-- Mini-profils circulaires -->
 <div id="miniProfilesContainer"></div>
-
-<!-- Bouton Mes Crush -->
 <button id="favoritesBtn">Mes Crush</button>
-
-<!-- Modale Mes Crush -->
-<div id="crushModal" class="modal">
-  <div class="closeBtn">×</div>
-  <h2>Mes Crush</h2>
-  <div class="modalContent" id="crushContent"></div>
-</div>
-
-<!-- Modale Message -->
-<div id="messageModal" class="modal">
-  <div class="closeBtn">×</div>
-  <h2 id="msgTo">Message à : </h2>
-  <div class="modalContent" id="msgContent"></div>
-  <textarea id="msgText"></textarea>
-  <button id="sendMsgBtn">Envoyer</button>
-</div>
 
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, set, update, onDisconnect, onValue, push, get } 
-  from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, onValue, set, update, get, onDisconnect } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-const miniProfilePic = document.getElementById("miniProfilePic");
-const pseudoMini = document.getElementById("pseudoMini");
-const carousel = document.getElementById("carousel");
-const miniProfilesContainer = document.getElementById("miniProfilesContainer");
-const favoritesBtn = document.getElementById("favoritesBtn");
+const miniProfilePic=document.getElementById("miniProfilePic");
+const pseudoMini=document.getElementById("pseudoMini");
+const carousel=document.getElementById("carousel");
+const miniProfilesContainer=document.getElementById("miniProfilesContainer");
 
-const crushModal = document.getElementById("crushModal");
-const crushContent = document.getElementById("crushContent");
+let currentUserUid=null;
 
-const messageModal = document.getElementById("messageModal");
-const msgTo = document.getElementById("msgTo");
-const msgText = document.getElementById("msgText");
-const msgContent = document.getElementById("msgContent");
-const sendMsgBtn = document.getElementById("sendMsgBtn");
-
-let currentUserUid = null;
-
-onAuthStateChanged(auth, async user => {
-  if (!user) { alert("Vous devez être connecté !"); window.location.href="inscription.html"; return; }
-  currentUserUid = user.uid;
-
-  const userRef = ref(db,"users/"+currentUserUid);
-  await update(userRef,{online:true});
+onAuthStateChanged(auth,async user=>{
+  if(!user){window.location.href="inscription.html";return;}
+  currentUserUid=user.uid;
+  const uRef=ref(db,"users/"+currentUserUid);
+  await update(uRef,{online:true});
   onDisconnect(ref(db,"users/"+currentUserUid+"/online")).set(false);
 
-  onValue(userRef,snap=>{
+  onValue(uRef,snap=>{
     if(snap.exists()){
-      const data = snap.val();
-      pseudoMini.textContent = data.pseudo||"Utilisateur";
-      miniProfilePic.src = (data.photos && data.photos.length>0)?data.photos[0]:"https://i.pravatar.cc/150?img=12";
+      const d=snap.val();
+      pseudoMini.textContent=d.pseudo||"Moi";
+      miniProfilePic.src=(d.photos&&d.photos[0])?d.photos[0]:"https://i.pravatar.cc/150?img=12";
     }
   });
 
-  const allUsersRef = ref(db,"users");
-  onValue(allUsersRef,snap=>{
+  onValue(ref(db,"users"),snap=>{
     carousel.innerHTML="";
     if(!snap.exists()) return;
-    const allUsers = snap.val();
-    Object.entries(allUsers).forEach(([uid,u])=>{
-      if(uid!==currentUserUid && u.online===true){
-        const card = document.createElement("div");
-        card.className="card "+(u.gender||"girl");
-        card.dataset.uid=uid;
-
-        card.innerHTML=`
-          <img src="${u.photos && u.photos.length>0?u.photos[0]:'https://i.pravatar.cc/150?img=12'}" alt="${u.pseudo}">
-          <div class="name">${u.pseudo||'Utilisateur'}</div>
-          <div class="btns">
-            <div class="btn-chat" title="Chat">💬</div>
-            <div class="btn-like" title="Like">💖</div>
-            <div class="btn-fav" title="Favoris">⭐️</div>
-          </div>
-        `;
-
-        // 🔹 Synchroniser like/fav
-        (async ()=>{
-          const likeSnap = await get(ref(db,`users/${uid}/likes/${currentUserUid}`));
-          if(likeSnap.exists() && likeSnap.val()===true) card.querySelector(".btn-like").classList.add("active");
-
-          const favSnap = await get(ref(db,`users/${currentUserUid}/favoris/${uid}`));
-          if(favSnap.exists() && favSnap.val()===true) card.querySelector(".btn-fav").classList.add("active");
-        })();
-
-        // 🔹 Clic sur la photo pour ouvrir la page du profil
-        card.querySelector("img").addEventListener("click", (e) => {
-          e.stopPropagation();
-          const targetUid = card.dataset.uid;
-          window.location.href = `profilcard.html?uid=${targetUid}`;
-        });
-
-        carousel.appendChild(card);
-      }
+    const data=snap.val();
+    Object.entries(data).forEach(([uid,u])=>{
+      if(uid===currentUserUid||!u.online) return;
+      const card=document.createElement("div");
+      card.className="card";
+      card.dataset.uid=uid;
+      card.innerHTML=`
+        <img src="${u.photos && u.photos[0]?u.photos[0]:"https://i.pravatar.cc/150?img=12"}">
+        <div class="name">${u.pseudo||"Utilisateur"}</div>
+        <div class="btns">
+          <div class="btn-chat">💬</div>
+          <div class="btn-like">💖</div>
+          <div class="btn-fav">⭐️</div>
+        </div>`;
+      carousel.appendChild(card);
     });
-    if(carousel.innerHTML.trim()===""){
-      const emptyMsg = document.createElement("div");
-      emptyMsg.style.textAlign="center"; emptyMsg.style.width="100%"; emptyMsg.style.color="#ff66cc";
-      emptyMsg.textContent="Aucun utilisateur en ligne pour le moment...";
-      carousel.appendChild(emptyMsg);
-    }
   });
 });
 
-// --- Gestion carrousel ---
-carousel.addEventListener("click", async e=>{
-  const card = e.target.closest(".card");
+// --- Like / Fav + MiniProfile ---
+carousel.addEventListener("click",async e=>{
+  const card=e.target.closest(".card");
   if(!card) return;
-  const targetUid = card.dataset.uid;
-  if(!currentUserUid || !targetUid) return;
+  const uid=card.dataset.uid;
+  const btnLike=e.target.closest(".btn-like");
+  const btnFav=e.target.closest(".btn-fav");
 
-  // Chat
-  if(e.target.closest(".btn-chat")){
-    const name = card.querySelector(".name").textContent;
-    msgTo.textContent=`Message à : ${name}`;
-    messageModal.style.display="flex";
-    messageModal.dataset.uid=targetUid;
+  if(btnLike){
+    btnLike.classList.toggle("active");
+    await set(ref(db,`users/${uid}/likes/${currentUserUid}`),btnLike.classList.contains("active"));
+    addMini(card);
   }
-
-  // --- LIKE ---
-if (e.target.closest(".btn-like")) {
-  const btn = e.target.closest(".btn-like");
-  btn.classList.toggle("active");
-  const likeRef = ref(db, `users/${targetUid}/likes/${currentUserUid}`);
-  if(btn.classList.contains("active")) await set(likeRef,true);
-  else await set(likeRef,false);
-
-  addMiniProfile(card);
-}
-
-// --- FAVORIS ---
-if (e.target.closest(".btn-fav")) {
-  const btn = e.target.closest(".btn-fav");
-  btn.classList.toggle("active");
-  const favRef = ref(db, `users/${currentUserUid}/favoris/${targetUid}`);
-  if(btn.classList.contains("active")) await set(favRef,true);
-  else await set(favRef,false);
-
-  addMiniProfile(card);
-}
+  if(btnFav){
+    btnFav.classList.toggle("active");
+    await set(ref(db,`users/${currentUserUid}/favoris/${uid}`),btnFav.classList.contains("active"));
+    addMini(card);
+  }
 });
 
-// --- Ajouter mini-profil circulaire fluide ---
-function addMiniProfile(card){
-  const uid = card.dataset.uid;
-  if(document.querySelector(`#miniProfilesContainer .miniProfileCircle[data-uid='${uid}']`)) return;
-  const circle = document.createElement("div");
+function addMini(card){
+  const uid=card.dataset.uid;
+  if(document.querySelector(`.miniProfileCircle[data-uid="${uid}"]`)) return;
+  const circle=document.createElement("div");
   circle.className="miniProfileCircle";
   circle.dataset.uid=uid;
-  const img = card.querySelector("img").cloneNode();
+  circle.style.left="20px";
+  circle.style.top="80px";
+  const img=card.querySelector("img").cloneNode();
   circle.appendChild(img);
+  const x=document.createElement("div");
+  x.className="miniRemove";
+  x.textContent="×";
+  x.onclick=()=>circle.remove();
+  circle.appendChild(x);
 
-  const removeBtn = document.createElement("div");
-  removeBtn.className="miniRemove"; removeBtn.textContent="×";
-  removeBtn.addEventListener("click",()=>{ circle.remove(); });
-  circle.appendChild(removeBtn);
-
-  circle.style.left="20px"; circle.style.top="80px"; // initial position
-  // draggable fluide
-  let shiftX, shiftY;
-  circle.onmousedown=function(e){
-    e.preventDefault();
-    shiftX=e.clientX-circle.getBoundingClientRect().left;
-    shiftY=e.clientY-circle.getBoundingClientRect().top;
-
-    function moveAt(pageX,pageY){ 
-      circle.style.left=(pageX-shiftX)+"px"; 
-      circle.style.top=(pageY-shiftY)+"px"; 
-    }
-
-    function onMouseMove(e){ moveAt(e.pageX,e.pageY); }
-    document.addEventListener("mousemove",onMouseMove);
-    document.onmouseup=function(){ 
-      document.removeEventListener("mousemove",onMouseMove); 
-      document.onmouseup=null; 
-    };
-  };
-  circle.ondragstart=()=>false;
+  let offsetX,offsetY,drag=false;
+  circle.addEventListener("mousedown",e=>{
+    drag=true;
+    offsetX=e.clientX-parseFloat(circle.style.left);
+    offsetY=e.clientY-parseFloat(circle.style.top);
+    circle.style.cursor="grabbing";
+  });
+  document.addEventListener("mousemove",e=>{
+    if(!drag)return;
+    circle.style.left=e.clientX-offsetX+"px";
+    circle.style.top=e.clientY-offsetY+"px";
+  });
+  document.addEventListener("mouseup",()=>{drag=false;circle.style.cursor="grab";});
   miniProfilesContainer.appendChild(circle);
 }
-
-// --- Bouton Mes Crush ---
-favoritesBtn.addEventListener("click", async ()=>{
-  crushModal.style.display="flex";
-  crushContent.innerHTML="";
-  const favSnap = await get(ref(db,`users/${currentUserUid}/favoris`));
-  if(favSnap.exists()){
-    const favs = favSnap.val();
-    for(const uid in favs){
-      const userSnap = await get(ref(db,`users/${uid}`));
-      if(userSnap.exists()){
-        const data = userSnap.val();
-        const prof = document.createElement("div");
-        prof.style.display="flex"; prof.style.flexDirection="column"; prof.style.alignItems="center";
-        prof.innerHTML=`<img src="${data.photos && data.photos.length>0?data.photos[0]:'https://i.pravatar.cc/150?img=12'}" style="width:70px;height:70px;border-radius:50%;margin-bottom:5px;"><span>${data.pseudo||'Utilisateur'}</span>`;
-        crushContent.appendChild(prof);
-      }
-    }
-  } else {
-    crushContent.textContent="Aucun crush pour le moment.";
-  }
-});
-
-// --- Fermer modales ---
-document.querySelectorAll(".modal .closeBtn").forEach(btn=>{
-  btn.addEventListener("click",()=>{ btn.parentElement.style.display="none"; });
-});
-
-// --- Envoyer message ---
-sendMsgBtn.addEventListener("click", async ()=>{
-  const text=msgText.value.trim(); if(!text) return;
-  const toUid=messageModal.dataset.uid;
-  const msgRef=push(ref(db,`messages/${toUid}`));
-  await set(msgRef,{from:currentUserUid,text: text,timestamp:Date.now()});
-  msgText.value=""; messageModal.style.display="none";
-});
-
-// --- Clic sur ma photo de profil perso ---
-miniProfilePic.addEventListener("click", () => {
-  window.location.href = "page2.html";
-});
 </script>
 </body>
 </html>
