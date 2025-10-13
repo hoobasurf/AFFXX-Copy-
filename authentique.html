@@ -91,6 +91,7 @@ import { app } from "./firebase.js";
 
 const auth = getAuth(app);
 const db = getDatabase(app);
+let currentUserUid = null;
 
 const miniProfilePic = document.getElementById("miniProfilePic");
 const pseudoMini = document.getElementById("pseudoMini");
@@ -107,8 +108,6 @@ const msgText = document.getElementById("msgText");
 const msgContent = document.getElementById("msgContent");
 const sendMsgBtn = document.getElementById("sendMsgBtn");
 
-let currentUserUid = null;
-
 onAuthStateChanged(auth, async user => {
   if (!user) { alert("Vous devez être connecté !"); window.location.href="inscription.html"; return; }
   currentUserUid = user.uid;
@@ -117,6 +116,7 @@ onAuthStateChanged(auth, async user => {
   await update(userRef,{online:true});
   onDisconnect(ref(db,"users/"+currentUserUid+"/online")).set(false);
 
+  // Mini-profil
   onValue(userRef,snap=>{
     if(snap.exists()){
       const data = snap.val();
@@ -125,6 +125,7 @@ onAuthStateChanged(auth, async user => {
     }
   });
 
+  // Carrousel utilisateurs
   const allUsersRef = ref(db,"users");
   onValue(allUsersRef,snap=>{
     carousel.innerHTML="";
@@ -141,12 +142,12 @@ onAuthStateChanged(auth, async user => {
           <div class="name">${u.pseudo||'Utilisateur'}</div>
           <div class="btns">
             <div class="btn-chat" title="Chat">💬</div>
-            <div class="btn-like" title="Like">💖</div>
-            <div class="btn-fav" title="Favoris">⭐️</div>
+            <div class="btn-like" title="Like" data-uid="${uid}">💖</div>
+            <div class="btn-fav" title="Favoris" data-uid="${uid}">⭐️</div>
           </div>
         `;
 
-        // 🔹 Synchroniser like/fav
+        // Synchroniser Like/Fav
         (async ()=>{
           const likeSnap = await get(ref(db,`users/${uid}/likes/${currentUserUid}`));
           if(likeSnap.exists() && likeSnap.val()===true) card.querySelector(".btn-like").classList.add("active");
@@ -155,11 +156,10 @@ onAuthStateChanged(auth, async user => {
           if(favSnap.exists() && favSnap.val()===true) card.querySelector(".btn-fav").classList.add("active");
         })();
 
-        // 🔹 Clic sur la photo pour ouvrir la page du profil
-        card.querySelector("img").addEventListener("click", (e) => {
+        // Clic photo → profil
+        card.querySelector("img").addEventListener("click", e => {
           e.stopPropagation();
-          const targetUid = card.dataset.uid;
-          window.location.href = `profilcard.html?uid=${targetUid}`;
+          window.location.href = `profilcard.html?uid=${uid}`;
         });
 
         carousel.appendChild(card);
@@ -174,7 +174,7 @@ onAuthStateChanged(auth, async user => {
   });
 });
 
-// --- Gestion carrousel ---
+// Carrousel clics
 carousel.addEventListener("click", async e=>{
   const card = e.target.closest(".card");
   if(!card) return;
@@ -189,87 +189,110 @@ carousel.addEventListener("click", async e=>{
     messageModal.dataset.uid=targetUid;
   }
 
-  // --- LIKE ---
-if (e.target.closest(".btn-like")) {
-  const btn = e.target.closest(".btn-like");
-  btn.classList.toggle("active");
-  const likeRef = ref(db, `users/${targetUid}/likes/${currentUserUid}`);
-  if(btn.classList.contains("active")) await set(likeRef,true);
-  else await set(likeRef,false);
+  // Like
+  if(e.target.closest(".btn-like")){
+    const btn = e.target.closest(".btn-like");
+    btn.classList.toggle("active");
+    const likeRef = ref(db, `users/${targetUid}/likes/${currentUserUid}`);
+    if(btn.classList.contains("active")) await set(likeRef,true);
+    else await set(likeRef,false);
 
-  addMiniProfile(card);
-}
+    addMiniProfile(card);
+  }
 
-// --- FAVORIS ---
-if (e.target.closest(".btn-fav")) {
-  const btn = e.target.closest(".btn-fav");
-  btn.classList.toggle("active");
-  const favRef = ref(db, `users/${currentUserUid}/favoris/${targetUid}`);
-  if(btn.classList.contains("active")) await set(favRef,true);
-  else await set(favRef,false);
+  // Favoris
+  if(e.target.closest(".btn-fav")){
+    const btn = e.target.closest(".btn-fav");
+    btn.classList.toggle("active");
+    const favRef = ref(db, `users/${currentUserUid}/favoris/${targetUid}`);
+    if(btn.classList.contains("active")) await set(favRef,true);
+    else await set(favRef,false);
 
-  addMiniProfile(card);
-}
+    addMiniProfile(card);
+  }
 });
 
-card);
+// Ajouter mini-profil draggable fluide
+function addMiniProfile(card){
+  const uid = card.dataset.uid;
+  if(document.querySelector(`#miniProfilesContainer .miniProfileCircle[data-uid='${uid}']`)) return;
+
+  const circle = document.createElement("div");
+  circle.className="miniProfileCircle";
+  circle.dataset.uid=uid;
+
+  const img = card.querySelector("img").cloneNode();
+  circle.appendChild(img);
+
+  const removeBtn = document.createElement("div");
+  removeBtn.className="miniRemove"; removeBtn.textContent="×";
+  removeBtn.addEventListener("click",()=>{ circle.remove(); });
+  circle.appendChild(removeBtn);
+
+  circle.style.left="20px"; circle.style.top="80px";
+
+  // Draggable fluide
+  let shiftX, shiftY;
+  circle.onmousedown = function(e){
+    e.preventDefault();
+    shiftX = e.clientX - circle.getBoundingClientRect().left;
+    shiftY = e.clientY - circle.getBoundingClientRect().top;
+
+    function moveAt(pageX,pageY){
+      circle.style.left = (pageX - shiftX) + "px";
+      circle.style.top = (pageY - shiftY) + "px";
+    }
+
+    function onMouseMove(e){ moveAt(e.pageX, e.pageY); }
+    document.addEventListener("mousemove", onMouseMove);
+    document.onmouseup = function(){ document.removeEventListener("mousemove", onMouseMove); document.onmouseup=null; };
+  };
+  circle.ondragstart = () => false;
+  miniProfilesContainer.appendChild(circle);
 }
-});
 
-
-// --- Bouton Mes Crush ---
+// Bouton Mes Crush
 favoritesBtn.addEventListener("click", async ()=>{
   crushModal.style.display="flex";
   crushContent.innerHTML="";
-  const favSnap = await get(ref(db, `users/${currentUserUid}/favoris`));
-  if (!favSnap.exists()) {
-    crushContent.textContent = "Aucun crush pour le moment.";
-    return;
-  }
-
-  const favs = favSnap.val();
-  for (const uid in favs) {
-    const userSnap = await get(ref(db, `users/${uid}`));
-    if (userSnap.exists()) {
-      const u = userSnap.val();
-      const imgSrc = (u.photos && u.photos.length > 0) 
-        ? u.photos[0] 
-        : "https://i.pravatar.cc/100?u="+uid;
-
-      const prof = document.createElement("div");
-      prof.style.display = "flex";
-      prof.style.flexDirection = "column";
-      prof.style.alignItems = "center";
-      prof.innerHTML = `
-        <img src="${imgSrc}" style="width:70px;height:70px;border-radius:50%;margin-bottom:5px;">
-        <span>${u.pseudo || 'Utilisateur'}</span>
-      `;
-      crushContent.appendChild(prof);
+  const favSnap = await get(ref(db,`users/${currentUserUid}/favoris`));
+  if(favSnap.exists()){
+    const favs = favSnap.val();
+    for(const uid in favs){
+      const userSnap = await get(ref(db,`users/${uid}`));
+      if(userSnap.exists()){
+        const data = userSnap.val();
+        const prof = document.createElement("div");
+        prof.style.display="flex";
+        prof.style.flexDirection="column";
+        prof.style.alignItems="center";
+        prof.innerHTML = `<img src="${data.photos && data.photos.length>0?data.photos[0]:'https://i.pravatar.cc/150?img=12'}" style="width:70px;height:70px;border-radius:50%;margin-bottom:5px;"><span>${data.pseudo||'Utilisateur'}</span>`;
+        crushContent.appendChild(prof);
+      }
     }
-   }
   } else {
     crushContent.textContent="Aucun crush pour le moment.";
   }
 });
 
-// --- Fermer modales ---
+// Fermer modales
 document.querySelectorAll(".modal .closeBtn").forEach(btn=>{
   btn.addEventListener("click",()=>{ btn.parentElement.style.display="none"; });
 });
 
-// --- Envoyer message ---
+// Envoyer message
 sendMsgBtn.addEventListener("click", async ()=>{
-  const text=msgText.value.trim(); if(!text) return;
-  const toUid=messageModal.dataset.uid;
-  const msgRef=push(ref(db,`messages/${toUid}`));
-  await set(msgRef,{from:currentUserUid,text: text,timestamp:Date.now()});
-  msgText.value=""; messageModal.style.display="none";
+  const text = msgText.value.trim(); 
+  if(!text) return;
+  const toUid = messageModal.dataset.uid;
+  const msgRef = push(ref(db,`messages/${toUid}`));
+  await set(msgRef,{from:currentUserUid, text: text, timestamp: Date.now()});
+  msgText.value="";
+  messageModal.style.display="none";
 });
 
-// --- Clic sur ma photo de profil perso ---
-miniProfilePic.addEventListener("click", () => {
-  window.location.href = "page2.html";
-});
+// Clic sur ma photo de profil perso
+miniProfilePic.addEventListener("click", () => { window.location.href = "page2.html"; });
 </script>
 </body>
 </html>
