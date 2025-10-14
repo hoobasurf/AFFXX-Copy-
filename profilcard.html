@@ -7,30 +7,135 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 <style>
 * { box-sizing:border-box; margin:0; padding:0; }
-html, body { height:100%; width:100%; font-family:'Orbitron',sans-serif; background:url('planete-romantique.jpg') no-repeat center center/cover; color:white; overflow-y:auto; }
-body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%); z-index:1; pointer-events:none; }
-#profileCard { position:relative; z-index:2; padding:20px; text-align:center; }
-#profileCard img { width:120px; height:120px; border-radius:50%; border:3px solid #ff66cc; box-shadow:0 0 15px #ff66cc; object-fit:cover; background:#222; }
-.name { margin-top:10px; font-size:1.5em; color:#ff66cc; }
-.btns { display:flex; justify-content:center; gap:10px; margin-top:15px; }
-.btn-like, .btn-fav, .btn-chat { width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.1); border:1px solid #ff66cc; color:#ff66cc; display:flex; align-items:center; justify-content:center; font-size:1.2em; cursor:pointer; transition: all .18s; }
+html, body {
+  height:100%; width:100%;
+  font-family:'Orbitron',sans-serif;
+  background:url('planete-romantique.jpg') no-repeat center center/cover;
+  color:white;
+  overflow-y:auto;
+}
+body::before {
+  content:"";
+  position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%);
+  z-index:1; pointer-events:none;
+}
+
+/* === Barre de navigation fixe === */
+.navbar {
+  position:fixed;
+  top:0; left:0; width:100%;
+  height:60px;
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  border-bottom:1px solid rgba(255,102,204,0.3);
+  padding:0 20px;
+  z-index:100;
+}
+.navbar button {
+  background:none; border:none;
+  color:#ff66cc; font-size:1em;
+  cursor:pointer;
+  transition:color .3s, transform .3s;
+}
+.navbar button:hover { color:#ff99e6; transform:scale(1.1); }
+.navbar .title {
+  flex:1; text-align:center;
+  color:#ff66cc; font-size:1.2em;
+  text-shadow:0 0 8px #ff66cc;
+}
+
+/* === Profil principal === */
+#profileCard {
+  position:relative; z-index:2;
+  padding:100px 20px 20px 20px; /* marge top pour laisser place à la navbar */
+  text-align:center;
+}
+#profileCard img {
+  width:120px; height:120px;
+  border-radius:50%;
+  border:3px solid #ff66cc;
+  box-shadow:0 0 15px #ff66cc;
+  object-fit:cover; background:#222;
+}
+.name {
+  margin-top:10px; font-size:1.5em; color:#ff66cc;
+}
+.btns {
+  display:flex; justify-content:center; gap:10px; margin-top:15px;
+}
+.btn-like, .btn-fav, .btn-chat {
+  width:40px; height:40px; border-radius:50%;
+  background:rgba(255,255,255,0.1);
+  border:1px solid #ff66cc; color:#ff66cc;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.2em; cursor:pointer;
+  transition: all .18s;
+}
 .btn-like.active { background:#ff66cc; color:white; box-shadow:0 0 12px #ff66cc; }
 .btn-fav.active { background:#ffea00; color:#333; box-shadow:0 0 12px #ffea00; }
 
-/* small chat modal styling (keeps your theme) */
-#chatModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:100; padding:20px; box-sizing:border-box; }
-#chatModal .closeChat { position:absolute; top:12px; right:12px; color:#ff66cc; font-size:22px; cursor:pointer; }
-#chatBox { margin-top:50px; margin-bottom:10px; max-height:70vh; overflow-y:auto; border:1px solid rgba(255,102,204,0.15); padding:10px; border-radius:8px; background:rgba(0,0,0,0.2); }
-.msg { padding:6px 8px; margin-bottom:8px; border-radius:6px; font-size:14px; }
-.msg.me { background:rgba(255,102,204,0.18); align-self:flex-end; color:#fff; }
-.msg.them { background:rgba(255,255,255,0.04); color:#fff; }
-#chatInput { display:flex; gap:8px; margin-top:10px; align-items:center; }
-#msgText { flex:1; padding:8px 10px; border-radius:8px; border:1px solid rgba(255,102,204,0.15); background:rgba(0,0,0,0.4); color:white; outline:none; font-family:'Orbitron',sans-serif; -webkit-text-size-adjust:100%; }
-#sendMsgBtn { background:#ff66cc; border:none; padding:8px 12px; border-radius:8px; color:white; cursor:pointer; }
-
+/* === Chat modal === */
+#chatModal {
+  display:none;
+  position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.85);
+  z-index:200;
+  padding:20px; box-sizing:border-box;
+}
+#chatModal .closeChat {
+  position:absolute; top:12px; right:12px;
+  color:#ff66cc; font-size:22px; cursor:pointer;
+}
+#chatBox {
+  margin-top:50px; margin-bottom:10px;
+  max-height:70vh; overflow-y:auto;
+  border:1px solid rgba(255,102,204,0.15);
+  padding:10px; border-radius:8px;
+  background:rgba(0,0,0,0.2);
+}
+.msg {
+  padding:6px 8px; margin-bottom:8px;
+  border-radius:6px; font-size:14px;
+}
+.msg.me {
+  background:rgba(255,102,204,0.18);
+  align-self:flex-end; color:#fff;
+}
+.msg.them {
+  background:rgba(255,255,255,0.04); color:#fff;
+}
+#chatInput {
+  display:flex; gap:8px; margin-top:10px; align-items:center;
+}
+#msgText {
+  flex:1; padding:8px 10px; border-radius:8px;
+  border:1px solid rgba(255,102,204,0.15);
+  background:rgba(0,0,0,0.4); color:white;
+  outline:none; font-family:'Orbitron',sans-serif;
+  -webkit-text-size-adjust:100%;
+  font-size:16px;
+}
+#sendMsgBtn {
+  background:#ff66cc; border:none;
+  padding:8px 12px; border-radius:8px;
+  color:white; cursor:pointer;
+}
 </style>
 </head>
 <body>
+
+<!-- ✅ Barre de navigation -->
+<div class="navbar">
+  <button id="backBtn">⬅ Authentique</button>
+  <div class="title">Profil</div>
+  <div style="width:60px;"></div> <!-- espace pour équilibre -->
+</div>
+
+<!-- === Profil principal === -->
 <div id="profileCard">
   <img id="profilePic" src="" alt="Profil" />
   <div class="name" id="profileName">Utilisateur</div>
@@ -41,7 +146,7 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
   </div>
 </div>
 
-<!-- Chat modal -->
+<!-- === Chat modal === -->
 <div id="chatModal">
   <div class="closeChat">✖</div>
   <div id="chatBox"></div>
@@ -74,10 +179,12 @@ const chatBox = document.getElementById("chatBox");
 const msgText = document.getElementById("msgText");
 const sendMsgBtn = document.getElementById("sendMsgBtn");
 
+const backBtn = document.getElementById("backBtn");
+backBtn.addEventListener("click", () => {
+  window.location.href = "authentique.html";
+});
+
 let currentUserUid = null;
-let likesListener = null;
-let favsListener = null;
-let messagesListener = null;
 
 function setImgSafe(imgEl, src) {
   imgEl.src = src || ("https://i.pravatar.cc/150?u=" + (targetUid || "default"));
@@ -89,18 +196,16 @@ onAuthStateChanged(auth, async user => {
   currentUserUid = user.uid;
 
   if(!targetUid){
-    // si pas de uid, revenir à authentique (sécurité)
     window.location.href = "authentique.html";
     return;
   }
 
-  // Récupérer les données du profil cible (once)
+  // Récupération du profil
   try {
     const snapshot = await get(ref(db, `users/${targetUid}`));
     if(snapshot.exists()){
       const data = snapshot.val();
       profileName.textContent = data.pseudo || "Utilisateur";
-      // set image with fallback
       const photo = (data.photos && data.photos.length > 0) ? data.photos[0] : null;
       setImgSafe(profilePic, photo);
     } else {
@@ -112,75 +217,41 @@ onAuthStateChanged(auth, async user => {
     setImgSafe(profilePic, null);
   }
 
-  // === Synchronisation en temps réel ===
-  // 1) like : je regarde si *moi* ai liké cette personne (stored under users/{targetUid}/likes/{currentUserUid})
-  const likePath = ref(db, `users/${targetUid}/likes/${currentUserUid}`);
-  if(likesListener) likesListener(); // pas direct unsubscribe possible pour simple ref/onValue (we'll reassign)
-  onValue(likePath, snap => {
-    const val = snap.exists() && snap.val() === true;
-    if(val) btnLike.classList.add("active"); else btnLike.classList.remove("active");
+  // === Synchronisation temps réel ===
+  onValue(ref(db, `users/${targetUid}/likes/${currentUserUid}`), snap => {
+    btnLike.classList.toggle("active", snap.exists() && snap.val() === true);
+  });
+  onValue(ref(db, `users/${currentUserUid}/favoris/${targetUid}`), snap => {
+    btnFav.classList.toggle("active", snap.exists() && snap.val() === true);
   });
 
-  // 2) favoris : je regarde si j'ai mis cette personne en favoris (stored under users/{currentUserUid}/favoris/{targetUid})
-  const favPath = ref(db, `users/${currentUserUid}/favoris/${targetUid}`);
-  onValue(favPath, snap => {
-    const val = snap.exists() && snap.val() === true;
-    if(val) btnFav.classList.add("active"); else btnFav.classList.remove("active");
-  });
-
-  // 3) Ecoute messages entrants (pour affichage chat si ouvert)
-  // onChildAdded pour le noeud messages/{currentUserUid}/{targetUid}
-  const msgListenPath = ref(db, `messages/${currentUserUid}/${targetUid}`);
-  onChildAdded(msgListenPath, snapshot => {
+  onChildAdded(ref(db, `messages/${currentUserUid}/${targetUid}`), snapshot => {
     const m = snapshot.val();
-    if(!m) return;
-    appendMessageToBox(m);
+    if(m) appendMessageToBox(m);
   });
 });
 
-// --- Actions Like / Fav ---
+// === Actions Like / Fav ===
 btnLike.addEventListener("click", async () => {
   if(!currentUserUid || !targetUid) return;
   const likeRef = ref(db, `users/${targetUid}/likes/${currentUserUid}`);
   const isActive = btnLike.classList.contains("active");
-  if(!isActive){
-    await set(likeRef, true);
-    // optional: also store in my crush list for persistence
-    await set(ref(db, `users/${currentUserUid}/crush/${targetUid}`), { type: "like", pseudo: profileName.textContent, photo: profilePic.src });
-    btnLike.classList.add("active");
-  } else {
-    await set(likeRef, null);
-    // remove from my crush if it was stored
-    await set(ref(db, `users/${currentUserUid}/crush/${targetUid}`), null);
-    btnLike.classList.remove("active");
-  }
+  await set(likeRef, !isActive);
 });
-
 btnFav.addEventListener("click", async () => {
   if(!currentUserUid || !targetUid) return;
   const favRef = ref(db, `users/${currentUserUid}/favoris/${targetUid}`);
   const isActive = btnFav.classList.contains("active");
-  if(!isActive){
-    await set(favRef, true);
-    await set(ref(db, `users/${currentUserUid}/crush/${targetUid}`), { type: "favoris", pseudo: profileName.textContent, photo: profilePic.src });
-    btnFav.classList.add("active");
-  } else {
-    await set(favRef, null);
-    await set(ref(db, `users/${currentUserUid}/crush/${targetUid}`), null);
-    btnFav.classList.remove("active");
-  }
+  await set(favRef, !isActive);
 });
 
-// --- Chat open / close + load existing messages ---
+// === Chat ===
 btnChat.addEventListener("click", () => {
   chatModal.style.display = "block";
   chatBox.innerHTML = "";
-  // load existing messages (both directions already mirrored when sending)
   loadMessages();
 });
-closeChat.addEventListener("click", () => {
-  chatModal.style.display = "none";
-});
+closeChat.addEventListener("click", () => { chatModal.style.display = "none"; });
 
 function appendMessageToBox(m){
   const div = document.createElement("div");
@@ -191,42 +262,23 @@ function appendMessageToBox(m){
 }
 
 async function loadMessages(){
-  // We will read messages/{currentUserUid}/{targetUid} once (recent)
   try {
     const snap = await get(ref(db, `messages/${currentUserUid}/${targetUid}`));
     if(snap.exists()){
-      const objs = snap.val();
-      // objs is object of messages keyed by push id
-      Object.values(objs).forEach(m => appendMessageToBox(m));
+      Object.values(snap.val()).forEach(m => appendMessageToBox(m));
     }
-  } catch(err){
-    console.error("Erreur loadMessages:", err);
-  }
+  } catch(err){ console.error("Erreur loadMessages:", err); }
 }
 
-// --- Send message (stores for both users so both see the conversation) ---
 sendMsgBtn.addEventListener("click", async ()=>{
   const text = msgText.value.trim();
-  if(!text) return;
-  if(!currentUserUid || !targetUid) return;
-
+  if(!text || !currentUserUid || !targetUid) return;
   const msg = { from: currentUserUid, to: targetUid, text, timestamp: Date.now() };
-
-  // push to both paths
-  const refMe = ref(db, `messages/${currentUserUid}/${targetUid}`);
-  const refThem = ref(db, `messages/${targetUid}/${currentUserUid}`);
-  await set(push(refMe), msg);
-  await set(push(refThem), msg);
-
+  await set(push(ref(db, `messages/${currentUserUid}/${targetUid}`)), msg);
+  await set(push(ref(db, `messages/${targetUid}/${currentUserUid}`)), msg);
   msgText.value = "";
   appendMessageToBox(msg);
 });
-
-// prevent mobile zoom on focus (meta tag approach is not reliable at runtime)
-// workaround: reduce font-size change and ensure viewport meta already set (we have it)
-// also ensure input doesn't trigger zoom by keeping font-size >= 16px on iOS
-msgText.style.fontSize = "16px";
-
 </script>
 </body>
 </html>
