@@ -29,8 +29,8 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 .btn-fav.active { background-color:#ffea00; border-color:#ffea00; color:#333; box-shadow:0 0 12px #ffea00; }
 
 /* Mini-profils circulaires draggable */
-#miniProfilesContainer { position:fixed; top:80px; right:20px; z-index:99; display:flex; flex-wrap:wrap; gap:10px; }
-.miniProfileCircle { width:50px; height:50px; border-radius:50%; overflow:hidden; border:2px solid #ff66cc; box-shadow:0 0 12px #ff66cc; cursor:grab; position:fixed; transition:left 0.1s linear, top 0.1s linear; }
+#miniProfilesContainer { position:fixed; top:80px; right:20px; z-index:99; display:flex; flex-wrap:wrap; gap:10px; pointer-events:auto; }
+.miniProfileCircle { width:50px; height:50px; border-radius:50%; overflow:hidden; border:2px solid #ff66cc; box-shadow:0 0 12px #ff66cc; cursor:grab; position:fixed; transition:left 0.05s linear, top 0.05s linear; }
 .miniProfileCircle img { width:100%; height:100%; object-fit:cover; }
 .miniRemove { position:absolute; top:-5px; right:-5px; background:#ff66cc; color:#fff; font-size:0.6em; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 6px #ff66cc; }
 
@@ -84,6 +84,13 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 </div>
 
 <script type="module">
+/* ============================
+   authentique.html - JS fixe
+   conserve le visuel d'origine,
+   corrige : photos blob -> fallback,
+   mini-profiles draggable, like/fav sync,
+   envoi message robuste et clic photo -> profilcard
+   ============================ */
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set, update, onDisconnect, onValue, push, get } 
   from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
@@ -97,160 +104,264 @@ const pseudoMini = document.getElementById("pseudoMini");
 const carousel = document.getElementById("carousel");
 const miniProfilesContainer = document.getElementById("miniProfilesContainer");
 const favoritesBtn = document.getElementById("favoritesBtn");
+
 const crushModal = document.getElementById("crushModal");
 const crushContent = document.getElementById("crushContent");
+
 const messageModal = document.getElementById("messageModal");
 const msgTo = document.getElementById("msgTo");
 const msgText = document.getElementById("msgText");
+const msgContent = document.getElementById("msgContent");
 const sendMsgBtn = document.getElementById("sendMsgBtn");
 
 let currentUserUid = null;
 
-// --- Connexion utilisateur ---
+/* Helper - safe image loader (fallback if blob not accessible) */
+function setImgSafe(imgEl, url, uidFallback){
+  // If it's a blob: URL, it might not be accessible in other sessions.
+  // Try to set it; if error (can't load), fall back to pravatar with uid.
+  imgEl.src = url || `https://i.pravatar.cc/150?u=${uidFallback||'default'}`;
+  imgEl.onerror = () => { imgEl.src = `https://i.pravatar.cc/150?u=${uidFallback||'default'}`; };
+}
+
+// --- Auth / présence en ligne ---
 onAuthStateChanged(auth, async user => {
-  if (!user) {
-    alert("Veuillez vous connecter.");
-    window.location.href = "inscription.html";
-    return;
-  }
-
+  if (!user) { alert("Vous devez être connecté !"); window.location.href="inscription.html"; return; }
   currentUserUid = user.uid;
-  const userRef = ref(db, "users/" + currentUserUid);
-  await update(userRef, { online: true });
-  onDisconnect(ref(db, "users/" + currentUserUid + "/online")).set(false);
 
-  onValue(userRef, snap => {
-    if (snap.exists()) {
+  const userRef = ref(db,"users/"+currentUserUid);
+  await update(userRef,{online:true});
+  onDisconnect(ref(db,"users/"+currentUserUid+"/online")).set(false);
+
+  // Afficher mini-profil
+  onValue(userRef,snap=>{
+    if(snap.exists()){
       const data = snap.val();
-      pseudoMini.textContent = data.pseudo || "Utilisateur";
-      miniProfilePic.src = (data.photos && data.photos.length > 0)
-        ? data.photos[0]
-        : "https://i.pravatar.cc/150?img=12";
+      pseudoMini.textContent = data.pseudo||"Utilisateur";
+      // data.photos may be an array or string - handle both
+      let photo = null;
+      if (data.photos && Array.isArray(data.photos) && data.photos.length>0) photo = data.photos[0];
+      else if (data.photos && typeof data.photos === 'string') photo = data.photos;
+      setImgSafe(miniProfilePic, photo, currentUserUid);
     }
   });
 
-  // --- Charger les utilisateurs en ligne ---
-  const allUsersRef = ref(db, "users");
-  onValue(allUsersRef, snap => {
+  // Charger utilisateurs en ligne
+  const allUsersRef = ref(db,"users");
+  onValue(allUsersRef,snap=>{
     carousel.innerHTML = "";
-    if (!snap.exists()) return;
-
+    if(!snap.exists()) return;
     const allUsers = snap.val();
-    Object.entries(allUsers).forEach(([uid, u]) => {
-      if (uid !== currentUserUid && u.online === true) {
+    Object.entries(allUsers).forEach(([uid,u])=>{
+      if(uid!==currentUserUid && u.online===true){
         const card = document.createElement("div");
-        card.className = "card";
+        card.className = "card " + (u.gender || "girl");
         card.dataset.uid = uid;
+
+        // resolve photo safely
+        const photo = (u.photos && Array.isArray(u.photos) && u.photos.length>0) ? u.photos[0] :
+                      (u.photos && typeof u.photos === 'string' ? u.photos : `https://i.pravatar.cc/150?u=${uid}`);
+
         card.innerHTML = `
-          <img src="${(u.photos && u.photos.length > 0) ? u.photos[0] : "https://i.pravatar.cc/150?u=" + uid}" alt="${u.pseudo}">
-          <div class="name">${u.pseudo || "Utilisateur"}</div>
+          <img src="${photo}" alt="${u.pseudo}">
+          <div class="name">${u.pseudo||'Utilisateur'}</div>
           <div class="btns">
-            <div class="btn-chat">💬</div>
-            <div class="btn-like">💖</div>
-            <div class="btn-fav">⭐️</div>
+            <div class="btn-chat" title="Chat" data-uid="${uid}">💬</div>
+            <div class="btn-like" title="Like" data-uid="${uid}">💖</div>
+            <div class="btn-fav" title="Favoris" data-uid="${uid}">⭐️</div>
           </div>
         `;
+
+        // sync UI states (likes/favs)
+        (async ()=>{
+          try {
+            const likeSnap = await get(ref(db,`users/${uid}/likes/${currentUserUid}`));
+            if(likeSnap.exists() && likeSnap.val()===true) card.querySelector(".btn-like").classList.add("active");
+            const favSnap = await get(ref(db,`users/${currentUserUid}/favoris/${uid}`));
+            if(favSnap.exists() && favSnap.val()===true) card.querySelector(".btn-fav").classList.add("active");
+            // also protect image load
+            const imgEl = card.querySelector("img");
+            imgEl.onerror = () => { imgEl.src = `https://i.pravatar.cc/150?u=${uid}`; };
+          } catch(e){ console.error(e); }
+        })();
+
+        // clic photo -> profilcard
+        card.querySelector("img").addEventListener("click", (e) => {
+          e.stopPropagation();
+          window.location.href = `profilcard.html?uid=${uid}`;
+        });
+
         carousel.appendChild(card);
       }
     });
 
-    if (carousel.innerHTML.trim() === "") {
-      const msg = document.createElement("div");
-      msg.textContent = "Aucun utilisateur en ligne.";
-      msg.style.textAlign = "center";
-      msg.style.color = "#ff66cc";
-      carousel.appendChild(msg);
+    if(carousel.innerHTML.trim()===""){
+      const emptyMsg = document.createElement("div");
+      emptyMsg.style.textAlign="center"; emptyMsg.style.width="100%"; emptyMsg.style.color="#ff66cc";
+      emptyMsg.textContent="Aucun utilisateur en ligne pour le moment...";
+      carousel.appendChild(emptyMsg);
     }
   });
 });
 
-// --- Actions sur le carrousel ---
-carousel.addEventListener("click", async e => {
+// --- Gestion clics via delegation ---
+carousel.addEventListener("click", async e=>{
   const card = e.target.closest(".card");
-  if (!card) return;
+  if(!card) return;
   const targetUid = card.dataset.uid;
+  if(!currentUserUid || !targetUid) return;
 
-  if (e.target.closest(".btn-chat")) {
-    msgTo.textContent = "Message à " + card.querySelector(".name").textContent;
-    messageModal.style.display = "flex";
+  // Chat -> open message modal
+  if(e.target.closest(".btn-chat")){
+    const name = card.querySelector(".name").textContent;
+    msgTo.textContent=`Message à : ${name}`;
+    messageModal.style.display="flex";
     messageModal.dataset.uid = targetUid;
+    return;
   }
 
-  if (e.target.closest(".btn-like")) {
+  // Like toggle
+  if(e.target.closest(".btn-like")){
     const btn = e.target.closest(".btn-like");
     btn.classList.toggle("active");
     const likeRef = ref(db, `users/${targetUid}/likes/${currentUserUid}`);
-    await set(likeRef, btn.classList.contains("active"));
-    addMiniProfile(card);
+    try {
+      await set(likeRef, btn.classList.contains("active"));
+    } catch(err){ console.error("like err",err); }
+    // add mini-profile indicator
+    if (btn.classList.contains("active")) addMiniProfile(card);
+    return;
   }
 
-  if (e.target.closest(".btn-fav")) {
+  // Favoris toggle
+  if(e.target.closest(".btn-fav")){
     const btn = e.target.closest(".btn-fav");
     btn.classList.toggle("active");
     const favRef = ref(db, `users/${currentUserUid}/favoris/${targetUid}`);
-    await set(favRef, btn.classList.contains("active"));
-    addMiniProfile(card);
+    try {
+      await set(favRef, btn.classList.contains("active"));
+    } catch(err){ console.error("fav err",err); }
+    if (btn.classList.contains("active")) addMiniProfile(card);
+    return;
   }
 });
 
-// --- Mini-profil flottant ---
-function addMiniProfile(card) {
+// --- mini-profil draggable (robuste touch + mouse) ---
+function addMiniProfile(card){
   const uid = card.dataset.uid;
-  if (document.querySelector(`#miniProfilesContainer .miniProfileCircle[data-uid='${uid}']`)) return;
+  if(!uid) return;
+  if(document.querySelector(`#miniProfilesContainer .miniProfileCircle[data-uid='${uid}']`)) return;
 
   const circle = document.createElement("div");
   circle.className = "miniProfileCircle";
   circle.dataset.uid = uid;
 
   const img = card.querySelector("img").cloneNode(true);
+  // fallback in case blob or missing
+  img.onerror = () => { img.src = `https://i.pravatar.cc/150?u=${uid}`; };
   circle.appendChild(img);
+
+  const removeBtn = document.createElement("div");
+  removeBtn.className = "miniRemove";
+  removeBtn.textContent = "×";
+  removeBtn.title = "Supprimer";
+  removeBtn.addEventListener("click", async (ev) => {
+    ev.stopPropagation();
+    // remove from DOM
+    circle.remove();
+    // optionally remove from favoris in DB so it doesn't reappear on reload:
+    try { await set(ref(db, `users/${currentUserUid}/favoris/${uid}`), false); } catch(e){ /* ignore */ }
+  });
+  circle.appendChild(removeBtn);
+
+  // place non-overlapping initial position
+  const existing = document.querySelectorAll('.miniProfileCircle').length;
+  circle.style.left = (20 + (existing * 58)) + "px";
+  circle.style.top = "80px";
+
+  // draggable (mouse + touch)
+  let dragging = false, shiftX = 0, shiftY = 0;
+  function startDrag(e){
+    dragging = true;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const rect = circle.getBoundingClientRect();
+    shiftX = clientX - rect.left;
+    shiftY = clientY - rect.top;
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('touchmove', onMove, {passive:false});
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+  }
+  function onMove(e){
+    if(!dragging) return;
+    e.preventDefault();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    circle.style.left = (clientX - shiftX) + "px";
+    circle.style.top = (clientY - shiftY) + "px";
+  }
+  function endDrag(){
+    dragging = false;
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('mouseup', endDrag);
+    document.removeEventListener('touchend', endDrag);
+  }
+  circle.addEventListener('mousedown', startDrag);
+  circle.addEventListener('touchstart', startDrag, {passive:false});
+  circle.ondragstart = () => false;
+
   miniProfilesContainer.appendChild(circle);
 }
 
-// --- Mes crushs ---
-favoritesBtn.addEventListener("click", async () => {
-  crushModal.style.display = "flex";
-  crushContent.innerHTML = "";
-
-  const favSnap = await get(ref(db, `users/${currentUserUid}/favoris`));
-  if (!favSnap.exists()) {
-    crushContent.textContent = "Aucun crush pour le moment.";
-    return;
-  }
-
-  const favs = favSnap.val();
-  for (const uid in favs) {
-    const uSnap = await get(ref(db, `users/${uid}`));
-    if (uSnap.exists()) {
-      const u = uSnap.val();
-      const img = (u.photos && u.photos.length > 0) ? u.photos[0] : "https://i.pravatar.cc/100?u=" + uid;
-      const div = document.createElement("div");
-      div.innerHTML = `
-        <img src="${img}" style="width:70px;height:70px;border-radius:50%;margin:5px;">
-        <div>${u.pseudo || "Utilisateur"}</div>
-      `;
-      crushContent.appendChild(div);
+// --- Mes Crush (favoris) modal ---
+favoritesBtn.addEventListener("click", async ()=>{
+  crushModal.style.display="flex";
+  crushContent.innerHTML="";
+  try {
+    const favSnap = await get(ref(db,`users/${currentUserUid}/favoris`));
+    if(!favSnap.exists()){ crushContent.textContent="Aucun crush pour le moment."; return; }
+    const favs = favSnap.val();
+    for(const uid in favs){
+      if(!favs[uid]) continue;
+      const userSnap = await get(ref(db,`users/${uid}`));
+      if(userSnap.exists()){
+        const data = userSnap.val();
+        const imgSrc = (data.photos && Array.isArray(data.photos) && data.photos[0]) ? data.photos[0] : (data.photos && typeof data.photos==='string' ? data.photos : `https://i.pravatar.cc/100?u=${uid}`);
+        const prof = document.createElement("div");
+        prof.style.display="flex"; prof.style.flexDirection="column"; prof.style.alignItems="center";
+        prof.innerHTML=`<img src="${imgSrc}" style="width:70px;height:70px;border-radius:50%;margin-bottom:5px;"><span>${data.pseudo||'Utilisateur'}</span>`;
+        crushContent.appendChild(prof);
+      }
     }
+  } catch(e){
+    console.error(e); crushContent.textContent = "Erreur lors du chargement.";
   }
 });
 
-// --- Fermer les modales ---
-document.querySelectorAll(".modal .closeBtn").forEach(btn => {
-  btn.addEventListener("click", () => btn.parentElement.style.display = "none");
+// --- Fermer modales ---
+document.querySelectorAll(".modal .closeBtn").forEach(btn=>{
+  btn.addEventListener("click",()=>{ btn.parentElement.style.display="none"; });
 });
 
-// --- Envoi de message ---
-sendMsgBtn.addEventListener("click", async () => {
+// --- Envoyer message (écrit sous me/them et them/me pour historique) ---
+sendMsgBtn.addEventListener("click", async ()=>{
   const text = msgText.value.trim();
-  if (!text) return alert("Écris un message !");
+  if(!text){ alert("Écris un message !"); return; }
   const toUid = messageModal.dataset.uid;
-  const msgRef = push(ref(db, `messages/${toUid}`));
-  await set(msgRef, { from: currentUserUid, text, timestamp: Date.now() });
-  msgText.value = "";
-  messageModal.style.display = "none";
+  if(!toUid || !currentUserUid) return;
+  try {
+    const msg = { from: currentUserUid, to: toUid, text, timestamp: Date.now() };
+    // push under both users so both see conversation easily
+    await set(push(ref(db, `messages/${currentUserUid}/${toUid}`)), msg);
+    await set(push(ref(db, `messages/${toUid}/${currentUserUid}`)), msg);
+    msgText.value = "";
+    messageModal.style.display = "none";
+  } catch(err){ console.error("send msg err",err); alert("Erreur envoi message"); }
 });
 
-// --- Profil perso ---
+// --- Clic sur ma photo de profil perso (ouvre page2) ---
 miniProfilePic.addEventListener("click", () => {
   window.location.href = "page2.html";
 });
