@@ -229,22 +229,55 @@ cancelEdit.addEventListener("click", ()=>{
   modalEdit.style.display='none'; stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
 });
 
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } 
+  from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+
+const storage = getStorage(app);
+
 saveEdit.addEventListener("click", async ()=>{
   const newDesc = editDescription.value.trim();
-  async function filesToDataURLs(files){
-    return Promise.all((files||[]).slice(0,5).map(f=>new Promise((res,rej)=>{
-      const fr=new FileReader();
-      fr.onload=e=>res(e.target.result);
-      fr.onerror=rej;
-      fr.readAsDataURL(f);
-    })));
-  }
-  try{
-    let photosToSave=currentPhotos;
-    if(stagedEditFiles && stagedEditFiles.length>0){
-      photosToSave = await filesToDataURLs(stagedEditFiles);
+
+  try {
+    let photosToSave = currentPhotos;
+
+    if (stagedEditFiles && stagedEditFiles.length > 0) {
+      photosToSave = [];
+
+      for (const file of stagedEditFiles) {
+        const photoRef = sRef(storage, `users/${currentUid}/${Date.now()}_${file.name}`);
+        await uploadBytes(photoRef, file);
+        const downloadURL = await getDownloadURL(photoRef);
+        photosToSave.push(downloadURL);
+      }
     }
-    await update(ref(db,'users/'+currentUid),{description:newDesc,photos:photosToSave});
+
+    await update(ref(db, 'users/' + currentUid), {
+      description: newDesc,
+      photos: photosToSave
+    });
+
+    // --- mise à jour interface ---
+    descSpan.textContent = newDesc || 'Non renseignée';
+    currentPhotos = photosToSave;
+    mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
+    photosContainer.innerHTML = '';
+    (currentPhotos || []).forEach(url => {
+      const img = document.createElement('img');
+      img.src = url;
+      img.addEventListener('click', () => openLightbox(url));
+      photosContainer.appendChild(img);
+    });
+
+    modalEdit.style.display = 'none';
+    stagedEditFiles = [];
+    editPhotos.value = '';
+    editPreview.innerHTML = '';
+    alert('✅ Profil mis à jour !');
+  } catch (e) {
+    console.error(e);
+    alert('❌ Erreur lors de la mise à jour du profil.');
+  }
+});
     descSpan.textContent=newDesc||'Non renseignée';
     currentPhotos=photosToSave;
     if(currentPhotos.length>0) mainPhoto.src=currentPhotos[0];
