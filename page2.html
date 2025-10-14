@@ -80,10 +80,12 @@
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, get, update, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
 const db = getDatabase(app);
+const storage = getStorage(app);
 
 const pseudoSpan = document.getElementById('pseudo');
 const ageSpan = document.getElementById('age');
@@ -92,10 +94,8 @@ const descSpan = document.getElementById('description');
 const mainPhoto = document.getElementById('mainPhoto');
 const photosContainer = document.getElementById('photosContainer');
 const roomButtons = document.getElementById('roomButtons');
-
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
-
 const modalEdit = document.getElementById('modalEdit');
 const editDescription = document.getElementById('editDescription');
 const editPhotos = document.getElementById('editPhotos');
@@ -103,26 +103,25 @@ const editPreview = document.getElementById('editPreview');
 const saveEdit = document.getElementById('saveEdit');
 const cancelEdit = document.getElementById('cancelEdit');
 const editBtn = document.getElementById('editBtn');
-
 const onlineCarousel = document.getElementById("onlineCarousel");
 
 let currentUid = null;
 let currentPhotos = [];
 
-// Mettre utilisateur en ligne
+// --- Auth et présence en ligne ---
 onAuthStateChanged(auth, async user => {
   if(!user){
     alert('Vous devez être connecté !');
     window.location.href = 'inscription.html';
     return;
   }
-  currentUid = user.uid;
 
+  currentUid = user.uid;
   const userStatusRef = ref(db, "users/" + currentUid + "/online");
   set(userStatusRef, true);
   onDisconnect(userStatusRef).set(false);
 
-  // Charger profil
+  // Charger profil utilisateur
   const snap = await get(ref(db, 'users/' + currentUid));
   if(snap.exists()){
     const data = snap.val();
@@ -130,7 +129,6 @@ onAuthStateChanged(auth, async user => {
     ageSpan.textContent = data.age || 'Non renseigné';
     locationSpan.textContent = data.location || 'Non renseigné';
     descSpan.textContent = data.description || 'Non renseignée';
-
     currentPhotos = data.photos || [];
     mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
 
@@ -142,24 +140,21 @@ onAuthStateChanged(auth, async user => {
       photosContainer.appendChild(img);
     });
 
-    // room buttons
     roomButtons.innerHTML = '';
     (data.rooms||[]).forEach(room=>{
       const btn = document.createElement('button');
       btn.className = 'room-btn';
       btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
       btn.addEventListener('click', ()=>{
-        let page='';
-        if(room==='serieux') page='authentique.html';
-        if(room==='amicale') page='amicale.html';
-        if(room==='fun') page='fun.html';
-        window.location.href = page;
+        if(room==='serieux') window.location.href='authentique.html';
+        if(room==='amicale') window.location.href='amicale.html';
+        if(room==='fun') window.location.href='fun.html';
       });
       roomButtons.appendChild(btn);
     });
   }
 
-  // Carrousel utilisateurs en ligne
+  // Carrousel des utilisateurs en ligne
   const usersRef = ref(db,"users");
   onValue(usersRef, snapshot=>{
     const users = snapshot.val();
@@ -167,19 +162,14 @@ onAuthStateChanged(auth, async user => {
     if(!users) return;
     Object.keys(users).forEach(uid=>{
       const u = users[uid];
-      if(u.online && uid !== currentUid){ // exclure moi-même
+      if(u.online && uid !== currentUid){
         const card = document.createElement("div");
         card.className = "onlineCard";
-
         const img = document.createElement("img");
         img.src = u.photos && u.photos[0] ? u.photos[0] : "https://via.placeholder.com/100";
-        img.alt = u.pseudo || "Utilisateur";
-
         const span = document.createElement("span");
         span.textContent = u.pseudo || "Utilisateur";
-
         img.addEventListener("click", ()=> alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age || "Non renseigné"}\nLieu: ${u.location || "Non renseigné"}`));
-
         card.appendChild(img);
         card.appendChild(span);
         onlineCarousel.appendChild(card);
@@ -188,10 +178,11 @@ onAuthStateChanged(auth, async user => {
   });
 });
 
+// Lightbox
 function openLightbox(src){ lightboxImg.src = src; lightbox.style.display='flex'; }
 lightbox.addEventListener("click", ()=>{ lightbox.style.display='none'; lightboxImg.src=''; });
 
-// EDIT modal
+// Modal édition
 editBtn.addEventListener("click", async ()=>{
   const snap = await get(ref(db,'users/'+currentUid));
   if(snap.exists()){
@@ -201,7 +192,11 @@ editBtn.addEventListener("click", async ()=>{
     (data.photos||[]).forEach(url=>{
       const img = document.createElement("img");
       img.src=url;
-      img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
+      img.style.width='60px';
+      img.style.height='60px';
+      img.style.objectFit='cover';
+      img.style.borderRadius='6px';
+      img.style.border='2px solid #ff66cc';
       editPreview.appendChild(img);
     });
   }
@@ -218,7 +213,11 @@ editPhotos.addEventListener("change", e=>{
     r.onload=ev=>{
       const img=document.createElement("img");
       img.src=ev.target.result;
-      img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
+      img.style.width='60px';
+      img.style.height='60px';
+      img.style.objectFit='cover';
+      img.style.borderRadius='6px';
+      img.style.border='2px solid #ff66cc';
       editPreview.appendChild(img);
     }
     r.readAsDataURL(file);
@@ -226,14 +225,13 @@ editPhotos.addEventListener("change", e=>{
 });
 
 cancelEdit.addEventListener("click", ()=>{
-  modalEdit.style.display='none'; stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
+  modalEdit.style.display='none';
+  stagedEditFiles=[];
+  editPhotos.value='';
+  editPreview.innerHTML='';
 });
 
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } 
-  from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
-
-const storage = getStorage(app);
-
+// --- Sauvegarder les modifications ---
 saveEdit.addEventListener("click", async ()=>{
   const newDesc = editDescription.value.trim();
 
@@ -242,7 +240,6 @@ saveEdit.addEventListener("click", async ()=>{
 
     if (stagedEditFiles && stagedEditFiles.length > 0) {
       photosToSave = [];
-
       for (const file of stagedEditFiles) {
         const photoRef = sRef(storage, `users/${currentUid}/${Date.now()}_${file.name}`);
         await uploadBytes(photoRef, file);
@@ -251,12 +248,8 @@ saveEdit.addEventListener("click", async ()=>{
       }
     }
 
-    await update(ref(db, 'users/' + currentUid), {
-      description: newDesc,
-      photos: photosToSave
-    });
+    await update(ref(db, 'users/' + currentUid), { description: newDesc, photos: photosToSave });
 
-    // --- mise à jour interface ---
     descSpan.textContent = newDesc || 'Non renseignée';
     currentPhotos = photosToSave;
     mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
@@ -277,21 +270,6 @@ saveEdit.addEventListener("click", async ()=>{
     console.error(e);
     alert('❌ Erreur lors de la mise à jour du profil.');
   }
-});
-    descSpan.textContent=newDesc||'Non renseignée';
-    currentPhotos=photosToSave;
-    if(currentPhotos.length>0) mainPhoto.src=currentPhotos[0];
-    photosContainer.innerHTML='';
-    (currentPhotos||[]).forEach(url=>{
-      const img=document.createElement('img');
-      img.src=url;
-      img.addEventListener('click',()=>openLightbox(url));
-      photosContainer.appendChild(img);
-    });
-    modalEdit.style.display='none';
-    stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
-    alert('Profil mis à jour !');
-  }catch(e){alert(e.message||e);}
 });
 </script>
 </body>
