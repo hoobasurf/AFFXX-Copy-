@@ -278,7 +278,7 @@ signupBtn.addEventListener("click", async ()=>{
 
 if (uploadedPhotos.length > 0) {
   for (const file of uploadedPhotos) {
-    const fileRef = sRef(storage, "photos/" + user.uid + "/" + file.name);
+    const fileRef = storageRef(storage, "photos/" + user.uid + "/" + file.name);
     await uploadBytes(fileRef, file);
     const url = await getDownloadURL(fileRef);
     photoURLs.push(url); // ← seulement les URLs Firebase
