@@ -137,19 +137,29 @@ onAuthStateChanged(auth, async user => {
     });
 
     // 🔸 Boutons des salles
-    roomButtons.innerHTML = '';
-    (data.rooms||[]).forEach(room=>{
-      const btn = document.createElement('button');
-      btn.className = 'room-btn';
-      btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
-      btn.addEventListener('click', ()=>{
-        let page='';
-        if(room==='serieux') page='authentique.html';
-        if(room==='amicale') page='amicale.html';
-        if(room==='fun') page='fun.html';
-        window.location.href = page;
-      });
-      roomButtons.appendChild(btn);
+    // Quand on clique sur un bouton de salle
+roomButtons.querySelectorAll(".room-btn").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const room = btn.textContent.toLowerCase();
+    const userRef = ref(db, "users/" + currentUid);
+
+    // ✅ Sauvegarde la salle dans Firebase
+    const snap = await get(userRef);
+    const data = snap.val() || {};
+    const rooms = data.rooms || [];
+    if (!rooms.includes(room)) {
+      rooms.push(room);
+      await update(userRef, { rooms });
+    }
+
+    // ✅ Redirection vers la page correspondante
+    let page = "";
+    if (room === "serieux") page = "authentique.html";
+    if (room === "amicale") page = "amicale.html";
+    if (room === "fun") page = "fun.html";
+    window.location.href = page;
+  });
+});
     });
   }
 });
