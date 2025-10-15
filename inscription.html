@@ -128,14 +128,14 @@ signupBtn.addEventListener("click", async () => {
     // ✅ Si aucune photo n’est choisie, tableau vide
     const photoURLs = [];
 
-    if (uploadedPhotos.length > 0) {
-      for (const file of uploadedPhotos) {
-        const fileRef = sRef(storage, "photos/" + user.uid + "/" + file.name);
-        await uploadBytes(fileRef, file);
-        const url = await getDownloadURL(fileRef);
-        photoURLs.push(url);
-      }
-    }
+if (uploadedPhotos.length > 0) {
+  for (const file of uploadedPhotos) {
+    const fileRef = sRef(storage, "photos/" + user.uid + "/" + file.name);
+    await uploadBytes(fileRef, file);
+    const url = await getDownloadURL(fileRef);
+    photoURLs.push(url); // ← seulement les URLs Firebase
+  }
+}
 
     await set(ref(db, "users/" + user.uid), {
       email: email.value,
