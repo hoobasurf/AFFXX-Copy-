@@ -26,6 +26,13 @@
   .modal input, .modal textarea{width:100%;margin:8px 0;padding:8px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff}
   .modal .row{display:flex;gap:8px}
   .modal button{flex:1;padding:10px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff;cursor:pointer}
+
+  /* carrousel online users */
+  #onlineCarouselContainer{max-width:600px;margin:30px auto;background:rgba(0,0,0,0.6);padding:16px;border-radius:15px;box-shadow:0 0 20px #ff66cc;text-align:left}
+  #onlineCarousel{display:flex;overflow-x:auto;gap:10px;padding-top:8px;padding-bottom:8px}
+  .onlineCard{min-width:100px;text-align:center;color:#fff;font-family:'Orbitron',sans-serif}
+  .onlineCard img{width:100px;height:100px;object-fit:cover;border-radius:10px;border:2px solid #ff66cc;cursor:pointer}
+  .onlineCard span{display:block;margin-top:4px;font-size:0.9em}
 </style>
 </head>
 <body>
@@ -71,15 +78,12 @@
   </div>
 
 <script type="module">
-// page2.html - upload images to Firebase Storage and save URLs to Realtime DB
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, get, update, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
 const db = getDatabase(app);
-const storage = getStorage(app);
 
 const pseudoSpan = document.getElementById('pseudo');
 const ageSpan = document.getElementById('age');
@@ -105,7 +109,7 @@ const onlineCarousel = document.getElementById("onlineCarousel");
 let currentUid = null;
 let currentPhotos = [];
 
-// presence + load profile
+// Mettre utilisateur en ligne
 onAuthStateChanged(auth, async user => {
   if(!user){
     alert('Vous devez être connecté !');
@@ -118,6 +122,7 @@ onAuthStateChanged(auth, async user => {
   set(userStatusRef, true);
   onDisconnect(userStatusRef).set(false);
 
+  // Charger profil
   const snap = await get(ref(db, 'users/' + currentUid));
   if(snap.exists()){
     const data = snap.val();
@@ -125,26 +130,36 @@ onAuthStateChanged(auth, async user => {
     ageSpan.textContent = data.age || 'Non renseigné';
     locationSpan.textContent = data.location || 'Non renseigné';
     descSpan.textContent = data.description || 'Non renseignée';
+
     currentPhotos = data.photos || [];
     mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
 
-    renderPhotosList();
-    // rooms
+    photosContainer.innerHTML = '';
+    (currentPhotos||[]).forEach(url=>{
+      const img = document.createElement('img');
+      img.src = url;
+      img.addEventListener("click", ()=> openLightbox(url));
+      photosContainer.appendChild(img);
+    });
+
+    // room buttons
     roomButtons.innerHTML = '';
     (data.rooms||[]).forEach(room=>{
       const btn = document.createElement('button');
       btn.className = 'room-btn';
       btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
       btn.addEventListener('click', ()=>{
-        if(room==='serieux') window.location.href='authentique.html';
-        if(room==='amicale') window.location.href='amicale.html';
-        if(room==='fun') window.location.href='fun.html';
+        let page='';
+        if(room==='serieux') page='authentique.html';
+        if(room==='amicale') page='amicale.html';
+        if(room==='fun') page='fun.html';
+        window.location.href = page;
       });
       roomButtons.appendChild(btn);
     });
   }
 
-  // online carousel
+  // Carrousel utilisateurs en ligne
   const usersRef = ref(db,"users");
   onValue(usersRef, snapshot=>{
     const users = snapshot.val();
@@ -152,15 +167,19 @@ onAuthStateChanged(auth, async user => {
     if(!users) return;
     Object.keys(users).forEach(uid=>{
       const u = users[uid];
-      if(u.online && uid !== currentUid){
+      if(u.online && uid !== currentUid){ // exclure moi-même
         const card = document.createElement("div");
         card.className = "onlineCard";
+
         const img = document.createElement("img");
         img.src = u.photos && u.photos[0] ? u.photos[0] : "https://via.placeholder.com/100";
         img.alt = u.pseudo || "Utilisateur";
+
         const span = document.createElement("span");
         span.textContent = u.pseudo || "Utilisateur";
+
         img.addEventListener("click", ()=> alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age || "Non renseigné"}\nLieu: ${u.location || "Non renseigné"}`));
+
         card.appendChild(img);
         card.appendChild(span);
         onlineCarousel.appendChild(card);
@@ -169,20 +188,10 @@ onAuthStateChanged(auth, async user => {
   });
 });
 
-function renderPhotosList(){
-  photosContainer.innerHTML = '';
-  (currentPhotos||[]).forEach(url=>{
-    const img = document.createElement('img');
-    img.src = url;
-    img.addEventListener("click", ()=> openLightbox(url));
-    photosContainer.appendChild(img);
-  });
-}
-
 function openLightbox(src){ lightboxImg.src = src; lightbox.style.display='flex'; }
 lightbox.addEventListener("click", ()=>{ lightbox.style.display='none'; lightboxImg.src=''; });
 
-// EDIT modal open
+// EDIT modal
 editBtn.addEventListener("click", async ()=>{
   const snap = await get(ref(db,'users/'+currentUid));
   if(snap.exists()){
@@ -199,68 +208,90 @@ editBtn.addEventListener("click", async ()=>{
   modalEdit.style.display='flex';
 });
 
-// preview selected files
-let stagedEditFiles = [];
+let stagedEditFiles=[];
 editPhotos.addEventListener("change", e=>{
-  const files = Array.from(e.target.files||[]).slice(0,5);
-  stagedEditFiles = files;
-  editPreview.innerHTML = '';
+  const files=Array.from(e.target.files||[]).slice(0,5);
+  stagedEditFiles=files;
+  editPreview.innerHTML='';
   files.forEach(file=>{
-    const img = document.createElement('img');
-    img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
-    editPreview.appendChild(img);
-    // preview via blob for immediate UX (not saved as blob)
-    const url = URL.createObjectURL(file);
-    img.src = url;
-    img.onload = () => URL.revokeObjectURL(url);
+    const r=new FileReader();
+    r.onload=ev=>{
+      const img=document.createElement("img");
+      img.src=ev.target.result;
+      img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
+      editPreview.appendChild(img);
+    }
+    r.readAsDataURL(file);
   });
 });
 
 cancelEdit.addEventListener("click", ()=>{
-  modalEdit.style.display='none';
-  stagedEditFiles=[];
-  editPhotos.value='';
-  editPreview.innerHTML='';
+  modalEdit.style.display='none'; stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
 });
 
-// ---------- STORAGE UPLOAD + DB update (unified, mobile compat) ----------
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } 
+  from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+
+const storage = getStorage(app);
+
 saveEdit.addEventListener("click", async ()=>{
   const newDesc = editDescription.value.trim();
 
   try {
-    let photosToSave = currentPhotos && Array.isArray(currentPhotos) ? currentPhotos.slice() : [];
+    let photosToSave = currentPhotos;
 
     if (stagedEditFiles && stagedEditFiles.length > 0) {
-      photosToSave = []; // replace currentPhotos only if new provided
+      photosToSave = [];
+
       for (const file of stagedEditFiles) {
-        // create a unique path
-        const path = `users/${currentUid}/${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
-        const photoRef = sRef(storage, path);
+        const photoRef = sRef(storage, `users/${currentUid}/${Date.now()}_${file.name}`);
         await uploadBytes(photoRef, file);
         const downloadURL = await getDownloadURL(photoRef);
         photosToSave.push(downloadURL);
       }
     }
 
-    // write to DB
-    await update(ref(db, 'users/' + currentUid), { description: newDesc, photos: photosToSave });
+    await update(ref(db, 'users/' + currentUid), {
+      description: newDesc,
+      photos: photosToSave
+    });
 
-    // update UI
+    // --- mise à jour interface ---
     descSpan.textContent = newDesc || 'Non renseignée';
     currentPhotos = photosToSave;
     mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
-    renderPhotosList();
+    photosContainer.innerHTML = '';
+    (currentPhotos || []).forEach(url => {
+      const img = document.createElement('img');
+      img.src = url;
+      img.addEventListener('click', () => openLightbox(url));
+      photosContainer.appendChild(img);
+    });
 
     modalEdit.style.display = 'none';
     stagedEditFiles = [];
     editPhotos.value = '';
     editPreview.innerHTML = '';
     alert('✅ Profil mis à jour !');
-
   } catch (e) {
-    console.error("saveEdit error", e);
+    console.error(e);
     alert('❌ Erreur lors de la mise à jour du profil.');
   }
+});
+    descSpan.textContent=newDesc||'Non renseignée';
+    currentPhotos=photosToSave;
+    if(currentPhotos.length>0) mainPhoto.src=currentPhotos[0];
+    photosContainer.innerHTML='';
+    (currentPhotos||[]).forEach(url=>{
+      const img=document.createElement('img');
+      img.src=url;
+      img.addEventListener('click',()=>openLightbox(url));
+      photosContainer.appendChild(img);
+    });
+    modalEdit.style.display='none';
+    stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
+    alert('Profil mis à jour !');
+  }catch(e){alert(e.message||e);}
 });
 </script>
 </body>
