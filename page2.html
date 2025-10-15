@@ -20,11 +20,14 @@
   .edit-btn{margin-top:10px;padding:8px 14px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff;cursor:pointer}
   .lightbox{display:none;position:fixed;z-index:10000;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center}
   .lightbox img{max-width:92%;max-height:92%;border-radius:10px;box-shadow:0 0 25px #ff66cc}
+  /* modal éditer */
   .modal{display:none;position:fixed;z-index:12000;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);align-items:center;justify-content:center}
   .modal .box{background:rgba(0,0,0,0.6);padding:18px;border-radius:12px;width:90%;max-width:480px;box-shadow:0 0 20px #ff66cc}
   .modal input, .modal textarea{width:100%;margin:8px 0;padding:8px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff}
   .modal .row{display:flex;gap:8px}
   .modal button{flex:1;padding:10px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff;cursor:pointer}
+
+  /* carrousel online users */
   #onlineCarouselContainer{max-width:600px;margin:30px auto;background:rgba(0,0,0,0.6);padding:16px;border-radius:15px;box-shadow:0 0 20px #ff66cc;text-align:left}
   #onlineCarousel{display:flex;overflow-x:auto;gap:10px;padding-top:8px;padding-bottom:8px}
   .onlineCard{min-width:100px;text-align:center;color:#fff;font-family:'Orbitron',sans-serif}
@@ -44,14 +47,15 @@
     </div>
 
     <img id="mainPhoto" class="main-photo" src="https://via.placeholder.com/800x360?text=Photo" alt="Photo principale">
+
     <div class="photos" id="photosContainer"></div>
 
-    <!-- Boutons des salles -->
     <div id="roomButtons" style="margin-top:12px"></div>
 
     <button id="editBtn" class="edit-btn">Modifier</button>
   </div>
 
+  <!-- Carrousel utilisateurs en ligne -->
   <div id="onlineCarouselContainer">
     <h2 style="color:#ff66cc;text-shadow:0 0 10px #ff66cc;margin-bottom:8px">Utilisateurs en ligne</h2>
     <div id="onlineCarousel"></div>
@@ -105,7 +109,6 @@ const onlineCarousel = document.getElementById("onlineCarousel");
 let currentUid = null;
 let currentPhotos = [];
 
-// 🔹 Connexion persistante
 onAuthStateChanged(auth, async user => {
   if(!user){
     alert('Vous devez être connecté !');
@@ -128,6 +131,7 @@ onAuthStateChanged(auth, async user => {
 
     currentPhotos = data.photos || [];
     mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
+
     photosContainer.innerHTML = '';
     (currentPhotos||[]).forEach(url=>{
       const img = document.createElement('img');
@@ -136,39 +140,65 @@ onAuthStateChanged(auth, async user => {
       photosContainer.appendChild(img);
     });
 
-    // 🔸 Boutons des salles
-    // Quand on clique sur un bouton de salle
-roomButtons.querySelectorAll(".room-btn").forEach(btn => {
-  btn.addEventListener("click", async () => {
-    const room = btn.textContent.toLowerCase();
-    const userRef = ref(db, "users/" + currentUid);
+    // ✅ Boutons de salle
+    roomButtons.innerHTML = '';
+    (data.rooms||[]).forEach(room=>{
+      const btn = document.createElement('button');
+      btn.className = 'room-btn';
+      btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
+      btn.addEventListener('click', async ()=>{
+        const userRef = ref(db, "users/" + currentUid);
+        const snapUser = await get(userRef);
+        const userData = snapUser.val() || {};
+        const rooms = userData.rooms || [];
+        if (!rooms.includes(room)) {
+          rooms.push(room);
+          await update(userRef, { rooms });
+        }
 
-    // ✅ Sauvegarde la salle dans Firebase
-    const snap = await get(userRef);
-    const data = snap.val() || {};
-    const rooms = data.rooms || [];
-    if (!rooms.includes(room)) {
-      rooms.push(room);
-      await update(userRef, { rooms });
-    }
-
-    // ✅ Redirection vers la page correspondante
-    let page = "";
-    if (room === "serieux") page = "authentique.html";
-    if (room === "amicale") page = "amicale.html";
-    if (room === "fun") page = "fun.html";
-    window.location.href = page;
-  });
-});
+        let page='';
+        if(room==='serieux') page='authentique.html';
+        if(room==='amicale') page='amicale.html';
+        if(room==='fun') page='fun.html';
+        window.location.href = page;
+      });
+      roomButtons.appendChild(btn);
     });
   }
+
+  // Carrousel utilisateurs en ligne
+  const usersRef = ref(db,"users");
+  onValue(usersRef, snapshot=>{
+    const users = snapshot.val();
+    onlineCarousel.innerHTML = "";
+    if(!users) return;
+    Object.keys(users).forEach(uid=>{
+      const u = users[uid];
+      if(u.online && uid !== currentUid){
+        const card = document.createElement("div");
+        card.className = "onlineCard";
+
+        const img = document.createElement("img");
+        img.src = u.photos && u.photos[0] ? u.photos[0] : "https://via.placeholder.com/100";
+        img.alt = u.pseudo || "Utilisateur";
+
+        const span = document.createElement("span");
+        span.textContent = u.pseudo || "Utilisateur";
+
+        img.addEventListener("click", ()=> alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age || "Non renseigné"}\nLieu: ${u.location || "Non renseigné"}`));
+
+        card.appendChild(img);
+        card.appendChild(span);
+        onlineCarousel.appendChild(card);
+      }
+    });
+  });
 });
 
-// Lightbox
 function openLightbox(src){ lightboxImg.src = src; lightbox.style.display='flex'; }
 lightbox.addEventListener("click", ()=>{ lightbox.style.display='none'; lightboxImg.src=''; });
 
-// Modal édition
+// Édition profil
 editBtn.addEventListener("click", async ()=>{
   const snap = await get(ref(db,'users/'+currentUid));
   if(snap.exists()){
