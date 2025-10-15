@@ -140,7 +140,7 @@ onAuthStateChanged(auth, async user => {
       photosContainer.appendChild(img);
     });
 
-    // ✅ Boutons de salle
+    // ✅ Boutons de salle corrigé
     roomButtons.innerHTML = '';
     (data.rooms||[]).forEach(room=>{
       const btn = document.createElement('button');
@@ -156,11 +156,13 @@ onAuthStateChanged(auth, async user => {
           await update(userRef, { rooms });
         }
 
-        let page='';
-        if(room==='serieux') page='authentique.html';
-        if(room==='amicale') page='amicale.html';
-        if(room==='fun') page='fun.html';
-        window.location.href = page;
+        // ✅ Ici la correction pour gérer majuscules/accents
+        const roomLower = room.toLowerCase();
+        let page = '';
+        if(roomLower==='serieux') page='authentique.html';
+        if(roomLower==='amicale') page='amicale.html';
+        if(roomLower==='fun') page='fun.html';
+        if(page) window.location.href = page;
       });
       roomButtons.appendChild(btn);
     });
