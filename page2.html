@@ -78,7 +78,6 @@ const locationSpan = document.getElementById('location');
 const descSpan = document.getElementById('description');
 const mainPhoto = document.getElementById('mainPhoto');
 const photosContainer = document.getElementById('photosContainer');
-const roomButtons = document.getElementById('roomButtons');
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
 const modalEdit = document.getElementById('modalEdit');
@@ -102,7 +101,7 @@ onAuthStateChanged(auth, async user => {
   currentUid = user.uid;
 
   const userStatusRef = ref(db, "users/" + currentUid + "/online");
-  set(userStatusRef, true);
+  await set(userStatusRef, true);
   onDisconnect(userStatusRef).set(false);
 
   const snap = await get(ref(db, 'users/' + currentUid));
@@ -128,8 +127,14 @@ function renderPhotosList(){
   });
 }
 
-function openLightbox(src){ lightboxImg.src = src; lightbox.style.display='flex'; }
-lightbox.addEventListener("click", ()=>{ lightbox.style.display='none'; lightboxImg.src=''; });
+function openLightbox(src){ 
+  lightboxImg.src = src; 
+  lightbox.style.display='flex'; 
+}
+lightbox.addEventListener("click", ()=>{ 
+  lightbox.style.display='none'; 
+  lightboxImg.src=''; 
+});
 
 editBtn.addEventListener("click", async ()=>{
   const snap = await get(ref(db,'users/'+currentUid));
@@ -140,7 +145,11 @@ editBtn.addEventListener("click", async ()=>{
     (data.photos||[]).forEach(url=>{
       const img = document.createElement("img");
       img.src=url;
-      img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
+      img.style.width='60px'; 
+      img.style.height='60px'; 
+      img.style.objectFit='cover'; 
+      img.style.borderRadius='6px'; 
+      img.style.border='2px solid #ff66cc';
       editPreview.appendChild(img);
     });
   }
@@ -168,13 +177,14 @@ cancelEdit.addEventListener("click", ()=>{
   editPreview.innerHTML='';
 });
 
-// ✅ Correction : les nouvelles photos remplacent les anciennes
+// ✅ Correction finale : bouton "Enregistrer" refonctionne
 saveEdit.addEventListener("click", async ()=>{
   const newDesc = editDescription.value.trim();
+  if (!currentUid) return;
+
   try {
     let newPhotos = [];
 
-    // si nouvelles photos uploadées → on remplace complètement
     if (stagedEditFiles.length > 0) {
       for (const file of stagedEditFiles) {
         const path = `users/${currentUid}/${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
@@ -184,11 +194,13 @@ saveEdit.addEventListener("click", async ()=>{
         newPhotos.push(url);
       }
     } else {
-      // sinon on garde les anciennes
       newPhotos = currentPhotos;
     }
 
-    await update(ref(db, 'users/' + currentUid), { description: newDesc, photos: newPhotos });
+    await update(ref(db, 'users/' + currentUid), { 
+      description: newDesc, 
+      photos: newPhotos 
+    });
 
     descSpan.textContent = newDesc || 'Non renseignée';
     currentPhotos = newPhotos;
@@ -199,7 +211,7 @@ saveEdit.addEventListener("click", async ()=>{
     stagedEditFiles = [];
     editPhotos.value = '';
     editPreview.innerHTML = '';
-    alert('✅ Profil mis à jour !');
+    alert('✅ Profil mis à jour avec succès !');
   } catch (e) {
     console.error("Erreur saveEdit :", e);
     alert('❌ Erreur lors de la mise à jour du profil.');
