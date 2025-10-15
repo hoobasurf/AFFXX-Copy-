@@ -6,6 +6,7 @@
 <title>Inscription</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
+  /* --- ton style inchangé --- */
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     height: 100%;
@@ -13,9 +14,8 @@
     font-family: 'Orbitron', sans-serif;
     background: url("ville.jpg") no-repeat center center/cover;
     color: #fff;
-    overflow: hidden; /* pas de scroll global */
+    overflow: hidden;
   }
-
   .container {
     background: rgba(0,0,0,0.4);
     padding: 20px;
@@ -27,19 +27,12 @@
     text-align: center;
     position: relative;
     z-index: 1;
-
-    max-height: 90vh;      /* limite hauteur */
-    overflow-y: auto;      /* scroll interne */
+    max-height: 90vh;
+    overflow-y: auto;
   }
   .container::-webkit-scrollbar { width: 8px; }
   .container::-webkit-scrollbar-thumb { background-color: #ff66cc; border-radius: 4px; }
-
-  h1 {
-    color: #ff66cc;
-    text-shadow: 0 0 10px #ff66cc;
-    margin-bottom: 15px;
-  }
-
+  h1 { color: #ff66cc; text-shadow: 0 0 10px #ff66cc; margin-bottom: 15px; }
   input, textarea {
     width: 100%;
     margin: 10px 0;
@@ -49,7 +42,6 @@
     background: rgba(0,0,0,0.5);
     color: #fff;
   }
-
   .salles {
     display: flex;
     justify-content: center;
@@ -69,9 +61,8 @@
   }
   .salle-btn.active {
     box-shadow: 0 0 15px #ff66cc, 0 0 25px #ff66cc inset;
-    background: rgba(255, 102, 204,0.8);
+    background: rgba(255,102,204,0.8);
   }
-
   .photos-preview {
     display: flex;
     flex-wrap: wrap;
@@ -89,7 +80,6 @@
     transition: transform 0.2s;
   }
   .photos-preview img:hover { transform: scale(1.2); }
-
   button.signup-btn, button.login-btn {
     margin: 10px;
     padding: 10px 20px;
@@ -106,8 +96,6 @@
   button.signup-btn:hover, button.login-btn:hover {
     box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
   }
-
-  /* Lightbox */
   .lightbox {
     display: none;
     position: fixed;
@@ -124,8 +112,6 @@
     border-radius: 10px;
     box-shadow: 0 0 25px #ff66cc;
   }
-
-  /* Vortex CSS */
   #vortexOverlay {
     position: fixed;
     top:0; left:0;
@@ -149,8 +135,6 @@
     70% { transform: scale(2) rotate(720deg); opacity: 1; }
     100% { transform: scale(4) rotate(1440deg); opacity: 0; }
   }
-
-  /* Flash blanc */
   #whiteFlash {
     position: fixed;
     top:0; left:0;
@@ -195,10 +179,12 @@
 <script type="module">
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
 const db = getDatabase(app);
+const storage = getStorage(app);
 
 const email = document.getElementById("email");
 const password = document.getElementById("password");
@@ -217,16 +203,16 @@ const whiteFlash = document.getElementById("whiteFlash");
 
 let uploadedPhotos = [];
 
-// Gestion du zoom photos
+// Preview photos
 photosInput.addEventListener("change", e=>{
   preview.innerHTML = "";
-  uploadedPhotos=[];
+  uploadedPhotos = [];
   [...e.target.files].slice(0,5).forEach(file=>{
     const reader = new FileReader();
-    reader.onload=ev=>{
-      const img=document.createElement("img");
-      img.src=ev.target.result;
-      img.addEventListener("click", ()=> {
+    reader.onload = ev=>{
+      const img = document.createElement("img");
+      img.src = ev.target.result;
+      img.addEventListener("click", ()=>{
         lightboxImg.src = ev.target.result;
         lightbox.style.display = "flex";
       });
@@ -236,13 +222,12 @@ photosInput.addEventListener("change", e=>{
     uploadedPhotos.push(file);
   });
 });
-
 lightbox.addEventListener("click", ()=>{
-  lightbox.style.display="none";
-  lightboxImg.src="";
+  lightbox.style.display = "none";
+  lightboxImg.src = "";
 });
 
-// Gestion boutons salles
+// Boutons salles
 const salleBtns = document.querySelectorAll(".salle-btn");
 let selectedRooms = [];
 salleBtns.forEach(btn=>{
@@ -258,24 +243,29 @@ salleBtns.forEach(btn=>{
   });
 });
 
-// Fonction animation vortex + flash + redirection
-function playVortexAndRedirect() {
-  vortexOverlay.style.display = "flex";
+function playVortexAndRedirect(){
+  vortexOverlay.style.display="flex";
   setTimeout(()=>{
-    whiteFlash.style.opacity = "1";
-    setTimeout(()=> window.location.href="page2.html", 400);
+    whiteFlash.style.opacity="1";
+    setTimeout(()=>window.location.href="page2.html",400);
   },1800);
 }
 
 // Inscription
 signupBtn.addEventListener("click", async ()=>{
-  if(!email.value || !password.value) { alert("Email et mot de passe requis"); return; }
+  if(!email.value || !password.value){ alert("Email et mot de passe requis"); return; }
   try{
     const userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
     const user = userCred.user;
-    const photoURLs = uploadedPhotos.map(file=>URL.createObjectURL(file));
 
-    // ⚡ Ajout online par défaut + gender (par défaut "girl", tu peux adapter)
+    const photoURLs = [];
+    for(const file of uploadedPhotos){
+      const fileRef = sRef(storage, "photos/"+user.uid+"/"+file.name);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+      photoURLs.push(url);
+    }
+
     await set(ref(db,"users/"+user.uid),{
       email: email.value,
       pseudo: pseudo.value,
@@ -289,7 +279,7 @@ signupBtn.addEventListener("click", async ()=>{
     });
 
     playVortexAndRedirect();
-  } catch(e){
+  }catch(e){
     alert("Erreur: "+e.message);
   }
 });
