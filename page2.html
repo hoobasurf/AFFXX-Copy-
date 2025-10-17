@@ -20,56 +20,42 @@
   .edit-btn{margin-top:10px;padding:8px 14px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff;cursor:pointer}
   .lightbox{display:none;position:fixed;z-index:10000;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center}
   .lightbox img{max-width:92%;max-height:92%;border-radius:10px;box-shadow:0 0 25px #ff66cc}
+  /* modal éditer */
   .modal{display:none;position:fixed;z-index:12000;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);align-items:center;justify-content:center}
   .modal .box{background:rgba(0,0,0,0.6);padding:18px;border-radius:12px;width:90%;max-width:480px;box-shadow:0 0 20px #ff66cc}
   .modal input, .modal textarea{width:100%;margin:8px 0;padding:8px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff}
   .modal .row{display:flex;gap:8px}
   .modal button{flex:1;padding:10px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff;cursor:pointer}
+
+  /* carrousel online users */
   #onlineCarouselContainer{max-width:600px;margin:30px auto;background:rgba(0,0,0,0.6);padding:16px;border-radius:15px;box-shadow:0 0 20px #ff66cc;text-align:left}
   #onlineCarousel{display:flex;overflow-x:auto;gap:10px;padding-top:8px;padding-bottom:8px}
   .onlineCard{min-width:100px;text-align:center;color:#fff;font-family:'Orbitron',sans-serif}
   .onlineCard img{width:100px;height:100px;object-fit:cover;border-radius:10px;border:2px solid #ff66cc;cursor:pointer}
   .onlineCard span{display:block;margin-top:4px;font-size:0.9em}
-  /* Message discret */
-  #loginMessage {
-    display:none;
-    position:fixed;
-    top:20px;
-    left:50%;
-    transform:translateX(-50%);
-    background:rgba(0,0,0,0.8);
-    border:2px solid #ff66cc;
-    color:#ff66cc;
-    padding:12px 20px;
-    border-radius:12px;
-    box-shadow:0 0 20px #ff66cc;
-    z-index:9999;
-    animation:fadeInOut 3s ease-in-out forwards;
-  }
-  @keyframes fadeInOut {
-    0%{opacity:0;transform:translate(-50%,-10px);}
-    10%,80%{opacity:1;transform:translate(-50%,0);}
-    100%{opacity:0;transform:translate(-50%,10px);}
-  }
 </style>
 </head>
 <body>
-  <div id="loginMessage">Vous devez être connecté</div>
-
   <div class="container">
     <h1>Mon Profil</h1>
+
     <div class="info">
       <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
       <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
       <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
       <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
     </div>
+
     <img id="mainPhoto" class="main-photo" src="https://via.placeholder.com/800x360?text=Photo" alt="Photo principale">
+
     <div class="photos" id="photosContainer"></div>
+
     <div id="roomButtons" style="margin-top:12px"></div>
+
     <button id="editBtn" class="edit-btn">Modifier</button>
   </div>
 
+  <!-- Carrousel utilisateurs en ligne -->
   <div id="onlineCarouselContainer">
     <h2 style="color:#ff66cc;text-shadow:0 0 10px #ff66cc;margin-bottom:8px">Utilisateurs en ligne</h2>
     <div id="onlineCarousel"></div>
@@ -99,7 +85,6 @@ import { app } from "./firebase.js";
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-const loginMessage = document.getElementById('loginMessage');
 const pseudoSpan = document.getElementById('pseudo');
 const ageSpan = document.getElementById('age');
 const locationSpan = document.getElementById('location');
@@ -107,8 +92,10 @@ const descSpan = document.getElementById('description');
 const mainPhoto = document.getElementById('mainPhoto');
 const photosContainer = document.getElementById('photosContainer');
 const roomButtons = document.getElementById('roomButtons');
+
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
+
 const modalEdit = document.getElementById('modalEdit');
 const editDescription = document.getElementById('editDescription');
 const editPhotos = document.getElementById('editPhotos');
@@ -116,23 +103,26 @@ const editPreview = document.getElementById('editPreview');
 const saveEdit = document.getElementById('saveEdit');
 const cancelEdit = document.getElementById('cancelEdit');
 const editBtn = document.getElementById('editBtn');
+
 const onlineCarousel = document.getElementById("onlineCarousel");
 
 let currentUid = null;
 let currentPhotos = [];
 
+// Mettre utilisateur en ligne
 onAuthStateChanged(auth, async user => {
   if(!user){
-    loginMessage.style.display = 'block';
-    setTimeout(()=>window.location.href='inscription.html',2000);
+    alert('Vous devez être connecté !');
+    window.location.href = 'inscription.html';
     return;
   }
-
   currentUid = user.uid;
+
   const userStatusRef = ref(db, "users/" + currentUid + "/online");
   set(userStatusRef, true);
   onDisconnect(userStatusRef).set(false);
 
+  // Charger profil
   const snap = await get(ref(db, 'users/' + currentUid));
   if(snap.exists()){
     const data = snap.val();
@@ -152,27 +142,18 @@ onAuthStateChanged(auth, async user => {
       photosContainer.appendChild(img);
     });
 
-    // Boutons de salle
+    // room buttons
     roomButtons.innerHTML = '';
     (data.rooms||[]).forEach(room=>{
       const btn = document.createElement('button');
       btn.className = 'room-btn';
       btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
-      btn.addEventListener('click', async ()=>{
-        const userRef = ref(db, "users/" + currentUid);
-        const snapUser = await get(userRef);
-        const userData = snapUser.val() || {};
-        const rooms = userData.rooms || [];
-        if (!rooms.includes(room)) {
-          rooms.push(room);
-          await update(userRef, { rooms });
-        }
-        const roomLower = room.toLowerCase();
-        let page = '';
-        if(roomLower==='serieux') page='authentique.html';
-        if(roomLower==='amicale') page='amicale.html';
-        if(roomLower==='fun') page='fun.html';
-        if(page) window.location.href = page;
+      btn.addEventListener('click', ()=>{
+        let page='';
+        if(room==='serieux') page='authentique.html';
+        if(room==='amicale') page='amicale.html';
+        if(room==='fun') page='fun.html';
+        window.location.href = page;
       });
       roomButtons.appendChild(btn);
     });
@@ -186,15 +167,19 @@ onAuthStateChanged(auth, async user => {
     if(!users) return;
     Object.keys(users).forEach(uid=>{
       const u = users[uid];
-      if(u.online && uid !== currentUid){
+      if(u.online && uid !== currentUid){ // exclure moi-même
         const card = document.createElement("div");
         card.className = "onlineCard";
+
         const img = document.createElement("img");
         img.src = u.photos && u.photos[0] ? u.photos[0] : "https://via.placeholder.com/100";
         img.alt = u.pseudo || "Utilisateur";
+
         const span = document.createElement("span");
         span.textContent = u.pseudo || "Utilisateur";
-        img.addEventListener("click", ()=> window.location.href=`profilcard.html?uid=${uid}`);
+
+        img.addEventListener("click", ()=> alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age || "Non renseigné"}\nLieu: ${u.location || "Non renseigné"}`));
+
         card.appendChild(img);
         card.appendChild(span);
         onlineCarousel.appendChild(card);
@@ -206,7 +191,7 @@ onAuthStateChanged(auth, async user => {
 function openLightbox(src){ lightboxImg.src = src; lightbox.style.display='flex'; }
 lightbox.addEventListener("click", ()=>{ lightbox.style.display='none'; lightboxImg.src=''; });
 
-// Édition profil
+// EDIT modal
 editBtn.addEventListener("click", async ()=>{
   const snap = await get(ref(db,'users/'+currentUid));
   if(snap.exists()){
@@ -244,22 +229,55 @@ cancelEdit.addEventListener("click", ()=>{
   modalEdit.style.display='none'; stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
 });
 
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } 
+  from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+
+const storage = getStorage(app);
+
 saveEdit.addEventListener("click", async ()=>{
   const newDesc = editDescription.value.trim();
-  async function filesToDataURLs(files){
-    return Promise.all((files||[]).slice(0,5).map(f=>new Promise((res,rej)=>{
-      const fr=new FileReader();
-      fr.onload=e=>res(e.target.result);
-      fr.onerror=rej;
-      fr.readAsDataURL(f);
-    })));
-  }
-  try{
-    let photosToSave=currentPhotos;
-    if(stagedEditFiles && stagedEditFiles.length>0){
-      photosToSave = await filesToDataURLs(stagedEditFiles);
+
+  try {
+    let photosToSave = currentPhotos;
+
+    if (stagedEditFiles && stagedEditFiles.length > 0) {
+      photosToSave = [];
+
+      for (const file of stagedEditFiles) {
+        const photoRef = sRef(storage, `users/${currentUid}/${Date.now()}_${file.name}`);
+        await uploadBytes(photoRef, file);
+        const downloadURL = await getDownloadURL(photoRef);
+        photosToSave.push(downloadURL);
+      }
     }
-    await update(ref(db,'users/'+currentUid),{description:newDesc,photos:photosToSave});
+
+    await update(ref(db, 'users/' + currentUid), {
+      description: newDesc,
+      photos: photosToSave
+    });
+
+    // --- mise à jour interface ---
+    descSpan.textContent = newDesc || 'Non renseignée';
+    currentPhotos = photosToSave;
+    mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
+    photosContainer.innerHTML = '';
+    (currentPhotos || []).forEach(url => {
+      const img = document.createElement('img');
+      img.src = url;
+      img.addEventListener('click', () => openLightbox(url));
+      photosContainer.appendChild(img);
+    });
+
+    modalEdit.style.display = 'none';
+    stagedEditFiles = [];
+    editPhotos.value = '';
+    editPreview.innerHTML = '';
+    alert('✅ Profil mis à jour !');
+  } catch (e) {
+    console.error(e);
+    alert('❌ Erreur lors de la mise à jour du profil.');
+  }
+});
     descSpan.textContent=newDesc||'Non renseignée';
     currentPhotos=photosToSave;
     if(currentPhotos.length>0) mainPhoto.src=currentPhotos[0];
@@ -272,7 +290,8 @@ saveEdit.addEventListener("click", async ()=>{
     });
     modalEdit.style.display='none';
     stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
-  }catch(e){console.error(e);}
+    alert('Profil mis à jour !');
+  }catch(e){alert(e.message||e);}
 });
 </script>
 </body>
