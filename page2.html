@@ -108,13 +108,19 @@ const onlineCarousel = document.getElementById("onlineCarousel");
 
 let currentUid = null;
 let currentPhotos = [];
+let authChecked = false; // ✅ empêche le message de tourner en boucle
 
 onAuthStateChanged(auth, async user => {
-  if(!user){
-    alert('Vous devez être connecté !');
+  if (authChecked) return; // évite plusieurs appels
+  authChecked = true;
+
+  if (!user) {
+    console.warn("Utilisateur non connecté — redirection...");
+    alert("Vous devez être connecté !");
     window.location.href = 'inscription.html';
     return;
   }
+
   currentUid = user.uid;
 
   const userStatusRef = ref(db, "users/" + currentUid + "/online");
@@ -122,7 +128,7 @@ onAuthStateChanged(auth, async user => {
   onDisconnect(userStatusRef).set(false);
 
   const snap = await get(ref(db, 'users/' + currentUid));
-  if(snap.exists()){
+  if (snap.exists()) {
     const data = snap.val();
     pseudoSpan.textContent = data.pseudo || 'Non renseigné';
     ageSpan.textContent = data.age || 'Non renseigné';
@@ -133,20 +139,20 @@ onAuthStateChanged(auth, async user => {
     mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
 
     photosContainer.innerHTML = '';
-    (currentPhotos||[]).forEach(url=>{
+    (currentPhotos || []).forEach(url => {
       const img = document.createElement('img');
       img.src = url;
-      img.addEventListener("click", ()=> openLightbox(url));
+      img.addEventListener("click", () => openLightbox(url));
       photosContainer.appendChild(img);
     });
 
-    // ✅ Boutons de salle corrigé
+    // ✅ Boutons de salle
     roomButtons.innerHTML = '';
-    (data.rooms||[]).forEach(room=>{
+    (data.rooms || []).forEach(room => {
       const btn = document.createElement('button');
       btn.className = 'room-btn';
-      btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
-      btn.addEventListener('click', async ()=>{
+      btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
+      btn.addEventListener('click', async () => {
         const userRef = ref(db, "users/" + currentUid);
         const snapUser = await get(userRef);
         const userData = snapUser.val() || {};
@@ -156,27 +162,26 @@ onAuthStateChanged(auth, async user => {
           await update(userRef, { rooms });
         }
 
-        // ✅ Ici la correction pour gérer majuscules/accents
         const roomLower = room.toLowerCase();
         let page = '';
-        if(roomLower==='serieux') page='authentique.html';
-        if(roomLower==='amicale') page='amicale.html';
-        if(roomLower==='fun') page='fun.html';
-        if(page) window.location.href = page;
+        if (roomLower === 'serieux') page = 'authentique.html';
+        if (roomLower === 'amicale') page = 'amicale.html';
+        if (roomLower === 'fun') page = 'fun.html';
+        if (page) window.location.href = page;
       });
       roomButtons.appendChild(btn);
     });
   }
 
-  // Carrousel utilisateurs en ligne
-  const usersRef = ref(db,"users");
-  onValue(usersRef, snapshot=>{
+  // ✅ Carrousel utilisateurs en ligne
+  const usersRef = ref(db, "users");
+  onValue(usersRef, snapshot => {
     const users = snapshot.val();
     onlineCarousel.innerHTML = "";
-    if(!users) return;
-    Object.keys(users).forEach(uid=>{
+    if (!users) return;
+    Object.keys(users).forEach(uid => {
       const u = users[uid];
-      if(u.online && uid !== currentUid){
+      if (u.online && uid !== currentUid) {
         const card = document.createElement("div");
         card.className = "onlineCard";
 
@@ -187,7 +192,7 @@ onAuthStateChanged(auth, async user => {
         const span = document.createElement("span");
         span.textContent = u.pseudo || "Utilisateur";
 
-        img.addEventListener("click", ()=> alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age || "Non renseigné"}\nLieu: ${u.location || "Non renseigné"}`));
+        img.addEventListener("click", () => alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age || "Non renseigné"}\nLieu: ${u.location || "Non renseigné"}`));
 
         card.appendChild(img);
         card.appendChild(span);
@@ -197,77 +202,90 @@ onAuthStateChanged(auth, async user => {
   });
 });
 
-function openLightbox(src){ lightboxImg.src = src; lightbox.style.display='flex'; }
-lightbox.addEventListener("click", ()=>{ lightbox.style.display='none'; lightboxImg.src=''; });
+function openLightbox(src) { lightboxImg.src = src; lightbox.style.display = 'flex'; }
+lightbox.addEventListener("click", () => { lightbox.style.display = 'none'; lightboxImg.src = ''; });
 
 // Édition profil
-editBtn.addEventListener("click", async ()=>{
-  const snap = await get(ref(db,'users/'+currentUid));
-  if(snap.exists()){
+editBtn.addEventListener("click", async () => {
+  const snap = await get(ref(db, 'users/' + currentUid));
+  if (snap.exists()) {
     const data = snap.val();
     editDescription.value = data.description || '';
-    editPreview.innerHTML='';
-    (data.photos||[]).forEach(url=>{
+    editPreview.innerHTML = '';
+    (data.photos || []).forEach(url => {
       const img = document.createElement("img");
-      img.src=url;
-      img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
+      img.src = url;
+      img.style.width = '60px';
+      img.style.height = '60px';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '6px';
+      img.style.border = '2px solid #ff66cc';
       editPreview.appendChild(img);
     });
   }
-  modalEdit.style.display='flex';
+  modalEdit.style.display = 'flex';
 });
 
-let stagedEditFiles=[];
-editPhotos.addEventListener("change", e=>{
-  const files=Array.from(e.target.files||[]).slice(0,5);
-  stagedEditFiles=files;
-  editPreview.innerHTML='';
-  files.forEach(file=>{
-    const r=new FileReader();
-    r.onload=ev=>{
-      const img=document.createElement("img");
-      img.src=ev.target.result;
-      img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
+let stagedEditFiles = [];
+editPhotos.addEventListener("change", e => {
+  const files = Array.from(e.target.files || []).slice(0, 5);
+  stagedEditFiles = files;
+  editPreview.innerHTML = '';
+  files.forEach(file => {
+    const r = new FileReader();
+    r.onload = ev => {
+      const img = document.createElement("img");
+      img.src = ev.target.result;
+      img.style.width = '60px';
+      img.style.height = '60px';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '6px';
+      img.style.border = '2px solid #ff66cc';
       editPreview.appendChild(img);
-    }
+    };
     r.readAsDataURL(file);
   });
 });
 
-cancelEdit.addEventListener("click", ()=>{
-  modalEdit.style.display='none'; stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
+cancelEdit.addEventListener("click", () => {
+  modalEdit.style.display = 'none';
+  stagedEditFiles = [];
+  editPhotos.value = '';
+  editPreview.innerHTML = '';
 });
 
-saveEdit.addEventListener("click", async ()=>{
+saveEdit.addEventListener("click", async () => {
   const newDesc = editDescription.value.trim();
-  async function filesToDataURLs(files){
-    return Promise.all((files||[]).slice(0,5).map(f=>new Promise((res,rej)=>{
-      const fr=new FileReader();
-      fr.onload=e=>res(e.target.result);
-      fr.onerror=rej;
+  async function filesToDataURLs(files) {
+    return Promise.all((files || []).slice(0, 5).map(f => new Promise((res, rej) => {
+      const fr = new FileReader();
+      fr.onload = e => res(e.target.result);
+      fr.onerror = rej;
       fr.readAsDataURL(f);
     })));
   }
-  try{
-    let photosToSave=currentPhotos;
-    if(stagedEditFiles && stagedEditFiles.length>0){
+  try {
+    let photosToSave = currentPhotos;
+    if (stagedEditFiles && stagedEditFiles.length > 0) {
       photosToSave = await filesToDataURLs(stagedEditFiles);
     }
-    await update(ref(db,'users/'+currentUid),{description:newDesc,photos:photosToSave});
-    descSpan.textContent=newDesc||'Non renseignée';
-    currentPhotos=photosToSave;
-    if(currentPhotos.length>0) mainPhoto.src=currentPhotos[0];
-    photosContainer.innerHTML='';
-    (currentPhotos||[]).forEach(url=>{
-      const img=document.createElement('img');
-      img.src=url;
-      img.addEventListener('click',()=>openLightbox(url));
+    await update(ref(db, 'users/' + currentUid), { description: newDesc, photos: photosToSave });
+    descSpan.textContent = newDesc || 'Non renseignée';
+    currentPhotos = photosToSave;
+    if (currentPhotos.length > 0) mainPhoto.src = currentPhotos[0];
+    photosContainer.innerHTML = '';
+    (currentPhotos || []).forEach(url => {
+      const img = document.createElement('img');
+      img.src = url;
+      img.addEventListener('click', () => openLightbox(url));
       photosContainer.appendChild(img);
     });
-    modalEdit.style.display='none';
-    stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
+    modalEdit.style.display = 'none';
+    stagedEditFiles = [];
+    editPhotos.value = '';
+    editPreview.innerHTML = '';
     alert('Profil mis à jour !');
-  }catch(e){alert(e.message||e);}
+  } catch (e) { alert(e.message || e); }
 });
 </script>
 </body>
