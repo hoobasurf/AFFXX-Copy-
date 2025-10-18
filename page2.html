@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
 <title>Mon Profil</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
@@ -71,8 +71,7 @@
   </div>
 
 <script type="module">
-// page2.html - upload images to Firebase Storage and save URLs to Realtime DB
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, get, update, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
 import { app } from "./firebase.js";
@@ -88,10 +87,8 @@ const descSpan = document.getElementById('description');
 const mainPhoto = document.getElementById('mainPhoto');
 const photosContainer = document.getElementById('photosContainer');
 const roomButtons = document.getElementById('roomButtons');
-
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
-
 const modalEdit = document.getElementById('modalEdit');
 const editDescription = document.getElementById('editDescription');
 const editPhotos = document.getElementById('editPhotos');
@@ -99,27 +96,39 @@ const editPreview = document.getElementById('editPreview');
 const saveEdit = document.getElementById('saveEdit');
 const cancelEdit = document.getElementById('cancelEdit');
 const editBtn = document.getElementById('editBtn');
-
 const onlineCarousel = document.getElementById("onlineCarousel");
 
 let currentUid = null;
 let currentPhotos = [];
+let alertShown = false;
 
-// presence + load profile
+// ✅ Correction : gestion propre du message de connexion + persistance
 onAuthStateChanged(auth, async user => {
-  if(!user){
-    alert('Vous devez être connecté !');
-    window.location.href = 'inscription.html';
+  if (!user) {
+    if (!alertShown) {
+      alertShown = true;
+      const messageBox = document.createElement('div');
+      messageBox.textContent = "⚠️ Vous devez être connecté pour accéder à votre profil.";
+      Object.assign(messageBox.style, {
+        position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)',
+        background: 'rgba(0,0,0,0.8)', color: '#ff66cc', padding: '12px 18px',
+        border: '2px solid #ff66cc', borderRadius: '8px', zIndex: 9999
+      });
+      document.body.appendChild(messageBox);
+      setTimeout(()=>{ messageBox.remove(); window.location.href = 'inscription.html'; }, 2500);
+    }
     return;
   }
+
   currentUid = user.uid;
+  alertShown = false;
 
   const userStatusRef = ref(db, "users/" + currentUid + "/online");
   set(userStatusRef, true);
   onDisconnect(userStatusRef).set(false);
 
   const snap = await get(ref(db, 'users/' + currentUid));
-  if(snap.exists()){
+  if (snap.exists()) {
     const data = snap.val();
     pseudoSpan.textContent = data.pseudo || 'Non renseigné';
     ageSpan.textContent = data.age || 'Non renseigné';
@@ -127,32 +136,31 @@ onAuthStateChanged(auth, async user => {
     descSpan.textContent = data.description || 'Non renseignée';
     currentPhotos = data.photos || [];
     mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
-
     renderPhotosList();
-    // rooms
+
     roomButtons.innerHTML = '';
-    (data.rooms||[]).forEach(room=>{
+    (data.rooms || []).forEach(room => {
       const btn = document.createElement('button');
       btn.className = 'room-btn';
-      btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
-      btn.addEventListener('click', ()=>{
-        if(room==='serieux') window.location.href='authentique.html';
-        if(room==='amicale') window.location.href='amicale.html';
-        if(room==='fun') window.location.href='fun.html';
+      btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
+      btn.addEventListener('click', () => {
+        if (room === 'serieux') window.location.href = 'authentique.html';
+        if (room === 'amicale') window.location.href = 'amicale.html';
+        if (room === 'fun') window.location.href = 'fun.html';
       });
       roomButtons.appendChild(btn);
     });
   }
 
-  // online carousel
-  const usersRef = ref(db,"users");
-  onValue(usersRef, snapshot=>{
+  // 🔹 utilisateurs en ligne
+  const usersRef = ref(db, "users");
+  onValue(usersRef, snapshot => {
     const users = snapshot.val();
     onlineCarousel.innerHTML = "";
-    if(!users) return;
-    Object.keys(users).forEach(uid=>{
+    if (!users) return;
+    Object.keys(users).forEach(uid => {
       const u = users[uid];
-      if(u.online && uid !== currentUid){
+      if (u.online && uid !== currentUid) {
         const card = document.createElement("div");
         card.className = "onlineCard";
         const img = document.createElement("img");
@@ -160,7 +168,9 @@ onAuthStateChanged(auth, async user => {
         img.alt = u.pseudo || "Utilisateur";
         const span = document.createElement("span");
         span.textContent = u.pseudo || "Utilisateur";
-        img.addEventListener("click", ()=> alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age || "Non renseigné"}\nLieu: ${u.location || "Non renseigné"}`));
+        img.addEventListener("click", () => {
+          window.location.href = `profilcard.html?uid=${uid}`;
+        });
         card.appendChild(img);
         card.appendChild(span);
         onlineCarousel.appendChild(card);
@@ -169,72 +179,79 @@ onAuthStateChanged(auth, async user => {
   });
 });
 
-function renderPhotosList(){
+function renderPhotosList() {
   photosContainer.innerHTML = '';
-  (currentPhotos||[]).forEach(url=>{
+  (currentPhotos || []).forEach(url => {
     const img = document.createElement('img');
     img.src = url;
-    img.addEventListener("click", ()=> openLightbox(url));
+    img.addEventListener("click", () => openLightbox(url));
     photosContainer.appendChild(img);
   });
 }
 
-function openLightbox(src){ lightboxImg.src = src; lightbox.style.display='flex'; }
-lightbox.addEventListener("click", ()=>{ lightbox.style.display='none'; lightboxImg.src=''; });
+function openLightbox(src) {
+  lightboxImg.src = src;
+  lightbox.style.display = 'flex';
+}
+lightbox.addEventListener("click", () => {
+  lightbox.style.display = 'none';
+  lightboxImg.src = '';
+});
 
-// EDIT modal open
-editBtn.addEventListener("click", async ()=>{
-  const snap = await get(ref(db,'users/'+currentUid));
-  if(snap.exists()){
+editBtn.addEventListener("click", async () => {
+  const snap = await get(ref(db, 'users/' + currentUid));
+  if (snap.exists()) {
     const data = snap.val();
     editDescription.value = data.description || '';
-    editPreview.innerHTML='';
-    (data.photos||[]).forEach(url=>{
+    editPreview.innerHTML = '';
+    (data.photos || []).forEach(url => {
       const img = document.createElement("img");
-      img.src=url;
-      img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
+      img.src = url;
+      img.style.width = '60px';
+      img.style.height = '60px';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '6px';
+      img.style.border = '2px solid #ff66cc';
       editPreview.appendChild(img);
     });
   }
-  modalEdit.style.display='flex';
+  modalEdit.style.display = 'flex';
 });
 
-// preview selected files
 let stagedEditFiles = [];
-editPhotos.addEventListener("change", e=>{
-  const files = Array.from(e.target.files||[]).slice(0,5);
+editPhotos.addEventListener("change", e => {
+  const files = Array.from(e.target.files || []).slice(0, 5);
   stagedEditFiles = files;
   editPreview.innerHTML = '';
-  files.forEach(file=>{
+  files.forEach(file => {
     const img = document.createElement('img');
-    img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
+    img.style.width = '60px';
+    img.style.height = '60px';
+    img.style.objectFit = 'cover';
+    img.style.borderRadius = '6px';
+    img.style.border = '2px solid #ff66cc';
     editPreview.appendChild(img);
-    // preview via blob for immediate UX (not saved as blob)
     const url = URL.createObjectURL(file);
     img.src = url;
     img.onload = () => URL.revokeObjectURL(url);
   });
 });
 
-cancelEdit.addEventListener("click", ()=>{
-  modalEdit.style.display='none';
-  stagedEditFiles=[];
-  editPhotos.value='';
-  editPreview.innerHTML='';
+cancelEdit.addEventListener("click", () => {
+  modalEdit.style.display = 'none';
+  stagedEditFiles = [];
+  editPhotos.value = '';
+  editPreview.innerHTML = '';
 });
 
-// ---------- STORAGE UPLOAD + DB update (unified, mobile compat) ----------
-saveEdit.addEventListener("click", async ()=>{
+saveEdit.addEventListener("click", async () => {
   const newDesc = editDescription.value.trim();
-
   try {
-    let photosToSave = currentPhotos && Array.isArray(currentPhotos) ? currentPhotos.slice() : [];
-
-    if (stagedEditFiles && stagedEditFiles.length > 0) {
-      photosToSave = []; // replace currentPhotos only if new provided
+    let photosToSave = currentPhotos.slice();
+    if (stagedEditFiles.length > 0) {
+      photosToSave = [];
       for (const file of stagedEditFiles) {
-        // create a unique path
-        const path = `users/${currentUid}/${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
+        const path = `users/${currentUid}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
         const photoRef = sRef(storage, path);
         await uploadBytes(photoRef, file);
         const downloadURL = await getDownloadURL(photoRef);
@@ -242,10 +259,7 @@ saveEdit.addEventListener("click", async ()=>{
       }
     }
 
-    // write to DB
     await update(ref(db, 'users/' + currentUid), { description: newDesc, photos: photosToSave });
-
-    // update UI
     descSpan.textContent = newDesc || 'Non renseignée';
     currentPhotos = photosToSave;
     mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
@@ -255,11 +269,19 @@ saveEdit.addEventListener("click", async ()=>{
     stagedEditFiles = [];
     editPhotos.value = '';
     editPreview.innerHTML = '';
-    alert('✅ Profil mis à jour !');
+
+    const okMsg = document.createElement('div');
+    okMsg.textContent = "✅ Profil mis à jour !";
+    Object.assign(okMsg.style, {
+      position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)',
+      background: 'rgba(0,0,0,0.8)', color: '#00ff99', padding: '10px 18px',
+      border: '2px solid #00ff99', borderRadius: '8px', zIndex: 9999
+    });
+    document.body.appendChild(okMsg);
+    setTimeout(()=> okMsg.remove(), 2000);
 
   } catch (e) {
     console.error("saveEdit error", e);
-    alert('❌ Erreur lors de la mise à jour du profil.');
   }
 });
 </script>
