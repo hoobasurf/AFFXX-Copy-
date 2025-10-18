@@ -11,13 +11,15 @@ const firebaseConfig = {
   appId: "1:763273288933:web:d0083f5f6ab7284661c80c"
 };
 
-// Initialisation
 const app = initializeApp(firebaseConfig);
 
-// 🔹 Persistance locale de la session
-const auth = getAuth(app);
-setPersistence(auth, browserLocalPersistence)
-  .then(() => console.log("✅ Persistance activée (session locale)"))
-  .catch(err => console.error("Erreur persistance :", err));
+try {
+  const auth = getAuth(app);
+  setPersistence(auth, browserLocalPersistence)
+    .then(() => console.log("✅ Persistance activée"))
+    .catch(e => console.error("Erreur de persistance:", e));
+} catch (e) {
+  console.error("Erreur init auth:", e);
+}
 
-export { app, auth };
+export { app };
