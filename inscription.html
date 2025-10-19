@@ -78,201 +78,225 @@
   </div>
 
 <script type="module">
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, get, update, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-import { app } from "./firebase.js";
+  // 🔹 Firebase Configuration et initialisation unique
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+  import { getDatabase, ref, get, update, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
-const auth = getAuth(app);
-const db = getDatabase(app);
+  const firebaseConfig = {
+    apiKey: "AIzaSyAbI0fvcv9lIzpPViVBx2BlO8c6L3w-rbc",
+    authDomain: "affxx-copy.firebaseapp.com",
+    databaseURL: "https://affxx-copy-default-rtdb.firebaseio.com",
+    projectId: "affxx-copy",
+    storageBucket: "affxx-copy.appspot.com",
+    messagingSenderId: "763273288933",
+    appId: "1:763273288933:web:d0083f5f6ab7284661c80c"
+  };
 
-const pseudoSpan = document.getElementById('pseudo');
-const ageSpan = document.getElementById('age');
-const locationSpan = document.getElementById('location');
-const descSpan = document.getElementById('description');
-const mainPhoto = document.getElementById('mainPhoto');
-const photosContainer = document.getElementById('photosContainer');
-const roomButtons = document.getElementById('roomButtons');
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
 
-const lightbox = document.getElementById('lightbox');
-const lightboxImg = document.getElementById('lightboxImg');
+  const pseudoSpan = document.getElementById('pseudo');
+  const ageSpan = document.getElementById('age');
+  const locationSpan = document.getElementById('location');
+  const descSpan = document.getElementById('description');
+  const mainPhoto = document.getElementById('mainPhoto');
+  const photosContainer = document.getElementById('photosContainer');
+  const roomButtons = document.getElementById('roomButtons');
 
-const modalEdit = document.getElementById('modalEdit');
-const editDescription = document.getElementById('editDescription');
-const editPhotos = document.getElementById('editPhotos');
-const editPreview = document.getElementById('editPreview');
-const saveEdit = document.getElementById('saveEdit');
-const cancelEdit = document.getElementById('cancelEdit');
-const editBtn = document.getElementById('editBtn');
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
 
-const onlineCarousel = document.getElementById("onlineCarousel");
+  const modalEdit = document.getElementById('modalEdit');
+  const editDescription = document.getElementById('editDescription');
+  const editPhotos = document.getElementById('editPhotos');
+  const editPreview = document.getElementById('editPreview');
+  const saveEdit = document.getElementById('saveEdit');
+  const cancelEdit = document.getElementById('cancelEdit');
+  const editBtn = document.getElementById('editBtn');
 
-let currentUid = null;
-let currentPhotos = [];
+  const onlineCarousel = document.getElementById("onlineCarousel");
 
-onAuthStateChanged(auth, async user => {
-  if(!user){
-    alert('Vous devez être connecté !');
-    window.location.href = 'inscription.html';
-    return;
-  }
-  currentUid = user.uid;
+  let currentUid = null;
+  let currentPhotos = [];
 
-  const userStatusRef = ref(db, "users/" + currentUid + "/online");
-  set(userStatusRef, true);
-  onDisconnect(userStatusRef).set(false);
+  // ⚡ Gestion connexion & redirection si connecté
+  onAuthStateChanged(auth, async user => {
+    if(!user){
+      alert('Vous devez être connecté !');
+      window.location.href = 'inscription.html';
+      return;
+    }
+    currentUid = user.uid;
 
-  const snap = await get(ref(db, 'users/' + currentUid));
-  if(snap.exists()){
-    const data = snap.val();
-    pseudoSpan.textContent = data.pseudo || 'Non renseigné';
-    ageSpan.textContent = data.age || 'Non renseigné';
-    locationSpan.textContent = data.location || 'Non renseigné';
-    descSpan.textContent = data.description || 'Non renseignée';
+    // ✅ Marquer utilisateur en ligne
+    const userStatusRef = ref(db, "users/" + currentUid + "/online");
+    set(userStatusRef, true);
+    onDisconnect(userStatusRef).set(false);
 
-    currentPhotos = data.photos || [];
+    // ✅ Récupération des données utilisateur
+    const snap = await get(ref(db, 'users/' + currentUid));
+    if(snap.exists()){
+      const data = snap.val();
+      pseudoSpan.textContent = data.pseudo || 'Non renseigné';
+      ageSpan.textContent = data.age || 'Non renseigné';
+      locationSpan.textContent = data.location || 'Non renseigné';
+      descSpan.textContent = data.description || 'Non renseignée';
 
-    // ✅ Correction : si aucune photo, on n’affiche rien
-    if(currentPhotos.length > 0){
-      mainPhoto.src = currentPhotos[0];
-      photosContainer.innerHTML = '';
-      currentPhotos.forEach(url=>{
-        const img = document.createElement('img');
-        img.src = url;
-        img.addEventListener("click", ()=> openLightbox(url));
+      currentPhotos = data.photos || [];
+      if(currentPhotos.length > 0){
+        mainPhoto.src = currentPhotos[0];
+        photosContainer.innerHTML = '';
+        currentPhotos.forEach(url=>{
+          const img = document.createElement('img');
+          img.src = url;
+          img.addEventListener("click", ()=> openLightbox(url));
+          photosContainer.appendChild(img);
+        });
+      } else {
+        mainPhoto.src = '';
+        photosContainer.innerHTML = '';
+      }
+
+      // Boutons de salle
+      roomButtons.innerHTML = '';
+      (data.rooms||[]).forEach(room=>{
+        const btn = document.createElement('button');
+        btn.className = 'room-btn';
+        btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
+        btn.addEventListener('click', async ()=>{
+          const userRef = ref(db, "users/" + currentUid);
+          const snapUser = await get(userRef);
+          const userData = snapUser.val() || {};
+          const rooms = userData.rooms || [];
+          if (!rooms.includes(room)) {
+            rooms.push(room);
+            await update(userRef, { rooms });
+          }
+
+          let page='';
+          if(room==='serieux') page='authentique.html';
+          if(room==='amicale') page='amicale.html';
+          if(room==='fun') page='fun.html';
+          window.location.href = page;
+        });
+        roomButtons.appendChild(btn);
+      });
+    }
+
+    // Carrousel utilisateurs en ligne
+    const usersRef = ref(db,"users");
+    onValue(usersRef, snapshot=>{
+      const users = snapshot.val();
+      onlineCarousel.innerHTML = "";
+      if(!users) return;
+      Object.keys(users).forEach(uid=>{
+        const u = users[uid];
+        if(u.online && uid !== currentUid){
+          const card = document.createElement("div");
+          card.className = "onlineCard";
+
+          const img = document.createElement("img");
+          img.src = u.photos && u.photos[0] ? u.photos[0] : "https://via.placeholder.com/100";
+          img.alt = u.pseudo || "Utilisateur";
+
+          const span = document.createElement("span");
+          span.textContent = u.pseudo || "Utilisateur";
+
+          img.addEventListener("click", ()=> alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age || "Non renseigné"}\nLieu: ${u.location || "Non renseigné"}`));
+
+          card.appendChild(img);
+          card.appendChild(span);
+          onlineCarousel.appendChild(card);
+        }
+      });
+    });
+  });
+
+  function openLightbox(src){ lightboxImg.src = src; lightbox.style.display='flex'; }
+  lightbox.addEventListener("click", ()=>{ lightbox.style.display='none'; lightboxImg.src=''; });
+
+  // Édition profil
+  editBtn.addEventListener("click", async ()=>{
+    const snap = await get(ref(db,'users/'+currentUid));
+    if(snap.exists()){
+      const data = snap.val();
+      editDescription.value = data.description || '';
+      editPreview.innerHTML='';
+      (data.photos||[]).forEach(url=>{
+        const img = document.createElement("img");
+        img.src=url;
+        img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
+        editPreview.appendChild(img);
+      });
+    }
+    modalEdit.style.display='flex';
+  });
+
+  let stagedEditFiles=[];
+  editPhotos.addEventListener("change", e=>{
+    const files=Array.from(e.target.files||[]).slice(0,5);
+    stagedEditFiles=files;
+    editPreview.innerHTML='';
+    files.forEach(file=>{
+      const r=new FileReader();
+      r.onload=ev=>{
+        const img=document.createElement("img");
+        img.src=ev.target.result;
+        img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
+        editPreview.appendChild(img);
+      }
+      r.readAsDataURL(file);
+    });
+  });
+
+  cancelEdit.addEventListener("click", ()=>{
+    modalEdit.style.display='none'; stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
+  });
+
+  saveEdit.addEventListener("click", async ()=>{
+    const newDesc = editDescription.value.trim();
+    async function filesToDataURLs(files){
+      return Promise.all((files||[]).slice(0,5).map(f=>new Promise((res,rej)=>{
+        const fr=new FileReader();
+        fr.onload=e=>res(e.target.result);
+        fr.onerror=rej;
+        fr.readAsDataURL(f);
+      })));
+    }
+    try{
+      let photosToSave=currentPhotos;
+      if(stagedEditFiles && stagedEditFiles.length>0){
+        photosToSave = await filesToDataURLs(stagedEditFiles);
+      }
+      await update(ref(db,'users/'+currentUid),{description:newDesc,photos:photosToSave});
+      descSpan.textContent=newDesc||'Non renseignée';
+      currentPhotos=photosToSave;
+      if(currentPhotos.length>0) mainPhoto.src=currentPhotos[0];
+      photosContainer.innerHTML='';
+      (currentPhotos||[]).forEach(url=>{
+        const img=document.createElement('img');
+        img.src=url;
+        img.addEventListener('click',()=>openLightbox(url));
         photosContainer.appendChild(img);
       });
-    } else {
-      mainPhoto.src = '';
-      photosContainer.innerHTML = '';
-    }
+      modalEdit.style.display='none';
+      stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
+      alert('Profil mis à jour !');
+    }catch(e){alert(e.message||e);}
+  });
 
-    // Boutons de salle
-    roomButtons.innerHTML = '';
-    (data.rooms||[]).forEach(room=>{
-      const btn = document.createElement('button');
-      btn.className = 'room-btn';
-      btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
-      btn.addEventListener('click', async ()=>{
-        const userRef = ref(db, "users/" + currentUid);
-        const snapUser = await get(userRef);
-        const userData = snapUser.val() || {};
-        const rooms = userData.rooms || [];
-        if (!rooms.includes(room)) {
-          rooms.push(room);
-          await update(userRef, { rooms });
-        }
-
-        let page='';
-        if(room==='serieux') page='authentique.html';
-        if(room==='amicale') page='amicale.html';
-        if(room==='fun') page='fun.html';
-        window.location.href = page;
-      });
-      roomButtons.appendChild(btn);
-    });
-  }
-
-  // Carrousel utilisateurs en ligne
-  const usersRef = ref(db,"users");
-  onValue(usersRef, snapshot=>{
-    const users = snapshot.val();
-    onlineCarousel.innerHTML = "";
-    if(!users) return;
-    Object.keys(users).forEach(uid=>{
-      const u = users[uid];
-      if(u.online && uid !== currentUid){
-        const card = document.createElement("div");
-        card.className = "onlineCard";
-
-        const img = document.createElement("img");
-        img.src = u.photos && u.photos[0] ? u.photos[0] : "https://via.placeholder.com/100";
-        img.alt = u.pseudo || "Utilisateur";
-
-        const span = document.createElement("span");
-        span.textContent = u.pseudo || "Utilisateur";
-
-        img.addEventListener("click", ()=> alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age || "Non renseigné"}\nLieu: ${u.location || "Non renseigné"}`));
-
-        card.appendChild(img);
-        card.appendChild(span);
-        onlineCarousel.appendChild(card);
+  // 🔹 Redirection automatique vers page2 si utilisateur déjà connecté
+  setTimeout(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = "page2.html";
+      } else {
+        console.log("Aucun utilisateur connecté → on reste sur inscription");
       }
     });
-  });
-});
-
-function openLightbox(src){ lightboxImg.src = src; lightbox.style.display='flex'; }
-lightbox.addEventListener("click", ()=>{ lightbox.style.display='none'; lightboxImg.src=''; });
-
-// Édition profil
-editBtn.addEventListener("click", async ()=>{
-  const snap = await get(ref(db,'users/'+currentUid));
-  if(snap.exists()){
-    const data = snap.val();
-    editDescription.value = data.description || '';
-    editPreview.innerHTML='';
-    (data.photos||[]).forEach(url=>{
-      const img = document.createElement("img");
-      img.src=url;
-      img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
-      editPreview.appendChild(img);
-    });
-  }
-  modalEdit.style.display='flex';
-});
-
-let stagedEditFiles=[];
-editPhotos.addEventListener("change", e=>{
-  const files=Array.from(e.target.files||[]).slice(0,5);
-  stagedEditFiles=files;
-  editPreview.innerHTML='';
-  files.forEach(file=>{
-    const r=new FileReader();
-    r.onload=ev=>{
-      const img=document.createElement("img");
-      img.src=ev.target.result;
-      img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
-      editPreview.appendChild(img);
-    }
-    r.readAsDataURL(file);
-  });
-});
-
-cancelEdit.addEventListener("click", ()=>{
-  modalEdit.style.display='none'; stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
-});
-
-saveEdit.addEventListener("click", async ()=>{
-  const newDesc = editDescription.value.trim();
-  async function filesToDataURLs(files){
-    return Promise.all((files||[]).slice(0,5).map(f=>new Promise((res,rej)=>{
-      const fr=new FileReader();
-      fr.onload=e=>res(e.target.result);
-      fr.onerror=rej;
-      fr.readAsDataURL(f);
-    })));
-  }
-  try{
-    let photosToSave=currentPhotos;
-    if(stagedEditFiles && stagedEditFiles.length>0){
-      photosToSave = await filesToDataURLs(stagedEditFiles);
-    }
-    await update(ref(db,'users/'+currentUid),{description:newDesc,photos:photosToSave});
-    descSpan.textContent=newDesc||'Non renseignée';
-    currentPhotos=photosToSave;
-    if(currentPhotos.length>0) mainPhoto.src=currentPhotos[0];
-    photosContainer.innerHTML='';
-    (currentPhotos||[]).forEach(url=>{
-      const img=document.createElement('img');
-      img.src=url;
-      img.addEventListener('click',()=>openLightbox(url));
-      photosContainer.appendChild(img);
-    });
-    modalEdit.style.display='none';
-    stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
-    alert('Profil mis à jour !');
-  }catch(e){alert(e.message||e);}
-});
+  }, 1500);
 </script>
 </body>
 </html>
