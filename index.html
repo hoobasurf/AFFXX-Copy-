@@ -140,7 +140,24 @@
 <div id="flash" class="flash-light"></div>
 <div id="explosion" class="final-explosion" style="display: none;"></div>
 
-<script>
+<!-- 🔹 Firebase redirection propre -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAbI0fvcv9lIzpPViVBx2BlO8c6L3w-rbc",
+    authDomain: "affxx-copy.firebaseapp.com",
+    databaseURL: "https://affxx-copy-default-rtdb.firebaseio.com",
+    projectId: "affxx-copy",
+    storageBucket: "affxx-copy.appspot.com",
+    messagingSenderId: "763273288933",
+    appId: "1:763273288933:web:d0083f5f6ab7284661c80c"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
   const logo = document.getElementById('logo');
   const phrase = document.getElementById('phrase');
   const phrase2 = document.getElementById('phrase2');
@@ -148,51 +165,26 @@
   const flash = document.getElementById('flash');
   const explosion = document.getElementById('explosion');
 
-  // Logo entre
+  // Animations (inchangées)
   logo.style.animation = 'zoomFade 2s ease-out forwards';
+  setTimeout(() => phrase.style.animation = 'fadeZoomIn 1s forwards ease-out', 2000);
+  setTimeout(() => phrase.style.animation = 'zoomBig 2s forwards ease-in', 3500);
+  setTimeout(() => vortex.style.opacity = '0.5', 4800);
+  setTimeout(() => phrase2.style.animation = 'fadeZoomIn 1.2s forwards ease-out', 5500);
+  setTimeout(() => phrase2.style.animation = 'shrinkAndFade 1.3s forwards ease-in', 7000);
+  setTimeout(() => logo.style.animation = 'logoToCenter 1.2s forwards ease-in', 7600);
+  setTimeout(() => flash.style.display = 'block', 8500);
+  setTimeout(() => explosion.style.display = 'block', 8900);
 
-  // Phrase 1
+  // ✅ Redirection après animation selon l’état Firebase
   setTimeout(() => {
-    phrase.style.animation = 'fadeZoomIn 1s forwards ease-out';
-  }, 2000);
-
-  // Phrase 1 disparaît
-  setTimeout(() => {
-    phrase.style.animation = 'zoomBig 2s forwards ease-in';
-  }, 3500);
-
-  // Vortex visible
-  setTimeout(() => {
-    vortex.style.opacity = '0.5';
-  }, 4800);
-
-  // Phrase 2 apparaît
-  setTimeout(() => {
-    phrase2.style.animation = 'fadeZoomIn 1.2s forwards ease-out';
-  }, 5500);
-
-  // Phrase 2 rétrécit et disparaît
-  setTimeout(() => {
-    phrase2.style.animation = 'shrinkAndFade 1.3s forwards ease-in';
-  }, 7000);
-
-  // Logo aspiré dans le vortex
-  setTimeout(() => {
-    logo.style.animation = 'logoToCenter 1.2s forwards ease-in';
-  }, 7600);
-
-  // Flash + explosion blanche
-  setTimeout(() => {
-    flash.style.display = 'block';
-  }, 8500);
-
-  setTimeout(() => {
-    explosion.style.display = 'block';
-  }, 8900);
-
-  // Redirection
-  setTimeout(() => {
-    window.location.href = "inscription.html";
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = "page2.html";
+      } else {
+        window.location.href = "inscription.html";
+      }
+    });
   }, 10100);
 </script>
 
