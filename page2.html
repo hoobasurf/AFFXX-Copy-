@@ -47,11 +47,6 @@
     <button id="editBtn" class="edit-btn">Modifier</button>
   </div>
 
-  <div id="onlineCarouselContainer">
-    <h2 style="color:#ff66cc;text-shadow:0 0 10px #ff66cc;margin-bottom:8px">Utilisateurs en ligne</h2>
-    <div id="onlineCarousel"></div>
-  </div>
-
   <div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
 
   <div class="modal" id="modalEdit">
@@ -69,7 +64,7 @@
 
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, get, update, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
 import { app } from "./firebase.js";
 
@@ -93,177 +88,140 @@ const editPreview = document.getElementById('editPreview');
 const saveEdit = document.getElementById('saveEdit');
 const cancelEdit = document.getElementById('cancelEdit');
 const editBtn = document.getElementById('editBtn');
-const onlineCarousel = document.getElementById("onlineCarousel");
 
 let currentUid = null;
 let currentPhotos = [];
-let messageBoxShown = false;
 
-// ✅ Correction principale : message non bloquant + redirection propre
-onAuthStateChanged(auth, async (user) => {
+// ✅ Vérifie si connecté
+onAuthStateChanged(auth, async user => {
   if (!user) {
-    if (!messageBoxShown) {
-      messageBoxShown = true;
-      const box = document.createElement("div");
-      box.textContent = "⚠️ Vous devez être connecté pour accéder à votre profil.";
-      Object.assign(box.style, {
-        position: "fixed", top: "20px", left: "50%", transform: "translateX(-50%)",
-        background: "rgba(0,0,0,0.85)", color: "#ff66cc", padding: "12px 18px",
-        border: "2px solid #ff66cc", borderRadius: "8px", zIndex: "9999"
-      });
-      document.body.appendChild(box);
-      // 🔹 attendre avant redirection (évite boucle)
-      setTimeout(() => {
-        window.location.replace("inscription.html");
-      }, 1500);
-    }
+    window.location.replace("inscription.html");
     return;
   }
 
-  // ✅ Auth OK
   currentUid = user.uid;
-  messageBoxShown = false;
 
-  const statusRef = ref(db, "users/" + currentUid + "/online");
-  set(statusRef, true);
-  onDisconnect(statusRef).set(false);
-
-  const snap = await get(ref(db, "users/" + currentUid));
+  const snap = await get(ref(db, 'users/' + currentUid));
   if (!snap.exists()) return;
 
   const data = snap.val();
-  pseudoSpan.textContent = data.pseudo || "Non renseigné";
-  ageSpan.textContent = data.age || "Non renseigné";
-  locationSpan.textContent = data.location || "Non renseigné";
-  descSpan.textContent = data.description || "Non renseignée";
+  pseudoSpan.textContent = data.pseudo || 'Non renseigné';
+  ageSpan.textContent = data.age || 'Non renseigné';
+  locationSpan.textContent = data.location || 'Non renseigné';
+  descSpan.textContent = data.description || 'Non renseignée';
   currentPhotos = data.photos || [];
-  mainPhoto.src = currentPhotos[0] || "https://via.placeholder.com/800x360?text=Photo";
-  renderPhotos();
+  mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
 
-  roomButtons.innerHTML = "";
+  renderPhotosList();
+  roomButtons.innerHTML = '';
+
   (data.rooms || []).forEach(room => {
-    const btn = document.createElement("button");
-    btn.className = "room-btn";
+    const btn = document.createElement('button');
+    btn.className = 'room-btn';
     btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
-    btn.onclick = () => {
-      if (room === "serieux") window.location.href = "authentique.html";
-      if (room === "amicale") window.location.href = "amicale.html";
-      if (room === "fun") window.location.href = "fun.html";
-    };
-    roomButtons.appendChild(btn);
-  });
-
-  const usersRef = ref(db, "users");
-  onValue(usersRef, (snapshot) => {
-    onlineCarousel.innerHTML = "";
-    const users = snapshot.val();
-    if (!users) return;
-    Object.keys(users).forEach(uid => {
-      const u = users[uid];
-      if (u.online && uid !== currentUid) {
-        const div = document.createElement("div");
-        const img = document.createElement("img");
-        img.src = u.photos?.[0] || "https://via.placeholder.com/100";
-        img.alt = u.pseudo || "Utilisateur";
-        img.onclick = () => window.location.href = `profilcard.html?uid=${uid}`;
-        const span = document.createElement("span");
-        span.textContent = u.pseudo || "Utilisateur";
-        div.appendChild(img);
-        div.appendChild(span);
-        onlineCarousel.appendChild(div);
-      }
+    btn.addEventListener('click', () => {
+      if (room === 'serieux') window.location.href = 'authentique.html';
+      if (room === 'amicale') window.location.href = 'amicale.html';
+      if (room === 'fun') window.location.href = 'fun.html';
     });
+    roomButtons.appendChild(btn);
   });
 });
 
-function renderPhotos() {
-  photosContainer.innerHTML = "";
-  currentPhotos.forEach(url => {
-    const img = document.createElement("img");
+function renderPhotosList() {
+  photosContainer.innerHTML = '';
+  (currentPhotos || []).forEach(url => {
+    const img = document.createElement('img');
     img.src = url;
-    img.onclick = () => openLightbox(url);
+    img.addEventListener("click", () => openLightbox(url));
     photosContainer.appendChild(img);
   });
 }
 
 function openLightbox(src) {
   lightboxImg.src = src;
-  lightbox.style.display = "flex";
+  lightbox.style.display = 'flex';
 }
-lightbox.onclick = () => {
-  lightbox.style.display = "none";
-  lightboxImg.src = "";
-};
+lightbox.addEventListener("click", () => {
+  lightbox.style.display = 'none';
+  lightboxImg.src = '';
+});
 
-// ✅ Edition du profil
-editBtn.onclick = async () => {
-  const snap = await get(ref(db, "users/" + currentUid));
-  if (!snap.exists()) return;
-  const data = snap.val();
-  editDescription.value = data.description || "";
-  editPreview.innerHTML = "";
-  (data.photos || []).forEach(url => {
-    const img = document.createElement("img");
-    img.src = url;
-    img.style.width = "60px";
-    img.style.height = "60px";
-    img.style.objectFit = "cover";
-    img.style.borderRadius = "6px";
-    img.style.border = "2px solid #ff66cc";
-    editPreview.appendChild(img);
-  });
-  modalEdit.style.display = "flex";
-};
+editBtn.addEventListener("click", async () => {
+  const snap = await get(ref(db, 'users/' + currentUid));
+  if (snap.exists()) {
+    const data = snap.val();
+    editDescription.value = data.description || '';
+    editPreview.innerHTML = '';
+    (data.photos || []).forEach(url => {
+      const img = document.createElement("img");
+      img.src = url;
+      img.style.width = '60px';
+      img.style.height = '60px';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '6px';
+      img.style.border = '2px solid #ff66cc';
+      editPreview.appendChild(img);
+    });
+  }
+  modalEdit.style.display = 'flex';
+});
 
 let stagedEditFiles = [];
-editPhotos.onchange = (e) => {
+editPhotos.addEventListener("change", e => {
   const files = Array.from(e.target.files || []).slice(0, 5);
   stagedEditFiles = files;
-  editPreview.innerHTML = "";
+  editPreview.innerHTML = '';
   files.forEach(file => {
-    const img = document.createElement("img");
-    img.src = URL.createObjectURL(file);
-    img.style.width = "60px";
-    img.style.height = "60px";
-    img.style.objectFit = "cover";
-    img.style.borderRadius = "6px";
-    img.style.border = "2px solid #ff66cc";
+    const img = document.createElement('img');
+    img.style.width = '60px';
+    img.style.height = '60px';
+    img.style.objectFit = 'cover';
+    img.style.borderRadius = '6px';
+    img.style.border = '2px solid #ff66cc';
     editPreview.appendChild(img);
+    const url = URL.createObjectURL(file);
+    img.src = url;
+    img.onload = () => URL.revokeObjectURL(url);
   });
-};
+});
 
-cancelEdit.onclick = () => {
-  modalEdit.style.display = "none";
+cancelEdit.addEventListener("click", () => {
+  modalEdit.style.display = 'none';
   stagedEditFiles = [];
-  editPhotos.value = "";
-  editPreview.innerHTML = "";
-};
+  editPhotos.value = '';
+  editPreview.innerHTML = '';
+});
 
-saveEdit.onclick = async () => {
+saveEdit.addEventListener("click", async () => {
   const newDesc = editDescription.value.trim();
   try {
-    let newPhotos = currentPhotos.slice();
+    let photosToSave = currentPhotos.slice();
     if (stagedEditFiles.length > 0) {
-      newPhotos = [];
+      photosToSave = [];
       for (const file of stagedEditFiles) {
-        const path = `users/${currentUid}/${Date.now()}_${file.name}`;
-        const refPhoto = sRef(storage, path);
-        await uploadBytes(refPhoto, file);
-        const url = await getDownloadURL(refPhoto);
-        newPhotos.push(url);
+        const path = `users/${currentUid}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+        const photoRef = sRef(storage, path);
+        await uploadBytes(photoRef, file);
+        const downloadURL = await getDownloadURL(photoRef);
+        photosToSave.push(downloadURL);
       }
     }
-    await update(ref(db, "users/" + currentUid), { description: newDesc, photos: newPhotos });
-    descSpan.textContent = newDesc || "Non renseignée";
-    currentPhotos = newPhotos;
-    mainPhoto.src = newPhotos[0] || "https://via.placeholder.com/800x360?text=Photo";
-    renderPhotos();
-    modalEdit.style.display = "none";
+
+    await update(ref(db, 'users/' + currentUid), { description: newDesc, photos: photosToSave });
+    descSpan.textContent = newDesc || 'Non renseignée';
+    currentPhotos = photosToSave;
+    mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
+    renderPhotosList();
+
+    modalEdit.style.display = 'none';
     stagedEditFiles = [];
-    editPhotos.value = "";
-    editPreview.innerHTML = "";
-  } catch (e) { console.error(e); }
-};
+    editPhotos.value = '';
+    editPreview.innerHTML = '';
+  } catch (e) {
+    console.error("saveEdit error", e);
+  }
+});
 </script>
 </body>
 </html>
