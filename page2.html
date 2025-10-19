@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
 <title>Mon Profil</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
@@ -20,19 +20,11 @@
   .edit-btn{margin-top:10px;padding:8px 14px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff;cursor:pointer}
   .lightbox{display:none;position:fixed;z-index:10000;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center}
   .lightbox img{max-width:92%;max-height:92%;border-radius:10px;box-shadow:0 0 25px #ff66cc}
-  /* modal éditer */
   .modal{display:none;position:fixed;z-index:12000;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);align-items:center;justify-content:center}
   .modal .box{background:rgba(0,0,0,0.6);padding:18px;border-radius:12px;width:90%;max-width:480px;box-shadow:0 0 20px #ff66cc}
   .modal input, .modal textarea{width:100%;margin:8px 0;padding:8px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff}
   .modal .row{display:flex;gap:8px}
   .modal button{flex:1;padding:10px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff;cursor:pointer}
-
-  /* carrousel online users */
-  #onlineCarouselContainer{max-width:600px;margin:30px auto;background:rgba(0,0,0,0.6);padding:16px;border-radius:15px;box-shadow:0 0 20px #ff66cc;text-align:left}
-  #onlineCarousel{display:flex;overflow-x:auto;gap:10px;padding-top:8px;padding-bottom:8px}
-  .onlineCard{min-width:100px;text-align:center;color:#fff;font-family:'Orbitron',sans-serif}
-  .onlineCard img{width:100px;height:100px;object-fit:cover;border-radius:10px;border:2px solid #ff66cc;cursor:pointer}
-  .onlineCard span{display:block;margin-top:4px;font-size:0.9em}
 </style>
 </head>
 <body>
@@ -55,15 +47,8 @@
     <button id="editBtn" class="edit-btn">Modifier</button>
   </div>
 
-  <!-- Carrousel utilisateurs en ligne -->
-  <div id="onlineCarouselContainer">
-    <h2 style="color:#ff66cc;text-shadow:0 0 10px #ff66cc;margin-bottom:8px">Utilisateurs en ligne</h2>
-    <div id="onlineCarousel"></div>
-  </div>
-
   <div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
 
-  <!-- Modal Modifier -->
   <div class="modal" id="modalEdit">
     <div class="box">
       <h3 style="color:#ff66cc;margin-bottom:8px">Modifier description / photos</h3>
@@ -79,11 +64,13 @@
 
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, get, update, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
 const db = getDatabase(app);
+const storage = getStorage(app);
 
 const pseudoSpan = document.getElementById('pseudo');
 const ageSpan = document.getElementById('age');
@@ -92,10 +79,8 @@ const descSpan = document.getElementById('description');
 const mainPhoto = document.getElementById('mainPhoto');
 const photosContainer = document.getElementById('photosContainer');
 const roomButtons = document.getElementById('roomButtons');
-
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
-
 const modalEdit = document.getElementById('modalEdit');
 const editDescription = document.getElementById('editDescription');
 const editPhotos = document.getElementById('editPhotos');
@@ -104,161 +89,138 @@ const saveEdit = document.getElementById('saveEdit');
 const cancelEdit = document.getElementById('cancelEdit');
 const editBtn = document.getElementById('editBtn');
 
-const onlineCarousel = document.getElementById("onlineCarousel");
-
 let currentUid = null;
 let currentPhotos = [];
 
-// Mettre utilisateur en ligne
+// ✅ Vérifie si connecté
 onAuthStateChanged(auth, async user => {
-  if(!user){
-    alert('Vous devez être connecté !');
-    window.location.href = 'inscription.html';
+  if (!user) {
+    window.location.replace("inscription.html");
     return;
   }
+
   currentUid = user.uid;
 
-  const userStatusRef = ref(db, "users/" + currentUid + "/online");
-  set(userStatusRef, true);
-  onDisconnect(userStatusRef).set(false);
-
-  // Charger profil
   const snap = await get(ref(db, 'users/' + currentUid));
-  if(snap.exists()){
-    const data = snap.val();
-    pseudoSpan.textContent = data.pseudo || 'Non renseigné';
-    ageSpan.textContent = data.age || 'Non renseigné';
-    locationSpan.textContent = data.location || 'Non renseigné';
-    descSpan.textContent = data.description || 'Non renseignée';
+  if (!snap.exists()) return;
 
-    currentPhotos = data.photos || [];
-    mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
+  const data = snap.val();
+  pseudoSpan.textContent = data.pseudo || 'Non renseigné';
+  ageSpan.textContent = data.age || 'Non renseigné';
+  locationSpan.textContent = data.location || 'Non renseigné';
+  descSpan.textContent = data.description || 'Non renseignée';
+  currentPhotos = data.photos || [];
+  mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
 
-    photosContainer.innerHTML = '';
-    (currentPhotos||[]).forEach(url=>{
-      const img = document.createElement('img');
-      img.src = url;
-      img.addEventListener("click", ()=> openLightbox(url));
-      photosContainer.appendChild(img);
+  renderPhotosList();
+  roomButtons.innerHTML = '';
+
+  (data.rooms || []).forEach(room => {
+    const btn = document.createElement('button');
+    btn.className = 'room-btn';
+    btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
+    btn.addEventListener('click', () => {
+      if (room === 'serieux') window.location.href = 'authentique.html';
+      if (room === 'amicale') window.location.href = 'amicale.html';
+      if (room === 'fun') window.location.href = 'fun.html';
     });
-
-    // room buttons
-    roomButtons.innerHTML = '';
-    (data.rooms||[]).forEach(room=>{
-      const btn = document.createElement('button');
-      btn.className = 'room-btn';
-      btn.textContent = room.charAt(0).toUpperCase()+room.slice(1);
-      btn.addEventListener('click', ()=>{
-        let page='';
-        if(room==='serieux') page='authentique.html';
-        if(room==='amicale') page='amicale.html';
-        if(room==='fun') page='fun.html';
-        window.location.href = page;
-      });
-      roomButtons.appendChild(btn);
-    });
-  }
-
-  // Carrousel utilisateurs en ligne
-  const usersRef = ref(db,"users");
-  onValue(usersRef, snapshot=>{
-    const users = snapshot.val();
-    onlineCarousel.innerHTML = "";
-    if(!users) return;
-    Object.keys(users).forEach(uid=>{
-      const u = users[uid];
-      if(u.online && uid !== currentUid){ // exclure moi-même
-        const card = document.createElement("div");
-        card.className = "onlineCard";
-
-        const img = document.createElement("img");
-        img.src = u.photos && u.photos[0] ? u.photos[0] : "https://via.placeholder.com/100";
-        img.alt = u.pseudo || "Utilisateur";
-
-        const span = document.createElement("span");
-        span.textContent = u.pseudo || "Utilisateur";
-
-        img.addEventListener("click", ()=> alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age || "Non renseigné"}\nLieu: ${u.location || "Non renseigné"}`));
-
-        card.appendChild(img);
-        card.appendChild(span);
-        onlineCarousel.appendChild(card);
-      }
-    });
+    roomButtons.appendChild(btn);
   });
 });
 
-function openLightbox(src){ lightboxImg.src = src; lightbox.style.display='flex'; }
-lightbox.addEventListener("click", ()=>{ lightbox.style.display='none'; lightboxImg.src=''; });
+function renderPhotosList() {
+  photosContainer.innerHTML = '';
+  (currentPhotos || []).forEach(url => {
+    const img = document.createElement('img');
+    img.src = url;
+    img.addEventListener("click", () => openLightbox(url));
+    photosContainer.appendChild(img);
+  });
+}
 
-// EDIT modal
-editBtn.addEventListener("click", async ()=>{
-  const snap = await get(ref(db,'users/'+currentUid));
-  if(snap.exists()){
+function openLightbox(src) {
+  lightboxImg.src = src;
+  lightbox.style.display = 'flex';
+}
+lightbox.addEventListener("click", () => {
+  lightbox.style.display = 'none';
+  lightboxImg.src = '';
+});
+
+editBtn.addEventListener("click", async () => {
+  const snap = await get(ref(db, 'users/' + currentUid));
+  if (snap.exists()) {
     const data = snap.val();
     editDescription.value = data.description || '';
-    editPreview.innerHTML='';
-    (data.photos||[]).forEach(url=>{
+    editPreview.innerHTML = '';
+    (data.photos || []).forEach(url => {
       const img = document.createElement("img");
-      img.src=url;
-      img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
+      img.src = url;
+      img.style.width = '60px';
+      img.style.height = '60px';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '6px';
+      img.style.border = '2px solid #ff66cc';
       editPreview.appendChild(img);
     });
   }
-  modalEdit.style.display='flex';
+  modalEdit.style.display = 'flex';
 });
 
-let stagedEditFiles=[];
-editPhotos.addEventListener("change", e=>{
-  const files=Array.from(e.target.files||[]).slice(0,5);
-  stagedEditFiles=files;
-  editPreview.innerHTML='';
-  files.forEach(file=>{
-    const r=new FileReader();
-    r.onload=ev=>{
-      const img=document.createElement("img");
-      img.src=ev.target.result;
-      img.style.width='60px'; img.style.height='60px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.style.border='2px solid #ff66cc';
-      editPreview.appendChild(img);
-    }
-    r.readAsDataURL(file);
+let stagedEditFiles = [];
+editPhotos.addEventListener("change", e => {
+  const files = Array.from(e.target.files || []).slice(0, 5);
+  stagedEditFiles = files;
+  editPreview.innerHTML = '';
+  files.forEach(file => {
+    const img = document.createElement('img');
+    img.style.width = '60px';
+    img.style.height = '60px';
+    img.style.objectFit = 'cover';
+    img.style.borderRadius = '6px';
+    img.style.border = '2px solid #ff66cc';
+    editPreview.appendChild(img);
+    const url = URL.createObjectURL(file);
+    img.src = url;
+    img.onload = () => URL.revokeObjectURL(url);
   });
 });
 
-cancelEdit.addEventListener("click", ()=>{
-  modalEdit.style.display='none'; stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
+cancelEdit.addEventListener("click", () => {
+  modalEdit.style.display = 'none';
+  stagedEditFiles = [];
+  editPhotos.value = '';
+  editPreview.innerHTML = '';
 });
 
-saveEdit.addEventListener("click", async ()=>{
+saveEdit.addEventListener("click", async () => {
   const newDesc = editDescription.value.trim();
-  async function filesToDataURLs(files){
-    return Promise.all((files||[]).slice(0,5).map(f=>new Promise((res,rej)=>{
-      const fr=new FileReader();
-      fr.onload=e=>res(e.target.result);
-      fr.onerror=rej;
-      fr.readAsDataURL(f);
-    })));
-  }
-  try{
-    let photosToSave=currentPhotos;
-    if(stagedEditFiles && stagedEditFiles.length>0){
-      photosToSave = await filesToDataURLs(stagedEditFiles);
+  try {
+    let photosToSave = currentPhotos.slice();
+    if (stagedEditFiles.length > 0) {
+      photosToSave = [];
+      for (const file of stagedEditFiles) {
+        const path = `users/${currentUid}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+        const photoRef = sRef(storage, path);
+        await uploadBytes(photoRef, file);
+        const downloadURL = await getDownloadURL(photoRef);
+        photosToSave.push(downloadURL);
+      }
     }
-    await update(ref(db,'users/'+currentUid),{description:newDesc,photos:photosToSave});
-    descSpan.textContent=newDesc||'Non renseignée';
-    currentPhotos=photosToSave;
-    if(currentPhotos.length>0) mainPhoto.src=currentPhotos[0];
-    photosContainer.innerHTML='';
-    (currentPhotos||[]).forEach(url=>{
-      const img=document.createElement('img');
-      img.src=url;
-      img.addEventListener('click',()=>openLightbox(url));
-      photosContainer.appendChild(img);
-    });
-    modalEdit.style.display='none';
-    stagedEditFiles=[]; editPhotos.value=''; editPreview.innerHTML='';
-    alert('Profil mis à jour !');
-  }catch(e){alert(e.message||e);}
+
+    await update(ref(db, 'users/' + currentUid), { description: newDesc, photos: photosToSave });
+    descSpan.textContent = newDesc || 'Non renseignée';
+    currentPhotos = photosToSave;
+    mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
+    renderPhotosList();
+
+    modalEdit.style.display = 'none';
+    stagedEditFiles = [];
+    editPhotos.value = '';
+    editPreview.innerHTML = '';
+  } catch (e) {
+    console.error("saveEdit error", e);
+  }
 });
 </script>
 </body>
