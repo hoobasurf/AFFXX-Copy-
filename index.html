@@ -3,85 +3,63 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Affinix Intro</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
-
+<title>Accueil AFFINIX</title>
 <style>
-  html, body {
+  body {
     margin: 0; padding: 0;
-    height: 100vh; width: 100vw;
-    background: url('/fond-galactique.jpg') no-repeat center center/cover;
+    background: url('fond-galactique.jpg') no-repeat center center / cover;
+    height: 100vh;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
     align-items: center;
-    font-family: 'Orbitron', sans-serif;
-    background-color: black;
-    overflow: hidden;
+    justify-content: flex-start; /* Pour pouvoir contrôler position */
+    font-family: 'Arial', sans-serif;
+    color: white;
+    position: relative;
   }
-
-  #container {
-    margin-top: 12vh;
-    text-align: center;
-    user-select: none;
+  #titre {
+    width: 60%;
+    max-width: 600px;
+    margin-top: 10vh; /* un peu au-dessus du centre */
+    animation: zoomOut 3s ease forwards;
   }
-
-  #logo {
-    width: 320px;
-    max-width: 90vw;
-    filter:
-      drop-shadow(0 0 5px #8a2be2)
-      drop-shadow(0 0 15px #d354f7);
-    animation: zoomFade 2s ease-out forwards;
-    opacity: 0;
-    transform: scale(2);
-  }
-
-  @keyframes zoomFade {
-    to {
-      opacity: 1;
+  @keyframes zoomOut {
+    0% {
+      transform: scale(3);
+      opacity: 0;
+    }
+    100% {
       transform: scale(1);
+      opacity: 1;
     }
   }
-
-  #phrase {
-    margin-top: 40px;
+  #texte {
     font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    user-select: none;
-    background: linear-gradient(90deg, #ff00ff, #ff66cc, #cc33ff);
+    margin-top: 30px;
+    opacity: 0;
+    animation: fadeIn 2s ease forwards;
+    animation-delay: 3.5s;
+    background: linear-gradient(90deg, #ff00f0, #7f00ff, #ff00f0);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow:
-      -1px -1px 0 #000,
-      1px -1px 0 #000,
-      -1px 1px 0 #000,
-      1px 1px 0 #000,
-      0 0 10px #ff66cc,
-      0 0 20px #d600d6;
-    opacity: 0;
-    transform-origin: center center;
+    text-shadow: 0 0 10px #ff00f0;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: black;
   }
-
-  @keyframes fadeZoomIn {
-    from {
-      opacity: 0;
-      transform: scale(0.3);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+  @keyframes fadeIn {
+    to { opacity: 1; }
   }
-
-  @keyframes zoomBig {
-    from {
+  @keyframes zoomToScreen {
+    0% {
       transform: scale(1);
       opacity: 1;
     }
-    to {
+    100% {
       transform: scale(25);
       opacity: 0;
     }
@@ -90,32 +68,31 @@
 </head>
 <body>
 
-<div id="container">
-  <img id="logo" src="/AAFFXX.png" alt="Logo Néon AFFINIX" />
-  <div id="phrase">Prépare-toi au voyage</div>
-</div>
+  <img id="titre" src="AAFFXX.png" alt="AFFINIX" />
+
+  <div id="texte">Prépare-toi au voyage</div>
 
 <script>
-  const logo = document.getElementById('logo');
-  const phrase = document.getElementById('phrase');
+  // On cache le texte au départ
+  const texte = document.getElementById('texte');
+  texte.style.opacity = 0;
 
-  // Logo animation
-  logo.style.animation = 'zoomFade 2s ease-out forwards';
-
-  // Phrase apparition après logo
+  // Le texte apparaît après 3.5s (fin de zoom du titre)
   setTimeout(() => {
-    phrase.style.animation = 'fadeZoomIn 1s forwards ease-out';
-  }, 2000);
+    texte.style.opacity = 1;
 
-  // Délai avant zoom grand
-  setTimeout(() => {
-    phrase.style.animation = 'zoomBig 2.5s forwards ease-in';
-  }, 3500); // 1,5s après apparition
+    // Après 2s, on lance le zoom avant
+    setTimeout(() => {
+      texte.style.animation = "zoomToScreen 2s forwards";
 
-  // Redirection après zoom
-  setTimeout(() => {
-    window.location.href = 'nouvelle-page.html'; 
-  }, 6000); // un peu après zoom
+      // Après 2s, on attend 0.5s puis on change de page
+      setTimeout(() => {
+        window.location.href = "vortex.html";
+      }, 500);
+
+    }, 2000);
+
+  }, 3500);
 </script>
 
 </body>
