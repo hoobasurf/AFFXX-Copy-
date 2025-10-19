@@ -6,101 +6,25 @@
   <title>Affinix Intro</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      width: 100vw;
+    html, body { margin: 0; padding: 0; height: 100vh; width: 100vw;
       background: url('/fond-galactique.jpg') no-repeat center center/cover;
-      font-family: 'Orbitron', sans-serif;
-      overflow: hidden;
-    }
-
-    #video-vortex {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      object-fit: cover;
-      opacity: 0;
-      transition: opacity 1.5s ease-in;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    #container {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      margin-top: 12vh;
-    }
-
-    #logo {
-      width: 320px;
-      max-width: 90vw;
-      filter:
-        drop-shadow(0 0 5px #8a2be2)
-        drop-shadow(0 0 15px #d354f7);
-      animation: zoomFade 2s ease-out forwards;
-      opacity: 0;
-      transform: scale(2);
-      transition: transform 1.2s ease-in-out, opacity 1s ease-in-out;
-    }
-
-    #phrase, #phrase2 {
-      margin-top: 40px;
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      background: linear-gradient(90deg, #ff00ff, #ff66cc, #cc33ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow:
-        -1px -1px 0 #000,
-        1px -1px 0 #000,
-        -1px 1px 0 #000,
-        1px 1px 0 #000,
-        0 0 10px #ff66cc,
-        0 0 20px #d600d6;
-      opacity: 0;
-    }
-
-    @keyframes zoomFade { to { opacity: 1; transform: scale(1); } }
-    @keyframes fadeZoomIn { from { opacity: 0; transform: scale(0.3); } to { opacity: 1; transform: scale(1); } }
-    @keyframes zoomBig { from { transform: scale(1); opacity: 1; } to { transform: scale(25); opacity: 0; } }
-    @keyframes shrinkAndFade { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.01); } }
-    @keyframes logoToCenter {
-      0% { transform: scale(1) translate(0, 0); opacity: 1; }
-      100% { transform: scale(0.05) translate(calc(-50vw + 50%), calc(-50vh + 50%)); opacity: 0; }
-    }
-
-    .flash-light {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(200,160,255,0.5) 100%);
-      z-index: 999;
-      animation: flash 0.8s ease-out forwards;
-      opacity: 0;
-      display: none;
-    }
-
-    .final-explosion {
-      background: white;
-      z-index: 1000;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      opacity: 0;
-      animation: explosion 1.2s ease-out forwards;
-    }
-
-    @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
-    @keyframes explosion { 0% { opacity: 0; } 50% { opacity: 0.9; } 100% { opacity: 1; } }
+      font-family: 'Orbitron', sans-serif; overflow: hidden; }
+    #video-vortex { position: absolute; top:0; left:0; width:100vw; height:100vh; object-fit:cover; opacity:0; transition:opacity 1.5s; z-index:1; pointer-events:none; }
+    #container { position: relative; z-index:2; text-align:center; margin-top:12vh; }
+    #logo { width:320px; max-width:90vw; filter: drop-shadow(0 0 5px #8a2be2) drop-shadow(0 0 15px #d354f7); animation: zoomFade 2s ease-out forwards; opacity:0; transform:scale(2); }
+    #phrase,#phrase2{ margin-top:40px; font-size:2rem; font-weight:700; letter-spacing:0.1em; background:linear-gradient(90deg,#ff00ff,#ff66cc,#cc33ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow:0 0 10px #ff66cc; opacity:0; }
+    @keyframes zoomFade { to { opacity:1; transform:scale(1); } }
+    @keyframes fadeZoomIn { from { opacity:0; transform:scale(.3);} to { opacity:1; transform:scale(1);} }
+    @keyframes zoomBig { from { transform:scale(1); opacity:1; } to { transform:scale(25); opacity:0; } }
+    @keyframes shrinkAndFade { 0%{ opacity:1; transform:scale(1);} 100% { opacity:0; transform:scale(.01);} }
+    @keyframes logoToCenter { 0%{ transform:scale(1) translate(0,0); opacity:1;} 100% { transform:scale(.05) translate(calc(-50vw + 50%), calc(-50vh + 50%)); opacity:0;} }
+    .flash-light{ position:absolute; top:0; left:0; width:100vw; height:100vh; background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(200,160,255,0.5) 100%); z-index:999; opacity:0; display:none; }
+    .final-explosion{ background:white; z-index:1000; position:fixed; top:0; left:0; width:100vw; height:100vh; opacity:0; }
   </style>
 </head>
 <body>
 
-<video id="video-vortex" src="/vortex.mov" autoplay muted loop></video>
+<video id="video-vortex" src="/vortex.mov" autoplay muted loop playsinline webkit-playsinline></video>
 
 <div id="container">
   <img id="logo" src="/AAFFXX.png" alt="Logo Néon AFFINIX" />
@@ -109,53 +33,132 @@
 </div>
 
 <div id="flash" class="flash-light"></div>
-<div id="explosion" class="final-explosion" style="display: none;"></div>
+<div id="explosion" class="final-explosion" style="display:none;"></div>
 
-<!-- 🔹 Firebase reset session + redirection -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+/*
+  Forcer nettoyage session Firebase + IndexedDB + localStorage
+  => Empêche la ré-auth automatique qui te renvoie sur page2
+*/
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAbI0fvcv9lIzpPViVBx2BlO8c6L3w-rbc",
-    authDomain: "affxx-copy.firebaseapp.com",
-    databaseURL: "https://affxx-copy-default-rtdb.firebaseio.com",
-    projectId: "affxx-copy",
-    storageBucket: "affxx-copy.appspot.com",
-    messagingSenderId: "763273288933",
-    appId: "1:763273288933:web:d0083f5f6ab7284661c80c"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyAbI0fvcv9lIzpPViVBx2BlO8c6L3w-rbc",
+  authDomain: "affxx-copy.firebaseapp.com",
+  databaseURL: "https://affxx-copy-default-rtdb.firebaseio.com",
+  projectId: "affxx-copy",
+  storageBucket: "affxx-copy.appspot.com",
+  messagingSenderId: "763273288933",
+  appId: "1:763273288933:web:d0083f5f6ab7284661c80c"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-  // 🔸 Force la déconnexion à chaque démarrage
-  signOut(auth).then(() => {
-    console.log("Session Firebase nettoyée ✅");
-  });
+// 1) signOut if any
+async function trySignOut(){
+  try {
+    await signOut(auth);
+    console.log("Firebase signOut OK");
+  } catch(e){
+    console.warn("signOut failed (maybe no session):", e);
+  }
+}
 
-  // Animations inchangées
+// 2) clear firebase keys in localStorage/sessionStorage
+function clearStorageKeys(){
+  try {
+    const keys = Object.keys(localStorage);
+    keys.forEach(k=>{
+      if(k && (k.startsWith("firebase:") || k.includes("firebase"))) {
+        localStorage.removeItem(k);
+        console.log("removed localStorage key", k);
+      }
+    });
+    // sessionStorage too
+    const sKeys = Object.keys(sessionStorage);
+    sKeys.forEach(k=>{
+      if(k && (k.startsWith("firebase:") || k.includes("firebase"))) {
+        sessionStorage.removeItem(k);
+        console.log("removed sessionStorage key", k);
+      }
+    });
+  } catch(e){ console.warn("clearStorageKeys failed", e); }
+}
+
+// 3) delete firebase IndexedDB databases commonly used
+function deleteFirebaseIndexedDB(){
+  const dbs = [
+    "firebaseLocalStorageDb",   // older names
+    "firebaseLocalStorage", 
+    "firebase_installations_*", // pattern - we can't wildcard delete but try common names
+    "firebase-auth-database"
+  ];
+  // try to enumerate and delete the firebaseLocalStorageDb if exists
+  try {
+    // best-effort: delete known DB names
+    dbs.forEach(name=>{
+      try {
+        const req = indexedDB.deleteDatabase(name);
+        req.onsuccess = () => console.log("Deleted indexedDB:", name);
+        req.onerror = () => console.log("Could not delete indexedDB:", name);
+      } catch(e){ /* ignore */ }
+    });
+    // also attempt to delete "firebaseLocalStorageDb" variants
+    // try to iterate databases (some browsers support indexedDB.databases())
+    if(indexedDB.databases){
+      indexedDB.databases().then(list=>{
+        list.forEach(info=>{
+          const n = info.name;
+          if(n && n.toLowerCase().includes("firebase")){
+            const req = indexedDB.deleteDatabase(n);
+            req.onsuccess = () => console.log("Deleted indexedDB (auto):", n);
+            req.onerror = () => console.log("Couldn't delete indexedDB (auto):", n);
+          }
+        });
+      }).catch(()=>{/* ignore */});
+    }
+  } catch(e){ console.warn("deleteFirebaseIndexedDB failed", e); }
+}
+
+// 4) Small delay to ensure operations finish on iOS
+async function resetEverything(){
+  await trySignOut();
+  clearStorageKeys();
+  deleteFirebaseIndexedDB();
+  // also clear caches (service worker cache) if any
+  if('caches' in window){
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k=>caches.delete(k)));
+      console.log("Cleared caches");
+    } catch(e){ console.warn("caches clear failed", e); }
+  }
+}
+
+// run reset, then continue animation & redirect to inscription
+resetEverything().finally(()=>{
+  // Start the same animations you already had (no visual change)
   const logo = document.getElementById('logo');
   const phrase = document.getElementById('phrase');
   const phrase2 = document.getElementById('phrase2');
   const vortex = document.getElementById('video-vortex');
   const flash = document.getElementById('flash');
   const explosion = document.getElementById('explosion');
-
   logo.style.animation = 'zoomFade 2s ease-out forwards';
-  setTimeout(() => phrase.style.animation = 'fadeZoomIn 1s forwards ease-out', 2000);
-  setTimeout(() => phrase.style.animation = 'zoomBig 2s forwards ease-in', 3500);
-  setTimeout(() => vortex.style.opacity = '0.5', 4800);
-  setTimeout(() => phrase2.style.animation = 'fadeZoomIn 1.2s forwards ease-out', 5500);
-  setTimeout(() => phrase2.style.animation = 'shrinkAndFade 1.3s forwards ease-in', 7000);
-  setTimeout(() => logo.style.animation = 'logoToCenter 1.2s forwards ease-in', 7600);
-  setTimeout(() => flash.style.display = 'block', 8500);
-  setTimeout(() => explosion.style.display = 'block', 8900);
+  setTimeout(()=> phrase.style.animation = 'fadeZoomIn 1s forwards ease-out', 2000);
+  setTimeout(()=> phrase.style.animation = 'zoomBig 2s forwards ease-in', 3500);
+  setTimeout(()=> vortex.style.opacity = '0.5', 4800);
+  setTimeout(()=> phrase2.style.animation = 'fadeZoomIn 1.2s forwards ease-out', 5500);
+  setTimeout(()=> phrase2.style.animation = 'shrinkAndFade 1.3s forwards ease-in', 7000);
+  setTimeout(()=> logo.style.animation = 'logoToCenter 1.2s forwards ease-in', 7600);
+  setTimeout(()=> flash.style.display = 'block', 8500);
+  setTimeout(()=> explosion.style.display = 'block', 8900);
 
-  // ✅ Toujours aller sur inscription après l’intro
-  setTimeout(() => {
-    window.location.href = "inscription.html";
-  }, 10100);
+  // final redirect: always to inscription.html after intro
+  setTimeout(()=> { window.location.href = "inscription.html"; }, 10100);
+});
 </script>
 
 </body>
