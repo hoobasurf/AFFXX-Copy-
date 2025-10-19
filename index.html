@@ -7,10 +7,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      width: 100vw;
+      margin: 0; padding: 0;
+      height: 100vh; width: 100vw;
       background: url('/fond-galactique.jpg') no-repeat center center/cover;
       font-family: 'Orbitron', sans-serif;
       overflow: hidden;
@@ -37,9 +35,7 @@
     #logo {
       width: 320px;
       max-width: 90vw;
-      filter:
-        drop-shadow(0 0 5px #8a2be2)
-        drop-shadow(0 0 15px #d354f7);
+      filter: drop-shadow(0 0 5px #8a2be2) drop-shadow(0 0 15px #d354f7);
       animation: zoomFade 2s ease-out forwards;
       opacity: 0;
       transform: scale(2);
@@ -55,22 +51,19 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       text-shadow:
-        -1px -1px 0 #000,
-        1px -1px 0 #000,
-        -1px 1px 0 #000,
-        1px 1px 0 #000,
-        0 0 10px #ff66cc,
-        0 0 20px #d600d6;
+        -1px -1px 0 #000, 1px -1px 0 #000,
+        -1px 1px 0 #000, 1px 1px 0 #000,
+        0 0 10px #ff66cc, 0 0 20px #d600d6;
       opacity: 0;
     }
 
     @keyframes zoomFade { to { opacity: 1; transform: scale(1); } }
     @keyframes fadeZoomIn { from { opacity: 0; transform: scale(0.3); } to { opacity: 1; transform: scale(1); } }
     @keyframes zoomBig { from { transform: scale(1); opacity: 1; } to { transform: scale(25); opacity: 0; } }
-    @keyframes shrinkAndFade { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.01); } }
+    @keyframes shrinkAndFade { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.01); } }
     @keyframes logoToCenter {
-      0% { transform: scale(1) translate(0, 0); opacity: 1; }
-      100% { transform: scale(0.05) translate(calc(-50vw + 50%), calc(-50vh + 50%)); opacity: 0; }
+      from { transform: scale(1) translate(0, 0); opacity: 1; }
+      to { transform: scale(0.05) translate(calc(-50vw + 50%), calc(-50vh + 50%)); opacity: 0; }
     }
 
     .flash-light {
@@ -111,7 +104,6 @@
 <div id="flash" class="flash-light"></div>
 <div id="explosion" class="final-explosion" style="display: none;"></div>
 
-<!-- 🔹 Firebase reset session + redirection -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
   import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
@@ -129,12 +121,22 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
-  // 🔸 Force la déconnexion à chaque démarrage
-  signOut(auth).then(() => {
-    console.log("Session Firebase nettoyée ✅");
-  });
+  // ✅ Nettoyage de session puis redirection
+  async function resetAndGo() {
+    try {
+      await signOut(auth);
+      console.log("Session Firebase nettoyée ✅");
+    } catch (e) {
+      console.warn("Erreur signOut:", e);
+    }
 
-  // Animations inchangées
+    // 🔹 Petite attente iOS (cache Firebase)
+    setTimeout(() => {
+      window.location.replace("inscription.html");
+    }, 500);
+  }
+
+  // 🔸 Lance les animations visuelles
   const logo = document.getElementById('logo');
   const phrase = document.getElementById('phrase');
   const phrase2 = document.getElementById('phrase2');
@@ -152,10 +154,8 @@
   setTimeout(() => flash.style.display = 'block', 8500);
   setTimeout(() => explosion.style.display = 'block', 8900);
 
-  // ✅ Toujours aller sur inscription après l’intro
-  setTimeout(() => {
-    window.location.href = "inscription.html";
-  }, 10100);
+  // ✅ Fin de l’intro => reset + inscription
+  setTimeout(resetAndGo, 10100);
 </script>
 
 </body>
