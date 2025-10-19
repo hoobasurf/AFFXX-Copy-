@@ -97,208 +97,173 @@ const onlineCarousel = document.getElementById("onlineCarousel");
 
 let currentUid = null;
 let currentPhotos = [];
-let alertShown = false;
+let messageBoxShown = false;
 
-// ✅ Correction : message discret et sans boucle
-onAuthStateChanged(auth, async user => {
+// ✅ Correction principale : message non bloquant + redirection propre
+onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    if (!alertShown) {
-      alertShown = true;
-      const box = document.createElement('div');
-      box.textContent = "⚠️ Connexion requise.";
+    if (!messageBoxShown) {
+      messageBoxShown = true;
+      const box = document.createElement("div");
+      box.textContent = "⚠️ Vous devez être connecté pour accéder à votre profil.";
       Object.assign(box.style, {
-        position: 'fixed',
-        bottom: '30px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        background: 'rgba(0,0,0,0.7)',
-        color: '#ff66cc',
-        padding: '10px 16px',
-        borderRadius: '10px',
-        border: '1px solid #ff66cc',
-        zIndex: 9999,
-        fontSize: '14px',
-        opacity: '0',
-        transition: 'opacity 0.5s ease'
+        position: "fixed", top: "20px", left: "50%", transform: "translateX(-50%)",
+        background: "rgba(0,0,0,0.85)", color: "#ff66cc", padding: "12px 18px",
+        border: "2px solid #ff66cc", borderRadius: "8px", zIndex: "9999"
       });
       document.body.appendChild(box);
-      requestAnimationFrame(() => box.style.opacity = '1');
+      // 🔹 attendre avant redirection (évite boucle)
       setTimeout(() => {
-        box.style.opacity = '0';
-        setTimeout(() => {
-          box.remove();
-          if (window.location.pathname.includes('page2.html')) {
-            window.location.replace('inscription.html');
-          }
-        }, 600);
-      }, 2000);
+        window.location.replace("inscription.html");
+      }, 1500);
     }
     return;
   }
 
+  // ✅ Auth OK
   currentUid = user.uid;
-  alertShown = false;
+  messageBoxShown = false;
 
-  const userStatusRef = ref(db, "users/" + currentUid + "/online");
-  set(userStatusRef, true);
-  onDisconnect(userStatusRef).set(false);
+  const statusRef = ref(db, "users/" + currentUid + "/online");
+  set(statusRef, true);
+  onDisconnect(statusRef).set(false);
 
-  const snap = await get(ref(db, 'users/' + currentUid));
-  if (snap.exists()) {
-    const data = snap.val();
-    pseudoSpan.textContent = data.pseudo || 'Non renseigné';
-    ageSpan.textContent = data.age || 'Non renseigné';
-    locationSpan.textContent = data.location || 'Non renseigné';
-    descSpan.textContent = data.description || 'Non renseignée';
-    currentPhotos = data.photos || [];
-    mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
-    renderPhotosList();
+  const snap = await get(ref(db, "users/" + currentUid));
+  if (!snap.exists()) return;
 
-    roomButtons.innerHTML = '';
-    (data.rooms || []).forEach(room => {
-      const btn = document.createElement('button');
-      btn.className = 'room-btn';
-      btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
-      btn.addEventListener('click', () => {
-        if (room === 'serieux') window.location.href = 'authentique.html';
-        if (room === 'amicale') window.location.href = 'amicale.html';
-        if (room === 'fun') window.location.href = 'fun.html';
-      });
-      roomButtons.appendChild(btn);
-    });
-  }
+  const data = snap.val();
+  pseudoSpan.textContent = data.pseudo || "Non renseigné";
+  ageSpan.textContent = data.age || "Non renseigné";
+  locationSpan.textContent = data.location || "Non renseigné";
+  descSpan.textContent = data.description || "Non renseignée";
+  currentPhotos = data.photos || [];
+  mainPhoto.src = currentPhotos[0] || "https://via.placeholder.com/800x360?text=Photo";
+  renderPhotos();
+
+  roomButtons.innerHTML = "";
+  (data.rooms || []).forEach(room => {
+    const btn = document.createElement("button");
+    btn.className = "room-btn";
+    btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
+    btn.onclick = () => {
+      if (room === "serieux") window.location.href = "authentique.html";
+      if (room === "amicale") window.location.href = "amicale.html";
+      if (room === "fun") window.location.href = "fun.html";
+    };
+    roomButtons.appendChild(btn);
+  });
 
   const usersRef = ref(db, "users");
-  onValue(usersRef, snapshot => {
-    const users = snapshot.val();
+  onValue(usersRef, (snapshot) => {
     onlineCarousel.innerHTML = "";
+    const users = snapshot.val();
     if (!users) return;
     Object.keys(users).forEach(uid => {
       const u = users[uid];
       if (u.online && uid !== currentUid) {
-        const card = document.createElement("div");
-        card.className = "onlineCard";
+        const div = document.createElement("div");
         const img = document.createElement("img");
-        img.src = u.photos && u.photos[0] ? u.photos[0] : "https://via.placeholder.com/100";
+        img.src = u.photos?.[0] || "https://via.placeholder.com/100";
         img.alt = u.pseudo || "Utilisateur";
+        img.onclick = () => window.location.href = `profilcard.html?uid=${uid}`;
         const span = document.createElement("span");
         span.textContent = u.pseudo || "Utilisateur";
-        img.addEventListener("click", () => {
-          window.location.href = `profilcard.html?uid=${uid}`;
-        });
-        card.appendChild(img);
-        card.appendChild(span);
-        onlineCarousel.appendChild(card);
+        div.appendChild(img);
+        div.appendChild(span);
+        onlineCarousel.appendChild(div);
       }
     });
   });
 });
 
-function renderPhotosList() {
-  photosContainer.innerHTML = '';
-  (currentPhotos || []).forEach(url => {
-    const img = document.createElement('img');
+function renderPhotos() {
+  photosContainer.innerHTML = "";
+  currentPhotos.forEach(url => {
+    const img = document.createElement("img");
     img.src = url;
-    img.addEventListener("click", () => openLightbox(url));
+    img.onclick = () => openLightbox(url);
     photosContainer.appendChild(img);
   });
 }
 
 function openLightbox(src) {
   lightboxImg.src = src;
-  lightbox.style.display = 'flex';
+  lightbox.style.display = "flex";
 }
-lightbox.addEventListener("click", () => {
-  lightbox.style.display = 'none';
-  lightboxImg.src = '';
-});
+lightbox.onclick = () => {
+  lightbox.style.display = "none";
+  lightboxImg.src = "";
+};
 
-editBtn.addEventListener("click", async () => {
-  const snap = await get(ref(db, 'users/' + currentUid));
-  if (snap.exists()) {
-    const data = snap.val();
-    editDescription.value = data.description || '';
-    editPreview.innerHTML = '';
-    (data.photos || []).forEach(url => {
-      const img = document.createElement("img");
-      img.src = url;
-      img.style.width = '60px';
-      img.style.height = '60px';
-      img.style.objectFit = 'cover';
-      img.style.borderRadius = '6px';
-      img.style.border = '2px solid #ff66cc';
-      editPreview.appendChild(img);
-    });
-  }
-  modalEdit.style.display = 'flex';
-});
+// ✅ Edition du profil
+editBtn.onclick = async () => {
+  const snap = await get(ref(db, "users/" + currentUid));
+  if (!snap.exists()) return;
+  const data = snap.val();
+  editDescription.value = data.description || "";
+  editPreview.innerHTML = "";
+  (data.photos || []).forEach(url => {
+    const img = document.createElement("img");
+    img.src = url;
+    img.style.width = "60px";
+    img.style.height = "60px";
+    img.style.objectFit = "cover";
+    img.style.borderRadius = "6px";
+    img.style.border = "2px solid #ff66cc";
+    editPreview.appendChild(img);
+  });
+  modalEdit.style.display = "flex";
+};
 
 let stagedEditFiles = [];
-editPhotos.addEventListener("change", e => {
+editPhotos.onchange = (e) => {
   const files = Array.from(e.target.files || []).slice(0, 5);
   stagedEditFiles = files;
-  editPreview.innerHTML = '';
+  editPreview.innerHTML = "";
   files.forEach(file => {
-    const img = document.createElement('img');
-    img.style.width = '60px';
-    img.style.height = '60px';
-    img.style.objectFit = 'cover';
-    img.style.borderRadius = '6px';
-    img.style.border = '2px solid #ff66cc';
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    img.style.width = "60px";
+    img.style.height = "60px";
+    img.style.objectFit = "cover";
+    img.style.borderRadius = "6px";
+    img.style.border = "2px solid #ff66cc";
     editPreview.appendChild(img);
-    const url = URL.createObjectURL(file);
-    img.src = url;
-    img.onload = () => URL.revokeObjectURL(url);
   });
-});
+};
 
-cancelEdit.addEventListener("click", () => {
-  modalEdit.style.display = 'none';
+cancelEdit.onclick = () => {
+  modalEdit.style.display = "none";
   stagedEditFiles = [];
-  editPhotos.value = '';
-  editPreview.innerHTML = '';
-});
+  editPhotos.value = "";
+  editPreview.innerHTML = "";
+};
 
-saveEdit.addEventListener("click", async () => {
+saveEdit.onclick = async () => {
   const newDesc = editDescription.value.trim();
   try {
-    let photosToSave = currentPhotos.slice();
+    let newPhotos = currentPhotos.slice();
     if (stagedEditFiles.length > 0) {
-      photosToSave = [];
+      newPhotos = [];
       for (const file of stagedEditFiles) {
-        const path = `users/${currentUid}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-        const photoRef = sRef(storage, path);
-        await uploadBytes(photoRef, file);
-        const downloadURL = await getDownloadURL(photoRef);
-        photosToSave.push(downloadURL);
+        const path = `users/${currentUid}/${Date.now()}_${file.name}`;
+        const refPhoto = sRef(storage, path);
+        await uploadBytes(refPhoto, file);
+        const url = await getDownloadURL(refPhoto);
+        newPhotos.push(url);
       }
     }
-
-    await update(ref(db, 'users/' + currentUid), { description: newDesc, photos: photosToSave });
-    descSpan.textContent = newDesc || 'Non renseignée';
-    currentPhotos = photosToSave;
-    mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
-    renderPhotosList();
-
-    modalEdit.style.display = 'none';
+    await update(ref(db, "users/" + currentUid), { description: newDesc, photos: newPhotos });
+    descSpan.textContent = newDesc || "Non renseignée";
+    currentPhotos = newPhotos;
+    mainPhoto.src = newPhotos[0] || "https://via.placeholder.com/800x360?text=Photo";
+    renderPhotos();
+    modalEdit.style.display = "none";
     stagedEditFiles = [];
-    editPhotos.value = '';
-    editPreview.innerHTML = '';
-
-    const okMsg = document.createElement('div');
-    okMsg.textContent = "✅ Profil mis à jour !";
-    Object.assign(okMsg.style, {
-      position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)',
-      background: 'rgba(0,0,0,0.8)', color: '#00ff99', padding: '10px 18px',
-      border: '2px solid #00ff99', borderRadius: '8px', zIndex: 9999
-    });
-    document.body.appendChild(okMsg);
-    setTimeout(()=> okMsg.remove(), 2000);
-
-  } catch (e) {
-    console.error("saveEdit error", e);
-  }
-});
+    editPhotos.value = "";
+    editPreview.innerHTML = "";
+  } catch (e) { console.error(e); }
+};
 </script>
 </body>
 </html>
