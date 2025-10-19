@@ -64,34 +64,13 @@
       opacity: 0;
     }
 
-    @keyframes zoomFade {
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    @keyframes fadeZoomIn {
-      from { opacity: 0; transform: scale(0.3); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    @keyframes zoomBig {
-      from { transform: scale(1); opacity: 1; }
-      to { transform: scale(25); opacity: 0; }
-    }
-
-    @keyframes shrinkAndFade {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(0.01); }
-    }
-
+    @keyframes zoomFade { to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeZoomIn { from { opacity: 0; transform: scale(0.3); } to { opacity: 1; transform: scale(1); } }
+    @keyframes zoomBig { from { transform: scale(1); opacity: 1; } to { transform: scale(25); opacity: 0; } }
+    @keyframes shrinkAndFade { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.01); } }
     @keyframes logoToCenter {
       0% { transform: scale(1) translate(0, 0); opacity: 1; }
-      100% {
-        transform: scale(0.05) translate(calc(-50vw + 50%), calc(-50vh + 50%));
-        opacity: 0;
-      }
+      100% { transform: scale(0.05) translate(calc(-50vw + 50%), calc(-50vh + 50%)); opacity: 0; }
     }
 
     .flash-light {
@@ -115,16 +94,8 @@
       animation: explosion 1.2s ease-out forwards;
     }
 
-    @keyframes flash {
-      0% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-
-    @keyframes explosion {
-      0% { opacity: 0; }
-      50% { opacity: 0.9; }
-      100% { opacity: 1; }
-    }
+    @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes explosion { 0% { opacity: 0; } 50% { opacity: 0.9; } 100% { opacity: 1; } }
   </style>
 </head>
 <body>
@@ -140,10 +111,10 @@
 <div id="flash" class="flash-light"></div>
 <div id="explosion" class="final-explosion" style="display: none;"></div>
 
-<!-- 🔹 Firebase redirection propre -->
+<!-- 🔹 Firebase reset session + redirection -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAbI0fvcv9lIzpPViVBx2BlO8c6L3w-rbc",
@@ -158,6 +129,12 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
+  // 🔸 Force la déconnexion à chaque démarrage
+  signOut(auth).then(() => {
+    console.log("Session Firebase nettoyée ✅");
+  });
+
+  // Animations inchangées
   const logo = document.getElementById('logo');
   const phrase = document.getElementById('phrase');
   const phrase2 = document.getElementById('phrase2');
@@ -165,7 +142,6 @@
   const flash = document.getElementById('flash');
   const explosion = document.getElementById('explosion');
 
-  // Animations (inchangées)
   logo.style.animation = 'zoomFade 2s ease-out forwards';
   setTimeout(() => phrase.style.animation = 'fadeZoomIn 1s forwards ease-out', 2000);
   setTimeout(() => phrase.style.animation = 'zoomBig 2s forwards ease-in', 3500);
@@ -176,15 +152,9 @@
   setTimeout(() => flash.style.display = 'block', 8500);
   setTimeout(() => explosion.style.display = 'block', 8900);
 
-  // ✅ Redirection après animation selon l’état Firebase
+  // ✅ Toujours aller sur inscription après l’intro
   setTimeout(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        window.location.href = "page2.html";
-      } else {
-        window.location.href = "inscription.html";
-      }
-    });
+    window.location.href = "inscription.html";
   }, 10100);
 </script>
 
