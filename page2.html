@@ -92,20 +92,27 @@ const editBtn = document.getElementById('editBtn');
 let currentUid = null;
 let currentPhotos = [];
 
-// ✅ Vérifie si connecté sans boucle infinie
-let verificationFaite = false;
-setTimeout(() => {
-  onAuthStateChanged(auth, async user => {
-    if (verificationFaite) return;
-    verificationFaite = true;
+/* ✅ Gestion fiable de la session Firebase */
+let authChecked = false;
+onAuthStateChanged(auth, async user => {
+  if (authChecked) return;
+  authChecked = true;
 
-    if (!user) {
-      console.log("Aucun utilisateur connecté → redirection douce");
-      window.location.replace("inscription.html");
-      return;
-    }
+  if (!user) {
+    console.log("⛔ Aucun utilisateur connecté — redirection après vérification finale...");
+    // On laisse encore 1 seconde au cas où Firebase charge en retard (Safari)
+    setTimeout(() => {
+      if (!auth.currentUser) {
+        window.location.replace("inscription.html");
+      }
+    }, 1000);
+    return;
+  }
 
-    currentUid = user.uid;
+  console.log("✅ Utilisateur détecté :", user.uid);
+  currentUid = user.uid;
+
+  try {
     const snap = await get(ref(db, 'users/' + currentUid));
     if (!snap.exists()) return;
 
@@ -118,21 +125,26 @@ setTimeout(() => {
     mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
 
     renderPhotosList();
-    roomButtons.innerHTML = '';
+    renderRoomButtons(data.rooms || []);
+  } catch (e) {
+    console.error("Erreur chargement profil:", e);
+  }
+});
 
-    (data.rooms || []).forEach(room => {
-      const btn = document.createElement('button');
-      btn.className = 'room-btn';
-      btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
-      btn.addEventListener('click', () => {
-        if (room === 'serieux') window.location.href = 'authentique.html';
-        if (room === 'amicale') window.location.href = 'amicale.html';
-        if (room === 'fun') window.location.href = 'fun.html';
-      });
-      roomButtons.appendChild(btn);
+function renderRoomButtons(rooms) {
+  roomButtons.innerHTML = '';
+  rooms.forEach(room => {
+    const btn = document.createElement('button');
+    btn.className = 'room-btn';
+    btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
+    btn.addEventListener('click', () => {
+      if (room === 'serieux') window.location.href = 'authentique.html';
+      if (room === 'amicale') window.location.href = 'amicale.html';
+      if (room === 'fun') window.location.href = 'fun.html';
     });
+    roomButtons.appendChild(btn);
   });
-}, 1200);
+}
 
 function renderPhotosList() {
   photosContainer.innerHTML = '';
