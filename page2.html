@@ -92,41 +92,47 @@ const editBtn = document.getElementById('editBtn');
 let currentUid = null;
 let currentPhotos = [];
 
-// ✅ Vérifie si connecté
-onAuthStateChanged(auth, async user => {
-  if (!user) {
-    window.location.replace("inscription.html");
-    return;
-  }
+// ✅ Vérifie si connecté sans boucle infinie
+let verificationFaite = false;
+setTimeout(() => {
+  onAuthStateChanged(auth, async user => {
+    if (verificationFaite) return;
+    verificationFaite = true;
 
-  currentUid = user.uid;
+    if (!user) {
+      console.log("Aucun utilisateur connecté → redirection douce");
+      window.location.replace("inscription.html");
+      return;
+    }
 
-  const snap = await get(ref(db, 'users/' + currentUid));
-  if (!snap.exists()) return;
+    currentUid = user.uid;
+    const snap = await get(ref(db, 'users/' + currentUid));
+    if (!snap.exists()) return;
 
-  const data = snap.val();
-  pseudoSpan.textContent = data.pseudo || 'Non renseigné';
-  ageSpan.textContent = data.age || 'Non renseigné';
-  locationSpan.textContent = data.location || 'Non renseigné';
-  descSpan.textContent = data.description || 'Non renseignée';
-  currentPhotos = data.photos || [];
-  mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
+    const data = snap.val();
+    pseudoSpan.textContent = data.pseudo || 'Non renseigné';
+    ageSpan.textContent = data.age || 'Non renseigné';
+    locationSpan.textContent = data.location || 'Non renseigné';
+    descSpan.textContent = data.description || 'Non renseignée';
+    currentPhotos = data.photos || [];
+    mainPhoto.src = currentPhotos[0] || 'https://via.placeholder.com/800x360?text=Photo';
 
-  renderPhotosList();
-  roomButtons.innerHTML = '';
+    renderPhotosList();
+    roomButtons.innerHTML = '';
 
-  (data.rooms || []).forEach(room => {
-    const btn = document.createElement('button');
-    btn.className = 'room-btn';
-    btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
-    btn.addEventListener('click', () => {
-      if (room === 'serieux') window.location.href = 'authentique.html';
-      if (room === 'amicale') window.location.href = 'amicale.html';
-      if (room === 'fun') window.location.href = 'fun.html';
+    (data.rooms || []).forEach(room => {
+      const btn = document.createElement('button');
+      btn.className = 'room-btn';
+      btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
+      btn.addEventListener('click', () => {
+        if (room === 'serieux') window.location.href = 'authentique.html';
+        if (room === 'amicale') window.location.href = 'amicale.html';
+        if (room === 'fun') window.location.href = 'fun.html';
+      });
+      roomButtons.appendChild(btn);
     });
-    roomButtons.appendChild(btn);
   });
-});
+}, 1200);
 
 function renderPhotosList() {
   photosContainer.innerHTML = '';
