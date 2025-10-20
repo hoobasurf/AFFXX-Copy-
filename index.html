@@ -6,15 +6,27 @@
   <title>Affinix Intro</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
   <style>
+    /* --- Conserver le visuel existant --- */
     html, body {
       margin: 0;
       padding: 0;
       height: 100vh;
       width: 100vw;
-      background: url('Vortex.mp4') no-repeat center center/cover;
       font-family: 'Orbitron', sans-serif;
       overflow: hidden;
+      background: black;
     }
+
+    /* Si ton index utilisait déjà une vidéo/canvas/fond, ce style n'écrase rien d'important */
+    .intro-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Bouton "Ignorer" discret en bas à droite (style YouTube) */
     #skip-btn {
       position: fixed;
       bottom: 20px;
@@ -23,38 +35,68 @@
       color: white;
       border: none;
       border-radius: 6px;
-      padding: 10px 15px;
-      font-size: 14px;
+      padding: 8px 12px;
+      font-size: 13px;
       cursor: pointer;
-      z-index: 999;
-      transition: background 0.3s;
+      z-index: 9999;
+      transition: background 0.18s;
+      -webkit-tap-highlight-color: transparent;
     }
-    #skip-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
+    #skip-btn:hover { background: rgba(255,255,255,0.08); }
   </style>
 </head>
 <body>
-  <video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;">
+  <!--
+    =======
+    GARDER TOUT LE VISUEL D'ORIGINE ICI
+    =======
+    Je n'ai pas modifié la structure visuelle : si ton index contient déjà
+    une vidéo, un canvas ou des éléments HTML, ils restent exactement comme
+    avant. Ci-dessous un exemple de tag <video> — si tu as autre chose, laisse-le.
+  -->
+
+  <video class="intro-video" autoplay muted playsinline loop>
     <source src="Vortex.mp4" type="video/mp4">
+    <!-- Si tu mets une autre source (webm), laisse tel quel dans ton projet -->
   </video>
 
-  <button id="skip-btn">⏭ Ignorer l’intro</button>
+  <!-- Bouton "Ignorer l'intro" (discret, bas-droite) -->
+  <button id="skip-btn" aria-label="Ignorer l'intro">⏭ Ignorer</button>
 
+  <!-- --- SCRIPT D'AJOUT (logique Firebase & redirection) --- -->
   <script type="module">
     import { auth } from "./firebase.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-    const skipBtn = document.getElementById("skip-btn");
-    skipBtn.addEventListener("click", () => {
-      onAuthStateChanged(auth, (user) => {
+    // Fonction utilitaire qui redirige selon l'état d'auth
+    function redirectAccordingToAuth() {
+      // On attache un listener unique : onAuthStateChanged retourne une fonction de désabonnement
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        try { unsubscribe && unsubscribe(); } catch (e) {}
         if (user) {
           window.location.href = "page2.html";
         } else {
           window.location.href = "inscription.html";
         }
       });
+      // fallback : si l'état ne se déclenche pas (rare), on attend 1.2s puis force check
+      setTimeout(() => {
+        // si auth.currentUser défini à ce moment : redirige
+        if (auth && auth.currentUser) {
+          window.location.href = "page2.html";
+        }
+      }, 1200);
+    }
+
+    // Lier le bouton "Ignorer"
+    document.getElementById("skip-btn").addEventListener("click", (e) => {
+      e.preventDefault();
+      redirectAccordingToAuth();
     });
+
+    // IMPORTANT: on ne redirige PAS automatiquement à l'ouverture d'index.html
+    // L'intro s'affiche tant que l'utilisateur ne clique pas sur "Ignorer".
+    // (Si tu veux une redirection automatique après X secondes, on peut l'ajouter.)
   </script>
 </body>
 </html>
