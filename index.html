@@ -11,149 +11,50 @@
       padding: 0;
       height: 100vh;
       width: 100vw;
-      background: url('/fond-galactique.jpg') no-repeat center center/cover;
+      background: url('Vortex.mp4') no-repeat center center/cover;
       font-family: 'Orbitron', sans-serif;
       overflow: hidden;
     }
-
-    #video-vortex {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      object-fit: cover;
-      opacity: 0;
-      transition: opacity 1.5s ease-in;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    #container {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      margin-top: 12vh;
-    }
-
-    #logo {
-      width: 320px;
-      max-width: 90vw;
-      filter:
-        drop-shadow(0 0 5px #8a2be2)
-        drop-shadow(0 0 15px #d354f7);
-      animation: zoomFade 2s ease-out forwards;
-      opacity: 0;
-      transform: scale(2);
-      transition: transform 1.2s ease-in-out, opacity 1s ease-in-out;
-    }
-
-    #phrase, #phrase2 {
-      margin-top: 40px;
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      background: linear-gradient(90deg, #ff00ff, #ff66cc, #cc33ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow:
-        -1px -1px 0 #000,
-        1px -1px 0 #000,
-        -1px 1px 0 #000,
-        1px 1px 0 #000,
-        0 0 10px #ff66cc,
-        0 0 20px #d600d6;
-      opacity: 0;
-    }
-
-    @keyframes zoomFade { to { opacity: 1; transform: scale(1); } }
-    @keyframes fadeZoomIn { from { opacity: 0; transform: scale(0.3); } to { opacity: 1; transform: scale(1); } }
-    @keyframes zoomBig { from { transform: scale(1); opacity: 1; } to { transform: scale(25); opacity: 0; } }
-    @keyframes shrinkAndFade { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.01); } }
-    @keyframes logoToCenter {
-      0% { transform: scale(1) translate(0, 0); opacity: 1; }
-      100% { transform: scale(0.05) translate(calc(-50vw + 50%), calc(-50vh + 50%)); opacity: 0; }
-    }
-
-    .flash-light {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(200,160,255,0.5) 100%);
-      z-index: 999;
-      animation: flash 0.8s ease-out forwards;
-      opacity: 0;
-      display: none;
-    }
-
-    .final-explosion {
-      background: white;
-      z-index: 1000;
+    #skip-btn {
       position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      opacity: 0;
-      animation: explosion 1.2s ease-out forwards;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      z-index: 999;
+      transition: background 0.3s;
     }
-
-    @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
-    @keyframes explosion { 0% { opacity: 0; } 50% { opacity: 0.9; } 100% { opacity: 1; } }
+    #skip-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
   </style>
 </head>
 <body>
+  <video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;">
+    <source src="Vortex.mp4" type="video/mp4">
+  </video>
 
-<video id="video-vortex" src="/vortex.mov" autoplay muted loop></video>
+  <button id="skip-btn">⏭ Ignorer l’intro</button>
 
-<div id="container">
-  <img id="logo" src="/AAFFXX.png" alt="Logo Néon AFFINIX" />
-  <div id="phrase">Prépare-toi au voyage</div>
-  <div id="phrase2">Avec une Connexion interdimensionnelle…</div>
-</div>
+  <script type="module">
+    import { auth } from "./firebase.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-<div id="flash" class="flash-light"></div>
-<div id="explosion" class="final-explosion" style="display: none;"></div>
-
-<!-- ✅ Firebase sans déconnexion forcée -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAbI0fvcv9lIzpPViVBx2BlO8c6L3w-rbc",
-    authDomain: "affxx-copy.firebaseapp.com",
-    databaseURL: "https://affxx-copy-default-rtdb.firebaseio.com",
-    projectId: "affxx-copy",
-    storageBucket: "affxx-copy.appspot.com",
-    messagingSenderId: "763273288933",
-    appId: "1:763273288933:web:d0083f5f6ab7284661c80c"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  console.log("✅ Session conservée");
-
-  // Animations inchangées
-  const logo = document.getElementById('logo');
-  const phrase = document.getElementById('phrase');
-  const phrase2 = document.getElementById('phrase2');
-  const vortex = document.getElementById('video-vortex');
-  const flash = document.getElementById('flash');
-  const explosion = document.getElementById('explosion');
-
-  logo.style.animation = 'zoomFade 2s ease-out forwards';
-  setTimeout(() => phrase.style.animation = 'fadeZoomIn 1s forwards ease-out', 2000);
-  setTimeout(() => phrase.style.animation = 'zoomBig 2s forwards ease-in', 3500);
-  setTimeout(() => vortex.style.opacity = '0.5', 4800);
-  setTimeout(() => phrase2.style.animation = 'fadeZoomIn 1.2s forwards ease-out', 5500);
-  setTimeout(() => phrase2.style.animation = 'shrinkAndFade 1.3s forwards ease-in', 7000);
-  setTimeout(() => logo.style.animation = 'logoToCenter 1.2s forwards ease-in', 7600);
-  setTimeout(() => flash.style.display = 'block', 8500);
-  setTimeout(() => explosion.style.display = 'block', 8900);
-
-  // ✅ Toujours aller sur inscription après l’intro
-  setTimeout(() => {
-    window.location.href = "inscription.html";
-  }, 10100);
-</script>
-
+    const skipBtn = document.getElementById("skip-btn");
+    skipBtn.addEventListener("click", () => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          window.location.href = "page2.html";
+        } else {
+          window.location.href = "inscription.html";
+        }
+      });
+    });
+  </script>
 </body>
 </html>
