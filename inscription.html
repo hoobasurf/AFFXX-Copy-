@@ -38,149 +38,125 @@
   <div id="whiteFlash"></div>
 </div>
 
+<!-- Remplacer le script module d'inscription par ceci -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import { 
-  getAuth, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+  import { app } from "./firebase.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAbI0fvcv9lIzpPViVBx2BlO8c6L3w-rbc",
-  authDomain: "affxx-copy.firebaseapp.com",
-  databaseURL: "https://affxx-copy-default-rtdb.firebaseio.com",
-  projectId: "affxx-copy",
-  storageBucket: "affxx-copy.appspot.com",
-  messagingSenderId: "763273288933",
-  appId: "1:763273288933:web:d0083f5f6ab7284661c80c"
-};
+  const auth = getAuth(app);
+  const db = getDatabase(app);
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const pseudo = document.getElementById("pseudo");
+  const age = document.getElementById("age");
+  const locationInput = document.getElementById("location");
+  const description = document.getElementById("description");
+  const photosInput = document.getElementById("photos");
+  const preview = document.getElementById("photosPreview");
+  const signupBtn = document.getElementById("signupBtn");
+  const loginBtn = document.getElementById("loginBtn");
+  const lightbox = document.getElementById("lightbox");
+  const lightboxImg = document.getElementById("lightboxImg");
+  const vortexOverlay = document.getElementById("vortexOverlay");
+  const whiteFlash = document.getElementById("whiteFlash");
 
-// ✅ Vérifie si l’utilisateur est déjà connecté
-onAuthStateChanged(auth, user => {
-  if (user) {
-    console.log("Utilisateur déjà connecté → redirection page2");
-    window.location.href = "page2.html";
-  } else {
-    console.log("Aucun utilisateur connecté → afficher formulaire");
-  }
-});
+  let uploadedPhotos = [];
 
-const email = document.getElementById("email");
-const password = document.getElementById("password");
-const pseudo = document.getElementById("pseudo");
-const age = document.getElementById("age");
-const locationInput = document.getElementById("location");
-const description = document.getElementById("description");
-const photosInput = document.getElementById("photos");
-const preview = document.getElementById("photosPreview");
-const signupBtn = document.getElementById("signupBtn");
-const loginBtn = document.getElementById("loginBtn");
-const lightbox = document.getElementById("lightbox");
-const lightboxImg = document.getElementById("lightboxImg");
-const vortexOverlay = document.getElementById("vortexOverlay");
-const whiteFlash = document.getElementById("whiteFlash");
-
-let uploadedPhotos = [];
-
-// --- prévisualisation des photos ---
-photosInput.addEventListener("change", e => {
-  preview.innerHTML = "";
-  uploadedPhotos = [];
-  [...e.target.files].slice(0, 5).forEach(file => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const img = document.createElement("img");
-      img.src = ev.target.result;
-      img.addEventListener("click", () => {
-        lightboxImg.src = ev.target.result;
-        lightbox.style.display = "flex";
-      });
-      preview.appendChild(img);
-    };
-    reader.readAsDataURL(file);
-    uploadedPhotos.push(file);
+  photosInput.addEventListener("change", e => {
+    preview.innerHTML = "";
+    uploadedPhotos = [];
+    [...e.target.files].slice(0, 5).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = document.createElement("img");
+        img.src = ev.target.result;
+        img.addEventListener("click", () => {
+          lightboxImg.src = ev.target.result;
+          lightbox.style.display = "flex";
+        });
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+      uploadedPhotos.push(file);
+    });
   });
-});
 
-lightbox.addEventListener("click", () => {
-  lightbox.style.display = "none";
-  lightboxImg.src = "";
-});
+  lightbox.addEventListener("click", () => {
+    lightbox.style.display = "none";
+    lightboxImg.src = "";
+  });
 
-// --- sélection des salles ---
-const salleBtns = document.querySelectorAll(".salle-btn");
-let selectedRooms = [];
-salleBtns.forEach(btn => {
-  btn.addEventListener("click", () => {
-    const val = btn.dataset.value;
-    if (selectedRooms.includes(val)) {
-      selectedRooms = selectedRooms.filter(r => r !== val);
-      btn.classList.remove("active");
-    } else {
-      selectedRooms.push(val);
-      btn.classList.add("active");
+  const salleBtns = document.querySelectorAll(".salle-btn");
+  let selectedRooms = [];
+  salleBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const val = btn.dataset.value;
+      if (selectedRooms.includes(val)) {
+        selectedRooms = selectedRooms.filter(r => r !== val);
+        btn.classList.remove("active");
+      } else {
+        selectedRooms.push(val);
+        btn.classList.add("active");
+      }
+    });
+  });
+
+  function playVortexAndRedirectToPage2() {
+    // ton overlay visuel — on garde l'effet
+    if (vortexOverlay) vortexOverlay.style.display = "flex";
+    if (whiteFlash) whiteFlash.style.opacity = "1";
+    // laisse 400ms pour l'effet puis redirige
+    setTimeout(() => window.location.href = "page2.html", 400);
+  }
+
+  // --- Inscription : on crée le compte, on écrit en DB, puis on redirige
+  signupBtn.addEventListener("click", async () => {
+    if (!email.value || !password.value) {
+      alert("Email et mot de passe requis");
+      return;
+    }
+    try {
+      const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
+      const user = userCred.user;
+
+      // pour l'instant on conserve la preview en dataURL comme tu avais avant (pas de changement visuel)
+      const photoURLs = uploadedPhotos.length > 0 ? await Promise.all(
+        uploadedPhotos.map(file => new Promise(res => {
+          const fr = new FileReader();
+          fr.onload = e => res(e.target.result);
+          fr.readAsDataURL(file);
+        }))
+      ) : [];
+
+      await set(ref(db, "users/" + user.uid), {
+        email: email.value,
+        pseudo: pseudo.value || "",
+        age: age.value || "",
+        location: locationInput.value || "",
+        description: description.value || "",
+        rooms: selectedRooms,
+        photos: photoURLs,
+        online: false,
+        gender: "girl"
+      });
+
+      // inscrit -> redirection vers page2 après animation
+      playVortexAndRedirectToPage2();
+
+    } catch (e) {
+      alert("Erreur: " + e.message);
     }
   });
-});
 
-function playVortexAndRedirect() {
-  vortexOverlay.style.display = "flex";
-  setTimeout(() => {
-    whiteFlash.style.opacity = "1";
-    setTimeout(() => window.location.href = "page2.html", 400);
-  }, 1800);
-}
-
-// --- bouton inscription ---
-signupBtn.addEventListener("click", async () => {
-  if (!email.value || !password.value) {
-    alert("Email et mot de passe requis");
-    return;
-  }
-
-  try {
-    const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
-    const user = userCred.user;
-
-    const photoURLs = uploadedPhotos.length > 0 
-      ? uploadedPhotos.map(file => URL.createObjectURL(file))
-      : [];
-
-    await set(ref(db, "users/" + user.uid), {
-      email: email.value,
-      pseudo: pseudo.value,
-      age: age.value,
-      location: locationInput.value,
-      description: description.value,
-      rooms: selectedRooms,
-      photos: photoURLs,
-      online: false,
-      gender: "girl"
-    });
-
-    playVortexAndRedirect();
-
-  } catch (e) {
-    alert("Erreur: " + e.message);
-  }
-});
-
-// --- bouton connexion ---
-loginBtn.addEventListener("click", async () => {
-  try {
-    await signInWithEmailAndPassword(auth, email.value, password.value);
-    playVortexAndRedirect();
-  } catch (e) {
-    alert("Erreur: " + e.message);
-  }
-});
+  // --- Connexion (login)
+  loginBtn.addEventListener("click", async () => {
+    try {
+      await signInWithEmailAndPassword(auth, email.value, password.value);
+      playVortexAndRedirectToPage2();
+    } catch (e) {
+      alert("Erreur: " + e.message);
+    }
+  });
 </script>
-</body>
-</html>
