@@ -1,48 +1,186 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Inscription</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
-<style>
-  /* Conserver le style visuel existant : reset minimal */
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;width:100%;font-family:'Orbitron',sans-serif;background:#000;color:#fff}
-  /* (Ton CSS visuel complet doit rester tel quel dans ton fichier) */
-</style>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!--
-    =======
-    CONTENU VISUEL EXISTANT DE INSCRIPTION.HTML
-    =======
-    Ne supprimer : laisse ici ton HTML complet (formulaires, champs, design).
-    Exemple minimal ci-dessous (ne remplace rien si tu as déjà ton formulaire).
-  -->
 
-  <main id="signup-area" style="padding:24px;">
-    <!-- Si tu as déjà un formulaire, laisse-le tel quel dans tes fichiers -->
-    <!-- Exemple visuel minimal (ne change pas ton design existant) -->
-    <h1 style="font-size:22px;margin-bottom:12px;">Inscription</h1>
-    <!-- Ton formulaire original doit être conservé ici -->
-  </main>
+<div class="container">
+  <h1>Inscription</h1>
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Mot de passe" />
+  <input type="text" id="pseudo" placeholder="Pseudo" />
+  <input type="number" id="age" placeholder="Âge" />
+  <input type="text" id="location" placeholder="Ville" />
+  <textarea id="description" placeholder="Description..."></textarea>
 
-  <!-- --- SCRIPT: vérifie l'état d'auth et redirige si déjà connecté --- -->
-  <script type="module">
-    import { auth } from "./firebase.js";
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+  <input type="file" id="photos" accept="image/*" multiple />
+  <div id="photosPreview"></div>
 
-    // Si l'utilisateur est déjà connecté, on ne doit pas rester sur inscription
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // redirection propre vers page2 si connecté
-        window.location.href = "page2.html";
-      } else {
-        // pas connecté : on reste sur la page inscription (aucune action)
-        console.log("inscription.html : utilisateur non connecté — ok.");
-      }
+  <div class="salles">
+    <button class="salle-btn" data-value="serieux">Sérieux</button>
+    <button class="salle-btn" data-value="amicale">Amicale</button>
+    <button class="salle-btn" data-value="fun">Fun</button>
+  </div>
+
+  <button id="signupBtn">Inscription</button>
+  <button id="loginBtn">Connexion</button>
+</div>
+
+<div id="lightbox">
+  <img id="lightboxImg" />
+</div>
+
+<div id="vortexOverlay">
+  <div id="whiteFlash"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAbI0fvcv9lIzpPViVBx2BlO8c6L3w-rbc",
+  authDomain: "affxx-copy.firebaseapp.com",
+  databaseURL: "https://affxx-copy-default-rtdb.firebaseio.com",
+  projectId: "affxx-copy",
+  storageBucket: "affxx-copy.appspot.com",
+  messagingSenderId: "763273288933",
+  appId: "1:763273288933:web:d0083f5f6ab7284661c80c"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// ✅ Vérifie si l’utilisateur est déjà connecté
+onAuthStateChanged(auth, user => {
+  if (user) {
+    console.log("Utilisateur déjà connecté → redirection page2");
+    window.location.href = "page2.html";
+  } else {
+    console.log("Aucun utilisateur connecté → afficher formulaire");
+  }
+});
+
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const pseudo = document.getElementById("pseudo");
+const age = document.getElementById("age");
+const locationInput = document.getElementById("location");
+const description = document.getElementById("description");
+const photosInput = document.getElementById("photos");
+const preview = document.getElementById("photosPreview");
+const signupBtn = document.getElementById("signupBtn");
+const loginBtn = document.getElementById("loginBtn");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
+const vortexOverlay = document.getElementById("vortexOverlay");
+const whiteFlash = document.getElementById("whiteFlash");
+
+let uploadedPhotos = [];
+
+// --- prévisualisation des photos ---
+photosInput.addEventListener("change", e => {
+  preview.innerHTML = "";
+  uploadedPhotos = [];
+  [...e.target.files].slice(0, 5).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = document.createElement("img");
+      img.src = ev.target.result;
+      img.addEventListener("click", () => {
+        lightboxImg.src = ev.target.result;
+        lightbox.style.display = "flex";
+      });
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+    uploadedPhotos.push(file);
+  });
+});
+
+lightbox.addEventListener("click", () => {
+  lightbox.style.display = "none";
+  lightboxImg.src = "";
+});
+
+// --- sélection des salles ---
+const salleBtns = document.querySelectorAll(".salle-btn");
+let selectedRooms = [];
+salleBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    const val = btn.dataset.value;
+    if (selectedRooms.includes(val)) {
+      selectedRooms = selectedRooms.filter(r => r !== val);
+      btn.classList.remove("active");
+    } else {
+      selectedRooms.push(val);
+      btn.classList.add("active");
+    }
+  });
+});
+
+function playVortexAndRedirect() {
+  vortexOverlay.style.display = "flex";
+  setTimeout(() => {
+    whiteFlash.style.opacity = "1";
+    setTimeout(() => window.location.href = "page2.html", 400);
+  }, 1800);
+}
+
+// --- bouton inscription ---
+signupBtn.addEventListener("click", async () => {
+  if (!email.value || !password.value) {
+    alert("Email et mot de passe requis");
+    return;
+  }
+
+  try {
+    const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
+    const user = userCred.user;
+
+    const photoURLs = uploadedPhotos.length > 0 
+      ? uploadedPhotos.map(file => URL.createObjectURL(file))
+      : [];
+
+    await set(ref(db, "users/" + user.uid), {
+      email: email.value,
+      pseudo: pseudo.value,
+      age: age.value,
+      location: locationInput.value,
+      description: description.value,
+      rooms: selectedRooms,
+      photos: photoURLs,
+      online: false,
+      gender: "girl"
     });
-  </script>
+
+    playVortexAndRedirect();
+
+  } catch (e) {
+    alert("Erreur: " + e.message);
+  }
+});
+
+// --- bouton connexion ---
+loginBtn.addEventListener("click", async () => {
+  try {
+    await signInWithEmailAndPassword(auth, email.value, password.value);
+    playVortexAndRedirect();
+  } catch (e) {
+    alert("Erreur: " + e.message);
+  }
+});
+</script>
 </body>
 </html>
