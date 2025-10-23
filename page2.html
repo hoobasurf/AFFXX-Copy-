@@ -56,22 +56,10 @@
 
   <div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
 
-  <div class="modal" id="modalEdit">
-    <div class="box">
-      <h3 style="color:#ff66cc;margin-bottom:8px">Modifier description / photos</h3>
-      <textarea id="editDescription" rows="3" placeholder="Nouvelle description..."></textarea>
-      <input type="file" id="editPhotos" accept="image/*" multiple>
-      <div class="photos" id="editPreview"></div>
-      <div class="row" style="margin-top:10px">
-        <button id="saveEdit">Enregistrer</button>
-        <button id="cancelEdit">Annuler</button>
-      </div>
-    </div>
-  </div>
-
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, get, update, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, get, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getStorage, ref as sRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
 const firebaseConfig = {
@@ -87,102 +75,85 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
+const storage = getStorage(app);
 
-// 🔹 Attente de la vérification utilisateur
 onAuthStateChanged(auth, async user => {
-  if (!user) {
-    console.warn("⚠️ Aucun utilisateur actif, redirection vers inscription...");
-    window.location.href = "inscription.html";
-    return;
-  }
+  if (!user) { window.location.href = "inscription.html"; return; }
+  const uid = user.uid;
+  const userRef = ref(db, "users/"+uid);
+  const onlineRef = ref(db, "users/"+uid+"/online");
+  set(onlineRef, true);
+  onDisconnect(onlineRef).set(false);
 
-  const currentUid = user.uid;
-  const userRef = ref(db, "users/" + currentUid);
-
-  const userStatusRef = ref(db, "users/" + currentUid + "/online");
-  set(userStatusRef, true);
-  onDisconnect(userStatusRef).set(false);
-
-  // 🔹 Charger le profil complet
   const snap = await get(userRef);
-  if (snap.exists()) {
+  if(snap.exists()){
     const data = snap.val();
-
     document.getElementById("pseudo").textContent = data.pseudo || "Non renseigné";
     document.getElementById("age").textContent = data.age || "Non renseigné";
     document.getElementById("location").textContent = data.location || "Non renseigné";
     document.getElementById("description").textContent = data.description || "Non renseignée";
 
-    // 🔹 Charger les photos (corrigé)
     const photosContainer = document.getElementById("photosContainer");
     photosContainer.innerHTML = "";
-    const currentPhotos = data.photos && Array.isArray(data.photos) ? data.photos : [];
+    const mainPhoto = document.getElementById("mainPhoto");
+    const photoURLs = data.photos || [];
 
-    if (currentPhotos.length > 0) {
-      document.getElementById("mainPhoto").src = currentPhotos[0];
-      currentPhotos.forEach(url => {
+    if(photoURLs.length>0){
+      mainPhoto.src = photoURLs[0];
+      for(const url of photoURLs){
         const img = document.createElement("img");
         img.src = url;
-        img.addEventListener("click", () => openLightbox(url));
+        img.addEventListener("click", ()=>{openLightbox(url)});
         photosContainer.appendChild(img);
-      });
-    } else {
-      document.getElementById("mainPhoto").src = "https://via.placeholder.com/800x360?text=Aucune+photo";
+      }
     }
 
-    // 🔹 Boutons de salles
     const roomButtons = document.getElementById("roomButtons");
     roomButtons.innerHTML = "";
-    (data.rooms || []).forEach(room => {
+    (data.rooms||[]).forEach(room=>{
       const btn = document.createElement("button");
-      btn.className = "room-btn";
-      btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
-      btn.addEventListener("click", () => {
-        const pageMap = {
-          serieux: "authentique.html",
-          amicale: "amicale.html",
-          fun: "fun.html"
-        };
+      btn.className="room-btn";
+      btn.textContent=room.charAt(0).toUpperCase()+room.slice(1);
+      btn.addEventListener("click", ()=>{
+        const pageMap = { serieux:"authentique.html", amicale:"amicale.html", fun:"fun.html"};
         const target = pageMap[room.toLowerCase()];
-        if (target) window.location.href = target;
+        if(target) window.location.href=target;
       });
       roomButtons.appendChild(btn);
     });
   }
 
-  // 🔹 Carrousel en ligne
-  const usersRef = ref(db, "users");
-  onValue(usersRef, snapshot => {
+  const usersRef = ref(db,"users");
+  onValue(usersRef, snapshot=>{
     const users = snapshot.val();
-    const onlineCarousel = document.getElementById("onlineCarousel");
-    onlineCarousel.innerHTML = "";
-    if (!users) return;
-    Object.keys(users).forEach(uid => {
-      const u = users[uid];
-      if (u.online && uid !== currentUid) {
-        const card = document.createElement("div");
-        card.className = "onlineCard";
+    const carousel = document.getElementById("onlineCarousel");
+    carousel.innerHTML="";
+    if(!users) return;
+    Object.keys(users).forEach(uid2=>{
+      const u = users[uid2];
+      if(u.online && uid2!==user.uid){
+        const card = document.createElement("div"); card.className="onlineCard";
         const img = document.createElement("img");
-        img.src = (u.photos && u.photos[0]) || "https://via.placeholder.com/100";
-        const span = document.createElement("span");
-        span.textContent = u.pseudo || "Utilisateur";
-        img.addEventListener("click", () => alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age || "Non renseigné"}\nLieu: ${u.location || "Non renseigné"}`));
-        card.appendChild(img);
-        card.appendChild(span);
-        onlineCarousel.appendChild(card);
+        img.src=(u.photos && u.photos[0]) || "https://via.placeholder.com/100";
+        const span=document.createElement("span");
+        span.textContent=u.pseudo||"Utilisateur";
+        img.addEventListener("click", ()=>alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age||"Non renseigné"}\nLieu: ${u.location||"Non renseigné"}`));
+        card.appendChild(img); card.appendChild(span);
+        carousel.appendChild(card);
       }
     });
   });
 });
 
-function openLightbox(src) {
-  const lightbox = document.getElementById("lightbox");
-  const lightboxImg = document.getElementById("lightboxImg");
-  lightboxImg.src = src;
-  lightbox.style.display = "flex";
+function openLightbox(src){
+  const lightbox=document.getElementById("lightbox");
+  const img=document.getElementById("lightboxImg");
+  img.src=src;
+  lightbox.style.display="flex";
 }
-document.getElementById("lightbox").addEventListener("click", () => {
-  document.getElementById("lightbox").style.display = "none";
+
+document.getElementById("lightbox").addEventListener("click", ()=>{
+  document.getElementById("lightbox").style.display="none";
 });
 </script>
 </body>
