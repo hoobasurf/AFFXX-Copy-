@@ -208,10 +208,12 @@
 <script type="module">
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
 const db = getDatabase(app);
+const storage = getStorage(app);
 
 const email = document.getElementById("email");
 const password = document.getElementById("password");
@@ -282,7 +284,16 @@ signupBtn.addEventListener("click", async ()=>{
   try{
     const userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
     const user = userCred.user;
-    const photoURLs = uploadedPhotos.map(file=>URL.createObjectURL(file));
+
+    // 🔹 Upload photos sur Firebase Storage
+    let photoURLs = [];
+    for(const file of uploadedPhotos){
+      const storageRef = sRef(storage, `users/${user.uid}/${file.name}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      photoURLs.push(url);
+    }
+
     await set(ref(db,"users/"+user.uid),{
       email: email.value,
       pseudo: pseudo.value,
@@ -294,6 +305,7 @@ signupBtn.addEventListener("click", async ()=>{
       online: false,
       gender: "girl"
     });
+
     playVortexAndRedirect();
   } catch(e){
     alert("Erreur: "+e.message);
