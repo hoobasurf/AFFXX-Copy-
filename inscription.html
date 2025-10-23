@@ -14,7 +14,7 @@
   input, textarea { width: 100%; margin: 10px 0; padding: 10px; border-radius: 8px; border: 2px solid #ff66cc; background: rgba(0,0,0,0.5); color: #fff; }
   .salles { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
   .salle-btn { padding: 8px 15px; border: 2px solid #ff66cc; border-radius: 10px; background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-weight: bold; transition: 0.3s; }
-  .salle-btn.active { box-shadow: 0 0 15px #ff66cc, 0 0 25px #ff66cc inset; background: rgba(255, 102, 204,0.8); }
+  .salle-btn.active { box-shadow: 0 0 15px #ff66cc, 0 0 25px #ff66cc inset; background: rgba(255,102,204,0.8); }
   .photos-preview { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px; }
   .photos-preview img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 2px solid #ff66cc; cursor: pointer; transition: transform 0.2s; }
   .photos-preview img:hover { transform: scale(1.2); }
@@ -29,6 +29,7 @@
 </style>
 </head>
 <body>
+
 <div class="container">
   <h1>Inscription</h1>
   <input type="email" id="email" placeholder="Email">
@@ -136,7 +137,8 @@ signupBtn.addEventListener("click", async ()=>{
     const userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
     const user = userCred.user;
 
-    let photoURLs = [];
+    // 🔹 Upload photos vers Firebase Storage
+    const photoURLs = [];
     for(const file of uploadedPhotos){
       const storageRef = sRef(storage, `users/${user.uid}/${file.name}`);
       await uploadBytes(storageRef, file);
