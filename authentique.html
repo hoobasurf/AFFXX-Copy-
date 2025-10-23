@@ -159,8 +159,23 @@ onAuthStateChanged(auth, async user => {
         card.dataset.uid = uid;
 
         // resolve photo safely
-        const photo = (u.photos && Array.isArray(u.photos) && u.photos.length>0) ? u.photos[0] :
-                      (u.photos && typeof u.photos === 'string' ? u.photos : `https://i.pravatar.cc/150?u=${uid}`);
+        let photo = null;
+
+// Plusieurs cas possibles : tableau, objet ou simple string
+if (u.photos) {
+  if (Array.isArray(u.photos) && u.photos.length > 0) {
+    photo = u.photos[0];
+  } else if (typeof u.photos === "object") {
+    // Si c’est un objet genre {0: "url1", 1: "url2"}
+    const first = Object.values(u.photos)[0];
+    if (first && typeof first === "string") photo = first;
+    else if (first && typeof first === "object" && first.url) photo = first.url;
+  } else if (typeof u.photos === "string") {
+    photo = u.photos;
+  }
+}
+
+if (!photo) photo = `https://i.pravatar.cc/150?u=${uid}`;
 
         card.innerHTML = `
           <img src="${photo}" alt="${u.pseudo}">
