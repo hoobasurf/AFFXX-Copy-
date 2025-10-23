@@ -39,12 +39,36 @@
 </div>
 
 <script type="module">
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signInAnonymously, 
+  onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-import { app } from "./firebase.js";
 
+const firebaseConfig = {
+  apiKey: "AIzaSyAbI0fvcv9lIzpPViVBx2BlO8c6L3w-rbc",
+  authDomain: "affxx-copy.firebaseapp.com",
+  databaseURL: "https://affxx-copy-default-rtdb.firebaseio.com",
+  projectId: "affxx-copy",
+  storageBucket: "affxx-copy.appspot.com",
+  messagingSenderId: "763273288933",
+  appId: "1:763273288933:web:d0083f5f6ab7284661c80c"
+};
+
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
+
+// ✅ Redirige automatiquement si connecté
+onAuthStateChanged(auth, (user) => {
+  if (user && !user.isAnonymous) {
+    window.location.href = "page2.html";
+  }
+});
 
 const email = document.getElementById("email");
 const password = document.getElementById("password");
@@ -112,7 +136,7 @@ function playVortexAndRedirect() {
   }, 1800);
 }
 
-// --- bouton inscription original ---
+// --- inscription ---
 signupBtn.addEventListener("click", async () => {
   if (!email.value || !password.value) {
     alert("Email et mot de passe requis");
@@ -123,7 +147,6 @@ signupBtn.addEventListener("click", async () => {
     const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
     const user = userCred.user;
 
-    // 🔹 Tableau de photos seulement si upload
     const photoURLs = uploadedPhotos.length > 0 
       ? uploadedPhotos.map(file => URL.createObjectURL(file))
       : [];
@@ -135,19 +158,18 @@ signupBtn.addEventListener("click", async () => {
       location: locationInput.value,
       description: description.value,
       rooms: selectedRooms,
-      photos: photoURLs, // ← vide si aucune photo
+      photos: photoURLs,
       online: false,
       gender: "girl"
     });
 
     playVortexAndRedirect();
-
   } catch (e) {
     alert("Erreur: " + e.message);
   }
 });
 
-// --- bouton connexion ---
+// --- connexion ---
 loginBtn.addEventListener("click", async () => {
   try {
     await signInWithEmailAndPassword(auth, email.value, password.value);
@@ -156,6 +178,15 @@ loginBtn.addEventListener("click", async () => {
     alert("Erreur: " + e.message);
   }
 });
+
+// --- connexion anonyme auto si personne n'est connecté ---
+setTimeout(() => {
+  if (!auth.currentUser) {
+    signInAnonymously(auth)
+      .then(() => console.log("Connexion anonyme active"))
+      .catch(err => console.error("Erreur connexion anonyme:", err));
+  }
+}, 1500);
 </script>
 </body>
 </html>
