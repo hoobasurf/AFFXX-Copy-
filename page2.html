@@ -71,7 +71,7 @@
 
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, get, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, get, update, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
 const firebaseConfig = {
@@ -88,8 +88,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
+// 🔹 Attente de la vérification utilisateur
 onAuthStateChanged(auth, async user => {
   if (!user) {
+    console.warn("⚠️ Aucun utilisateur actif, redirection vers inscription...");
     window.location.href = "inscription.html";
     return;
   }
@@ -97,12 +99,11 @@ onAuthStateChanged(auth, async user => {
   const currentUid = user.uid;
   const userRef = ref(db, "users/" + currentUid);
 
-  // Mettre à jour le statut en ligne
   const userStatusRef = ref(db, "users/" + currentUid + "/online");
   set(userStatusRef, true);
   onDisconnect(userStatusRef).set(false);
 
-  // Charger le profil complet
+  // 🔹 Charger le profil complet
   const snap = await get(userRef);
   if (snap.exists()) {
     const data = snap.val();
@@ -112,10 +113,10 @@ onAuthStateChanged(auth, async user => {
     document.getElementById("location").textContent = data.location || "Non renseigné";
     document.getElementById("description").textContent = data.description || "Non renseignée";
 
-    // 🔹 Photos
+    // 🔹 Charger les photos (corrigé)
     const photosContainer = document.getElementById("photosContainer");
     photosContainer.innerHTML = "";
-    const currentPhotos = Array.isArray(data.photos) ? data.photos : [];
+    const currentPhotos = data.photos && Array.isArray(data.photos) ? data.photos : [];
 
     if (currentPhotos.length > 0) {
       document.getElementById("mainPhoto").src = currentPhotos[0];
@@ -149,7 +150,7 @@ onAuthStateChanged(auth, async user => {
     });
   }
 
-  // 🔹 Carrousel utilisateurs en ligne
+  // 🔹 Carrousel en ligne
   const usersRef = ref(db, "users");
   onValue(usersRef, snapshot => {
     const users = snapshot.val();
@@ -162,7 +163,7 @@ onAuthStateChanged(auth, async user => {
         const card = document.createElement("div");
         card.className = "onlineCard";
         const img = document.createElement("img");
-        img.src = (Array.isArray(u.photos) && u.photos[0]) || "https://via.placeholder.com/100";
+        img.src = (u.photos && u.photos[0]) || "https://via.placeholder.com/100";
         const span = document.createElement("span");
         span.textContent = u.pseudo || "Utilisateur";
         img.addEventListener("click", () => alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age || "Non renseigné"}\nLieu: ${u.location || "Non renseigné"}`));
