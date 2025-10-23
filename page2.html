@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;width:100%;font-family:'Orbitron',sans-serif;background:url('ville.jpg') no-repeat center center/cover;background-attachment:fixed;color:#fff;overflow-y:auto}
+  html,body{height:100%;width:100%;font-family:'Orbitron',sans-serif;background:url('ville.jpg') no-repeat center center/cover;background-attachment:fixed;color:#fff;overflow-y:auto;scroll-behavior:smooth}
   .container{max-width:600px;margin:30px auto;background:rgba(0,0,0,0.6);padding:24px;border-radius:15px;box-shadow:0 0 20px #ff66cc;text-align:center}
   h1{color:#ff66cc;text-shadow:0 0 10px #ff66cc;margin-bottom:12px}
   .info{margin-bottom:12px;text-align:left}
@@ -88,7 +88,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// ✅ On ne redirige pas tout de suite si non connecté, on attend la vérification complète
+// 🔹 Attente de la vérification utilisateur
 onAuthStateChanged(auth, async user => {
   if (!user) {
     console.warn("⚠️ Aucun utilisateur actif, redirection vers inscription...");
@@ -97,32 +97,40 @@ onAuthStateChanged(auth, async user => {
   }
 
   const currentUid = user.uid;
+  const userRef = ref(db, "users/" + currentUid);
+
   const userStatusRef = ref(db, "users/" + currentUid + "/online");
   set(userStatusRef, true);
   onDisconnect(userStatusRef).set(false);
 
-  // Chargement du profil
-  const snap = await get(ref(db, "users/" + currentUid));
+  // 🔹 Charger le profil complet
+  const snap = await get(userRef);
   if (snap.exists()) {
     const data = snap.val();
+
     document.getElementById("pseudo").textContent = data.pseudo || "Non renseigné";
     document.getElementById("age").textContent = data.age || "Non renseigné";
     document.getElementById("location").textContent = data.location || "Non renseigné";
     document.getElementById("description").textContent = data.description || "Non renseignée";
 
+    // 🔹 Charger les photos (corrigé)
     const photosContainer = document.getElementById("photosContainer");
     photosContainer.innerHTML = "";
-    const currentPhotos = data.photos || [];
-    document.getElementById("mainPhoto").src = currentPhotos[0] || "https://via.placeholder.com/800x360?text=Photo";
+    const currentPhotos = data.photos && Array.isArray(data.photos) ? data.photos : [];
 
-    currentPhotos.forEach(url => {
-      const img = document.createElement("img");
-      img.src = url;
-      img.addEventListener("click", () => openLightbox(url));
-      photosContainer.appendChild(img);
-    });
+    if (currentPhotos.length > 0) {
+      document.getElementById("mainPhoto").src = currentPhotos[0];
+      currentPhotos.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.addEventListener("click", () => openLightbox(url));
+        photosContainer.appendChild(img);
+      });
+    } else {
+      document.getElementById("mainPhoto").src = "https://via.placeholder.com/800x360?text=Aucune+photo";
+    }
 
-    // Boutons de salle
+    // 🔹 Boutons de salles
     const roomButtons = document.getElementById("roomButtons");
     roomButtons.innerHTML = "";
     (data.rooms || []).forEach(room => {
@@ -142,7 +150,7 @@ onAuthStateChanged(auth, async user => {
     });
   }
 
-  // Carrousel utilisateurs en ligne
+  // 🔹 Carrousel en ligne
   const usersRef = ref(db, "users");
   onValue(usersRef, snapshot => {
     const users = snapshot.val();
@@ -155,7 +163,7 @@ onAuthStateChanged(auth, async user => {
         const card = document.createElement("div");
         card.className = "onlineCard";
         const img = document.createElement("img");
-        img.src = u.photos?.[0] || "https://via.placeholder.com/100";
+        img.src = (u.photos && u.photos[0]) || "https://via.placeholder.com/100";
         const span = document.createElement("span");
         span.textContent = u.pseudo || "Utilisateur";
         img.addEventListener("click", () => alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age || "Non renseigné"}\nLieu: ${u.location || "Non renseigné"}`));
