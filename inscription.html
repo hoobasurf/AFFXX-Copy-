@@ -58,7 +58,12 @@
 <div id="whiteFlash"></div>
 
 <script type="module">
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword,
+  fetchSignInMethodsForEmail 
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
 import { app } from "./firebase.js";
@@ -84,20 +89,21 @@ const whiteFlash = document.getElementById("whiteFlash");
 
 let uploadedPhotos = [];
 
-photosInput.addEventListener("change", e=>{
+// Preview photos
+photosInput.addEventListener("change", e => {
   preview.innerHTML = "";
-  uploadedPhotos=[];
-  [...e.target.files].slice(0,5).forEach(file=>{
+  uploadedPhotos = [];
+  [...e.target.files].slice(0,5).forEach(file => {
     const reader = new FileReader();
-    reader.onload=ev=>{
-      const img=document.createElement("img");
-      img.src=ev.target.result;
-      img.addEventListener("click", ()=> {
+    reader.onload = ev => {
+      const img = document.createElement("img");
+      img.src = ev.target.result;
+      img.addEventListener("click", () => {
         lightboxImg.src = ev.target.result;
         lightbox.style.display = "flex";
       });
       preview.appendChild(img);
-    }
+    };
     reader.readAsDataURL(file);
     uploadedPhotos.push(file);
   });
@@ -108,13 +114,14 @@ lightbox.addEventListener("click", ()=>{
   lightboxImg.src="";
 });
 
+// Sélection salles
 const salleBtns = document.querySelectorAll(".salle-btn");
 let selectedRooms = [];
-salleBtns.forEach(btn=>{
-  btn.addEventListener("click", ()=>{
+salleBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
     const val = btn.dataset.value;
     if(selectedRooms.includes(val)){
-      selectedRooms = selectedRooms.filter(r=>r!==val);
+      selectedRooms = selectedRooms.filter(r => r !== val);
       btn.classList.remove("active");
     } else {
       selectedRooms.push(val);
@@ -131,22 +138,36 @@ function playVortexAndRedirect() {
   },1800);
 }
 
+// 🔹 Inscription
 signupBtn.addEventListener("click", async ()=>{
-  if(!email.value || !password.value) { alert("Email et mot de passe requis"); return; }
-  try{
-    const userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
+  if(!email.value || !password.value){
+    alert("Email et mot de passe requis");
+    return;
+  }
+
+  try {
+    // Vérifie si l’e-mail existe déjà
+    const methods = await fetchSignInMethodsForEmail(auth, email.value);
+    if (methods.length > 0) {
+      alert("Cet e-mail est déjà utilisé. Connecte-toi plutôt !");
+      return;
+    }
+
+    // Crée le compte
+    const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
     const user = userCred.user;
 
-    // 🔹 Upload photos vers Firebase Storage
+    // Upload des photos vers Firebase Storage
     const photoURLs = [];
-    for(const file of uploadedPhotos){
+    for (const file of uploadedPhotos) {
       const storageRef = sRef(storage, `users/${user.uid}/${file.name}`);
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       photoURLs.push(url);
     }
 
-    await set(ref(db,"users/"+user.uid),{
+    // Enregistre dans Realtime Database
+    await set(ref(db, "users/" + user.uid), {
       email: email.value,
       pseudo: pseudo.value,
       age: age.value,
@@ -159,17 +180,19 @@ signupBtn.addEventListener("click", async ()=>{
     });
 
     playVortexAndRedirect();
-  } catch(e){
-    alert("Erreur: "+e.message);
+
+  } catch (e) {
+    alert("Erreur: " + e.message);
   }
 });
 
+// 🔹 Connexion
 loginBtn.addEventListener("click", async ()=>{
-  try{
-    await signInWithEmailAndPassword(auth,email.value,password.value);
+  try {
+    await signInWithEmailAndPassword(auth, email.value, password.value);
     playVortexAndRedirect();
-  }catch(e){
-    alert("Erreur: "+e.message);
+  } catch (e) {
+    alert("Erreur: " + e.message);
   }
 });
 </script>
