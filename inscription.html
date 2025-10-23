@@ -208,12 +208,10 @@
 <script type="module">
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
 const db = getDatabase(app);
-const storage = getStorage(app);
 
 const email = document.getElementById("email");
 const password = document.getElementById("password");
@@ -232,6 +230,7 @@ const whiteFlash = document.getElementById("whiteFlash");
 
 let uploadedPhotos = [];
 
+// Prévisualisation locale
 photosInput.addEventListener("change", e=>{
   preview.innerHTML = "";
   uploadedPhotos=[];
@@ -279,39 +278,63 @@ function playVortexAndRedirect() {
   },1800);
 }
 
+// 🔹 Inscription
 signupBtn.addEventListener("click", async ()=>{
   if(!email.value || !password.value) { alert("Email et mot de passe requis"); return; }
   try{
     const userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
     const user = userCred.user;
 
-    // 🔹 Upload photos sur Firebase Storage
-    let photoURLs = [];
-    for(const file of uploadedPhotos){
-      const storageRef = sRef(storage, `users/${user.uid}/${file.name}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      photoURLs.push(url);
+    // Stockage photos en Base64 pour persistance
+    const photoURLs = [];
+    if(uploadedPhotos.length === 0){
+      // Pas de photo sélectionnée
+      await set(ref(db,"users/"+user.uid),{
+        email: email.value,
+        pseudo: pseudo.value,
+        age: age.value,
+        location: locationInput.value,
+        description: description.value,
+        rooms: selectedRooms,
+        photos: [],
+        online: false,
+        gender: "girl"
+      });
+      playVortexAndRedirect();
+      return;
     }
 
-    await set(ref(db,"users/"+user.uid),{
-      email: email.value,
-      pseudo: pseudo.value,
-      age: age.value,
-      location: locationInput.value,
-      description: description.value,
-      rooms: selectedRooms,
-      photos: photoURLs,
-      online: false,
-      gender: "girl"
+    // Conversion de toutes les photos en Base64
+    let processed = 0;
+    uploadedPhotos.forEach(file=>{
+      const reader = new FileReader();
+      reader.onload = async (ev)=>{
+        photoURLs.push(ev.target.result);
+        processed++;
+        if(processed === uploadedPhotos.length){
+          // Quand toutes les photos sont prêtes, on stocke dans la DB
+          await set(ref(db,"users/"+user.uid),{
+            email: email.value,
+            pseudo: pseudo.value,
+            age: age.value,
+            location: locationInput.value,
+            description: description.value,
+            rooms: selectedRooms,
+            photos: photoURLs,
+            online: false,
+            gender: "girl"
+          });
+          playVortexAndRedirect();
+        }
+      };
+      reader.readAsDataURL(file);
     });
-
-    playVortexAndRedirect();
   } catch(e){
     alert("Erreur: "+e.message);
   }
 });
 
+// 🔹 Connexion
 loginBtn.addEventListener("click", async ()=>{
   try{
     await signInWithEmailAndPassword(auth,email.value,password.value);
