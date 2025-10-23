@@ -13,7 +13,7 @@
     font-family: 'Orbitron', sans-serif;
     background: url("ville.jpg") no-repeat center center/cover;
     color: #fff;
-    overflow: hidden; /* pas de scroll global */
+    overflow: hidden;
   }
 
   .container {
@@ -27,9 +27,8 @@
     text-align: center;
     position: relative;
     z-index: 1;
-
-    max-height: 90vh;      /* limite hauteur */
-    overflow-y: auto;      /* scroll interne */
+    max-height: 90vh;
+    overflow-y: auto;
   }
   .container::-webkit-scrollbar { width: 8px; }
   .container::-webkit-scrollbar-thumb { background-color: #ff66cc; border-radius: 4px; }
@@ -107,7 +106,6 @@
     box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
   }
 
-  /* Lightbox */
   .lightbox {
     display: none;
     position: fixed;
@@ -125,7 +123,6 @@
     box-shadow: 0 0 25px #ff66cc;
   }
 
-  /* Vortex CSS */
   #vortexOverlay {
     position: fixed;
     top:0; left:0;
@@ -150,7 +147,6 @@
     100% { transform: scale(4) rotate(1440deg); opacity: 0; }
   }
 
-  /* Flash blanc */
   #whiteFlash {
     position: fixed;
     top:0; left:0;
@@ -193,12 +189,17 @@
 <div id="whiteFlash"></div>
 
 <script type="module">
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
 const db = getDatabase(app);
+
+// ✅ Si utilisateur déjà connecté → page2.html
+onAuthStateChanged(auth, (user) => {
+  if (user) window.location.href = "page2.html";
+});
 
 const email = document.getElementById("email");
 const password = document.getElementById("password");
@@ -217,7 +218,7 @@ const whiteFlash = document.getElementById("whiteFlash");
 
 let uploadedPhotos = [];
 
-// Gestion du zoom photos
+// Photos preview
 photosInput.addEventListener("change", e=>{
   preview.innerHTML = "";
   uploadedPhotos=[];
@@ -242,7 +243,7 @@ lightbox.addEventListener("click", ()=>{
   lightboxImg.src="";
 });
 
-// Gestion boutons salles
+// Boutons salles
 const salleBtns = document.querySelectorAll(".salle-btn");
 let selectedRooms = [];
 salleBtns.forEach(btn=>{
@@ -258,7 +259,7 @@ salleBtns.forEach(btn=>{
   });
 });
 
-// Fonction animation vortex + flash + redirection
+// Animation vortex + flash
 function playVortexAndRedirect() {
   vortexOverlay.style.display = "flex";
   setTimeout(()=>{
@@ -274,8 +275,6 @@ signupBtn.addEventListener("click", async ()=>{
     const userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
     const user = userCred.user;
     const photoURLs = uploadedPhotos.map(file=>URL.createObjectURL(file));
-
-    // ⚡ Ajout online par défaut + gender (par défaut "girl", tu peux adapter)
     await set(ref(db,"users/"+user.uid),{
       email: email.value,
       pseudo: pseudo.value,
@@ -287,7 +286,6 @@ signupBtn.addEventListener("click", async ()=>{
       online: false,
       gender: "girl"
     });
-
     playVortexAndRedirect();
   } catch(e){
     alert("Erreur: "+e.message);
