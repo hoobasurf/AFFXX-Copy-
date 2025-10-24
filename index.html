@@ -37,11 +37,12 @@
     #logo {
       width: 320px;
       max-width: 90vw;
-      filter: drop-shadow(0 0 5px #8a2be2) drop-shadow(0 0 15px #d354f7);
+      filter:
+        drop-shadow(0 0 5px #8a2be2)
+        drop-shadow(0 0 15px #d354f7);
       animation: zoomFade 2s ease-out forwards;
       opacity: 0;
       transform: scale(2);
-      transition: transform 1.2s ease-in-out, opacity 1s ease-in-out;
     }
 
     #phrase, #phrase2 {
@@ -90,6 +91,7 @@
       width: 100vw; height: 100vh;
       opacity: 0;
       animation: explosion 1.2s ease-out forwards;
+      display: none;
     }
 
     @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
@@ -107,17 +109,15 @@
 </div>
 
 <div id="flash" class="flash-light"></div>
-<div id="explosion" class="final-explosion" style="display: none;"></div>
+<div id="explosion" class="final-explosion"></div>
 
-<!-- ✅ Firebase + redirection correcte -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAbI0fvcv9lIzpPViVBx2BlO8c6L3w-rbc",
     authDomain: "affxx-copy.firebaseapp.com",
-    databaseURL: "https://affxx-copy-default-rtdb.firebaseio.com",
     projectId: "affxx-copy",
     storageBucket: "affxx-copy.appspot.com",
     messagingSenderId: "763273288933",
@@ -127,6 +127,14 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
+  // ✅ Déconnexion complète de la session Firebase
+  signOut(auth).then(() => {
+    console.log("Session Firebase réinitialisée ✅");
+  }).catch(() => {
+    console.warn("Aucune session active (normal)");
+  });
+
+  // ✅ Animation
   const logo = document.getElementById('logo');
   const phrase = document.getElementById('phrase');
   const phrase2 = document.getElementById('phrase2');
@@ -144,15 +152,11 @@
   setTimeout(() => flash.style.display = 'block', 8500);
   setTimeout(() => explosion.style.display = 'block', 8900);
 
-  // 🔥 Redirection après l’intro
+  // ✅ Redirection uniquement vers inscription.html
   setTimeout(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        window.location.href = "page2.html";
-      } else {
-        window.location.href = "inscription.html";
-      }
-    });
+    localStorage.removeItem("authUser");
+    sessionStorage.clear();
+    window.location.replace("inscription.html");
   }, 10100);
 </script>
 
