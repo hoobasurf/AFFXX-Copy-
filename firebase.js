@@ -1,4 +1,4 @@
-// firebase.js (version modulaire - 100% compatible iPhone / Safari / Windows / Android)
+// firebase.js (100% compatible iPhone / Safari / Windows / Android)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 import {
   getAuth,
@@ -24,69 +24,32 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-/* ---------- Persistance locale ---------- */
+/* ---------- PERSISTANCE ---------- */
 setPersistence(auth, browserLocalPersistence)
-  .then(() => console.log("✅ Session Firebase persistée localement"))
-  .catch(e => console.error("Erreur persistance :", e));
+  .then(() => console.log("✅ Persistance locale activée"))
+  .catch(e => console.error("Erreur persistance:", e));
 
-/* ---------- Nettoyage local ---------- */
-function clearLocalSession() {
+/* ---------- FONCTIONS ---------- */
+async function forceLogoutAndClear() {
+  try { await signOut(auth); } catch {}
   try {
     indexedDB.deleteDatabase('firebaseLocalStorageDb');
     localStorage.clear();
     sessionStorage.clear();
-    console.log("🧹 Cache Firebase local supprimé");
-  } catch (e) {
-    console.warn("Erreur suppression cache :", e);
-  }
+  } catch {}
+  console.log("🧹 Session Firebase nettoyée");
 }
 
-/* ---------- Déconnexion + Nettoyage ---------- */
-async function forceLogoutAndClear() {
-  try {
-    await signOut(auth);
-  } catch (e) {
-    console.warn("Erreur déconnexion :", e);
-  }
-  clearLocalSession();
-  try { window.location.reload(); } catch {}
-}
-
-/* ---------- Suivi d’état utilisateur ---------- */
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("👤 Utilisateur connecté :", user.email ?? user.uid);
-  } else {
-    console.log("🚫 Aucun utilisateur connecté");
-  }
+  if (user) console.log("👤 Connecté:", user.email);
+  else console.log("🚫 Déconnecté");
 });
 
 onIdTokenChanged(auth, async (user) => {
   if (!user) return;
-  try {
-    await user.getIdToken(true);
-  } catch (e) {
-    console.warn("Token invalide — déconnexion forcée");
-    try { await signOut(auth); } catch (err) {}
-    clearLocalSession();
-  }
+  try { await user.getIdToken(true); } 
+  catch { await signOut(auth); forceLogoutAndClear(); }
 });
 
-/* ---------- Fonction cachée admin ---------- */
-async function hiddenResetAdmin() {
-  const auth = getAuth();
-  await signOut(auth);
-  indexedDB.deleteDatabase('firebaseLocalStorageDb');
-  localStorage.clear();
-  sessionStorage.clear();
-  console.log("🔥 Réinitialisation Firebase locale effectuée (admin seulement)");
-}
-
-// Accessible depuis la console si besoin :
-window.hiddenResetAdmin = hiddenResetAdmin;
-
-/* ---------- Exports ---------- */
 window.forceLogoutAndClear = forceLogoutAndClear;
-window.clearLocalSession = clearLocalSession;
-
-export { app, auth, clearLocalSession, forceLogoutAndClear };
+export { app, auth, forceLogoutAndClear };
