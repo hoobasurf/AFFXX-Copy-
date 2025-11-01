@@ -4,186 +4,58 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inscription</title>
-
-<!-- Police Orbitron -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
-
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
-    height: 100%;
-    width: 100%;
+    height: 100%; width: 100%;
     font-family: 'Orbitron', sans-serif;
     background: url("ville.jpg") no-repeat center center/cover;
     color: #fff;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
   }
-
-  body {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    padding-bottom: 40px;
-  }
-
   .container {
     background: rgba(0,0,0,0.4);
     padding: 20px;
     border-radius: 15px;
-    width: 95%;
-    max-width: 500px;
+    width: 95%; max-width: 500px;
     margin: 40px auto;
     box-shadow: 0 0 20px #ff66cc;
     text-align: center;
-    position: relative;
-    z-index: 1;
   }
-
-  h1 {
-    color: #ff66cc;
-    text-shadow: 0 0 10px #ff66cc;
-    margin-bottom: 15px;
-  }
-
+  h1 { color: #ff66cc; text-shadow: 0 0 10px #ff66cc; margin-bottom: 15px; }
   input, textarea {
-    width: 100%;
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 8px;
-    border: 2px solid #ff66cc;
-    background: rgba(0,0,0,0.5);
-    color: #fff;
+    width: 100%; margin: 10px 0; padding: 10px;
+    border-radius: 8px; border: 2px solid #ff66cc;
+    background: rgba(0,0,0,0.5); color: #fff;
   }
-
-  .salles {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 10px 0;
-  }
-
+  .salles { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
   .salle-btn {
-    padding: 8px 15px;
-    border: 2px solid #ff66cc;
-    border-radius: 10px;
-    background: rgba(0,0,0,0.4);
-    color: #fff;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
+    padding: 8px 15px; border: 2px solid #ff66cc; border-radius: 10px;
+    background: rgba(0,0,0,0.4); color: #fff; cursor: pointer;
   }
-
   .salle-btn.active {
-    box-shadow: 0 0 15px #ff66cc, 0 0 25px #ff66cc inset;
-    background: rgba(255,102,204,0.8);
+    box-shadow: 0 0 15px #ff66cc; background: rgba(255,102,204,0.8);
   }
-
-  .photos-preview {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 10px;
-  }
-
+  .photos-preview { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px; }
   .photos-preview img {
-    width: 70px;
-    height: 70px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid #ff66cc;
-    cursor: pointer;
-    transition: transform 0.2s;
+    width: 70px; height: 70px; object-fit: cover; border-radius: 8px;
+    border: 2px solid #ff66cc; cursor: zoom-in; transition: transform 0.2s;
   }
-
-  .photos-preview img:hover {
-    transform: scale(1.2);
+  .photos-preview img:hover { transform: scale(1.2); }
+  button {
+    margin: 10px; padding: 10px 20px; border-radius: 8px;
+    border: 2px solid #ff66cc; background: rgba(0,0,0,0.4);
+    color: #fff; cursor: pointer; font-size: 1em;
+    text-transform: uppercase; box-shadow: 0 0 10px #ff66cc;
   }
-
-  button.signup-btn, button.login-btn {
-    margin: 10px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: 2px solid #ff66cc;
-    background: rgba(0,0,0,0.4);
-    color: #fff;
-    cursor: pointer;
-    font-size: 1em;
-    text-transform: uppercase;
-    box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
-    transition: 0.3s;
-  }
-
-  button.signup-btn:hover, button.login-btn:hover {
-    box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
-  }
-
-  .lightbox {
-    display: none;
-    position: fixed;
-    z-index: 10000;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.9);
-    justify-content: center;
-    align-items: center;
-  }
-
-  .lightbox img {
-    max-width: 90%;
-    max-height: 90%;
-    border-radius: 10px;
-    box-shadow: 0 0 25px #ff66cc;
-  }
-
-  #vortexOverlay {
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    background: transparent;
-    z-index: 2000;
-    overflow: hidden;
-  }
-
-  .vortex {
-    width: 200vw;
-    height: 200vw;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,102,204,0.2) 20%, transparent 70%);
-    animation: spinZoom 2s ease-in-out forwards;
-  }
-
-  @keyframes spinZoom {
-    0% { transform: scale(0) rotate(0deg); opacity: 1; }
-    70% { transform: scale(2) rotate(720deg); opacity: 1; }
-    100% { transform: scale(4) rotate(1440deg); opacity: 0; }
-  }
-
-  #whiteFlash {
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background:white;
-    opacity:0;
-    z-index:3000;
-    pointer-events:none;
-    transition: opacity 0.4s ease-in-out;
-  }
+  button:hover { box-shadow: 0 0 20px #ff66cc; }
 </style>
 </head>
-
 <body>
 <div class="container">
   <h1>Inscription</h1>
+
   <input type="email" id="email" placeholder="Email">
   <input type="password" id="password" placeholder="Mot de passe">
   <input type="text" id="pseudo" placeholder="Pseudo">
@@ -201,23 +73,17 @@
   <input type="file" id="photos" accept="image/*" multiple>
   <div class="photos-preview" id="photosPreview"></div>
 
-  <button class="signup-btn" id="signupBtn">S’inscrire</button>
-  <button class="login-btn" id="loginBtn">Se connecter</button>
+  <button id="signupBtn">S’inscrire</button>
+  <button id="loginBtn">Se connecter</button>
 </div>
 
-<div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
-<div id="vortexOverlay"><div class="vortex"></div></div>
-<div id="whiteFlash"></div>
-
 <script type="module">
-import { 
-  getAuth, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword,
-  fetchSignInMethodsForEmail 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
+  from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getDatabase, ref, set } 
+  from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } 
+  from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
@@ -234,14 +100,11 @@ const photosInput = document.getElementById("photos");
 const preview = document.getElementById("photosPreview");
 const signupBtn = document.getElementById("signupBtn");
 const loginBtn = document.getElementById("loginBtn");
-const lightbox = document.getElementById("lightbox");
-const lightboxImg = document.getElementById("lightboxImg");
-const vortexOverlay = document.getElementById("vortexOverlay");
-const whiteFlash = document.getElementById("whiteFlash");
 
 let uploadedPhotos = [];
+let selectedRooms = [];
 
-// Aperçu photos
+// Prévisualisation
 photosInput.addEventListener("change", e => {
   preview.innerHTML = "";
   uploadedPhotos = [];
@@ -250,10 +113,7 @@ photosInput.addEventListener("change", e => {
     reader.onload = ev => {
       const img = document.createElement("img");
       img.src = ev.target.result;
-      img.addEventListener("click", () => {
-        lightboxImg.src = ev.target.result;
-        lightbox.style.display = "flex";
-      });
+      img.addEventListener("click", () => window.open(ev.target.result, "_blank"));
       preview.appendChild(img);
     };
     reader.readAsDataURL(file);
@@ -261,66 +121,22 @@ photosInput.addEventListener("change", e => {
   });
 });
 
-lightbox.addEventListener("click", ()=>{
-  lightbox.style.display="none";
-  lightboxImg.src="";
-});
-
-// Sélection de salles
-const salleBtns = document.querySelectorAll(".salle-btn");
-let selectedRooms = [];
-salleBtns.forEach(btn => {
-  btn.addEventListener("click", () => {
+// Salles
+document.querySelectorAll(".salle-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
     const val = btn.dataset.value;
-    if(selectedRooms.includes(val)){
-      selectedRooms = selectedRooms.filter(r => r !== val);
-      btn.classList.remove("active");
-    } else {
-      selectedRooms.push(val);
-      btn.classList.add("active");
-    }
+    btn.classList.toggle("active");
+    if(selectedRooms.includes(val)) selectedRooms = selectedRooms.filter(r=>r!==val);
+    else selectedRooms.push(val);
   });
 });
 
-function playVortexAndRedirect() {
-  vortexOverlay.style.display = "flex";
-  setTimeout(()=>{
-    whiteFlash.style.opacity = "1";
-    setTimeout(()=> window.location.href="page2.html", 400);
-  },1800);
-}
-
-// 🔹 Inscription corrigée
+// INSCRIPTION
 signupBtn.addEventListener("click", async ()=>{
-  if(!email.value || !password.value){
-    alert("Email et mot de passe requis");
-    return;
-  }
-
   try {
-    // 🔹 Vider cache local Firebase
-    await new Promise(resolve => {
-      const req = indexedDB.deleteDatabase('firebaseLocalStorageDb');
-      req.onsuccess = () => resolve();
-      req.onerror = () => resolve();
-      req.onblocked = () => resolve();
-    });
-    localStorage.clear();
-    sessionStorage.clear();
-    await new Promise(r=>setTimeout(r,100));
-
-    // 🔹 Vérifier email
-    const methods = await fetchSignInMethodsForEmail(auth, email.value);
-    if (methods.length > 0) {
-      alert("Adresse bloquée localement. Réessaye une fois, c’est libéré automatiquement ✅");
-      return;
-    }
-
-    // 🔹 Créer compte
     const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
     const user = userCred.user;
 
-    // 🔹 Upload photos
     const photoURLs = [];
     for (const file of uploadedPhotos) {
       const storageRef = sRef(storage, `users/${user.uid}/${file.name}`);
@@ -329,7 +145,6 @@ signupBtn.addEventListener("click", async ()=>{
       photoURLs.push(url);
     }
 
-    // 🔹 Enregistrer données utilisateur
     await set(ref(db, "users/" + user.uid), {
       email: email.value,
       pseudo: pseudo.value,
@@ -342,20 +157,18 @@ signupBtn.addEventListener("click", async ()=>{
       gender: "girl"
     });
 
-    // 🔹 Redirection
-    playVortexAndRedirect();
+    window.location.href = "page2.html";
 
-  } catch(e) {
-    console.error(e);
+  } catch (e) {
     alert("Erreur: " + e.message);
   }
 });
 
-// 🔹 Connexion
+// CONNEXION
 loginBtn.addEventListener("click", async ()=>{
   try {
     await signInWithEmailAndPassword(auth, email.value, password.value);
-    playVortexAndRedirect();
+    window.location.href = "page2.html";
   } catch (e) {
     alert("Erreur: " + e.message);
   }
