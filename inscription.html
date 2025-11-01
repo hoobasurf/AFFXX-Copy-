@@ -82,10 +82,12 @@ const photosInput = document.getElementById("photos");
 const preview = document.getElementById("photosPreview");
 const signupBtn = document.getElementById("signupBtn");
 const loginBtn = document.getElementById("loginBtn");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
 
 let uploadedPhotos = [];
 
-// --- Photos preview ---
+/* ---------- APERÇU & ZOOM PHOTO ---------- */
 photosInput.addEventListener("change", e => {
   preview.innerHTML = "";
   uploadedPhotos = [];
@@ -94,6 +96,11 @@ photosInput.addEventListener("change", e => {
     reader.onload = ev => {
       const img = document.createElement("img");
       img.src = ev.target.result;
+      img.style.cursor = "zoom-in";
+      img.addEventListener("click", () => {
+        lightboxImg.src = ev.target.result;
+        lightbox.style.display = "flex";
+      });
       preview.appendChild(img);
     };
     reader.readAsDataURL(file);
@@ -101,7 +108,13 @@ photosInput.addEventListener("change", e => {
   });
 });
 
-// --- Sélection de salles ---
+// fermer zoom
+lightbox.addEventListener("click", ()=>{
+  lightbox.style.display="none";
+  lightboxImg.src="";
+});
+
+/* ---------- SÉLECTION DES SALLES ---------- */
 const salleBtns = document.querySelectorAll(".salle-btn");
 let selectedRooms = [];
 salleBtns.forEach(btn => {
@@ -117,7 +130,7 @@ salleBtns.forEach(btn => {
   });
 });
 
-// --- Animation de transition ---
+/* ---------- ANIMATION TRANSITION ---------- */
 function playVortexAndRedirect() {
   const vortexOverlay = document.getElementById("vortexOverlay");
   const whiteFlash = document.getElementById("whiteFlash");
@@ -128,7 +141,7 @@ function playVortexAndRedirect() {
   },1800);
 }
 
-// --- ✅ Inscription corrigée (avec reset automatique) ---
+/* ---------- INSCRIPTION ---------- */
 signupBtn.addEventListener("click", async ()=>{
   if(!email.value || !password.value){
     alert("Email et mot de passe requis");
@@ -138,6 +151,7 @@ signupBtn.addEventListener("click", async ()=>{
   try {
     // 1️⃣ Nettoyage complet avant tentative
     await clearLocalSession();
+    await new Promise(r=>setTimeout(r,300)); // petit délai iOS
 
     // 2️⃣ Création du compte
     const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
@@ -169,7 +183,7 @@ signupBtn.addEventListener("click", async ()=>{
 
   } catch (e) {
     if (e.code === "auth/email-already-in-use") {
-      alert("Cet e-mail était bloqué localement, retente une seconde fois, il sera libéré automatiquement.");
+      alert("Adresse bloquée localement. Réessaye une fois, c’est libéré automatiquement ✅");
       await clearLocalSession();
     } else {
       alert("Erreur: " + e.message);
@@ -177,7 +191,7 @@ signupBtn.addEventListener("click", async ()=>{
   }
 });
 
-// --- Connexion simple ---
+/* ---------- CONNEXION ---------- */
 loginBtn.addEventListener("click", async ()=>{
   try {
     await signInWithEmailAndPassword(auth, email.value, password.value);
