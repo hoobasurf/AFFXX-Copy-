@@ -1,12 +1,12 @@
-// firebase.js (version modulaire - 100% compatible iPhone / Safari)
+// firebase.js (version modulaire - 100% compatible iPhone / Safari / Windows / Android)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 import {
   getAuth,
   setPersistence,
   browserLocalPersistence,
+  signOut,
   onAuthStateChanged,
-  onIdTokenChanged,
-  signOut
+  onIdTokenChanged
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 /* ---------- CONFIG ---------- */
@@ -24,16 +24,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-/* ✅ Correction principale : forcer la persistance locale (iPhone/Safari) */
+/* ---------- Persistance locale pour Safari/iPhone/Android/Windows ---------- */
 setPersistence(auth, browserLocalPersistence)
   .then(() => {
-    console.log("✅ Session Firebase persistée localement (Safari/iPhone compatible)");
+    console.log("✅ Session Firebase persistée localement");
   })
-  .catch((e) => {
-    console.error("Erreur de persistance :", e);
+  .catch(e => {
+    console.error("Erreur persistance :", e);
   });
 
-/* ---------- Nettoyage local ---------- */
+/* ---------- Fonction pour vider cache local Firebase ---------- */
 function clearLocalSession() {
   try {
     indexedDB.deleteDatabase('firebaseLocalStorageDb');
@@ -44,7 +44,7 @@ function clearLocalSession() {
   }
 }
 
-/* ---------- Déconnexion complète ---------- */
+/* ---------- Déconnexion complète et nettoyage ---------- */
 async function forceLogoutAndClear() {
   try {
     await signOut(auth);
@@ -75,7 +75,7 @@ onIdTokenChanged(auth, async (user) => {
   }
 });
 
-/* ---------- Exports et global ---------- */
+/* ---------- Exports ---------- */
 window.forceLogoutAndClear = forceLogoutAndClear;
 window.clearLocalSession = clearLocalSession;
 
