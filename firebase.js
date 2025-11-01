@@ -24,7 +24,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-/* ---------- Persistance locale pour Safari/iPhone/Android/Windows ---------- */
+/* ---------- Persistance locale ---------- */
 setPersistence(auth, browserLocalPersistence)
   .then(() => {
     console.log("✅ Session Firebase persistée localement");
@@ -33,29 +33,30 @@ setPersistence(auth, browserLocalPersistence)
     console.error("Erreur persistance :", e);
   });
 
-/* ---------- Fonction pour vider cache local Firebase ---------- */
+/* ---------- Nettoyage local ---------- */
 function clearLocalSession() {
   try {
     indexedDB.deleteDatabase('firebaseLocalStorageDb');
     localStorage.clear();
+    sessionStorage.clear();
     console.log("🧹 Cache Firebase local supprimé");
   } catch (e) {
     console.warn("Erreur suppression cache :", e);
   }
 }
 
-/* ---------- Déconnexion complète et nettoyage ---------- */
+/* ---------- Déconnexion + Nettoyage ---------- */
 async function forceLogoutAndClear() {
   try {
     await signOut(auth);
   } catch (e) {
-    console.warn("Erreur lors de la déconnexion :", e);
+    console.warn("Erreur déconnexion :", e);
   }
   clearLocalSession();
   try { window.location.reload(); } catch {}
 }
 
-/* ---------- Suivi de l’état utilisateur ---------- */
+/* ---------- Suivi d’état utilisateur ---------- */
 onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log("👤 Utilisateur connecté :", user.email ?? user.uid);
