@@ -212,17 +212,15 @@
 <div id="whiteFlash"></div>
 
 <script type="module">
+import { app, auth } from "./firebase.js";
 import { 
-  getAuth, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
-  fetchSignInMethodsForEmail 
+  fetchSignInMethodsForEmail
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
-import { app } from "./firebase.js";
 
-const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
@@ -300,13 +298,14 @@ signupBtn.addEventListener("click", async ()=>{
   }
 
   try {
-    const methods = await fetchSignInMethodsForEmail(auth, email.value);
+    const cleanEmail = email.value.trim().toLowerCase();
+    const methods = await fetchSignInMethodsForEmail(auth, cleanEmail);
     if (methods.length > 0) {
       alert("Cet e-mail est déjà utilisé. Connecte-toi plutôt !");
       return;
     }
 
-    const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
+    const userCred = await createUserWithEmailAndPassword(auth, cleanEmail, password.value);
     const user = userCred.user;
 
     const photoURLs = [];
@@ -318,7 +317,7 @@ signupBtn.addEventListener("click", async ()=>{
     }
 
     await set(ref(db, "users/" + user.uid), {
-      email: email.value,
+      email: cleanEmail,
       pseudo: pseudo.value,
       age: age.value,
       location: locationInput.value,
