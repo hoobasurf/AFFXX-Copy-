@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inscription</title>
 
-<!-- Police Orbitron -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 
 <style>
@@ -19,165 +18,24 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
-
-  body {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    padding-bottom: 40px;
-  }
-
-  .container {
-    background: rgba(0,0,0,0.4);
-    padding: 20px;
-    border-radius: 15px;
-    width: 95%;
-    max-width: 500px;
-    margin: 40px auto;
-    box-shadow: 0 0 20px #ff66cc;
-    text-align: center;
-    position: relative;
-    z-index: 1;
-  }
-
-  h1 {
-    color: #ff66cc;
-    text-shadow: 0 0 10px #ff66cc;
-    margin-bottom: 15px;
-  }
-
-  input, textarea {
-    width: 100%;
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 8px;
-    border: 2px solid #ff66cc;
-    background: rgba(0,0,0,0.5);
-    color: #fff;
-  }
-
-  .salles {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 10px 0;
-  }
-
-  .salle-btn {
-    padding: 8px 15px;
-    border: 2px solid #ff66cc;
-    border-radius: 10px;
-    background: rgba(0,0,0,0.4);
-    color: #fff;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
-  }
-
-  .salle-btn.active {
-    box-shadow: 0 0 15px #ff66cc, 0 0 25px #ff66cc inset;
-    background: rgba(255,102,204,0.8);
-  }
-
-  .photos-preview {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 10px;
-  }
-
-  .photos-preview img {
-    width: 70px;
-    height: 70px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid #ff66cc;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-
-  .photos-preview img:hover {
-    transform: scale(1.2);
-  }
-
-  button.signup-btn, button.login-btn {
-    margin: 10px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: 2px solid #ff66cc;
-    background: rgba(0,0,0,0.4);
-    color: #fff;
-    cursor: pointer;
-    font-size: 1em;
-    text-transform: uppercase;
-    box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
-    transition: 0.3s;
-  }
-
-  button.signup-btn:hover, button.login-btn:hover {
-    box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
-  }
-
-  .lightbox {
-    display: none;
-    position: fixed;
-    z-index: 10000;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.9);
-    justify-content: center;
-    align-items: center;
-  }
-
-  .lightbox img {
-    max-width: 90%;
-    max-height: 90%;
-    border-radius: 10px;
-    box-shadow: 0 0 25px #ff66cc;
-  }
-
-  #vortexOverlay {
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    background: transparent;
-    z-index: 2000;
-    overflow: hidden;
-  }
-
-  .vortex {
-    width: 200vw;
-    height: 200vw;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,102,204,0.2) 20%, transparent 70%);
-    animation: spinZoom 2s ease-in-out forwards;
-  }
-
-  @keyframes spinZoom {
-    0% { transform: scale(0) rotate(0deg); opacity: 1; }
-    70% { transform: scale(2) rotate(720deg); opacity: 1; }
-    100% { transform: scale(4) rotate(1440deg); opacity: 0; }
-  }
-
-  #whiteFlash {
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background:white;
-    opacity:0;
-    z-index:3000;
-    pointer-events:none;
-    transition: opacity 0.4s ease-in-out;
-  }
+  body { min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding-bottom: 40px; }
+  .container { background: rgba(0,0,0,0.4); padding: 20px; border-radius: 15px; width: 95%; max-width: 500px; margin: 40px auto; box-shadow: 0 0 20px #ff66cc; text-align: center; position: relative; z-index: 1; }
+  h1 { color: #ff66cc; text-shadow: 0 0 10px #ff66cc; margin-bottom: 15px; }
+  input, textarea { width: 100%; margin: 10px 0; padding: 10px; border-radius: 8px; border: 2px solid #ff66cc; background: rgba(0,0,0,0.5); color: #fff; }
+  .salles { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+  .salle-btn { padding: 8px 15px; border: 2px solid #ff66cc; border-radius: 10px; background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-weight: bold; transition: 0.3s; }
+  .salle-btn.active { box-shadow: 0 0 15px #ff66cc, 0 0 25px #ff66cc inset; background: rgba(255,102,204,0.8); }
+  .photos-preview { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px; }
+  .photos-preview img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 2px solid #ff66cc; cursor: pointer; transition: transform 0.2s; }
+  .photos-preview img:hover { transform: scale(1.2); }
+  button.signup-btn, button.login-btn { margin: 10px; padding: 10px 20px; border-radius: 8px; border: 2px solid #ff66cc; background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-size: 1em; text-transform: uppercase; box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset; transition: 0.3s; }
+  button.signup-btn:hover, button.login-btn:hover { box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset; }
+  .lightbox { display: none; position: fixed; z-index: 10000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
+  .lightbox img { max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 0 25px #ff66cc; }
+  #vortexOverlay { position: fixed; top:0; left:0; width:100%; height:100%; display: none; justify-content: center; align-items: center; background: transparent; z-index: 2000; overflow: hidden; }
+  .vortex { width: 200vw; height: 200vw; border-radius: 50%; background: radial-gradient(circle, rgba(255,102,204,0.2) 20%, transparent 70%); animation: spinZoom 2s ease-in-out forwards; }
+  @keyframes spinZoom { 0% { transform: scale(0) rotate(0deg); opacity: 1; } 70% { transform: scale(2) rotate(720deg); opacity: 1; } 100% { transform: scale(4) rotate(1440deg); opacity: 0; } }
+  #whiteFlash { position: fixed; top:0; left:0; width:100%; height:100%; background:white; opacity:0; z-index:3000; pointer-events:none; transition: opacity 0.4s ease-in-out; }
 </style>
 </head>
 
@@ -212,16 +70,14 @@
 <div id="whiteFlash"></div>
 
 <script type="module">
-import { app, auth } from "./firebase.js";
 import { 
-  getAuth, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword,
-  fetchSignInMethodsForEmail
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, fetchSignInMethodsForEmail 
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+import { app } from "./firebase.js";
 
+const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
@@ -242,7 +98,7 @@ const whiteFlash = document.getElementById("whiteFlash");
 
 let uploadedPhotos = [];
 
-// 🔹 Aperçu photos
+// --- Aperçu photos ---
 photosInput.addEventListener("change", e => {
   preview.innerHTML = "";
   uploadedPhotos = [];
@@ -262,12 +118,9 @@ photosInput.addEventListener("change", e => {
   });
 });
 
-lightbox.addEventListener("click", ()=>{
-  lightbox.style.display="none";
-  lightboxImg.src="";
-});
+lightbox.addEventListener("click", ()=>{ lightbox.style.display="none"; lightboxImg.src=""; });
 
-// 🔹 Sélection de salles
+// --- Boutons salles ---
 const salleBtns = document.querySelectorAll(".salle-btn");
 let selectedRooms = [];
 salleBtns.forEach(btn => {
@@ -283,7 +136,15 @@ salleBtns.forEach(btn => {
   });
 });
 
-// 🔹 Réinitialisation locale Firebase pour éviter "email-already-in-use"
+function playVortexAndRedirect() {
+  vortexOverlay.style.display = "flex";
+  setTimeout(()=>{
+    whiteFlash.style.opacity = "1";
+    setTimeout(()=> window.location.href="page2.html", 400);
+  },1800);
+}
+
+// --- Reset cache Firebase local avant création compte ---
 async function resetFirebaseLocal() {
   try {
     await indexedDB.deleteDatabase('firebaseLocalStorageDb');
@@ -293,37 +154,19 @@ async function resetFirebaseLocal() {
   } catch(e){ console.warn(e); }
 }
 
-// 🔹 Animation vortex et redirection
-function playVortexAndRedirect() {
-  vortexOverlay.style.display = "flex";
-  setTimeout(()=>{
-    whiteFlash.style.opacity = "1";
-    setTimeout(()=> window.location.href="page2.html", 400);
-  },1800);
-}
-
-// 🔹 Inscription
+// --- Inscription ---
 signupBtn.addEventListener("click", async ()=>{
-  if(!email.value || !password.value){
-    alert("Email et mot de passe requis");
-    return;
-  }
-
-  // 🔹 Réinitialisation locale avant création
-  await resetFirebaseLocal();
-
+  if(!email.value || !password.value){ alert("Email et mot de passe requis"); return; }
   try {
+    await resetFirebaseLocal(); // <- libère l'email localement
     const methods = await fetchSignInMethodsForEmail(auth, email.value);
-    if (methods.length > 0) {
-      alert("Cet e-mail est déjà utilisé. Réessaie une fois, il sera libéré automatiquement.");
-      return;
-    }
+    if (methods.length > 0) { alert("Cet e-mail est déjà utilisé. Retente, il sera libéré."); return; }
 
     const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
     const user = userCred.user;
 
     const photoURLs = [];
-    for (const file of uploadedPhotos) {
+    for(const file of uploadedPhotos){
       const storageRef = sRef(storage, `users/${user.uid}/${file.name}`);
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
@@ -344,19 +187,13 @@ signupBtn.addEventListener("click", async ()=>{
 
     playVortexAndRedirect();
 
-  } catch (e) {
-    alert("Erreur: " + e.message);
-  }
+  } catch(e){ alert("Erreur: " + e.message); }
 });
 
-// 🔹 Connexion
+// --- Connexion ---
 loginBtn.addEventListener("click", async ()=>{
-  try {
-    await signInWithEmailAndPassword(auth, email.value, password.value);
-    playVortexAndRedirect();
-  } catch (e) {
-    alert("Erreur: " + e.message);
-  }
+  try { await signInWithEmailAndPassword(auth, email.value, password.value); playVortexAndRedirect(); }
+  catch(e){ alert("Erreur: " + e.message); }
 });
 </script>
 </body>
