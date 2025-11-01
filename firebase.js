@@ -26,12 +26,8 @@ const auth = getAuth(app);
 
 /* ---------- Persistance locale ---------- */
 setPersistence(auth, browserLocalPersistence)
-  .then(() => {
-    console.log("✅ Session Firebase persistée localement");
-  })
-  .catch(e => {
-    console.error("Erreur persistance :", e);
-  });
+  .then(() => console.log("✅ Session Firebase persistée localement"))
+  .catch(e => console.error("Erreur persistance :", e));
 
 /* ---------- Nettoyage local ---------- */
 function clearLocalSession() {
@@ -75,6 +71,19 @@ onIdTokenChanged(auth, async (user) => {
     clearLocalSession();
   }
 });
+
+/* ---------- Fonction cachée admin ---------- */
+async function hiddenResetAdmin() {
+  const auth = getAuth();
+  await signOut(auth);
+  indexedDB.deleteDatabase('firebaseLocalStorageDb');
+  localStorage.clear();
+  sessionStorage.clear();
+  console.log("🔥 Réinitialisation Firebase locale effectuée (admin seulement)");
+}
+
+// Accessible depuis la console si besoin :
+window.hiddenResetAdmin = hiddenResetAdmin;
 
 /* ---------- Exports ---------- */
 window.forceLogoutAndClear = forceLogoutAndClear;
