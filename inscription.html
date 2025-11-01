@@ -8,7 +8,8 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
-    height: 100%; width: 100%;
+    height: 100%;
+    width: 100%;
     font-family: 'Orbitron', sans-serif;
     background: url("ville.jpg") no-repeat center center/cover;
     color: #fff;
@@ -16,7 +17,8 @@
     -webkit-overflow-scrolling: touch;
   }
   body {
-    min-height: 100vh; display: flex;
+    min-height: 100vh;
+    display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
@@ -24,44 +26,122 @@
   }
   .container {
     background: rgba(0,0,0,0.4);
-    padding: 20px; border-radius: 15px;
-    width: 95%; max-width: 500px;
-    margin: 40px auto; box-shadow: 0 0 20px #ff66cc;
-    text-align: center; position: relative; z-index: 1;
+    padding: 20px;
+    border-radius: 15px;
+    width: 95%;
+    max-width: 500px;
+    margin: 40px auto;
+    box-shadow: 0 0 20px #ff66cc;
+    text-align: center;
+    position: relative;
+    z-index: 1;
   }
-  h1 { color: #ff66cc; text-shadow:0 0 10px #ff66cc; margin-bottom:15px; }
+  h1 { color: #ff66cc; text-shadow: 0 0 10px #ff66cc; margin-bottom: 15px; }
   input, textarea {
-    width: 100%; margin: 10px 0; padding:10px;
-    border-radius:8px; border:2px solid #ff66cc;
-    background: rgba(0,0,0,0.5); color:#fff;
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 8px;
+    border: 2px solid #ff66cc;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
   }
-  .salles { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin:10px 0; }
+  .salles {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 10px 0;
+  }
   .salle-btn {
-    padding:8px 15px; border:2px solid #ff66cc; border-radius:10px;
-    background: rgba(0,0,0,0.4); color:#fff; cursor:pointer; font-weight:bold;
-    transition:0.3s;
+    padding: 8px 15px;
+    border: 2px solid #ff66cc;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.4);
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
   }
-  .salle-btn.active { box-shadow:0 0 15px #ff66cc,0 0 25px #ff66cc inset; background:rgba(255,102,204,0.8);}
-  .photos-preview { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:10px; }
-  .photos-preview img { width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc; cursor:pointer; transition:transform 0.2s; }
-  .photos-preview img:hover { transform:scale(1.2); }
-  button.signup-btn, button.login-btn, button.reset-btn {
-    margin:10px; padding:10px 20px; border-radius:8px;
-    border:2px solid #ff66cc; background: rgba(0,0,0,0.4);
-    color:#fff; cursor:pointer; font-size:1em; text-transform:uppercase;
-    box-shadow:0 0 10px #ff66cc,0 0 20px #ff66cc inset; transition:0.3s;
+  .salle-btn.active {
+    box-shadow: 0 0 15px #ff66cc, 0 0 25px #ff66cc inset;
+    background: rgba(255,102,204,0.8);
   }
-  button.signup-btn:hover, button.login-btn:hover, button.reset-btn:hover { box-shadow:0 0 20px #ff66cc,0 0 30px #ff66cc inset; }
-  .lightbox { display:none; position:fixed; z-index:10000; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center;}
-  .lightbox img { max-width:90%; max-height:90%; border-radius:10px; box-shadow:0 0 25px #ff66cc; }
-  #vortexOverlay { position:fixed; top:0; left:0; width:100%; height:100%; display:none; justify-content:center; align-items:center; background:transparent; z-index:2000; overflow:hidden; }
-  .vortex { width:200vw; height:200vw; border-radius:50%; background: radial-gradient(circle, rgba(255,102,204,0.2) 20%, transparent 70%); animation:spinZoom 2s ease-in-out forwards; }
-  @keyframes spinZoom { 0%{transform:scale(0) rotate(0deg);opacity:1;} 70%{transform:scale(2) rotate(720deg);opacity:1;} 100%{transform:scale(4) rotate(1440deg);opacity:0;} }
-  #whiteFlash { position:fixed; top:0; left:0; width:100%; height:100%; background:white; opacity:0; z-index:3000; pointer-events:none; transition:opacity 0.4s ease-in-out; }
+  .photos-preview {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .photos-preview img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #ff66cc;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .photos-preview img:hover { transform: scale(1.2); }
+  button.signup-btn, button.login-btn {
+    margin: 10px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 2px solid #ff66cc;
+    background: rgba(0,0,0,0.4);
+    color: #fff;
+    cursor: pointer;
+    font-size: 1em;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
+    transition: 0.3s;
+  }
+  button.signup-btn:hover, button.login-btn:hover { box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset; }
+  .lightbox {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+  }
+  .lightbox img { max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 0 25px #ff66cc; }
+  #vortexOverlay {
+    position: fixed; top:0; left:0;
+    width:100%; height:100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    z-index: 2000;
+    overflow: hidden;
+  }
+  .vortex {
+    width: 200vw; height: 200vw; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,102,204,0.2) 20%, transparent 70%);
+    animation: spinZoom 2s ease-in-out forwards;
+  }
+  @keyframes spinZoom {
+    0% { transform: scale(0) rotate(0deg); opacity: 1; }
+    70% { transform: scale(2) rotate(720deg); opacity: 1; }
+    100% { transform: scale(4) rotate(1440deg); opacity: 0; }
+  }
+  #whiteFlash {
+    position: fixed; top:0; left:0;
+    width:100%; height:100%;
+    background:white;
+    opacity:0;
+    z-index:3000;
+    pointer-events:none;
+    transition: opacity 0.4s ease-in-out;
+  }
 </style>
 </head>
-<body>
 
+<body>
 <div class="container">
   <h1>Inscription</h1>
 
@@ -84,7 +164,6 @@
 
   <button class="signup-btn" id="signupBtn">S’inscrire</button>
   <button class="login-btn" id="loginBtn">Se connecter</button>
-  <button class="reset-btn" id="resetBtn">Réinitialiser Firebase</button>
 </div>
 
 <div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
@@ -93,11 +172,11 @@
 
 <script type="module">
 import { 
-  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, fetchSignInMethodsForEmail
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, fetchSignInMethodsForEmail 
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
-import { app, clearLocalSession } from "./firebase.js"; // Assure-toi que firebase.js contient clearLocalSession()
+import { app, forceLogoutAndClear } from "./firebase.js";
 
 const auth = getAuth(app);
 const db = getDatabase(app);
@@ -113,7 +192,6 @@ const photosInput = document.getElementById("photos");
 const preview = document.getElementById("photosPreview");
 const signupBtn = document.getElementById("signupBtn");
 const loginBtn = document.getElementById("loginBtn");
-const resetBtn = document.getElementById("resetBtn");
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightboxImg");
 const vortexOverlay = document.getElementById("vortexOverlay");
@@ -121,7 +199,7 @@ const whiteFlash = document.getElementById("whiteFlash");
 
 let uploadedPhotos = [];
 
-// Preview photos
+// Aperçu photos
 photosInput.addEventListener("change", e => {
   preview.innerHTML = "";
   uploadedPhotos = [];
@@ -130,7 +208,10 @@ photosInput.addEventListener("change", e => {
     reader.onload = ev => {
       const img = document.createElement("img");
       img.src = ev.target.result;
-      img.addEventListener("click", () => { lightboxImg.src = ev.target.result; lightbox.style.display = "flex"; });
+      img.addEventListener("click", () => {
+        lightboxImg.src = ev.target.result;
+        lightbox.style.display = "flex";
+      });
       preview.appendChild(img);
     };
     reader.readAsDataURL(file);
@@ -140,25 +221,23 @@ photosInput.addEventListener("change", e => {
 
 lightbox.addEventListener("click", ()=>{ lightbox.style.display="none"; lightboxImg.src=""; });
 
-// Salle selection
+// Sélection de salles
 const salleBtns = document.querySelectorAll(".salle-btn");
 let selectedRooms = [];
 salleBtns.forEach(btn => {
   btn.addEventListener("click", () => {
     const val = btn.dataset.value;
-    if(selectedRooms.includes(val)){ selectedRooms = selectedRooms.filter(r => r!==val); btn.classList.remove("active"); }
-    else { selectedRooms.push(val); btn.classList.add("active"); }
+    if(selectedRooms.includes(val)){
+      selectedRooms = selectedRooms.filter(r => r !== val);
+      btn.classList.remove("active");
+    } else {
+      selectedRooms.push(val);
+      btn.classList.add("active");
+    }
   });
 });
 
-// Reset Firebase cache
-resetBtn.addEventListener("click", () => {
-  if (window.clearLocalSession) {
-    clearLocalSession();
-    alert("Firebase réinitialisé. Réessaie avec ton e-mail.");
-  }
-});
-
+// Fonction vortex et redirection
 function playVortexAndRedirect() {
   vortexOverlay.style.display = "flex";
   setTimeout(()=>{
@@ -167,16 +246,20 @@ function playVortexAndRedirect() {
   },1800);
 }
 
-// Signup
+// 🔹 Inscription corrigée
 signupBtn.addEventListener("click", async ()=>{
-  if(!email.value || !password.value){ alert("Email et mot de passe requis"); return; }
+  // Nettoyage cache + déconnexion
+  await forceLogoutAndClear();
+
+  if(!email.value || !password.value){
+    alert("Email et mot de passe requis");
+    return;
+  }
 
   try {
-    if(window.clearLocalSession) clearLocalSession(); // purge cache local
-
     const methods = await fetchSignInMethodsForEmail(auth, email.value);
-    if(methods.length > 0){
-      alert("Cet e-mail semble déjà utilisé. Clique sur Réinitialiser Firebase puis réessaie.");
+    if (methods.length > 0) {
+      alert("Cet e-mail est déjà utilisé. Connecte-toi plutôt !");
       return;
     }
 
@@ -184,14 +267,14 @@ signupBtn.addEventListener("click", async ()=>{
     const user = userCred.user;
 
     const photoURLs = [];
-    for(const file of uploadedPhotos){
+    for (const file of uploadedPhotos) {
       const storageRef = sRef(storage, `users/${user.uid}/${file.name}`);
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       photoURLs.push(url);
     }
 
-    await set(ref(db,"users/"+user.uid), {
+    await set(ref(db, "users/" + user.uid), {
       email: email.value,
       pseudo: pseudo.value,
       age: age.value,
@@ -205,17 +288,19 @@ signupBtn.addEventListener("click", async ()=>{
 
     playVortexAndRedirect();
 
-  } catch(e){
-    alert("Erreur: "+e.message);
+  } catch (e) {
+    alert("Erreur: " + e.message);
   }
 });
 
-// Login
+// 🔹 Connexion
 loginBtn.addEventListener("click", async ()=>{
-  try{
-    await signInWithEmailAndPassword(auth,email.value,password.value);
+  try {
+    await signInWithEmailAndPassword(auth, email.value, password.value);
     playVortexAndRedirect();
-  } catch(e){ alert("Erreur: "+e.message); }
+  } catch (e) {
+    alert("Erreur: " + e.message);
+  }
 });
 </script>
 </body>
