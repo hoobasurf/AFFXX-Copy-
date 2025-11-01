@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inscription</title>
+
+<!-- Police Orbitron -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
+
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
@@ -16,6 +19,7 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
+
   body {
     min-height: 100vh;
     display: flex;
@@ -24,6 +28,7 @@
     align-items: center;
     padding-bottom: 40px;
   }
+
   .container {
     background: rgba(0,0,0,0.4);
     padding: 20px;
@@ -36,11 +41,13 @@
     position: relative;
     z-index: 1;
   }
+
   h1 {
     color: #ff66cc;
     text-shadow: 0 0 10px #ff66cc;
     margin-bottom: 15px;
   }
+
   input, textarea {
     width: 100%;
     margin: 10px 0;
@@ -50,6 +57,7 @@
     background: rgba(0,0,0,0.5);
     color: #fff;
   }
+
   .salles {
     display: flex;
     justify-content: center;
@@ -57,6 +65,7 @@
     gap: 10px;
     margin: 10px 0;
   }
+
   .salle-btn {
     padding: 8px 15px;
     border: 2px solid #ff66cc;
@@ -67,10 +76,12 @@
     font-weight: bold;
     transition: 0.3s;
   }
+
   .salle-btn.active {
     box-shadow: 0 0 15px #ff66cc, 0 0 25px #ff66cc inset;
     background: rgba(255,102,204,0.8);
   }
+
   .photos-preview {
     display: flex;
     flex-wrap: wrap;
@@ -78,6 +89,7 @@
     gap: 10px;
     margin-top: 10px;
   }
+
   .photos-preview img {
     width: 70px;
     height: 70px;
@@ -87,9 +99,11 @@
     cursor: pointer;
     transition: transform 0.2s;
   }
+
   .photos-preview img:hover {
     transform: scale(1.2);
   }
+
   button.signup-btn, button.login-btn {
     margin: 10px;
     padding: 10px 20px;
@@ -103,9 +117,11 @@
     box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
     transition: 0.3s;
   }
+
   button.signup-btn:hover, button.login-btn:hover {
     box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
   }
+
   .lightbox {
     display: none;
     position: fixed;
@@ -118,12 +134,14 @@
     justify-content: center;
     align-items: center;
   }
+
   .lightbox img {
     max-width: 90%;
     max-height: 90%;
     border-radius: 10px;
     box-shadow: 0 0 25px #ff66cc;
   }
+
   #vortexOverlay {
     position: fixed;
     top:0; left:0;
@@ -135,6 +153,7 @@
     z-index: 2000;
     overflow: hidden;
   }
+
   .vortex {
     width: 200vw;
     height: 200vw;
@@ -142,11 +161,13 @@
     background: radial-gradient(circle, rgba(255,102,204,0.2) 20%, transparent 70%);
     animation: spinZoom 2s ease-in-out forwards;
   }
+
   @keyframes spinZoom {
     0% { transform: scale(0) rotate(0deg); opacity: 1; }
     70% { transform: scale(2) rotate(720deg); opacity: 1; }
     100% { transform: scale(4) rotate(1440deg); opacity: 0; }
   }
+
   #whiteFlash {
     position: fixed;
     top:0; left:0;
@@ -159,6 +180,7 @@
   }
 </style>
 </head>
+
 <body>
 
 <div class="container">
@@ -194,15 +216,10 @@ import {
   getAuth, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
-  fetchSignInMethodsForEmail 
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
-import { app } from "./firebase.js";
-
-const auth = getAuth(app);
-const db = getDatabase(app);
-const storage = getStorage(app);
+import { app, auth } from "./firebase.js"; // ton fichier firebase.js existant
 
 const email = document.getElementById("email");
 const password = document.getElementById("password");
@@ -216,10 +233,9 @@ const signupBtn = document.getElementById("signupBtn");
 const loginBtn = document.getElementById("loginBtn");
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightboxImg");
-const vortexOverlay = document.getElementById("vortexOverlay");
-const whiteFlash = document.getElementById("whiteFlash");
 
 let uploadedPhotos = [];
+let selectedRooms = [];
 
 // Aperçu photos
 photosInput.addEventListener("change", e => {
@@ -248,7 +264,6 @@ lightbox.addEventListener("click", ()=>{
 
 // Sélection de salles
 const salleBtns = document.querySelectorAll(".salle-btn");
-let selectedRooms = [];
 salleBtns.forEach(btn => {
   btn.addEventListener("click", () => {
     const val = btn.dataset.value;
@@ -262,15 +277,7 @@ salleBtns.forEach(btn => {
   });
 });
 
-function playVortexAndRedirect() {
-  vortexOverlay.style.display = "flex";
-  setTimeout(()=>{
-    whiteFlash.style.opacity = "1";
-    setTimeout(()=> window.location.href="page2.html", 400);
-  },1800);
-}
-
-// 🔹 Inscription corrigée
+// Inscription
 signupBtn.addEventListener("click", async ()=>{
   if(!email.value || !password.value){
     alert("Email et mot de passe requis");
@@ -278,19 +285,21 @@ signupBtn.addEventListener("click", async ()=>{
   }
 
   try {
-    // ignore local bloqué email, permet création répétée
+    // Création du compte Firebase
     const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
     const user = userCred.user;
 
+    // Upload photos
     const photoURLs = [];
     for (const file of uploadedPhotos) {
-      const storageRef = sRef(storage, `users/${user.uid}/${file.name}`);
+      const storageRef = sRef(getStorage(app), `users/${user.uid}/${file.name}`);
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       photoURLs.push(url);
     }
 
-    await set(ref(db, "users/" + user.uid), {
+    // Enregistrement des données
+    await set(ref(getDatabase(app), "users/" + user.uid), {
       email: email.value,
       pseudo: pseudo.value,
       age: age.value,
@@ -302,18 +311,20 @@ signupBtn.addEventListener("click", async ()=>{
       gender: "girl"
     });
 
-    playVortexAndRedirect();
+    // Redirection vers page2
+    window.location.href = "page2.html";
 
-  } catch (e) {
-    alert("Erreur: " + e.message);
+  } catch(e) {
+    console.error("Erreur inscription :", e);
+    alert("Erreur lors de l'inscription : " + e.message);
   }
 });
 
-// 🔹 Connexion
+// Connexion
 loginBtn.addEventListener("click", async ()=>{
   try {
     await signInWithEmailAndPassword(auth, email.value, password.value);
-    playVortexAndRedirect();
+    window.location.href="page2.html";
   } catch (e) {
     alert("Erreur: " + e.message);
   }
