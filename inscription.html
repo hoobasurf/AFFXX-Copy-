@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inscription</title>
+
+<!-- Police Orbitron -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
+
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
@@ -177,6 +180,7 @@
   }
 </style>
 </head>
+
 <body>
 
 <div class="container">
@@ -208,12 +212,16 @@
 <div id="whiteFlash"></div>
 
 <script type="module">
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { app, auth } from "./firebase.js";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword,
+  fetchSignInMethodsForEmail
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
-import { app } from "./firebase.js";
 
-const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
@@ -234,7 +242,7 @@ const whiteFlash = document.getElementById("whiteFlash");
 
 let uploadedPhotos = [];
 
-// Aperçu photos
+// 🔹 Aperçu photos
 photosInput.addEventListener("change", e => {
   preview.innerHTML = "";
   uploadedPhotos = [];
@@ -259,7 +267,7 @@ lightbox.addEventListener("click", ()=>{
   lightboxImg.src="";
 });
 
-// Sélection salles
+// 🔹 Sélection de salles
 const salleBtns = document.querySelectorAll(".salle-btn");
 let selectedRooms = [];
 salleBtns.forEach(btn => {
@@ -275,24 +283,39 @@ salleBtns.forEach(btn => {
   });
 });
 
-// 🔹 Inscription corrigée
+// 🔹 Réinitialisation locale Firebase pour éviter "email-already-in-use"
+async function resetFirebaseLocal() {
+  try {
+    await indexedDB.deleteDatabase('firebaseLocalStorageDb');
+    localStorage.clear();
+    sessionStorage.clear();
+    console.log("🔥 Firebase local réinitialisé");
+  } catch(e){ console.warn(e); }
+}
+
+// 🔹 Animation vortex et redirection
+function playVortexAndRedirect() {
+  vortexOverlay.style.display = "flex";
+  setTimeout(()=>{
+    whiteFlash.style.opacity = "1";
+    setTimeout(()=> window.location.href="page2.html", 400);
+  },1800);
+}
+
+// 🔹 Inscription
 signupBtn.addEventListener("click", async ()=>{
   if(!email.value || !password.value){
     alert("Email et mot de passe requis");
     return;
   }
 
-  try {
-    // Vérifie localement si l'email est bloqué et ignore la première alerte Firebase
-    let blocked = localStorage.getItem(`blocked_${email.value}`);
-    if(blocked){
-      localStorage.removeItem(`blocked_${email.value}`);
-      console.log("Adresse bloquée localement, libérée automatiquement ✅");
-    }
+  // 🔹 Réinitialisation locale avant création
+  await resetFirebaseLocal();
 
+  try {
     const methods = await fetchSignInMethodsForEmail(auth, email.value);
     if (methods.length > 0) {
-      alert("Cet e-mail est déjà utilisé. Essaie un autre ou réessaye après quelques secondes.");
+      alert("Cet e-mail est déjà utilisé. Réessaie une fois, il sera libéré automatiquement.");
       return;
     }
 
@@ -319,12 +342,7 @@ signupBtn.addEventListener("click", async ()=>{
       gender: "girl"
     });
 
-    // Animation vortex puis redirection
-    vortexOverlay.style.display = "flex";
-    setTimeout(()=>{
-      whiteFlash.style.opacity = "1";
-      setTimeout(()=> window.location.href="page2.html", 400);
-    },1800);
+    playVortexAndRedirect();
 
   } catch (e) {
     alert("Erreur: " + e.message);
@@ -335,11 +353,7 @@ signupBtn.addEventListener("click", async ()=>{
 loginBtn.addEventListener("click", async ()=>{
   try {
     await signInWithEmailAndPassword(auth, email.value, password.value);
-    vortexOverlay.style.display = "flex";
-    setTimeout(()=>{
-      whiteFlash.style.opacity = "1";
-      setTimeout(()=> window.location.href="page2.html", 400);
-    },1800);
+    playVortexAndRedirect();
   } catch (e) {
     alert("Erreur: " + e.message);
   }
