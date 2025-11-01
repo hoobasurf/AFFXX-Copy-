@@ -7,144 +7,27 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    height: 100%;
-    width: 100%;
-    font-family: 'Orbitron', sans-serif;
-    background: url("ville.jpg") no-repeat center center/cover;
-    color: #fff;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  body {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    padding-bottom: 40px;
-  }
-
-  .container {
-    background: rgba(0,0,0,0.4);
-    padding: 20px;
-    border-radius: 15px;
-    width: 95%;
-    max-width: 500px;
-    margin: 40px auto;
-    box-shadow: 0 0 20px #ff66cc;
-    text-align: center;
-    position: relative;
-    z-index: 1;
-  }
-
-  h1 {
-    color: #ff66cc;
-    text-shadow: 0 0 10px #ff66cc;
-    margin-bottom: 15px;
-  }
-
-  input, textarea {
-    width: 100%;
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 8px;
-    border: 2px solid #ff66cc;
-    background: rgba(0,0,0,0.5);
-    color: #fff;
-  }
-
-  .salles {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 10px 0;
-  }
-
-  .salle-btn {
-    padding: 8px 15px;
-    border: 2px solid #ff66cc;
-    border-radius: 10px;
-    background: rgba(0,0,0,0.4);
-    color: #fff;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
-  }
-
-  .salle-btn.active {
-    box-shadow: 0 0 15px #ff66cc, 0 0 25px #ff66cc inset;
-    background: rgba(255,102,204,0.8);
-  }
-
-  .photos-preview {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 10px;
-  }
-
-  .photos-preview img {
-    width: 70px;
-    height: 70px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid #ff66cc;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-
-  .photos-preview img:hover {
-    transform: scale(1.2);
-  }
-
-  button.signup-btn, button.login-btn, #resetBtn {
-    margin: 10px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: 2px solid #ff66cc;
-    background: rgba(0,0,0,0.4);
-    color: #fff;
-    cursor: pointer;
-    font-size: 1em;
-    text-transform: uppercase;
-    box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
-    transition: 0.3s;
-  }
-
-  button.signup-btn:hover, button.login-btn:hover, #resetBtn:hover {
-    box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
-  }
-
-  .lightbox {
-    display: none;
-    position: fixed;
-    z-index: 10000;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.9);
-    justify-content: center;
-    align-items: center;
-  }
-
-  .lightbox img {
-    max-width: 90%;
-    max-height: 90%;
-    border-radius: 10px;
-    box-shadow: 0 0 25px #ff66cc;
-  }
+  html, body { height: 100%; width: 100%; font-family: 'Orbitron', sans-serif; background: url("ville.jpg") no-repeat center center/cover; color: #fff; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  body { min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding-bottom: 40px; }
+  .container { background: rgba(0,0,0,0.4); padding: 20px; border-radius: 15px; width: 95%; max-width: 500px; margin: 40px auto; box-shadow: 0 0 20px #ff66cc; text-align: center; position: relative; z-index: 1; }
+  h1 { color: #ff66cc; text-shadow: 0 0 10px #ff66cc; margin-bottom: 15px; }
+  input, textarea { width: 100%; margin: 10px 0; padding: 10px; border-radius: 8px; border: 2px solid #ff66cc; background: rgba(0,0,0,0.5); color: #fff; }
+  .salles { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+  .salle-btn { padding: 8px 15px; border: 2px solid #ff66cc; border-radius: 10px; background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-weight: bold; transition: 0.3s; }
+  .salle-btn.active { box-shadow: 0 0 15px #ff66cc, 0 0 25px #ff66cc inset; background: rgba(255,102,204,0.8); }
+  .photos-preview { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px; }
+  .photos-preview img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 2px solid #ff66cc; cursor: pointer; transition: transform 0.2s; }
+  .photos-preview img:hover { transform: scale(1.2); }
+  button.signup-btn, button.login-btn { margin: 10px; padding: 10px 20px; border-radius: 8px; border: 2px solid #ff66cc; background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-size: 1em; text-transform: uppercase; box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset; transition: 0.3s; }
+  button.signup-btn:hover, button.login-btn:hover { box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset; }
+  .lightbox { display: none; position: fixed; z-index: 10000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
+  .lightbox img { max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 0 25px #ff66cc; }
 </style>
 </head>
 <body>
 
 <div class="container">
   <h1>Inscription</h1>
-
   <input type="email" id="email" placeholder="Email">
   <input type="password" id="password" placeholder="Mot de passe">
   <input type="text" id="pseudo" placeholder="Pseudo">
@@ -164,16 +47,17 @@
 
   <button class="signup-btn" id="signupBtn">S’inscrire</button>
   <button class="login-btn" id="loginBtn">Se connecter</button>
-  <button id="resetBtn">Réinitialiser Firebase</button>
 </div>
 
 <div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
 
 <script type="module">
-import { getAuth, createUserWithEmailAndPassword, fetchSignInMethodsForEmail, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { 
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, fetchSignInMethodsForEmail 
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
-import { app, forceLogoutAndClear } from "./firebase.js";
+import { app } from "./firebase.js";
 
 const auth = getAuth(app);
 const db = getDatabase(app);
@@ -189,12 +73,14 @@ const photosInput = document.getElementById("photos");
 const preview = document.getElementById("photosPreview");
 const signupBtn = document.getElementById("signupBtn");
 const loginBtn = document.getElementById("loginBtn");
-const resetBtn = document.getElementById("resetBtn");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
 const salleBtns = document.querySelectorAll(".salle-btn");
+
 let uploadedPhotos = [];
 let selectedRooms = [];
 
-// Prévisualisation photos
+// Aperçu photos
 photosInput.addEventListener("change", e => {
   preview.innerHTML = "";
   uploadedPhotos = [];
@@ -203,11 +89,19 @@ photosInput.addEventListener("change", e => {
     reader.onload = ev => {
       const img = document.createElement("img");
       img.src = ev.target.result;
+      img.addEventListener("click", () => {
+        lightboxImg.src = ev.target.result;
+        lightbox.style.display = "flex";
+      });
       preview.appendChild(img);
     };
     reader.readAsDataURL(file);
     uploadedPhotos.push(file);
   });
+});
+
+lightbox.addEventListener("click", () => {
+  lightbox.style.display = "none";
 });
 
 // Sélection salles
@@ -224,7 +118,7 @@ salleBtns.forEach(btn => {
   });
 });
 
-// 🔹 Inscription
+// Fonction inscription
 signupBtn.addEventListener("click", async () => {
   if(!email.value || !password.value){
     alert("Email et mot de passe requis");
@@ -234,14 +128,13 @@ signupBtn.addEventListener("click", async () => {
   try {
     const methods = await fetchSignInMethodsForEmail(auth, email.value);
     if(methods.length > 0){
-      alert("Cet e-mail existe déjà. Utilise un autre email ou clique sur Réinitialiser Firebase.");
+      alert("Cet e-mail semble déjà utilisé. Essaie un autre e-mail ou réinitialise Firebase.");
       return;
     }
 
     const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
     const user = userCred.user;
 
-    // Upload photos
     const photoURLs = [];
     for(const file of uploadedPhotos){
       const storageRef = sRef(storage, `users/${user.uid}/${file.name}`);
@@ -250,7 +143,6 @@ signupBtn.addEventListener("click", async () => {
       photoURLs.push(url);
     }
 
-    // Enregistre données
     await set(ref(db, "users/" + user.uid), {
       email: email.value,
       pseudo: pseudo.value,
@@ -263,16 +155,22 @@ signupBtn.addEventListener("click", async () => {
       gender: "girl"
     });
 
-    // Redirection page2
     window.location.href = "page2.html";
 
-  } catch(e) {
+  } catch(e){
     alert("Erreur: " + e.message);
   }
 });
 
-// 🔹 Connexion
+// Connexion
 loginBtn.addEventListener("click", async () => {
   try {
     await signInWithEmailAndPassword(auth, email.value, password.value);
     window.location.href = "page2.html";
+  } catch(e){
+    alert("Erreur: " + e.message);
+  }
+});
+</script>
+</body>
+</html>
