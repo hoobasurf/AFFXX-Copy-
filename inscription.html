@@ -212,12 +212,8 @@
 <div id="whiteFlash"></div>
 
 <script type="module">
-import { app, auth } from "./firebase.js";
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword,
-  fetchSignInMethodsForEmail
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { app, auth, clearLocalSession } from "./firebase.js";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
 
@@ -266,7 +262,7 @@ lightbox.addEventListener("click", ()=>{
   lightboxImg.src="";
 });
 
-// Sélection de salles
+// Sélection salles
 const salleBtns = document.querySelectorAll(".salle-btn");
 let selectedRooms = [];
 salleBtns.forEach(btn => {
@@ -282,6 +278,7 @@ salleBtns.forEach(btn => {
   });
 });
 
+// Animation et redirection
 function playVortexAndRedirect() {
   vortexOverlay.style.display = "flex";
   setTimeout(()=>{
@@ -290,22 +287,17 @@ function playVortexAndRedirect() {
   },1800);
 }
 
-// 🔹 Inscription
-signupBtn.addEventListener("click", async ()=>{
+// 🔹 Inscription corrigée (cache local ignoré)
+signupBtn.addEventListener("click", async () => {
   if(!email.value || !password.value){
     alert("Email et mot de passe requis");
     return;
   }
 
   try {
-    const cleanEmail = email.value.trim().toLowerCase();
-    const methods = await fetchSignInMethodsForEmail(auth, cleanEmail);
-    if (methods.length > 0) {
-      alert("Cet e-mail est déjà utilisé. Connecte-toi plutôt !");
-      return;
-    }
+    await clearLocalSession();
 
-    const userCred = await createUserWithEmailAndPassword(auth, cleanEmail, password.value);
+    const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
     const user = userCred.user;
 
     const photoURLs = [];
@@ -317,7 +309,7 @@ signupBtn.addEventListener("click", async ()=>{
     }
 
     await set(ref(db, "users/" + user.uid), {
-      email: cleanEmail,
+      email: email.value,
       pseudo: pseudo.value,
       age: age.value,
       location: locationInput.value,
@@ -331,7 +323,11 @@ signupBtn.addEventListener("click", async ()=>{
     playVortexAndRedirect();
 
   } catch (e) {
-    alert("Erreur: " + e.message);
+    if(e.code === "auth/email-already-in-use"){
+      alert("Cet e-mail semble déjà utilisé. Essaie un autre e-mail ou force le logout via forceLogoutAndClear().");
+    } else {
+      alert("Erreur: " + e.message);
+    }
   }
 });
 
