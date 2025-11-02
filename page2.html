@@ -14,31 +14,48 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 #myProfile img { width:100px; height:100px; border-radius:50%; border:3px solid #ff66cc; box-shadow:0 0 15px #ff66cc; object-fit:cover; }
 #myProfile div { margin-top:8px; font-size:1.2em; color:#ff66cc; }
 
-.carousel-container { z-index:2; position: relative; width:100%; height:calc(100% - 120px); overflow:hidden; display:flex; align-items:center; }
-.carousel { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; gap:40px; padding:40px; }
-.carousel::-webkit-scrollbar { display:none; }
+/* Mini-profils circulaires draggable */
+#miniProfilesContainer { position:fixed; top:80px; right:20px; z-index:99; display:flex; flex-wrap:wrap; gap:10px; pointer-events:auto; }
+.miniProfileCircle { width:50px; height:50px; border-radius:50%; overflow:hidden; border:2px solid #ff66cc; box-shadow:0 0 12px #ff66cc; cursor:grab; position:fixed; transition:left 0.05s linear, top 0.05s linear; }
+.miniProfileCircle img { width:100%; height:100%; object-fit:cover; }
+.miniRemove { position:absolute; top:-5px; right:-5px; background:#ff66cc; color:#fff; font-size:0.6em; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 6px #ff66cc; }
 
-.card { scroll-snap-align:center; flex:0 0 150px; background:rgba(0,0,0,0.5); border-radius:16px; padding:15px; text-align:center; transition: transform .3s, box-shadow .3s; cursor:pointer; position:relative; }
-.card img { width:90px; height:90px; border-radius:50%; object-fit:cover; margin-bottom:10px; border:3px solid; }
-.girl img { border-color:#ff66cc; box-shadow:0 0 12px #ff66cc; }
-.boy img { border-color:#9933ff; box-shadow:0 0 12px #9933ff; }
-.name { font-size:1.1em; margin-bottom:5px; }
+/* Bouton Mes Crush */
+#favoritesBtn { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#ffea00; color:#333; border:none; border-radius:30px; padding:10px 20px; font-weight:bold; cursor:pointer; z-index:100; box-shadow:0 0 12px #ffea00; }
+
+/* Modales */
+.modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; flex-direction:column; align-items:center; justify-content:flex-start; padding:20px; z-index:200; }
+.modal .closeBtn { position:absolute; top:10px; right:10px; width:24px; height:24px; background:#ff66cc; color:white; font-size:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 8px #ff66cc; }
+.modal h2 { color:#ff66cc; margin-bottom:20px; }
+.modal .modalContent { display:flex; flex-wrap:wrap; gap:15px; justify-content:center; overflow-y:auto; width:100%; }
+.modal textarea { width:90%; height:80px; resize:none; border-radius:6px; border:1px solid #ff66cc; background:rgba(0,0,0,0.4); color:white; padding:5px; margin-top:auto; }
+.modal button { margin-top:10px; background:#ff66cc; color:white; border:none; border-radius:6px; padding:8px 12px; cursor:pointer; align-self:flex-end; }
 </style>
 </head>
 <body>
 
+<!-- Mini-profil -->
 <div id="myProfile">
   <img id="miniProfilePic" src="" alt="Mon profil">
   <div id="pseudoMini">Utilisateur</div>
 </div>
 
-<div class="carousel-container">
-  <div class="carousel" id="carousel"></div>
+<!-- Conteneur mini-profiles -->
+<div id="miniProfilesContainer"></div>
+
+<!-- Bouton Mes Crush -->
+<button id="favoritesBtn">Mes Crush</button>
+
+<!-- Modale Mes Crush -->
+<div id="crushModal" class="modal">
+  <div class="closeBtn">×</div>
+  <h2>Mes Crush</h2>
+  <div class="modalContent" id="crushContent"></div>
 </div>
 
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, update, onDisconnect, get, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
@@ -46,16 +63,21 @@ const db = getDatabase(app);
 
 const miniProfilePic = document.getElementById("miniProfilePic");
 const pseudoMini = document.getElementById("pseudoMini");
-const carousel = document.getElementById("carousel");
+const miniProfilesContainer = document.getElementById("miniProfilesContainer");
+const favoritesBtn = document.getElementById("favoritesBtn");
+const crushModal = document.getElementById("crushModal");
+const crushContent = document.getElementById("crushContent");
 
 let currentUserUid = null;
 
-// --- Auth et mini-profil ---
 onAuthStateChanged(auth, async user => {
   if(!user){ window.location.href="inscription.html"; return; }
   currentUserUid = user.uid;
 
   const userRef = ref(db,"users/"+currentUserUid);
+  await update(userRef,{online:true});
+  onDisconnect(ref(db,"users/"+currentUserUid+"/online")).set(false);
+
   onValue(userRef, snap=>{
     if(!snap.exists()) return;
     const data = snap.val();
@@ -63,49 +85,98 @@ onAuthStateChanged(auth, async user => {
     const photo = data.photos && Array.isArray(data.photos) && data.photos[0] ? data.photos[0] : '';
     if(photo) miniProfilePic.src = photo;
   });
-
-  // --- Carrousel uniquement vrais utilisateurs ---
-  const allUsersRef = ref(db,"users");
-  onValue(allUsersRef, snap=>{
-    carousel.innerHTML = "";
-    if(!snap.exists()) return;
-    const allUsers = snap.val();
-    let hasOnline = false;
-
-    Object.entries(allUsers).forEach(([uid, u])=>{
-      // filtrage strict : pas soi-même, online=true, pseudo et photo existants
-      if(uid === currentUserUid) return;
-      if(!u.online) return;
-      if(!u.photos || u.photos.length === 0) return;
-      if(!u.pseudo || u.pseudo.trim() === "") return;
-
-      hasOnline = true;
-
-      const card = document.createElement("div");
-      card.className = "card " + (u.gender || "girl");
-      card.dataset.uid = uid;
-
-      card.innerHTML = `
-        <img src="${u.photos[0]}" alt="${u.pseudo}">
-        <div class="name">${u.pseudo}</div>
-      `;
-
-      carousel.appendChild(card);
-    });
-
-    if(!hasOnline){
-      const emptyMsg = document.createElement("div");
-      emptyMsg.style.textAlign="center";
-      emptyMsg.style.width="100%";
-      emptyMsg.style.color="#ff66cc";
-      emptyMsg.textContent = "Aucun utilisateur en ligne pour le moment...";
-      carousel.appendChild(emptyMsg);
-    }
-  });
 });
 
-// --- clic sur ma photo ouvre page précédente ou profil ---
-miniProfilePic.addEventListener("click", ()=>window.location.href="authentique.html");
+// Mini-profil draggable
+function addMiniProfile(uid, photoSrc){
+  if(document.querySelector(`#miniProfilesContainer .miniProfileCircle[data-uid='${uid}']`)) return;
+
+  const circle = document.createElement("div");
+  circle.className = "miniProfileCircle";
+  circle.dataset.uid = uid;
+
+  const img = document.createElement("img");
+  img.src = photoSrc;
+  img.onerror = () => { img.src=`https://i.pravatar.cc/150?u=${uid}`; };
+  circle.appendChild(img);
+
+  const removeBtn = document.createElement("div");
+  removeBtn.className = "miniRemove";
+  removeBtn.textContent="×";
+  removeBtn.addEventListener("click", async ev=>{
+    ev.stopPropagation();
+    circle.remove();
+    await set(ref(db, `users/${currentUserUid}/favoris/${uid}`), false);
+  });
+  circle.appendChild(removeBtn);
+
+  const existing = document.querySelectorAll('.miniProfileCircle').length;
+  circle.style.left = (20 + (existing*58))+"px";
+  circle.style.top = "80px";
+
+  // Drag
+  let dragging=false, shiftX=0, shiftY=0;
+  function startDrag(e){
+    dragging=true;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const rect = circle.getBoundingClientRect();
+    shiftX = clientX - rect.left;
+    shiftY = clientY - rect.top;
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('touchmove', onMove, {passive:false});
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+  }
+  function onMove(e){
+    if(!dragging) return;
+    e.preventDefault();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    circle.style.left = (clientX - shiftX) + "px";
+    circle.style.top = (clientY - shiftY) + "px";
+  }
+  function endDrag(){
+    dragging=false;
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('mouseup', endDrag);
+    document.removeEventListener('touchend', endDrag);
+  }
+  circle.addEventListener('mousedown', startDrag);
+  circle.addEventListener('touchstart', startDrag, {passive:false});
+  circle.ondragstart = ()=>false;
+
+  miniProfilesContainer.appendChild(circle);
+}
+
+// Mes Crush modal
+favoritesBtn.addEventListener("click", async ()=>{
+  crushModal.style.display="flex";
+  crushContent.innerHTML="";
+  const favSnap = await get(ref(db,`users/${currentUserUid}/favoris`));
+  if(!favSnap.exists()){ crushContent.textContent="Aucun crush pour le moment."; return; }
+  const favs = favSnap.val();
+  for(const uid in favs){
+    if(!favs[uid]) continue;
+    const userSnap = await get(ref(db,`users/${uid}`));
+    if(!userSnap.exists()) continue;
+    const data = userSnap.val();
+    if(!data.photos || data.photos.length===0) continue;
+    const prof = document.createElement("div");
+    prof.style.display="flex"; prof.style.flexDirection="column"; prof.style.alignItems="center";
+    prof.innerHTML=`<img src="${data.photos[0]}" style="width:70px;height:70px;border-radius:50%;margin-bottom:5px;"><span>${data.pseudo||'Utilisateur'}</span>`;
+    crushContent.appendChild(prof);
+  }
+});
+
+// Fermer modales
+document.querySelectorAll(".modal .closeBtn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{ btn.parentElement.style.display="none"; });
+});
+
+// Mini-profil clique ouvre page2 (déjà ici, inutile)
+miniProfilePic.addEventListener("click", ()=>{});
 </script>
 </body>
 </html>
