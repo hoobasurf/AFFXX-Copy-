@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <title>Authentique</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 <style>
 * { box-sizing:border-box; margin:0; padding:0; }
@@ -13,7 +13,6 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 #myProfile { z-index:3; position: relative; text-align:center; margin-top:10px; cursor:pointer; }
 #myProfile img { width:100px; height:100px; border-radius:50%; border:3px solid #ff66cc; box-shadow:0 0 15px #ff66cc; object-fit:cover; }
 #myProfile div { margin-top:8px; font-size:1.2em; color:#ff66cc; }
-/* Carrousel */
 .carousel-container { z-index:2; position: relative; width:100%; height:calc(100% - 180px); overflow:hidden; display:flex; align-items:center; }
 .carousel { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; gap:40px; padding:40px; }
 .carousel::-webkit-scrollbar { display:none; }
@@ -27,73 +26,50 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 .btn-like:hover, .btn-chat:hover, .btn-fav:hover { transform: scale(1.2); }
 .btn-like.active { background-color:#ff66cc; border-color:#ff66cc; color:white; box-shadow:0 0 12px #ff66cc; }
 .btn-fav.active { background-color:#ffea00; border-color:#ffea00; color:#333; box-shadow:0 0 12px #ffea00; }
-
-/* Mini-profils circulaires draggable */
 #miniProfilesContainer { position:fixed; top:80px; right:20px; z-index:99; display:flex; flex-wrap:wrap; gap:10px; pointer-events:auto; }
 .miniProfileCircle { width:50px; height:50px; border-radius:50%; overflow:hidden; border:2px solid #ff66cc; box-shadow:0 0 12px #ff66cc; cursor:grab; position:fixed; transition:left 0.05s linear, top 0.05s linear; }
 .miniProfileCircle img { width:100%; height:100%; object-fit:cover; }
 .miniRemove { position:absolute; top:-5px; right:-5px; background:#ff66cc; color:#fff; font-size:0.6em; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 6px #ff66cc; }
-
-/* Bouton Mes Crush */
 #favoritesBtn { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#ffea00; color:#333; border:none; border-radius:30px; padding:10px 20px; font-weight:bold; cursor:pointer; z-index:100; box-shadow:0 0 12px #ffea00; }
-
-/* Modales */
 .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; flex-direction:column; align-items:center; justify-content:flex-start; padding:20px; z-index:200; }
 .modal .closeBtn { position:absolute; top:10px; right:10px; width:24px; height:24px; background:#ff66cc; color:white; font-size:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 8px #ff66cc; }
 .modal h2 { color:#ff66cc; margin-bottom:20px; }
 .modal .modalContent { display:flex; flex-wrap:wrap; gap:15px; justify-content:center; overflow-y:auto; width:100%; }
-
-/* Message modal textarea */
 .modal textarea { width:90%; height:80px; resize:none; border-radius:6px; border:1px solid #ff66cc; background:rgba(0,0,0,0.4); color:white; padding:5px; margin-top:auto; }
 .modal button { margin-top:10px; background:#ff66cc; color:white; border:none; border-radius:6px; padding:8px 12px; cursor:pointer; align-self:flex-end; }
 </style>
 </head>
 <body>
 
-<!-- MINI-PROFIL -->
 <div id="myProfile">
   <img id="miniProfilePic" src="" alt="Mon profil">
   <div id="pseudoMini">Utilisateur</div>
 </div>
 
-<!-- Carrousel -->
 <div class="carousel-container">
   <div class="carousel" id="carousel"></div>
 </div>
 
-<!-- Mini-profils circulaires -->
 <div id="miniProfilesContainer"></div>
-
-<!-- Bouton Mes Crush -->
 <button id="favoritesBtn">Mes Crush</button>
 
-<!-- Modale Mes Crush -->
 <div id="crushModal" class="modal">
   <div class="closeBtn">×</div>
   <h2>Mes Crush</h2>
   <div class="modalContent" id="crushContent"></div>
 </div>
 
-<!-- Modale Message -->
 <div id="messageModal" class="modal">
   <div class="closeBtn">×</div>
   <h2 id="msgTo">Message à : </h2>
   <div class="modalContent" id="msgContent"></div>
-  <textarea id="msgText"></textarea>
+  <textarea id="msgText" inputmode="none"></textarea>
   <button id="sendMsgBtn">Envoyer</button>
 </div>
 
 <script type="module">
-/* ============================
-   authentique.html - JS fixe
-   conserve le visuel d'origine,
-   corrige : photos blob -> fallback,
-   mini-profiles draggable, like/fav sync,
-   envoi message robuste et clic photo -> profilcard
-   ============================ */
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, set, update, onDisconnect, onValue, push, get } 
-  from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, set, update, onDisconnect, onValue, push, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
@@ -116,117 +92,71 @@ const sendMsgBtn = document.getElementById("sendMsgBtn");
 
 let currentUserUid = null;
 
-/* Helper - safe image loader (fallback if blob not accessible) */
-function setImgSafe(imgEl, url, uidFallback){
-  // If it's a blob: URL, it might not be accessible in other sessions.
-  // Try to set it; if error (can't load), fall back to pravatar with uid.
-  imgEl.src = url || `https://i.pravatar.cc/150?u=${uidFallback||'default'}`;
-  imgEl.onerror = () => { imgEl.src = `https://i.pravatar.cc/150?u=${uidFallback||'default'}`; };
-}
-
-// --- Auth / présence en ligne ---
+// --- Auth et présence en ligne ---
 onAuthStateChanged(auth, async user => {
-  if (!user) { alert("Vous devez être connecté !"); window.location.href="inscription.html"; return; }
+  if(!user){ window.location.href="inscription.html"; return; }
   currentUserUid = user.uid;
 
   const userRef = ref(db,"users/"+currentUserUid);
   await update(userRef,{online:true});
   onDisconnect(ref(db,"users/"+currentUserUid+"/online")).set(false);
 
-  // Afficher mini-profil
-  onValue(userRef,snap=>{
-    if(snap.exists()){
-      const data = snap.val();
-      pseudoMini.textContent = data.pseudo||"Utilisateur";
-      // data.photos may be an array or string - handle both
-      let photo = null;
-      if (data.photos && Array.isArray(data.photos) && data.photos.length>0) photo = data.photos[0];
-      else if (data.photos && typeof data.photos === 'string') photo = data.photos;
-      setImgSafe(miniProfilePic, photo, currentUserUid);
-    }
+  // mini-profil
+  onValue(userRef, snap=>{
+    if(!snap.exists()) return;
+    const data = snap.val();
+    pseudoMini.textContent = data.pseudo || "Utilisateur";
+    const photo = data.photos && Array.isArray(data.photos) && data.photos[0] ? data.photos[0] : '';
+    if(photo) miniProfilePic.src = photo;
   });
 
-  // Charger utilisateurs en ligne
+  // --- Carrousel uniquement vrais utilisateurs avec photo ---
   const allUsersRef = ref(db,"users");
-  onValue(allUsersRef,snap=>{
-    carousel.innerHTML = "";
+  onValue(allUsersRef, snap=>{
+    carousel.innerHTML="";
     if(!snap.exists()) return;
     const allUsers = snap.val();
-    Object.entries(allUsers).forEach(([uid,u])=>{
-      if(uid!==currentUserUid && u.online===true){
-        const card = document.createElement("div");
-        card.className = "card " + (u.gender || "girl");
-        card.dataset.uid = uid;
-
-        // resolve photo safely
-        let photo = null;
-
-// Plusieurs cas possibles : tableau, objet ou simple string
-if (u.photos) {
-  if (Array.isArray(u.photos) && u.photos.length > 0) {
-    photo = u.photos[0];
-  } else if (typeof u.photos === "object") {
-    // Si c’est un objet genre {0: "url1", 1: "url2"}
-    const first = Object.values(u.photos)[0];
-    if (first && typeof first === "string") photo = first;
-    else if (first && typeof first === "object" && first.url) photo = first.url;
-  } else if (typeof u.photos === "string") {
-    photo = u.photos;
-  }
-}
-
-if (!photo) photo = `https://i.pravatar.cc/150?u=${uid}`;
-
-        card.innerHTML = `
-          <img src="${photo}" alt="${u.pseudo}">
-          <div class="name">${u.pseudo||'Utilisateur'}</div>
-          <div class="btns">
-            <div class="btn-chat" title="Chat" data-uid="${uid}">💬</div>
-            <div class="btn-like" title="Like" data-uid="${uid}">💖</div>
-            <div class="btn-fav" title="Favoris" data-uid="${uid}">⭐️</div>
-          </div>
-        `;
-
-        // sync UI states (likes/favs)
-        (async ()=>{
-          try {
-            const likeSnap = await get(ref(db,`users/${uid}/likes/${currentUserUid}`));
-            if(likeSnap.exists() && likeSnap.val()===true) card.querySelector(".btn-like").classList.add("active");
-            const favSnap = await get(ref(db,`users/${currentUserUid}/favoris/${uid}`));
-            if(favSnap.exists() && favSnap.val()===true) card.querySelector(".btn-fav").classList.add("active");
-            // also protect image load
-            const imgEl = card.querySelector("img");
-            imgEl.onerror = () => { imgEl.src = `https://i.pravatar.cc/150?u=${uid}`; };
-          } catch(e){ console.error(e); }
-        })();
-
-        // clic photo -> profilcard
-        card.querySelector("img").addEventListener("click", (e) => {
-          e.stopPropagation();
-          window.location.href = `profilcard.html?uid=${uid}`;
-        });
-
-        carousel.appendChild(card);
-      }
+    let hasOnline = false;
+    Object.entries(allUsers).forEach(([uid, u])=>{
+      if(uid===currentUserUid || !u.online || !u.photos || u.photos.length===0) return;
+      hasOnline = true;
+      const card = document.createElement("div");
+      card.className = "card " + (u.gender||"girl");
+      card.dataset.uid = uid;
+      const photo = u.photos[0];
+      card.innerHTML = `
+        <img src="${photo}" alt="${u.pseudo}">
+        <div class="name">${u.pseudo||'Utilisateur'}</div>
+        <div class="btns">
+          <div class="btn-chat" title="Chat" data-uid="${uid}">💬</div>
+          <div class="btn-like" title="Like" data-uid="${uid}">💖</div>
+          <div class="btn-fav" title="Favoris" data-uid="${uid}">⭐️</div>
+        </div>
+      `;
+      carousel.appendChild(card);
     });
-
-    if(carousel.innerHTML.trim()===""){
+    if(!hasOnline){
       const emptyMsg = document.createElement("div");
-      emptyMsg.style.textAlign="center"; emptyMsg.style.width="100%"; emptyMsg.style.color="#ff66cc";
-      emptyMsg.textContent="Aucun utilisateur en ligne pour le moment...";
+      emptyMsg.style.textAlign="center";
+      emptyMsg.style.width="100%";
+      emptyMsg.style.color="#ff66cc";
+      emptyMsg.textContent = "Aucun utilisateur en ligne pour le moment...";
       carousel.appendChild(emptyMsg);
     }
   });
 });
 
-// --- Gestion clics via delegation ---
+// --- Clic sur photo ouvre page2 ---
+miniProfilePic.addEventListener("click", ()=>window.location.href="page2.html");
+
+// --- Gestion Like/Fav/Chat ---
 carousel.addEventListener("click", async e=>{
   const card = e.target.closest(".card");
   if(!card) return;
   const targetUid = card.dataset.uid;
   if(!currentUserUid || !targetUid) return;
 
-  // Chat -> open message modal
+  // Chat
   if(e.target.closest(".btn-chat")){
     const name = card.querySelector(".name").textContent;
     msgTo.textContent=`Message à : ${name}`;
@@ -239,12 +169,8 @@ carousel.addEventListener("click", async e=>{
   if(e.target.closest(".btn-like")){
     const btn = e.target.closest(".btn-like");
     btn.classList.toggle("active");
-    const likeRef = ref(db, `users/${targetUid}/likes/${currentUserUid}`);
-    try {
-      await set(likeRef, btn.classList.contains("active"));
-    } catch(err){ console.error("like err",err); }
-    // add mini-profile indicator
-    if (btn.classList.contains("active")) addMiniProfile(card);
+    await set(ref(db, `users/${targetUid}/likes/${currentUserUid}`), btn.classList.contains("active"));
+    if(btn.classList.contains("active")) addMiniProfile(card);
     return;
   }
 
@@ -252,52 +178,41 @@ carousel.addEventListener("click", async e=>{
   if(e.target.closest(".btn-fav")){
     const btn = e.target.closest(".btn-fav");
     btn.classList.toggle("active");
-    const favRef = ref(db, `users/${currentUserUid}/favoris/${targetUid}`);
-    try {
-      await set(favRef, btn.classList.contains("active"));
-    } catch(err){ console.error("fav err",err); }
-    if (btn.classList.contains("active")) addMiniProfile(card);
+    await set(ref(db, `users/${currentUserUid}/favoris/${targetUid}`), btn.classList.contains("active"));
+    if(btn.classList.contains("active")) addMiniProfile(card);
     return;
   }
 });
 
-// --- mini-profil draggable (robuste touch + mouse) ---
+// --- Mini-profile draggable ---
 function addMiniProfile(card){
   const uid = card.dataset.uid;
   if(!uid) return;
   if(document.querySelector(`#miniProfilesContainer .miniProfileCircle[data-uid='${uid}']`)) return;
-
   const circle = document.createElement("div");
   circle.className = "miniProfileCircle";
   circle.dataset.uid = uid;
-
   const img = card.querySelector("img").cloneNode(true);
-  // fallback in case blob or missing
-  img.onerror = () => { img.src = `https://i.pravatar.cc/150?u=${uid}`; };
   circle.appendChild(img);
 
   const removeBtn = document.createElement("div");
   removeBtn.className = "miniRemove";
-  removeBtn.textContent = "×";
-  removeBtn.title = "Supprimer";
-  removeBtn.addEventListener("click", async (ev) => {
+  removeBtn.textContent="×";
+  removeBtn.addEventListener("click", async ev=>{
     ev.stopPropagation();
-    // remove from DOM
     circle.remove();
-    // optionally remove from favoris in DB so it doesn't reappear on reload:
-    try { await set(ref(db, `users/${currentUserUid}/favoris/${uid}`), false); } catch(e){ /* ignore */ }
+    await set(ref(db, `users/${currentUserUid}/favoris/${uid}`), false);
   });
   circle.appendChild(removeBtn);
 
-  // place non-overlapping initial position
   const existing = document.querySelectorAll('.miniProfileCircle').length;
-  circle.style.left = (20 + (existing * 58)) + "px";
+  circle.style.left = (20 + (existing*58))+"px";
   circle.style.top = "80px";
 
-  // draggable (mouse + touch)
-  let dragging = false, shiftX = 0, shiftY = 0;
+  // Drag
+  let dragging=false, shiftX=0, shiftY=0;
   function startDrag(e){
-    dragging = true;
+    dragging=true;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     const rect = circle.getBoundingClientRect();
@@ -317,7 +232,7 @@ function addMiniProfile(card){
     circle.style.top = (clientY - shiftY) + "px";
   }
   function endDrag(){
-    dragging = false;
+    dragging=false;
     document.removeEventListener('mousemove', onMove);
     document.removeEventListener('touchmove', onMove);
     document.removeEventListener('mouseup', endDrag);
@@ -325,60 +240,50 @@ function addMiniProfile(card){
   }
   circle.addEventListener('mousedown', startDrag);
   circle.addEventListener('touchstart', startDrag, {passive:false});
-  circle.ondragstart = () => false;
-
+  circle.ondragstart = ()=>false;
   miniProfilesContainer.appendChild(circle);
 }
 
-// --- Mes Crush (favoris) modal ---
+// --- Mes Crush modal ---
 favoritesBtn.addEventListener("click", async ()=>{
   crushModal.style.display="flex";
   crushContent.innerHTML="";
-  try {
-    const favSnap = await get(ref(db,`users/${currentUserUid}/favoris`));
-    if(!favSnap.exists()){ crushContent.textContent="Aucun crush pour le moment."; return; }
-    const favs = favSnap.val();
-    for(const uid in favs){
-      if(!favs[uid]) continue;
-      const userSnap = await get(ref(db,`users/${uid}`));
-      if(userSnap.exists()){
-        const data = userSnap.val();
-        const imgSrc = (data.photos && Array.isArray(data.photos) && data.photos[0]) ? data.photos[0] : (data.photos && typeof data.photos==='string' ? data.photos : `https://i.pravatar.cc/100?u=${uid}`);
-        const prof = document.createElement("div");
-        prof.style.display="flex"; prof.style.flexDirection="column"; prof.style.alignItems="center";
-        prof.innerHTML=`<img src="${imgSrc}" style="width:70px;height:70px;border-radius:50%;margin-bottom:5px;"><span>${data.pseudo||'Utilisateur'}</span>`;
-        crushContent.appendChild(prof);
-      }
-    }
-  } catch(e){
-    console.error(e); crushContent.textContent = "Erreur lors du chargement.";
+  const favSnap = await get(ref(db,`users/${currentUserUid}/favoris`));
+  if(!favSnap.exists()){ crushContent.textContent="Aucun crush pour le moment."; return; }
+  const favs = favSnap.val();
+  for(const uid in favs){
+    if(!favs[uid]) continue;
+    const userSnap = await get(ref(db,`users/${uid}`));
+    if(!userSnap.exists()) continue;
+    const data = userSnap.val();
+    if(!data.photos || data.photos.length===0) continue;
+    const prof = document.createElement("div");
+    prof.style.display="flex"; prof.style.flexDirection="column"; prof.style.alignItems="center";
+    prof.innerHTML=`<img src="${data.photos[0]}" style="width:70px;height:70px;border-radius:50%;margin-bottom:5px;"><span>${data.pseudo||'Utilisateur'}</span>`;
+    crushContent.appendChild(prof);
   }
 });
 
 // --- Fermer modales ---
 document.querySelectorAll(".modal .closeBtn").forEach(btn=>{
-  btn.addEventListener("click",()=>{ btn.parentElement.style.display="none"; });
+  btn.addEventListener("click", ()=>{ btn.parentElement.style.display="none"; });
 });
 
-// --- Envoyer message (écrit sous me/them et them/me pour historique) ---
+// --- Envoyer message ---
 sendMsgBtn.addEventListener("click", async ()=>{
   const text = msgText.value.trim();
-  if(!text){ alert("Écris un message !"); return; }
   const toUid = messageModal.dataset.uid;
-  if(!toUid || !currentUserUid) return;
+  if(!text || !toUid || !currentUserUid) return;
   try {
     const msg = { from: currentUserUid, to: toUid, text, timestamp: Date.now() };
-    // push under both users so both see conversation easily
     await set(push(ref(db, `messages/${currentUserUid}/${toUid}`)), msg);
     await set(push(ref(db, `messages/${toUid}/${currentUserUid}`)), msg);
-    msgText.value = "";
-    messageModal.style.display = "none";
-  } catch(err){ console.error("send msg err",err); alert("Erreur envoi message"); }
-});
-
-// --- Clic sur ma photo de profil perso (ouvre page2) ---
-miniProfilePic.addEventListener("click", () => {
-  window.location.href = "page2.html";
+    msgText.value="";
+    messageModal.style.display="none";
+  } catch(err){
+    console.error("send msg err", err);
+    alert("Erreur envoi message");
+  }
 });
 </script>
 </body>
