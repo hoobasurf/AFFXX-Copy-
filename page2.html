@@ -1,34 +1,46 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <title>Mon Profil</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="style.css" />
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family: 'Orbitron', sans-serif; background: linear-gradient(135deg, #ff66cc, #ff3399); color:#fff; display:flex; flex-direction:column; align-items:center; min-height:100vh; padding:20px; }
+.container { background: rgba(0,0,0,0.4); padding:20px; border-radius:15px; width:95%; max-width:600px; box-shadow:0 0 20px #ff66cc; }
+h1 { text-align:center; color:#fff; text-shadow:0 0 10px #ff66cc; margin-bottom:15px; }
+.info div { margin:5px 0; }
+.main-photo { width:100%; max-height:360px; object-fit:cover; border-radius:10px; border:2px solid #ff66cc; margin:10px 0; cursor:pointer; }
+.photos { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; justify-content:center; }
+.photos img { width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #ff66cc; cursor:pointer; transition:0.2s; }
+.photos img:hover { transform:scale(1.2); }
+.room-btn { margin:5px; padding:5px 10px; border-radius:8px; border:2px solid #ff66cc; background:rgba(0,0,0,0.4); cursor:pointer; color:#fff; font-weight:bold; }
+.edit-btn { margin-top:10px; padding:10px 20px; border-radius:8px; border:2px solid #ff66cc; background:rgba(0,0,0,0.4); cursor:pointer; color:#fff; font-weight:bold; }
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center; z-index:10000; }
+.lightbox img { max-width:90%; max-height:90%; border-radius:10px; box-shadow:0 0 25px #ff66cc; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Mon Profil</h1>
-
-    <div class="info">
-      <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
-      <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
-      <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
-      <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
-    </div>
-
-    <img id="mainPhoto" class="main-photo" src="https://via.placeholder.com/800x360?text=Photo" alt="Photo principale">
-    <div class="photos" id="photosContainer"></div>
-    <div id="roomButtons" style="margin-top:12px"></div>
-    <button id="logoutBtn" class="edit-btn">Déconnexion</button>
+<div class="container">
+  <h1>Mon Profil</h1>
+  <div class="info">
+    <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
+    <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
+    <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
+    <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
   </div>
+  <img id="mainPhoto" class="main-photo" src="https://via.placeholder.com/800x360?text=Photo" alt="Photo principale">
+  <div class="photos" id="photosContainer"></div>
+  <div id="roomButtons"></div>
+  <button id="logoutBtn" class="edit-btn">Déconnexion</button>
+</div>
 
-  <div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
+<div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
 
 <script type="module">
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, get, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, get, onValue, onDisconnect, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
 const firebaseConfig = {
@@ -46,60 +58,55 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 
 onAuthStateChanged(auth, async user => {
-  if (!user) {
-    window.location.href = "inscription.html";
-    return;
-  }
-
+  if(!user){ window.location.href="inscription.html"; return; }
   const uid = user.uid;
-  const userStatusRef = ref(db, "users/" + uid + "/online");
-  set(userStatusRef, true);
-  onDisconnect(userStatusRef).set(false);
+  const statusRef = ref(db, "users/"+uid+"/online");
+  set(statusRef, true);
+  onDisconnect(statusRef).set(false);
 
-  const snap = await get(ref(db, "users/" + uid));
-  if (snap.exists()) {
+  const snap = await get(ref(db,"users/"+uid));
+  if(snap.exists()){
     const data = snap.val();
-    document.getElementById("pseudo").textContent = data.pseudo || "Non renseigné";
-    document.getElementById("age").textContent = data.age || "Non renseigné";
-    document.getElementById("location").textContent = data.location || "Non renseigné";
-    document.getElementById("description").textContent = data.description || "Non renseignée";
+    document.getElementById("pseudo").textContent = data.pseudo||"Non renseigné";
+    document.getElementById("age").textContent = data.age||"Non renseigné";
+    document.getElementById("location").textContent = data.location||"Non renseigné";
+    document.getElementById("description").textContent = data.description||"Non renseignée";
 
     const photosContainer = document.getElementById("photosContainer");
-    photosContainer.innerHTML = "";
+    photosContainer.innerHTML="";
     const currentPhotos = data.photos || [];
     document.getElementById("mainPhoto").src = currentPhotos[0] || "https://via.placeholder.com/800x360?text=Photo";
-
-    currentPhotos.forEach(url => {
+    currentPhotos.forEach(url=>{
       const img = document.createElement("img");
-      img.src = url;
-      img.addEventListener("click", () => {
-        const lightbox = document.getElementById("lightbox");
-        const lightboxImg = document.getElementById("lightboxImg");
-        lightboxImg.src = url;
-        lightbox.style.display = "flex";
-      });
+      img.src=url;
+      img.addEventListener("click", ()=>openLightbox(url));
       photosContainer.appendChild(img);
     });
 
     const roomButtons = document.getElementById("roomButtons");
-    roomButtons.innerHTML = "";
-    (data.rooms || []).forEach(room => {
-      const btn = document.createElement("button");
-      btn.className = "room-btn";
-      btn.textContent = room.charAt(0).toUpperCase() + room.slice(1);
+    roomButtons.innerHTML="";
+    (data.rooms||[]).forEach(room=>{
+      const btn=document.createElement("button");
+      btn.className="room-btn";
+      btn.textContent=room.charAt(0).toUpperCase()+room.slice(1);
       roomButtons.appendChild(btn);
     });
   }
 });
 
-// --- Déconnexion ---
-document.getElementById("logoutBtn").addEventListener("click", async () => {
+document.getElementById("logoutBtn").addEventListener("click", async ()=>{
   await signOut(auth);
-  window.location.href = "inscription.html";
+  window.location.href="inscription.html";
 });
 
-document.getElementById("lightbox").addEventListener("click", () => {
-  document.getElementById("lightbox").style.display = "none";
+function openLightbox(src){
+  const lightbox=document.getElementById("lightbox");
+  const img=document.getElementById("lightboxImg");
+  img.src=src;
+  lightbox.style.display="flex";
+}
+document.getElementById("lightbox").addEventListener("click", ()=>{
+  document.getElementById("lightbox").style.display="none";
 });
 </script>
 </body>
