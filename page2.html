@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <title>Mon Profil</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;width:100%;font-family:'Orbitron',sans-serif;background:url('ville.jpg') no-repeat center center/cover;color:#fff;overflow-y:auto;scroll-behavior:smooth}
+  html,body{height:100%;width:100%;font-family:'Orbitron',sans-serif;background:url('ville.jpg') no-repeat center center/cover;background-attachment:fixed;color:#fff;overflow-y:auto;scroll-behavior:smooth}
   .container{max-width:600px;margin:30px auto;background:rgba(0,0,0,0.6);padding:24px;border-radius:15px;box-shadow:0 0 20px #ff66cc;text-align:center}
   h1{color:#ff66cc;text-shadow:0 0 10px #ff66cc;margin-bottom:12px}
   .info{margin-bottom:12px;text-align:left}
@@ -30,12 +30,14 @@
 <body>
   <div class="container">
     <h1>Mon Profil</h1>
+
     <div class="info">
       <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
       <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
       <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
       <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
     </div>
+
     <img id="mainPhoto" class="main-photo" src="https://via.placeholder.com/800x360?text=Photo" alt="Photo principale">
     <div class="photos" id="photosContainer"></div>
     <div id="roomButtons" style="margin-top:12px"></div>
@@ -51,8 +53,7 @@
 
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, get, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-import { getStorage, ref as sRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+import { getDatabase, ref, get, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
 const firebaseConfig = {
@@ -68,14 +69,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
-const storage = getStorage(app);
 
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = "inscription.html"; return; }
   const uid = user.uid;
   const userRef = ref(db, "users/"+uid);
   const onlineRef = ref(db, "users/"+uid+"/online");
-  await set(onlineRef, true);
+  set(onlineRef, true);
   onDisconnect(onlineRef).set(false);
 
   const snap = await get(userRef);
@@ -90,12 +90,14 @@ onAuthStateChanged(auth, async user => {
     photosContainer.innerHTML = "";
     const mainPhoto = document.getElementById("mainPhoto");
     const photoURLs = data.photos || [];
+
+    // Affiche uniquement les photos de l'utilisateur réel
     if(photoURLs.length>0){
       mainPhoto.src = photoURLs[0];
       for(const url of photoURLs){
         const img = document.createElement("img");
         img.src = url;
-        img.addEventListener("click", ()=>{ openLightbox(url) });
+        img.addEventListener("click", ()=>{openLightbox(url)});
         photosContainer.appendChild(img);
       }
     }
@@ -123,11 +125,13 @@ onAuthStateChanged(auth, async user => {
     if(!users) return;
     Object.keys(users).forEach(uid2=>{
       const u = users[uid2];
-      // ✅ Affiche uniquement les utilisateurs en ligne avec au moins une photo
-      if(u.online && uid2!==user.uid && u.photos && u.photos.length>0){
+      if(u.online && uid2!==user.uid){
         const card = document.createElement("div"); card.className="onlineCard";
-        const img = document.createElement("img"); img.src = u.photos[0];
-        const span = document.createElement("span"); span.textContent = u.pseudo || "Utilisateur";
+        const img = document.createElement("img");
+        // Plus de photo fictive, seulement photo existante
+        img.src = u.photos?.[0] || "https://via.placeholder.com/100";
+        const span=document.createElement("span");
+        span.textContent=u.pseudo||"Utilisateur";
         img.addEventListener("click", ()=>alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age||"Non renseigné"}\nLieu: ${u.location||"Non renseigné"}`));
         card.appendChild(img); card.appendChild(span);
         carousel.appendChild(card);
@@ -142,7 +146,10 @@ function openLightbox(src){
   img.src=src;
   lightbox.style.display="flex";
 }
-document.getElementById("lightbox").addEventListener("click", ()=>{ document.getElementById("lightbox").style.display="none"; });
+
+document.getElementById("lightbox").addEventListener("click", ()=>{
+  document.getElementById("lightbox").style.display="none";
+});
 </script>
 </body>
 </html>
