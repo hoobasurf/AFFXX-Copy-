@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inscription</title>
 
+<!-- Police Orbitron -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 
 <style>
@@ -18,6 +19,7 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
+
   body {
     min-height: 100vh;
     display: flex;
@@ -26,6 +28,7 @@
     align-items: center;
     padding-bottom: 40px;
   }
+
   .container {
     background: rgba(0,0,0,0.4);
     padding: 20px;
@@ -38,11 +41,13 @@
     position: relative;
     z-index: 1;
   }
+
   h1 {
     color: #ff66cc;
     text-shadow: 0 0 10px #ff66cc;
     margin-bottom: 15px;
   }
+
   input, textarea {
     width: 100%;
     margin: 10px 0;
@@ -52,6 +57,7 @@
     background: rgba(0,0,0,0.5);
     color: #fff;
   }
+
   .salles {
     display: flex;
     justify-content: center;
@@ -59,6 +65,7 @@
     gap: 10px;
     margin: 10px 0;
   }
+
   .salle-btn {
     padding: 8px 15px;
     border: 2px solid #ff66cc;
@@ -69,10 +76,12 @@
     font-weight: bold;
     transition: 0.3s;
   }
+
   .salle-btn.active {
     box-shadow: 0 0 15px #ff66cc, 0 0 25px #ff66cc inset;
     background: rgba(255,102,204,0.8);
   }
+
   .photos-preview {
     display: flex;
     flex-wrap: wrap;
@@ -80,6 +89,7 @@
     gap: 10px;
     margin-top: 10px;
   }
+
   .photos-preview img {
     width: 70px;
     height: 70px;
@@ -89,7 +99,11 @@
     cursor: pointer;
     transition: transform 0.2s;
   }
-  .photos-preview img:hover { transform: scale(1.2); }
+
+  .photos-preview img:hover {
+    transform: scale(1.2);
+  }
+
   button.signup-btn, button.login-btn {
     margin: 10px;
     padding: 10px 20px;
@@ -103,9 +117,11 @@
     box-shadow: 0 0 10px #ff66cc, 0 0 20px #ff66cc inset;
     transition: 0.3s;
   }
+
   button.signup-btn:hover, button.login-btn:hover {
     box-shadow: 0 0 20px #ff66cc, 0 0 30px #ff66cc inset;
   }
+
   .lightbox {
     display: none;
     position: fixed;
@@ -118,12 +134,14 @@
     justify-content: center;
     align-items: center;
   }
+
   .lightbox img {
     max-width: 90%;
     max-height: 90%;
     border-radius: 10px;
     box-shadow: 0 0 25px #ff66cc;
   }
+
   #vortexOverlay {
     position: fixed;
     top:0; left:0;
@@ -135,6 +153,7 @@
     z-index: 2000;
     overflow: hidden;
   }
+
   .vortex {
     width: 200vw;
     height: 200vw;
@@ -142,11 +161,13 @@
     background: radial-gradient(circle, rgba(255,102,204,0.2) 20%, transparent 70%);
     animation: spinZoom 2s ease-in-out forwards;
   }
+
   @keyframes spinZoom {
     0% { transform: scale(0) rotate(0deg); opacity: 1; }
     70% { transform: scale(2) rotate(720deg); opacity: 1; }
     100% { transform: scale(4) rotate(1440deg); opacity: 0; }
   }
+
   #whiteFlash {
     position: fixed;
     top:0; left:0;
@@ -161,6 +182,7 @@
 </head>
 
 <body>
+
 <div class="container">
   <h1>Inscription</h1>
 
@@ -190,14 +212,13 @@
 <div id="whiteFlash"></div>
 
 <script type="module">
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { auth, fixEmailAlreadyInUse } from "./firebase.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
-import { app } from "./firebase.js";
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-const auth = getAuth(app);
-const db = getDatabase(app);
-const storage = getStorage(app);
+const db = getDatabase();
+const storage = getStorage();
 
 const email = document.getElementById("email");
 const password = document.getElementById("password");
@@ -215,8 +236,8 @@ const vortexOverlay = document.getElementById("vortexOverlay");
 const whiteFlash = document.getElementById("whiteFlash");
 
 let uploadedPhotos = [];
-let selectedRooms = [];
 
+// Aperçu photos
 photosInput.addEventListener("change", e => {
   preview.innerHTML = "";
   uploadedPhotos = [];
@@ -241,10 +262,13 @@ lightbox.addEventListener("click", ()=>{
   lightboxImg.src="";
 });
 
-document.querySelectorAll(".salle-btn").forEach(btn => {
+// Sélection de salles
+const salleBtns = document.querySelectorAll(".salle-btn");
+let selectedRooms = [];
+salleBtns.forEach(btn => {
   btn.addEventListener("click", () => {
     const val = btn.dataset.value;
-    if (selectedRooms.includes(val)) {
+    if(selectedRooms.includes(val)){
       selectedRooms = selectedRooms.filter(r => r !== val);
       btn.classList.remove("active");
     } else {
@@ -262,14 +286,16 @@ function playVortexAndRedirect() {
   },1800);
 }
 
+// 🔹 Inscription
 signupBtn.addEventListener("click", async ()=>{
   if(!email.value || !password.value){
     alert("Email et mot de passe requis");
     return;
   }
+
   try {
-    const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
-    const user = userCred.user;
+    // Utilisation du correctif pour éviter email bloqué localement
+    const { user } = await fixEmailAlreadyInUse(auth, email.value, password.value, (a,e,p)=>import("https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js").then(m=>m.createUserWithEmailAndPassword(a,e,p)));
 
     const photoURLs = [];
     for (const file of uploadedPhotos) {
@@ -294,20 +320,17 @@ signupBtn.addEventListener("click", async ()=>{
     playVortexAndRedirect();
 
   } catch (e) {
-    if (e.code === "auth/email-already-in-use") {
-      alert("Cet e-mail existe déjà. Utilise un autre ou connecte-toi.");
-    } else {
-      alert("Erreur : " + e.message);
-    }
+    alert("Erreur lors de l'inscription : " + e.message);
   }
 });
 
+// 🔹 Connexion
 loginBtn.addEventListener("click", async ()=>{
   try {
     await signInWithEmailAndPassword(auth, email.value, password.value);
     playVortexAndRedirect();
   } catch (e) {
-    alert("Erreur : " + e.message);
+    alert("Erreur: " + e.message);
   }
 });
 </script>
