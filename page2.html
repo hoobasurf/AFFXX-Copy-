@@ -24,28 +24,27 @@
     <button id="logoutBtn" class="edit-btn">Déconnexion</button>
   </div>
 
-  <div id="onlineCarouselContainer">
-    <h2 style="color:#ff66cc;text-shadow:0 0 10px #ff66cc;margin-bottom:8px">Utilisateurs en ligne</h2>
-    <div id="onlineCarousel"></div>
-  </div>
-
   <div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
 
 <script type="module">
-import { auth, db } from "./firebase.js";
-import { 
-  onAuthStateChanged, 
-  signOut 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { 
-  ref, 
-  get, 
-  set, 
-  onDisconnect, 
-  onValue 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getDatabase, ref, get, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
-// --- Redirection si non connecté ---
+const firebaseConfig = {
+  apiKey: "AIzaSyAbI0fvcv9lIzpPViVBx2BlO8c6L3w-rbc",
+  authDomain: "affxx-copy.firebaseapp.com",
+  databaseURL: "https://affxx-copy-default-rtdb.firebaseio.com",
+  projectId: "affxx-copy",
+  storageBucket: "affxx-copy.appspot.com",
+  messagingSenderId: "763273288933",
+  appId: "1:763273288933:web:d0083f5f6ab7284661c80c"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
 onAuthStateChanged(auth, async user => {
   if (!user) {
     window.location.href = "inscription.html";
@@ -53,13 +52,11 @@ onAuthStateChanged(auth, async user => {
   }
 
   const uid = user.uid;
-  const userRef = ref(db, "users/" + uid);
-  const statusRef = ref(db, "users/" + uid + "/online");
+  const userStatusRef = ref(db, "users/" + uid + "/online");
+  set(userStatusRef, true);
+  onDisconnect(userStatusRef).set(false);
 
-  set(statusRef, true);
-  onDisconnect(statusRef).set(false);
-
-  const snap = await get(userRef);
+  const snap = await get(ref(db, "users/" + uid));
   if (snap.exists()) {
     const data = snap.val();
     document.getElementById("pseudo").textContent = data.pseudo || "Non renseigné";
@@ -75,8 +72,12 @@ onAuthStateChanged(auth, async user => {
     currentPhotos.forEach(url => {
       const img = document.createElement("img");
       img.src = url;
-      img.classList.add("thumbnail");
-      img.addEventListener("click", () => openLightbox(url));
+      img.addEventListener("click", () => {
+        const lightbox = document.getElementById("lightbox");
+        const lightboxImg = document.getElementById("lightboxImg");
+        lightboxImg.src = url;
+        lightbox.style.display = "flex";
+      });
       photosContainer.appendChild(img);
     });
 
@@ -89,28 +90,6 @@ onAuthStateChanged(auth, async user => {
       roomButtons.appendChild(btn);
     });
   }
-
-  const usersRef = ref(db, "users");
-  onValue(usersRef, snapshot => {
-    const users = snapshot.val();
-    const onlineCarousel = document.getElementById("onlineCarousel");
-    onlineCarousel.innerHTML = "";
-    if (!users) return;
-    Object.keys(users).forEach(uid => {
-      const u = users[uid];
-      if (u.online && uid !== user.uid) {
-        const card = document.createElement("div");
-        card.className = "onlineCard";
-        const img = document.createElement("img");
-        img.src = u.photos?.[0] || "https://via.placeholder.com/100";
-        const span = document.createElement("span");
-        span.textContent = u.pseudo || "Utilisateur";
-        card.appendChild(img);
-        card.appendChild(span);
-        onlineCarousel.appendChild(card);
-      }
-    });
-  });
 });
 
 // --- Déconnexion ---
@@ -119,13 +98,6 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   window.location.href = "inscription.html";
 });
 
-// --- Lightbox zoom photo ---
-function openLightbox(src) {
-  const lightbox = document.getElementById("lightbox");
-  const lightboxImg = document.getElementById("lightboxImg");
-  lightboxImg.src = src;
-  lightbox.style.display = "flex";
-}
 document.getElementById("lightbox").addEventListener("click", () => {
   document.getElementById("lightbox").style.display = "none";
 });
