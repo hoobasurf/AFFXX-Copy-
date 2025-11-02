@@ -1,112 +1,66 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <title>Mon Profil</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
-  /* Visuel original page2 */
-  body {
-    font-family: 'Orbitron', sans-serif;
-    margin: 0;
-    background: linear-gradient(120deg, #ff66cc, #ff99cc);
-    color: #fff;
-    min-height: 100vh;
-  }
-
-  .container {
-    max-width: 500px;
-    margin: 40px auto;
-    background: rgba(0,0,0,0.4);
-    padding: 20px;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 0 20px #ff66cc;
-  }
-
-  h1 {
-    color: #ff66cc;
-    text-shadow: 0 0 10px #ff66cc;
-    margin-bottom: 20px;
-  }
-
-  .info div {
-    margin: 8px 0;
-    font-size: 1em;
-  }
-
-  #mainPhoto {
-    width: 100%;
-    max-height: 360px;
-    object-fit: cover;
-    border: 2px solid #ff66cc;
-    border-radius: 10px;
-    margin-bottom: 10px;
-  }
-
-  .photos {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  .photos img {
-    width: 70px;
-    height: 70px;
-    object-fit: cover;
-    border: 2px solid #ff66cc;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-
-  .photos img:hover {
-    transform: scale(1.2);
-  }
-
-  .lightbox {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.9);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-
-  .lightbox img {
-    max-width: 90%;
-    max-height: 90%;
-    border-radius: 10px;
-    box-shadow: 0 0 25px #ff66cc;
-  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;width:100%;font-family:'Orbitron',sans-serif;background:url('ville.jpg') no-repeat center center/cover;background-attachment:fixed;color:#fff;overflow-y:auto;scroll-behavior:smooth}
+  .container{max-width:600px;margin:30px auto;background:rgba(0,0,0,0.6);padding:24px;border-radius:15px;box-shadow:0 0 20px #ff66cc;text-align:center}
+  h1{color:#ff66cc;text-shadow:0 0 10px #ff66cc;margin-bottom:12px}
+  .info{margin-bottom:12px;text-align:left}
+  .info div{margin:8px 0}
+  .main-photo{width:100%;max-height:360px;object-fit:cover;border-radius:10px;border:2px solid #ff66cc;cursor:pointer}
+  .photos{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:12px}
+  .photos img{width:70px;height:70px;object-fit:cover;border-radius:8px;border:2px solid #ff66cc;cursor:pointer;transition:transform .15s}
+  .photos img:hover{transform:scale(1.15)}
+  .room-btn{padding:10px 20px;margin:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff;border-radius:8px;cursor:pointer;box-shadow:0 0 10px #ff66cc,0 0 20px #ff66cc inset}
+  .edit-btn{margin-top:10px;padding:8px 14px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff;cursor:pointer}
+  .lightbox{display:none;position:fixed;z-index:10000;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center}
+  .lightbox img{max-width:92%;max-height:92%;border-radius:10px;box-shadow:0 0 25px #ff66cc}
+  .modal{display:none;position:fixed;z-index:12000;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);align-items:center;justify-content:center}
+  .modal .box{background:rgba(0,0,0,0.6);padding:18px;border-radius:12px;width:90%;max-width:480px;box-shadow:0 0 20px #ff66cc}
+  .modal input, .modal textarea{width:100%;margin:8px 0;padding:8px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff}
+  .modal .row{display:flex;gap:8px}
+  .modal button{flex:1;padding:10px;border-radius:8px;border:2px solid #ff66cc;background:rgba(0,0,0,0.4);color:#fff;cursor:pointer}
+  #onlineCarouselContainer{max-width:600px;margin:30px auto;background:rgba(0,0,0,0.6);padding:16px;border-radius:15px;box-shadow:0 0 20px #ff66cc;text-align:left}
+  #onlineCarousel{display:flex;overflow-x:auto;gap:10px;padding-top:8px;padding-bottom:8px}
+  .onlineCard{min-width:100px;text-align:center;color:#fff;font-family:'Orbitron',sans-serif}
+  .onlineCard img{width:100px;height:100px;object-fit:cover;border-radius:10px;border:2px solid #ff66cc;cursor:pointer}
+  .onlineCard span{display:block;margin-top:4px;font-size:0.9em}
 </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Mon Profil</h1>
 
-<div class="container">
-  <h1>Mon Profil</h1>
-  <div class="info">
-    <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
-    <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
-    <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
-    <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
+    <div class="info">
+      <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
+      <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
+      <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
+      <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
+    </div>
+
+    <img id="mainPhoto" class="main-photo" src="https://via.placeholder.com/800x360?text=Photo" alt="Photo principale">
+    <div class="photos" id="photosContainer"></div>
+    <div id="roomButtons" style="margin-top:12px"></div>
+    <button id="editBtn" class="edit-btn">Modifier</button>
   </div>
 
-  <img id="mainPhoto" src="https://via.placeholder.com/800x360?text=Photo" alt="Photo principale">
-  <div class="photos" id="photosContainer"></div>
-</div>
+  <div id="onlineCarouselContainer">
+    <h2 style="color:#ff66cc;text-shadow:0 0 10px #ff66cc;margin-bottom:8px">Utilisateurs en ligne</h2>
+    <div id="onlineCarousel"></div>
+  </div>
 
-<div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
+  <div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, get, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getStorage, ref as sRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAbI0fvcv9lIzpPViVBx2BlO8c6L3w-rbc",
@@ -121,38 +75,86 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
+const storage = getStorage(app);
 
 onAuthStateChanged(auth, async user => {
-  if(!user) { window.location.href="inscription.html"; return; }
+  if (!user) { window.location.href = "inscription.html"; return; }
+  const uid = user.uid;
+  const userRef = ref(db, "users/"+uid);
+  const onlineRef = ref(db, "users/"+uid+"/online");
+  set(onlineRef, true);
+  onDisconnect(onlineRef).set(false);
 
-  const snap = await get(ref(db,"users/"+user.uid));
+  const snap = await get(userRef);
   if(snap.exists()){
     const data = snap.val();
     document.getElementById("pseudo").textContent = data.pseudo || "Non renseigné";
     document.getElementById("age").textContent = data.age || "Non renseigné";
     document.getElementById("location").textContent = data.location || "Non renseigné";
     document.getElementById("description").textContent = data.description || "Non renseignée";
-    document.getElementById("mainPhoto").src = data.photos?.[0] || "https://via.placeholder.com/800x360?text=Photo";
 
-    const container = document.getElementById("photosContainer");
-    container.innerHTML = "";
-    (data.photos||[]).forEach(url=>{
-      const img=document.createElement("img");
-      img.src=url;
-      img.addEventListener("click",()=> {
-        document.getElementById("lightboxImg").src=url;
-        document.getElementById("lightbox").style.display="flex";
+    const photosContainer = document.getElementById("photosContainer");
+    photosContainer.innerHTML = "";
+    const mainPhoto = document.getElementById("mainPhoto");
+    const photoURLs = data.photos || [];
+
+    if(photoURLs.length>0){
+      mainPhoto.src = photoURLs[0];
+      for(const url of photoURLs){
+        const img = document.createElement("img");
+        img.src = url;
+        img.addEventListener("click", ()=>{openLightbox(url)});
+        photosContainer.appendChild(img);
+      }
+    }
+
+    const roomButtons = document.getElementById("roomButtons");
+    roomButtons.innerHTML = "";
+    (data.rooms||[]).forEach(room=>{
+      const btn = document.createElement("button");
+      btn.className="room-btn";
+      btn.textContent=room.charAt(0).toUpperCase()+room.slice(1);
+      btn.addEventListener("click", ()=>{
+        const pageMap = { serieux:"authentique.html", amicale:"amicale.html", fun:"fun.html"};
+        const target = pageMap[room.toLowerCase()];
+        if(target) window.location.href=target;
       });
-      container.appendChild(img);
+      roomButtons.appendChild(btn);
     });
   }
+
+  const usersRef = ref(db,"users");
+  onValue(usersRef, snapshot=>{
+    const users = snapshot.val();
+    const carousel = document.getElementById("onlineCarousel");
+    carousel.innerHTML="";
+    if(!users) return;
+    Object.keys(users).forEach(uid2=>{
+      const u = users[uid2];
+      if(u.online && uid2!==user.uid){
+        const card = document.createElement("div"); card.className="onlineCard";
+        const img = document.createElement("img");
+        img.src=(u.photos && u.photos[0]) || "https://via.placeholder.com/100";
+        const span=document.createElement("span");
+        span.textContent=u.pseudo||"Utilisateur";
+        img.addEventListener("click", ()=>alert(`Pseudo: ${u.pseudo}\nÂge: ${u.age||"Non renseigné"}\nLieu: ${u.location||"Non renseigné"}`));
+        card.appendChild(img); card.appendChild(span);
+        carousel.appendChild(card);
+      }
+    });
+  });
 });
 
-document.getElementById("lightbox").addEventListener("click",()=>{
+function openLightbox(src){
+  const lightbox=document.getElementById("lightbox");
+  const img=document.getElementById("lightboxImg");
+  img.src=src;
+  lightbox.style.display="flex";
+}
+
+document.getElementById("lightbox").addEventListener("click", ()=>{
   document.getElementById("lightbox").style.display="none";
-  document.getElementById("lightboxImg").src="";
 });
 </script>
-
 </body>
 </html>
