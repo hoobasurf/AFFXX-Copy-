@@ -1,27 +1,16 @@
-// firebase.js (version modulaire 2025 - stable et compatible mobile)
-
-import { 
-  initializeApp 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-
-import { 
-  getAuth, 
-  setPersistence, 
-  browserLocalPersistence, 
-  signOut, 
-  onAuthStateChanged, 
-  onIdTokenChanged 
+// firebase.js (version modulaire - compatible iPhone / Safari / Android / Windows)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+import {
+  getAuth,
+  setPersistence,
+  browserLocalPersistence,
+  signOut,
+  onAuthStateChanged,
+  onIdTokenChanged,
+  createUserWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-import { 
-  getDatabase 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-
-import { 
-  getStorage 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
-
-/* ---------- CONFIGURATION FIREBASE ---------- */
+/* ---------- CONFIG ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyAbI0fvcv9lIzpPViVBx2BlO8c6L3w-rbc",
   authDomain: "affxx-copy.firebaseapp.com",
@@ -35,59 +24,75 @@ const firebaseConfig = {
 /* ---------- INITIALISATION ---------- */
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getDatabase(app);
-const storage = getStorage(app);
 
-/* ---------- PERSISTANCE (iPhone / Safari / Android / Windows) ---------- */
+/* ---------- Persistance locale pour Safari/iPhone/Android/Windows ---------- */
 setPersistence(auth, browserLocalPersistence)
   .then(() => console.log("✅ Session Firebase persistée localement"))
-  .catch(e => console.warn("⚠️ Erreur persistance :", e));
+  .catch(e => console.error("Erreur persistance :", e));
 
-/* ---------- NETTOYAGE LOCAL ---------- */
+/* ---------- Fonction pour vider cache local Firebase ---------- */
 function clearLocalSession() {
   try {
     indexedDB.deleteDatabase('firebaseLocalStorageDb');
     localStorage.clear();
     sessionStorage.clear();
-    console.log("🧹 Cache local Firebase supprimé");
+    console.log("🧹 Cache Firebase local supprimé");
   } catch (e) {
     console.warn("Erreur suppression cache :", e);
   }
 }
 
-/* ---------- DÉCONNEXION COMPLÈTE ---------- */
+/* ---------- Déconnexion complète et nettoyage ---------- */
 async function forceLogoutAndClear() {
-  try {
-    await signOut(auth);
-  } catch (e) {
-    console.warn("Erreur déconnexion :", e);
-  }
+  try { await signOut(auth); } catch (e) { console.warn("Erreur déconnexion :", e); }
   clearLocalSession();
   try { window.location.reload(); } catch {}
 }
 
-/* ---------- SUIVI DE SESSION ---------- */
+/* ---------- Suivi de l’état utilisateur ---------- */
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("👤 Connecté :", user.email ?? user.uid);
-  } else {
-    console.log("🚫 Aucun utilisateur connecté");
-  }
+  if (user) console.log("👤 Utilisateur connecté :", user.email ?? user.uid);
+  else console.log("🚫 Aucun utilisateur connecté");
 });
 
 onIdTokenChanged(auth, async (user) => {
   if (!user) return;
-  try {
-    await user.getIdToken(true);
-  } catch (e) {
-    console.warn("⚠️ Token invalide — déconnexion forcée");
+  try { await user.getIdToken(true); }
+  catch (e) {
+    console.warn("Token invalide — déconnexion forcée");
     try { await signOut(auth); } catch {}
     clearLocalSession();
   }
 });
 
-/* ---------- EXPORTS ---------- */
-window.clearLocalSession = clearLocalSession;
-window.forceLogoutAndClear = forceLogoutAndClear;
+/* ---------- Correctif iPhone/Safari : email déjà utilisé localement ---------- */
+async function fixEmailAlreadyInUse(auth, email, password, createUserFn) {
+  try {
+    return await createUserFn(auth, email, password);
+  } catch (e) {
+    if (e.code === "auth/email-already-in-use") {
+      console.warn("⚠️ Email bloqué localement. Réinitialisation du cache...");
+      clearLocalSession();
+      // Réessayer automatiquement une seule fois
+      return await new Promise((resolve, reject) => {
+        setTimeout(async () => {
+          try {
+            const result = await createUserFn(auth, email, password);
+            resolve(result);
+          } catch (err2) {
+            reject(err2);
+          }
+        }, 1200);
+      });
+    } else {
+      throw e;
+    }
+  }
+}
 
-export { app, auth, db, storage, clearLocalSession, forceLogoutAndClear };
+/* ---------- Exports ---------- */
+window.forceLogoutAndClear = forceLogoutAndClear;
+window.clearLocalSession = clearLocalSession;
+window.fixEmailAlreadyInUse = fixEmailAlreadyInUse;
+
+export { app, auth, clearLocalSession, forceLogoutAndClear, fixEmailAlreadyInUse };
