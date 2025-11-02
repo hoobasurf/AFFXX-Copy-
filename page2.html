@@ -6,22 +6,97 @@
 <title>Mon Profil</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet"/>
 <style>
-body { font-family:'Orbitron',sans-serif; margin:0; background:linear-gradient(120deg,#ff66cc,#ff99cc); color:#fff; }
-.container { max-width:500px; margin:40px auto; background:rgba(0,0,0,0.4); padding:20px; border-radius:15px; text-align:center; box-shadow:0 0 20px #ff66cc; }
-.photos img { width:70px; height:70px; margin:5px; border:2px solid #ff66cc; cursor:pointer; transition:0.2s; }
-.photos img:hover { transform:scale(1.2); }
-#mainPhoto { width:100%; max-height:360px; object-fit:cover; border:2px solid #ff66cc; border-radius:10px; }
-.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center; z-index:1000; }
-.lightbox img { max-width:90%; max-height:90%; border-radius:10px; box-shadow:0 0 25px #ff66cc; }
+  /* Visuel original page2 */
+  body {
+    font-family: 'Orbitron', sans-serif;
+    margin: 0;
+    background: linear-gradient(120deg, #ff66cc, #ff99cc);
+    color: #fff;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 500px;
+    margin: 40px auto;
+    background: rgba(0,0,0,0.4);
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 0 20px #ff66cc;
+  }
+
+  h1 {
+    color: #ff66cc;
+    text-shadow: 0 0 10px #ff66cc;
+    margin-bottom: 20px;
+  }
+
+  .info div {
+    margin: 8px 0;
+    font-size: 1em;
+  }
+
+  #mainPhoto {
+    width: 100%;
+    max-height: 360px;
+    object-fit: cover;
+    border: 2px solid #ff66cc;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+
+  .photos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .photos img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border: 2px solid #ff66cc;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .photos img:hover {
+    transform: scale(1.2);
+  }
+
+  .lightbox {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .lightbox img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
+    box-shadow: 0 0 25px #ff66cc;
+  }
 </style>
 </head>
 <body>
+
 <div class="container">
   <h1>Mon Profil</h1>
-  <div><strong>Pseudo:</strong> <span id="pseudo">Non renseigné</span></div>
-  <div><strong>Âge:</strong> <span id="age">Non renseigné</span></div>
-  <div><strong>Lieu:</strong> <span id="location">Non renseigné</span></div>
-  <div><strong>Description:</strong> <span id="description">Non renseignée</span></div>
+  <div class="info">
+    <div><strong>Pseudo :</strong> <span id="pseudo">Non renseigné</span></div>
+    <div><strong>Âge :</strong> <span id="age">Non renseigné</span></div>
+    <div><strong>Lieu :</strong> <span id="location">Non renseigné</span></div>
+    <div><strong>Description :</strong> <span id="description">Non renseignée</span></div>
+  </div>
+
   <img id="mainPhoto" src="https://via.placeholder.com/800x360?text=Photo" alt="Photo principale">
   <div class="photos" id="photosContainer"></div>
 </div>
@@ -29,9 +104,9 @@ body { font-family:'Orbitron',sans-serif; margin:0; background:linear-gradient(1
 <div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
 
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAbI0fvcv9lIzpPViVBx2BlO8c6L3w-rbc",
@@ -40,14 +115,16 @@ const firebaseConfig = {
   projectId: "affxx-copy",
   storageBucket: "affxx-copy.appspot.com",
   messagingSenderId: "763273288933",
-  appId: "1:7632732884661c80c"
+  appId: "1:763273288933:web:d0083f5f6ab7284661c80c"
 };
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
 onAuthStateChanged(auth, async user => {
-  if(!user){ window.location.href="inscription.html"; return; }
+  if(!user) { window.location.href="inscription.html"; return; }
+
   const snap = await get(ref(db,"users/"+user.uid));
   if(snap.exists()){
     const data = snap.val();
@@ -56,18 +133,26 @@ onAuthStateChanged(auth, async user => {
     document.getElementById("location").textContent = data.location || "Non renseigné";
     document.getElementById("description").textContent = data.description || "Non renseignée";
     document.getElementById("mainPhoto").src = data.photos?.[0] || "https://via.placeholder.com/800x360?text=Photo";
+
     const container = document.getElementById("photosContainer");
     container.innerHTML = "";
     (data.photos||[]).forEach(url=>{
       const img=document.createElement("img");
       img.src=url;
-      img.addEventListener("click",()=>{ document.getElementById("lightboxImg").src=url; document.getElementById("lightbox").style.display="flex"; });
+      img.addEventListener("click",()=> {
+        document.getElementById("lightboxImg").src=url;
+        document.getElementById("lightbox").style.display="flex";
+      });
       container.appendChild(img);
     });
   }
 });
 
-document.getElementById("lightbox").addEventListener("click",()=>{ document.getElementById("lightbox").style.display="none"; });
+document.getElementById("lightbox").addEventListener("click",()=>{
+  document.getElementById("lightbox").style.display="none";
+  document.getElementById("lightboxImg").src="";
+});
 </script>
+
 </body>
 </html>
