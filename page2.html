@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<title>Page2</title>
+<meta charset="UTF-8">
+<title>Page2 - Choix des salles</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 <style>
@@ -10,52 +10,38 @@
 html, body { height:100%; width:100%; font-family:'Orbitron',sans-serif; background:url('planete-romantique.jpg') no-repeat center center/cover; color:white; overflow:hidden; }
 body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle at center, rgba(255,0,255,0.05), transparent 70%); z-index:1; pointer-events:none; }
 
-#myProfile { z-index:3; position: relative; text-align:center; margin-top:10px; cursor:pointer; }
+#myProfile { z-index:2; position:relative; text-align:center; margin-top:20px; cursor:pointer; }
 #myProfile img { width:100px; height:100px; border-radius:50%; border:3px solid #ff66cc; box-shadow:0 0 15px #ff66cc; object-fit:cover; }
 #myProfile div { margin-top:8px; font-size:1.2em; color:#ff66cc; }
 
-/* Mini-profils circulaires draggable */
+#roomButtons { z-index:2; position:relative; margin-top:60px; display:flex; justify-content:center; gap:20px; flex-wrap:wrap; }
+.room-btn { padding:15px 25px; font-size:1.1em; border:2px solid #ff66cc; border-radius:12px; background:rgba(0,0,0,0.5); color:#fff; cursor:pointer; transition:0.2s; }
+.room-btn:hover { transform: scale(1.1); background:rgba(255,102,204,0.4); }
+
 #miniProfilesContainer { position:fixed; top:80px; right:20px; z-index:99; display:flex; flex-wrap:wrap; gap:10px; pointer-events:auto; }
 .miniProfileCircle { width:50px; height:50px; border-radius:50%; overflow:hidden; border:2px solid #ff66cc; box-shadow:0 0 12px #ff66cc; cursor:grab; position:fixed; transition:left 0.05s linear, top 0.05s linear; }
 .miniProfileCircle img { width:100%; height:100%; object-fit:cover; }
 .miniRemove { position:absolute; top:-5px; right:-5px; background:#ff66cc; color:#fff; font-size:0.6em; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 6px #ff66cc; }
-
-/* Bouton Mes Crush */
-#favoritesBtn { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#ffea00; color:#333; border:none; border-radius:30px; padding:10px 20px; font-weight:bold; cursor:pointer; z-index:100; box-shadow:0 0 12px #ffea00; }
-
-/* Modales */
-.modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; flex-direction:column; align-items:center; justify-content:flex-start; padding:20px; z-index:200; }
-.modal .closeBtn { position:absolute; top:10px; right:10px; width:24px; height:24px; background:#ff66cc; color:white; font-size:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 8px #ff66cc; }
-.modal h2 { color:#ff66cc; margin-bottom:20px; }
-.modal .modalContent { display:flex; flex-wrap:wrap; gap:15px; justify-content:center; overflow-y:auto; width:100%; }
-.modal textarea { width:90%; height:80px; resize:none; border-radius:6px; border:1px solid #ff66cc; background:rgba(0,0,0,0.4); color:white; padding:5px; margin-top:auto; }
-.modal button { margin-top:10px; background:#ff66cc; color:white; border:none; border-radius:6px; padding:8px 12px; cursor:pointer; align-self:flex-end; }
 </style>
 </head>
 <body>
 
-<!-- Mini-profil -->
 <div id="myProfile">
   <img id="miniProfilePic" src="" alt="Mon profil">
   <div id="pseudoMini">Utilisateur</div>
 </div>
 
-<!-- Conteneur mini-profiles -->
-<div id="miniProfilesContainer"></div>
-
-<!-- Bouton Mes Crush -->
-<button id="favoritesBtn">Mes Crush</button>
-
-<!-- Modale Mes Crush -->
-<div id="crushModal" class="modal">
-  <div class="closeBtn">×</div>
-  <h2>Mes Crush</h2>
-  <div class="modalContent" id="crushContent"></div>
+<div id="roomButtons">
+  <button class="room-btn" data-room="serieux">Sérieux</button>
+  <button class="room-btn" data-room="amicale">Amicale</button>
+  <button class="room-btn" data-room="fun">Fun</button>
 </div>
+
+<div id="miniProfilesContainer"></div>
 
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getDatabase, ref, update, onDisconnect, get, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, update, onDisconnect, onValue, get, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { app } from "./firebase.js";
 
 const auth = getAuth(app);
@@ -63,13 +49,12 @@ const db = getDatabase(app);
 
 const miniProfilePic = document.getElementById("miniProfilePic");
 const pseudoMini = document.getElementById("pseudoMini");
+const roomButtons = document.querySelectorAll(".room-btn");
 const miniProfilesContainer = document.getElementById("miniProfilesContainer");
-const favoritesBtn = document.getElementById("favoritesBtn");
-const crushModal = document.getElementById("crushModal");
-const crushContent = document.getElementById("crushContent");
 
 let currentUserUid = null;
 
+// --- Auth & présence ---
 onAuthStateChanged(auth, async user => {
   if(!user){ window.location.href="inscription.html"; return; }
   currentUserUid = user.uid;
@@ -78,35 +63,44 @@ onAuthStateChanged(auth, async user => {
   await update(userRef,{online:true});
   onDisconnect(ref(db,"users/"+currentUserUid+"/online")).set(false);
 
+  // Mini-profil
   onValue(userRef, snap=>{
     if(!snap.exists()) return;
     const data = snap.val();
     pseudoMini.textContent = data.pseudo || "Utilisateur";
-    const photo = data.photos && Array.isArray(data.photos) && data.photos[0] ? data.photos[0] : '';
+    let photo = '';
+    if(data.photos && Array.isArray(data.photos) && data.photos[0]) photo = data.photos[0];
     if(photo) miniProfilePic.src = photo;
   });
 });
 
-// Mini-profil draggable
-function addMiniProfile(uid, photoSrc){
-  if(document.querySelector(`#miniProfilesContainer .miniProfileCircle[data-uid='${uid}']`)) return;
+// --- Choix des salles ---
+roomButtons.forEach(btn => {
+  btn.addEventListener("click", ()=>{
+    const room = btn.dataset.room;
+    const pageMap = { serieux: "authentique.html", amicale:"authentique.html", fun:"authentique.html" };
+    // On peut aussi stocker la salle choisie dans Firebase si besoin
+    window.location.href = pageMap[room];
+  });
+});
 
+// --- Mini-profil draggable (facultatif) ---
+function addMiniProfile(uid, imgUrl){
+  if(document.querySelector(`#miniProfilesContainer .miniProfileCircle[data-uid='${uid}']`)) return;
   const circle = document.createElement("div");
   circle.className = "miniProfileCircle";
   circle.dataset.uid = uid;
-
   const img = document.createElement("img");
-  img.src = photoSrc;
-  img.onerror = () => { img.src=`https://i.pravatar.cc/150?u=${uid}`; };
+  img.src = imgUrl || `https://i.pravatar.cc/150?u=${uid}`;
   circle.appendChild(img);
 
   const removeBtn = document.createElement("div");
   removeBtn.className = "miniRemove";
-  removeBtn.textContent="×";
-  removeBtn.addEventListener("click", async ev=>{
+  removeBtn.textContent = "×";
+  removeBtn.addEventListener("click", ev=>{
     ev.stopPropagation();
     circle.remove();
-    await set(ref(db, `users/${currentUserUid}/favoris/${uid}`), false);
+    set(ref(db, `users/${currentUserUid}/favoris/${uid}`), false);
   });
   circle.appendChild(removeBtn);
 
@@ -149,34 +143,6 @@ function addMiniProfile(uid, photoSrc){
 
   miniProfilesContainer.appendChild(circle);
 }
-
-// Mes Crush modal
-favoritesBtn.addEventListener("click", async ()=>{
-  crushModal.style.display="flex";
-  crushContent.innerHTML="";
-  const favSnap = await get(ref(db,`users/${currentUserUid}/favoris`));
-  if(!favSnap.exists()){ crushContent.textContent="Aucun crush pour le moment."; return; }
-  const favs = favSnap.val();
-  for(const uid in favs){
-    if(!favs[uid]) continue;
-    const userSnap = await get(ref(db,`users/${uid}`));
-    if(!userSnap.exists()) continue;
-    const data = userSnap.val();
-    if(!data.photos || data.photos.length===0) continue;
-    const prof = document.createElement("div");
-    prof.style.display="flex"; prof.style.flexDirection="column"; prof.style.alignItems="center";
-    prof.innerHTML=`<img src="${data.photos[0]}" style="width:70px;height:70px;border-radius:50%;margin-bottom:5px;"><span>${data.pseudo||'Utilisateur'}</span>`;
-    crushContent.appendChild(prof);
-  }
-});
-
-// Fermer modales
-document.querySelectorAll(".modal .closeBtn").forEach(btn=>{
-  btn.addEventListener("click", ()=>{ btn.parentElement.style.display="none"; });
-});
-
-// Mini-profil clique ouvre page2 (déjà ici, inutile)
-miniProfilePic.addEventListener("click", ()=>{});
 </script>
 </body>
 </html>
