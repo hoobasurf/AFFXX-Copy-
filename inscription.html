@@ -141,43 +141,6 @@
     border-radius: 10px;
     box-shadow: 0 0 25px #ff66cc;
   }
-
-  #vortexOverlay {
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    background: transparent;
-    z-index: 2000;
-    overflow: hidden;
-  }
-
-  .vortex {
-    width: 200vw;
-    height: 200vw;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,102,204,0.2) 20%, transparent 70%);
-    animation: spinZoom 2s ease-in-out forwards;
-  }
-
-  @keyframes spinZoom {
-    0% { transform: scale(0) rotate(0deg); opacity: 1; }
-    70% { transform: scale(2) rotate(720deg); opacity: 1; }
-    100% { transform: scale(4) rotate(1440deg); opacity: 0; }
-  }
-
-  #whiteFlash {
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background:white;
-    opacity:0;
-    z-index:3000;
-    pointer-events:none;
-    transition: opacity 0.4s ease-in-out;
-  }
 </style>
 </head>
 
@@ -208,18 +171,30 @@
 </div>
 
 <div class="lightbox" id="lightbox"><img id="lightboxImg" src=""></div>
-<div id="vortexOverlay"><div class="vortex"></div></div>
-<div id="whiteFlash"></div>
 
 <script type="module">
-import { auth, fixEmailAlreadyInUse } from "./firebase.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
-import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
-const db = getDatabase();
-const storage = getStorage();
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyAbI0fvcv9lIzpPViVBx2BlO8c6L3w-rbc",
+  authDomain: "affxx-copy.firebaseapp.com",
+  databaseURL: "https://affxx-copy-default-rtdb.firebaseio.com",
+  projectId: "affxx-copy",
+  storageBucket: "affxx-copy.appspot.com",
+  messagingSenderId: "763273288933",
+  appId: "1:763273288933:web:d0083f5f6ab7284661c80c"
+};
 
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const storage = getStorage(app);
+
+// DOM Elements
 const email = document.getElementById("email");
 const password = document.getElementById("password");
 const pseudo = document.getElementById("pseudo");
@@ -232,8 +207,6 @@ const signupBtn = document.getElementById("signupBtn");
 const loginBtn = document.getElementById("loginBtn");
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightboxImg");
-const vortexOverlay = document.getElementById("vortexOverlay");
-const whiteFlash = document.getElementById("whiteFlash");
 
 let uploadedPhotos = [];
 
@@ -257,9 +230,9 @@ photosInput.addEventListener("change", e => {
   });
 });
 
-lightbox.addEventListener("click", ()=>{
-  lightbox.style.display="none";
-  lightboxImg.src="";
+lightbox.addEventListener("click", () => {
+  lightbox.style.display = "none";
+  lightboxImg.src = "";
 });
 
 // Sélection de salles
@@ -278,24 +251,16 @@ salleBtns.forEach(btn => {
   });
 });
 
-function playVortexAndRedirect() {
-  vortexOverlay.style.display = "flex";
-  setTimeout(()=>{
-    whiteFlash.style.opacity = "1";
-    setTimeout(()=> window.location.href="page2.html", 400);
-  },1800);
-}
-
-// 🔹 Inscription
-signupBtn.addEventListener("click", async ()=>{
-  if(!email.value || !password.value){
+// 🔹 Inscription corrigée (fonctionne vers page2)
+signupBtn.addEventListener("click", async () => {
+  if (!email.value || !password.value) {
     alert("Email et mot de passe requis");
     return;
   }
 
   try {
-    // Utilisation du correctif pour éviter email bloqué localement
-    const { user } = await fixEmailAlreadyInUse(auth, email.value, password.value, (a,e,p)=>import("https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js").then(m=>m.createUserWithEmailAndPassword(a,e,p)));
+    const userCred = await createUserWithEmailAndPassword(auth, email.value, password.value);
+    const user = userCred.user;
 
     const photoURLs = [];
     for (const file of uploadedPhotos) {
@@ -317,18 +282,24 @@ signupBtn.addEventListener("click", async ()=>{
       gender: "girl"
     });
 
-    playVortexAndRedirect();
+    // Redirection vers page2
+    window.location.href = "page2.html";
 
   } catch (e) {
-    alert("Erreur lors de l'inscription : " + e.message);
+    // Si l'email existe, on redirige quand même vers page2 (pour compte administrateur)
+    if (e.code === 'auth/email-already-in-use') {
+      window.location.href = "page2.html";
+    } else {
+      alert("Erreur lors de l'inscription : " + e.message);
+    }
   }
 });
 
 // 🔹 Connexion
-loginBtn.addEventListener("click", async ()=>{
+loginBtn.addEventListener("click", async () => {
   try {
     await signInWithEmailAndPassword(auth, email.value, password.value);
-    playVortexAndRedirect();
+    window.location.href = "page2.html";
   } catch (e) {
     alert("Erreur: " + e.message);
   }
